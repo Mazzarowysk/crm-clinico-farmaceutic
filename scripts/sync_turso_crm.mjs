@@ -5,8 +5,8 @@ import { createClient } from '@libsql/client';
 import dotenv from 'dotenv';
 dotenv.config();
 
-const url = process.env.TURSO_DATABASE_URL || 'libsql://health-nexus-mazzarowysk.aws-us-east-1.turso.io';
-const authToken = process.env.TURSO_AUTH_TOKEN || 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3ODYxNDU1NTgsImlkIjoiMDE5Zjc1YmYtMTUwMS03YmMyLTlkYTQtZTA1ZGIxMzdiYjEyIiwia2lkIjoiU0RZWEtINkIzZWg1b3JtRDBPRXpUbmhUaGpFMllXRXJxbjhCNVFnSmVLZyIsInJpZCI6Ijg4YTY2NjM0LTM3YWQtNGEyZC04ZmUxLTFmYjM3ZDAxNGE4YiJ9.teLr9MEIIXvjkOJh_nUWWaGwJuF0vnFwaMdUsyQLQba1kLOP30ziYQJkCWDDbADYl74zhYLujOwdr0Gg5EWoAg';
+const url = process.env.TURSO_DATABASE_URL || 'libsql://crm-clinico-farmaceutico-mazzarowysk.aws-us-east-1.turso.io';
+const authToken = process.env.TURSO_AUTH_TOKEN || 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3ODc3MDE4ODUsImlkIjoiMDFhMDNiNTUtZGIwMS03NzhkLTg3MzctNDBmNTljY2RjNzEwIiwia2lkIjoiU0RZWEtINkIzZWg1b3JtRDBPRXpUbmhUaGpFMllXRXJxbjhCNVFnSmVLZyIsInJpZCI6ImJhOGY5NjVjLWVkMTUtNGQzOC1hZGJkLTlkYWFhMmRkMjg1YiJ9._XnhBxBbCgxX6tJV115CnNRzE0fHx49TMvv6igv1EIjMOEeVuIGB9EP1QgTxO_famkEZrk2-vRPBuoHGz5KxAA';
 
 console.log('🌿 Conectando ao Turso Database:', url);
 const client = createClient({ url, authToken });
