@@ -585,48 +585,48 @@ function openLoginInstructionsModal() {
 
       <!-- Cabeçalho da Janela -->
       <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-        <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(2, 132, 199, 0.15); border: 1px solid rgba(2, 132, 199, 0.3); display: flex; align-items: center; justify-content: center; color: #38bdf8; font-size: 1.15rem;">
-          <i class="fa-solid fa-key"></i>
+        <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(13, 148, 136, 0.15); border: 1px solid rgba(20, 184, 166, 0.3); display: flex; align-items: center; justify-content: center; color: #14b8a6; font-size: 1.15rem;">
+          <i class="fa-solid fa-notes-medical"></i>
         </div>
         <div>
           <h3 style="margin: 0; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1.15rem; color: #ffffff;">Instruções de Acesso</h3>
-          <span style="font-size: 0.78rem; color: #94a3b8;">Orientações para login no Health Nexus</span>
+          <span style="font-size: 0.78rem; color: #94a3b8;">Credenciais do CRM Clínico Farmacêutico</span>
         </div>
       </div>
 
       <!-- Texto de Orientação -->
-      <p style="font-size: 0.84rem; color: #cbd5e1; line-height: 1.5; margin-bottom: 18px; background: #111827; padding: 12px 14px; border-radius: 10px; border-left: 3px solid #0284c7;">
-        Para acessar o sistema de demonstração, utilize uma das contas pré-configuradas abaixo ou selecione <strong>"Preencher"</strong> para aplicar automaticamente.
+      <p style="font-size: 0.84rem; color: #cbd5e1; line-height: 1.5; margin-bottom: 18px; background: #111827; padding: 12px 14px; border-radius: 10px; border-left: 3px solid #0d9488;">
+        Para acessar o sistema de demonstração clínica, utilize uma das contas pré-configuradas abaixo ou clique em <strong>"Preencher"</strong>.
       </p>
 
       <!-- Cartões de Credenciais -->
       <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 22px;">
-        <!-- Perfil Médico -->
-        <div style="background: rgba(30, 41, 59, 0.65); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;">
+        <!-- Perfil Farmacêutico Responsável -->
+        <div style="background: rgba(30, 41, 59, 0.65); border: 1px solid rgba(20, 184, 166, 0.4); border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;">
           <div>
-            <div style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 0.92rem; color: #38bdf8; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
-              <i class="fa-solid fa-user-doctor"></i> Perfil Médico
+            <div style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 0.92rem; color: #14b8a6; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+              <i class="fa-solid fa-user-doctor"></i> Farmacêutico(a) Clínico(a)
             </div>
             <div style="font-size: 0.82rem; color: #94a3b8; font-family: monospace;">
-              Usuário: <strong style="color: #fff;">medico123</strong> &nbsp;|&nbsp; Senha: <strong style="color: #fff;">medico123</strong>
+              Usuário: <strong style="color: #fff;">farmacia</strong> &nbsp;|&nbsp; Senha: <strong style="color: #fff;">farmacia123</strong>
             </div>
           </div>
-          <button type="button" class="btn-fill-cred" data-user="medico123" data-pass="medico123" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; padding: 7px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.2s;" onmouseenter="this.style.background='rgba(56, 189, 248, 0.3)'" onmouseleave="this.style.background='rgba(56, 189, 248, 0.15)'">
+          <button type="button" class="btn-fill-cred" data-user="farmacia" data-pass="farmacia123" style="background: rgba(13, 148, 136, 0.2); border: 1px solid rgba(20, 184, 166, 0.5); color: #2dd4bf; padding: 7px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.2s;">
             Preencher
           </button>
         </div>
 
-        <!-- Perfil Admin -->
-        <div style="background: rgba(30, 41, 59, 0.65); border: 1px solid rgba(192, 132, 252, 0.3); border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;">
+        <!-- Perfil Administrador -->
+        <div style="background: rgba(30, 41, 59, 0.65); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;">
           <div>
-            <div style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 0.92rem; color: #c084fc; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
-              <i class="fa-solid fa-user-shield"></i> Perfil Administrador
+            <div style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 0.92rem; color: #38bdf8; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+              <i class="fa-solid fa-user-shield"></i> Administrador Geral
             </div>
             <div style="font-size: 0.82rem; color: #94a3b8; font-family: monospace;">
               Usuário: <strong style="color: #fff;">admin</strong> &nbsp;|&nbsp; Senha: <strong style="color: #fff;">admin123</strong>
             </div>
           </div>
-          <button type="button" class="btn-fill-cred" data-user="admin" data-pass="admin123" style="background: rgba(192, 132, 252, 0.15); border: 1px solid rgba(192, 132, 252, 0.4); color: #c084fc; padding: 7px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.2s;" onmouseenter="this.style.background='rgba(192, 132, 252, 0.3)'" onmouseleave="this.style.background='rgba(192, 132, 252, 0.15)'">
+          <button type="button" class="btn-fill-cred" data-user="admin" data-pass="admin123" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; padding: 7px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">
             Preencher
           </button>
         </div>
@@ -634,7 +634,7 @@ function openLoginInstructionsModal() {
 
       <!-- Footer da Janela -->
       <div style="display: flex; justify-content: flex-end;">
-        <button id="btn-close-instructions-modal" type="button" style="background: linear-gradient(135deg, #6366f1, #4f46e5); color: #ffffff; border: none; padding: 10px 22px; border-radius: 10px; font-weight: 600; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4); transition: transform 0.2s;" onmouseenter="this.style.transform='scale(1.02)'" onmouseleave="this.style.transform='scale(1)'">
+        <button id="btn-close-instructions-modal" type="button" style="background: linear-gradient(135deg, #0d9488, #0f766e); color: #ffffff; border: none; padding: 10px 22px; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; box-shadow: 0 4px 14px rgba(13, 148, 136, 0.4); transition: transform 0.2s;" onmouseenter="this.style.transform='scale(1.02)'" onmouseleave="this.style.transform='scale(1)'">
           Entendi, Fechar
         </button>
       </div>
@@ -880,9 +880,9 @@ function renderAuthScreen() {
   const renderForm = () => {
     root.innerHTML = `
       <div class="auth-container">
-        <!-- Painel Esquerdo: Branding Institucional Hospitalar -->
+        <!-- Painel Esquerdo: Branding Institucional CRM Clínico Farmacêutico -->
         <div class="auth-brand-panel">
-          <!-- Canvas 2D Suave e Sóbrio (Rede Neural Clínica) -->
+          <!-- Canvas 2D Suave e Sóbrio (Rede Neural Clínica Farmacológica) -->
           <canvas id="auth-constellation-canvas" class="auth-constellation-canvas"></canvas>
 
           <!-- Camada de Iluminação Ambiental Sutil -->
@@ -893,58 +893,58 @@ function renderAuthScreen() {
           </div>
 
           <div class="auth-brand-content">
-            <div class="auth-hero-badge">
-              <i class="fa-solid fa-hospital" style="color: #38bdf8;"></i> SISTEMA HOSPITALAR ENTERPRISE &bull; LINHA DO CUIDADO
+            <div class="auth-hero-badge" style="background: rgba(13, 148, 136, 0.2); border: 1px solid rgba(20, 184, 166, 0.4); color: #2dd4bf;">
+              <i class="fa-solid fa-notes-medical"></i> CRM CLÍNICO FARMACÊUTICO &bull; CUIDADO &amp; SEGURANÇA DO PACIENTE
             </div>
 
             <div class="auth-brand-logo-wrap">
-              <div class="auth-brand-logo-box">
-                <img src="/assets/logo.png" alt="Health Nexus" class="auth-brand-logo-img">
+              <div class="auth-brand-logo-box" style="background: linear-gradient(135deg, #0d9488, #0f766e); box-shadow: 0 4px 20px rgba(13, 148, 136, 0.4);">
+                <i class="fa-solid fa-pills" style="font-size: 2rem; color: #ffffff;"></i>
               </div>
               <div class="auth-brand-name">
-                Health Nexus
-                <span class="auth-brand-subtag">
-                  <i class="fa-solid fa-shield-halved" style="color: #38bdf8; margin-right: 5px;"></i> Plataforma Clínica Integrada
+                CRM Farmacêutico
+                <span class="auth-brand-subtag" style="background: rgba(13, 148, 136, 0.15); border-color: rgba(20, 184, 166, 0.3); color: #14b8a6;">
+                  <i class="fa-solid fa-shield-halved" style="color: #14b8a6; margin-right: 5px;"></i> CFF nº 585/586 &bull; CDSS 4D
                 </span>
               </div>
             </div>
 
             <h2 class="auth-brand-headline">
-              Decisão Clínica Precisa.<br>
-              <span class="highlight">Gestão Hospitalar em Tempo Real.</span>
+              Decisão Farmacoterapêutica Segura.<br>
+              <span class="highlight" style="background: linear-gradient(135deg, #14b8a6, #38bdf8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">CRM Clínico &amp; CDSS em Tempo Real.</span>
             </h2>
 
             <p class="auth-brand-desc">
-              Prontuário eletrônico SOAP com ditado por voz, triagem Manchester com alerta preditivo MEWS, mapa de leitos Kanban e telemedicina em conformidade CFM e LGPD.
+              Triagem estruturada de sintomas (&lt; 60s), validação de Red Flags com bloqueio de MIPs, motor de cruzamento medicamentoso multidimensional 4D e emissão de Declaração de Serviço Farmacêutico.
             </p>
 
             <ul class="auth-feature-list">
               <li class="auth-feature-item">
-                <div class="auth-feature-icon"><i class="fa-solid fa-file-medical"></i></div>
+                <div class="auth-feature-icon" style="background: rgba(13, 148, 136, 0.15); color: #14b8a6; border: 1px solid rgba(20, 184, 166, 0.3);"><i class="fa-solid fa-stethoscope"></i></div>
                 <div class="auth-feature-text">
-                  <strong>Prontuário PEP &amp; Voz</strong>
-                  Ditado contínuo SOAP e interações medicamentosas
+                  <strong>Balcão de Triagem (&lt; 60s)</strong>
+                  Protocolos clínicos guiados, queixas e Red Flags
                 </div>
               </li>
               <li class="auth-feature-item">
-                <div class="auth-feature-icon"><i class="fa-solid fa-heart-pulse"></i></div>
+                <div class="auth-feature-icon" style="background: rgba(225, 29, 72, 0.15); color: #f43f5e; border: 1px solid rgba(225, 29, 72, 0.3);"><i class="fa-solid fa-bolt-lightning"></i></div>
                 <div class="auth-feature-text">
-                  <strong>Manchester &amp; Sepse</strong>
-                  Triagem clínica com escore precoce MEWS
+                  <strong>Motor de Interações CDSS 4D</strong>
+                  Fármaco x Fármaco, Alergias, Patologias e Alimentos
                 </div>
               </li>
               <li class="auth-feature-item">
-                <div class="auth-feature-icon"><i class="fa-solid fa-bed-pulse"></i></div>
+                <div class="auth-feature-icon" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3);"><i class="fa-solid fa-timeline"></i></div>
                 <div class="auth-feature-text">
-                  <strong>Controle de Leitos</strong>
-                  Censo hospitalar e Kanban de internações
+                  <strong>Prontuário Longitudinal</strong>
+                  Histórico de visitas, adesão e tratamentos contínuos
                 </div>
               </li>
               <li class="auth-feature-item">
-                <div class="auth-feature-icon"><i class="fa-solid fa-video"></i></div>
+                <div class="auth-feature-icon" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.3);"><i class="fa-solid fa-file-signature"></i></div>
                 <div class="auth-feature-text">
-                  <strong>Telemedicina E2E</strong>
-                  Consultas por vídeo HD e receita digital
+                  <strong>Declaração CFF 585/586</strong>
+                  Documentação oficial com impressão, PDF e WhatsApp
                 </div>
               </li>
             </ul>
@@ -952,7 +952,7 @@ function renderAuthScreen() {
 
           <div class="auth-brand-footer">
             <i class="fa-solid fa-shield-halved" style="margin-right: 5px; color: #0d9488;"></i>
-            Criptografia E2E &bull; Conformidade CFM nº 1.821/2007 &bull; v2.8.0
+            Conformidade CFF nº 585/2013 &bull; Resolução CFF nº 586/2013 &bull; v3.0.0
           </div>
         </div>
 
@@ -960,15 +960,15 @@ function renderAuthScreen() {
         <div class="auth-form-panel">
           <div class="auth-form-header">
             <div style="display: flex; align-items: center; justify-content: space-between; width: 100%; margin-bottom: 4px;">
-              <div class="auth-form-eyebrow" style="margin-bottom: 0;">${isLogin ? 'Autenticação Segura' : 'Credenciamento'}</div>
+              <div class="auth-form-eyebrow" style="margin-bottom: 0; color: #14b8a6;">${isLogin ? 'Autenticação Farmacêutica Segura' : 'Credenciamento'}</div>
               ${isLogin ? `
                 <button type="button" id="btn-show-instructions" style="background: #1e293b; border: 1px solid #334155; color: #94a3b8; padding: 5px 12px; border-radius: 16px; font-size: 0.75rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s;" onmouseenter="this.style.background='#334155'; this.style.color='#f8fafc'" onmouseleave="this.style.background='#1e293b'; this.style.color='#94a3b8'">
-                  <i class="fa-solid fa-circle-info" style="color: #38bdf8;"></i> Instruções de Acesso
+                  <i class="fa-solid fa-circle-info" style="color: #14b8a6;"></i> Instruções de Acesso
                 </button>
               ` : ''}
             </div>
-            <h1 class="auth-title">${isLogin ? 'Acesso ao Sistema' : 'Criar Credencial'}</h1>
-            <p class="auth-subtitle">${isLogin ? 'Identifique-se com suas credenciais hospitalares' : 'Preencha os dados abaixo para solicitar acesso'}</p>
+            <h1 class="auth-title">${isLogin ? 'Acesso ao CRM Clínico' : 'Criar Credencial'}</h1>
+            <p class="auth-subtitle">${isLogin ? 'Identifique-se com suas credenciais farmacêuticas ou CRF' : 'Preencha os dados abaixo para solicitar acesso'}</p>
           </div>
 
           <div id="auth-error-container"></div>
@@ -976,36 +976,31 @@ function renderAuthScreen() {
           <form id="auth-form" class="auth-form">
             ${!isLogin ? `
               <div class="form-group">
-                <label class="form-label" for="auth-name">Nome Completo</label>
-                <input type="text" id="auth-name" class="form-input" required placeholder="Dr. João Silva" autocomplete="name">
+                <label class="form-label" for="auth-name">Nome Completo / Farmacêutico</label>
+                <input type="text" id="auth-name" class="form-input" required placeholder="Dr(a). Farmacêutico(a)" autocomplete="name">
               </div>
               <div class="form-group">
                 <label class="form-label" for="auth-role">Perfil / Função Desejada</label>
                 <select id="auth-role" class="form-input" style="background: var(--bg-card, #1e293b); color: var(--text-primary);">
-                  <option value="Médico" selected>🩺 Médico (Corpo Clínico / Especialista)</option>
-                  <option value="Enfermeiro">🩺 Enfermeiro(a) / Triagem Manchester</option>
-                  <option value="Recepcionista">📋 Recepcionista / Atendimento</option>
-                  <option value="Farmacêutico">💊 Farmacêutico(a) / Dispensário</option>
-                  <option value="Biomédico">🧪 Biomédico(a) / Laboratório</option>
-                  <option value="Gestor Financeiro">📊 Gestor Financeiro / Faturamento</option>
-                  <option value="Auxiliar de Enfermagem">🏥 Auxiliar de Enfermagem</option>
-                  <option value="Master">👑 Solicitar Acesso Total (Master / Admin)</option>
-                  <option value="Desenvolvedor">💻 Solicitar Acesso Desenvolvedor</option>
+                  <option value="Farmacêutico" selected>💊 Farmacêutico(a) Clínico(a) / Balcão</option>
+                  <option value="Administrador">🛠️ Administrador / Responsável Técnico</option>
+                  <option value="Recepcionista">📋 Atendente / Triagem Inicial</option>
+                  <option value="Master">👑 Gestor Geral Master</option>
                 </select>
               </div>
               <div id="auth-master-key-box" class="form-group" style="display: block; background: #0f172a; border: 1px solid #1e293b; border-radius: 8px; padding: 10px; margin-bottom: 12px;">
-                <label class="form-label" for="auth-master-key" style="color: #38bdf8; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+                <label class="form-label" for="auth-master-key" style="color: #14b8a6; font-weight: 600; display: flex; align-items: center; gap: 6px;">
                   <i class="fa-solid fa-key" style="color: #fbbf24;"></i> Chave Master (Opcional):
                 </label>
                 <input type="password" id="auth-master-key" class="form-input" placeholder="Digite a chave se possuir">
                 <small style="color: var(--text-secondary); display: block; margin-top: 4px; font-size: 0.75rem; line-height: 1.3;">
-                  * Todo novo cadastro fica <strong>Pendente de Aprovação</strong> pelo Usuário Master principal, exceto se você possuir a Chave Master.
+                  * Todo novo cadastro fica <strong>Pendente de Aprovação</strong> pelo Administrador, exceto se você possuir a Chave Master.
                 </small>
               </div>
             ` : ''}
             <div class="form-group">
-              <label class="form-label" for="auth-username">Usuário</label>
-              <input type="text" id="auth-username" class="form-input" required placeholder="ex: drjoao" autocomplete="username">
+              <label class="form-label" for="auth-username">Usuário ou CRF</label>
+              <input type="text" id="auth-username" class="form-input" required placeholder="ex: farmacia ou admin" autocomplete="username">
             </div>
             <div class="form-group">
               <label class="form-label" for="auth-password">Senha</label>
@@ -1016,9 +1011,9 @@ function renderAuthScreen() {
                 </button>
               </div>
             </div>
-            <button type="submit" id="auth-submit-btn" class="btn btn-primary" style="width: 100%; margin-top: 6px; padding: 12px; font-size: 0.95rem; font-weight: 700; background: #0284c7; border: none; box-shadow: 0 2px 10px rgba(2,132,199,0.35);">
+            <button type="submit" id="auth-submit-btn" class="btn btn-primary" style="width: 100%; margin-top: 6px; padding: 12px; font-size: 0.95rem; font-weight: 700; background: linear-gradient(135deg, #0d9488, #0f766e); border: none; box-shadow: 0 4px 16px rgba(13,148,136,0.4);">
               <i class="fa-solid fa-${isLogin ? 'right-to-bracket' : 'user-plus'}" style="margin-right: 8px;"></i>
-              ${isLogin ? 'Entrar no Sistema' : 'Criar Conta'}
+              ${isLogin ? 'Acessar CRM Farmacêutico' : 'Criar Conta'}
             </button>
           </form>
 
@@ -1031,8 +1026,8 @@ function renderAuthScreen() {
           </div>
 
           <div class="auth-form-footer">
-            <i class="fa-solid fa-hospital-user" style="margin-right: 4px; color: #0d9488;"></i>
-            Health Nexus &bull; Ambiente Clínico Seguro
+            <i class="fa-solid fa-pills" style="margin-right: 4px; color: #0d9488;"></i>
+            CRM Clínico Farmacêutico &bull; Cuidado em Saúde
           </div>
         </div>
       </div>
@@ -1330,8 +1325,7 @@ function initConstellationCanvas() {
 
     animationFrameId = requestAnimationFrame(animate);
   };
-
-  if (window._authConstellationCancel) {
+          if (window._authConstellationCancel) {
     window._authConstellationCancel();
   }
   window._authConstellationCancel = () => {
@@ -1350,37 +1344,31 @@ function renderAppStructure() {
   const perms = getRolePermissions(state.user);
 
   const allNavItems = [
-    { id: 'dashboard', label: 'Health Nexus', icon: 'fa-chart-line' },
-    { id: 'escalas', label: 'Escalas de Trabalho', icon: 'fa-user-clock' },
-    { id: 'agenda', label: 'Agenda', icon: 'fa-calendar-check' },
-    { id: 'pacientes', label: 'Pacientes', icon: 'fa-user-injured' },
-    { id: 'atendimento', label: 'Atendimentos', icon: 'fa-stethoscope' },
-    { id: 'tv_panel', label: 'Painel TV (Chamador)', icon: 'fa-tv' },
-    { id: 'estagnacao', label: 'Alertas & Estagnação', icon: 'fa-triangle-exclamation', hasBadge: true },
-    { id: 'leitos', label: 'Leitos', icon: 'fa-bed-pulse' },
-    { id: 'kanban', label: 'Kanban', icon: 'fa-table-columns' },
-    { id: 'farmacia', label: 'Farmácia & Estoque', icon: 'fa-pills' },
-    { id: 'financeiro', label: 'Financeiro', icon: 'fa-hand-holding-dollar' },
-    { id: 'medicos', label: 'Profissionais', icon: 'fa-user-nurse' },
-    { id: 'consultorios', label: 'Consultórios', icon: 'fa-door-open' },
-    { id: 'relatorios', label: 'Relatórios', icon: 'fa-file-contract' },
-    { id: 'configuracoes', label: 'Configurações', icon: 'fa-gear' }
+    { id: 'farmacia', label: 'CRM Farmacêutico', icon: 'fa-notes-medical' },
+    { id: 'pacientes', label: 'Pacientes & Histórico', icon: 'fa-user-injured' },
+    { id: 'agenda', label: 'Agenda Clínica', icon: 'fa-calendar-check' },
+    { id: 'relatorios', label: 'Declarações & Relatórios', icon: 'fa-file-contract' },
+    { id: 'configuracoes', label: 'Configurações & Turso', icon: 'fa-gear' },
+    { id: 'dashboard', label: 'Métricas do Consultório', icon: 'fa-chart-line' },
+    { id: 'financeiro', label: 'Financeiro & Vendas', icon: 'fa-hand-holding-dollar' },
+    { id: 'atendimento', label: 'Atendimentos Gerais', icon: 'fa-stethoscope' }
   ];
 
 
   const visibleNavItems = allNavItems.filter(item => perms.allowedTabs.includes(item.id));
 
-  // Ajusta aba ativa caso a atual não seja permitida para o perfil
+  // Ajusta aba ativa para abrir diretamente no CRM Farmacêutico
   if (!perms.allowedTabs.includes(state.activeTab)) {
-    state.activeTab = perms.allowedTabs[0] || 'dashboard';
+    state.activeTab = perms.allowedTabs.includes('farmacia') ? 'farmacia' : (perms.allowedTabs[0] || 'farmacia');
+  } else if (!state.activeTab || state.activeTab === 'dashboard') {
+    state.activeTab = 'farmacia';
   }
 
   const navHtml = visibleNavItems.map(item => `
     <li>
       <a class="nav-item ${state.activeTab === item.id ? 'active' : ''}" data-tab="${item.id}" style="${item.hasBadge ? 'position: relative;' : ''}">
-        <i class="fa-solid ${item.icon}" style="${item.id === 'estagnacao' ? 'color: #f59e0b;' : ''}"></i>
+        <i class="fa-solid ${item.icon}"></i>
         <span>${item.label}</span>
-        ${item.hasBadge ? `<span id="stagnation-nav-badge" class="badge-count" style="display:none; margin-left: auto; background: #ef4444; color: #fff; border-radius: 10px; font-size: 0.7rem; padding: 2px 7px; font-weight: 700;">0</span>` : ''}
       </a>
     </li>
   `).join('');
@@ -1389,9 +1377,13 @@ function renderAppStructure() {
     <div class="app-container">
       <!-- Sidebar de Navegação -->
       <aside class="app-sidebar">
-        <div class="brand-logo">
-          <div class="brand-logo-card">
-            <img src="/assets/logo.png" alt="Health Nexus" class="brand-logo-img">
+        <div class="brand-logo" style="padding: 16px 12px; display: flex; align-items: center; gap: 10px;">
+          <div style="width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, #0d9488, #0f766e); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.4);">
+            <i class="fa-solid fa-notes-medical"></i>
+          </div>
+          <div>
+            <div style="font-family: 'Outfit', sans-serif; font-weight: 700; color: #f8fafc; font-size: 1rem; line-height: 1.1;">PharmaCRM</div>
+            <div style="font-size: 0.72rem; color: #14b8a6; font-weight: 600;">Clínico &amp; CDSS</div>
           </div>
         </div>
         <nav>
@@ -1402,7 +1394,7 @@ function renderAppStructure() {
         <div style="margin-top: auto; border-top: 1px solid var(--border-color); padding-top: 16px;">
           <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 10px;">
             Logado como: <br>
-            <strong style="color: var(--text-primary); display: block; margin-top: 2px;">${state.user ? state.user.name : 'Usuário'}</strong>
+            <strong style="color: var(--text-primary); display: block; margin-top: 2px;">${state.user ? state.user.name : 'Farmacêutico'}</strong>
             <span style="display: inline-block; margin-top: 4px; padding: 3px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; color: #fff; background: ${perms.badgeColor}; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
               ${perms.label}
             </span>
@@ -1411,7 +1403,7 @@ function renderAppStructure() {
             <i class="fa-solid fa-arrow-right-from-bracket"></i> Sair
           </button>
           <div style="text-align: center; font-size: 0.65rem; color: var(--text-secondary); opacity: 0.6;">
-            <i class="fa-solid fa-code" style="margin-right: 4px;"></i> Desenvolvido por @mazzarowysk &amp; @_coltri_
+            <i class="fa-solid fa-pills" style="margin-right: 4px;"></i> CRM Clínico Farmacêutico &bull; v3.0
           </div>
         </div>
       </aside>
@@ -1419,14 +1411,14 @@ function renderAppStructure() {
       <!-- Cabeçalho Superior -->
       <header class="app-header" style="display: flex; justify-content: space-between; align-items: center; padding-right: 24px; gap: 16px;">
         <div style="display: flex; align-items: center; gap: 14px;">
-          <button id="global-back-btn" style="display: none; background: linear-gradient(135deg, rgba(99,102,241,0.25), rgba(59,130,246,0.25)); border: 1px solid rgba(129,140,248,0.4); color: #818cf8; font-weight: 700; font-size: 0.82rem; padding: 7px 14px; border-radius: 20px; cursor: pointer; align-items: center; gap: 8px; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.25);" title="Voltar para a tela anterior (Atalho: Alt + Seta Esquerda)">
+          <button id="global-back-btn" style="display: none; background: rgba(13, 148, 136, 0.2); border: 1px solid rgba(20, 184, 166, 0.4); color: #2dd4bf; font-weight: 700; font-size: 0.82rem; padding: 7px 14px; border-radius: 20px; cursor: pointer; align-items: center; gap: 8px; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.25);" title="Voltar para a tela anterior (Atalho: Alt + Seta Esquerda)">
             <i class="fa-solid fa-arrow-left"></i>
             <span id="global-back-label">Voltar</span>
           </button>
-          <h1 class="page-title" id="page-title-label" style="margin: 0;">Health Nexus</h1>
+          <h1 class="page-title" id="page-title-label" style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.3rem;">CRM Clínico Farmacêutico</h1>
           <div class="header-brand-text" style="margin: 0;">
-            <i class="fa-solid fa-circle-nodes"></i>
-            <span>Sistema de Gestão Hospitalar Health Nexus</span>
+            <i class="fa-solid fa-shield-halved" style="color: #14b8a6;"></i>
+            <span>Cuidado Farmacêutico &amp; Suporte à Decisão Clínica (CDSS 4D)</span>
           </div>
         </div>
 

@@ -1,7 +1,7 @@
 {
-  "name": "health-nexus",
-  "version": "2.9.0",
-  "description": "Health Nexus - Software de Gestão Hospitalar",
+  "name": "crm-clinico-farmaceutico",
+  "version": "3.0.0",
+  "description": "CRM Clínico Farmacêutico — Suporte à Decisão Clínica, Triagem e Prescrição Segura (CDSS 4D)",
   "main": "backend/server.js",
   "type": "module",
   "scripts": {
