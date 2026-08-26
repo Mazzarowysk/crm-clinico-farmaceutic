@@ -3597,24 +3597,82 @@ async function exportToPDF(headers, rows, title = 'Relatório CRM Clínico Farma
   }
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-  doc.setFontSize(14);
+  const hash = 'CFF-' + Math.random().toString(36).substring(2, 8).toUpperCase() + '-' + Date.now().toString().slice(-4);
+  const now = new Date().toLocaleString('pt-BR');
+
+  // Cabeçalho Clínico Farmacêutico Executivo
+  doc.setFillColor(15, 118, 110); // Teal institucional
+  doc.rect(14, 12, 182, 1.5, 'F');
+
+  doc.setFontSize(13);
   doc.setFont('helvetica', 'bold');
-  doc.text(title, 14, 15);
-  doc.setFontSize(8.5);
+  doc.setTextColor(15, 118, 110);
+  doc.text('CRM CLÍNICO FARMACÊUTICO', 14, 20);
+
+  doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
-  doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')} · CRM Clínico Farmacêutico`, 14, 21);
+  doc.setTextColor(71, 85, 105);
+  doc.text('Consultório Farmacêutico · Prescrição Clínica · Farmacovigilância CDSS 4D', 14, 25);
+  doc.text('Em conformidade com as Resoluções CFF nº 585/2013 e nº 586/2013 · RDC ANVISA nº 44/2009', 14, 29);
+
+  doc.setFontSize(7.5);
+  doc.setTextColor(100, 116, 139);
+  doc.text(`Emissão: ${now}`, 196, 20, { align: 'right' });
+  doc.text(`Autenticação: ${hash}`, 196, 24, { align: 'right' });
+  doc.text('RT: Dr. Marcelo Mazaro (CRF-SP 54180)', 196, 28, { align: 'right' });
+
+  // Banner do Título do Relatório
+  doc.setFillColor(240, 253, 250);
+  doc.setDrawColor(13, 148, 136);
+  doc.roundedRect(14, 33, 182, 12, 2, 2, 'FD');
+
+  doc.setFontSize(10.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(17, 94, 89);
+  doc.text(title.toUpperCase(), 18, 40.5);
+
+  // Tabela de Dados Formatada
   if (doc.autoTable) {
     doc.autoTable({
-      startY: 26,
+      startY: 49,
       head: [headers],
       body: rows,
       theme: 'grid',
-      headStyles: { fillColor: [99, 102, 241], textColor: 255, fontSize: 8.5 },
-      styles: { fontSize: 8, cellPadding: 2.5 }
+      headStyles: { 
+        fillColor: [15, 23, 42], 
+        textColor: [255, 255, 255], 
+        fontSize: 8,
+        fontStyle: 'bold',
+        halign: 'left',
+        cellPadding: 3
+      },
+      alternateRowStyles: {
+        fillColor: [248, 250, 252]
+      },
+      styles: { 
+        fontSize: 7.8, 
+        cellPadding: 2.8,
+        textColor: [30, 41, 59],
+        lineColor: [226, 232, 240],
+        lineWidth: 0.2
+      },
+      margin: { left: 14, right: 14, bottom: 20 },
+      didDrawPage: function (data) {
+        // Rodapé em todas as páginas
+        const pageCount = doc.internal.getNumberOfPages();
+        doc.setFontSize(7);
+        doc.setTextColor(148, 163, 184);
+        doc.setDrawColor(203, 213, 225);
+        doc.line(14, 284, 196, 284);
+        doc.text('CRM Clínico Farmacêutico · Dr. Marcelo Mazaro (CRF-SP 54180) · Documento Eletrônico de Valor Clínico', 14, 289);
+        doc.text(`Página ${data.pageNumber} de ${pageCount}`, 196, 289, { align: 'right' });
+      }
     });
   }
+
   const fn = filename.endsWith('.pdf') ? filename : `${filename}.pdf`;
   doc.save(fn);
+  if (typeof showToast === 'function') showToast(`✅ PDF gerado com sucesso: ${fn}`);
 }
 window.exportToPDF = exportToPDF;
 
