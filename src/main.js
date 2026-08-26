@@ -1359,14 +1359,12 @@ function renderAppStructure() {
   const perms = getRolePermissions(state.user);
 
   const allNavItems = [
-    { id: 'farmacia', label: 'CRM Farmacêutico', icon: 'fa-notes-medical' },
-    { id: 'pacientes', label: 'Pacientes & Histórico', icon: 'fa-user-injured' },
-    { id: 'agenda', label: 'Agenda Clínica', icon: 'fa-calendar-check' },
-    { id: 'relatorios', label: 'Declarações & Relatórios', icon: 'fa-file-contract' },
-    { id: 'configuracoes', label: 'Configurações & Turso', icon: 'fa-gear' },
+    { id: 'farmacia', label: 'CRM Farmacêutico & Balcão', icon: 'fa-prescription-bottle-medical' },
+    { id: 'pacientes', label: 'Prontuário & Pacientes', icon: 'fa-user-nurse' },
+    { id: 'agenda', label: 'Agenda de Serviços Clínicos', icon: 'fa-calendar-check' },
+    { id: 'relatorios', label: 'Declarações (DSF) & Relatórios', icon: 'fa-file-signature' },
     { id: 'dashboard', label: 'Métricas do Consultório', icon: 'fa-chart-line' },
-    { id: 'financeiro', label: 'Financeiro & Vendas', icon: 'fa-hand-holding-dollar' },
-    { id: 'atendimento', label: 'Atendimentos Gerais', icon: 'fa-stethoscope' }
+    { id: 'configuracoes', label: 'Configurações & Gestão', icon: 'fa-sliders' }
   ];
 
 
@@ -1717,27 +1715,14 @@ function initGlobalSystemSearch() {
     const qNorm = normalizeStr(rawQuery);
     const queryTokens = qNorm.split(/\s+/).filter(Boolean);
 
-    const searchResult = typeof searchManualEngine === 'function' ? searchManualEngine(rawQuery, 'Master') : null;
-    const buttonMatches = searchResult ? searchResult.buttonMatches : [];
-    const faqMatches = searchResult ? searchResult.faqMatches : [];
-
-    // 2. Pesquisar abas da aplicação
+    // Abas oficiais do CRM Clínico Farmacêutico
     const allNavItems = [
-      { id: 'dashboard', label: 'CRM Clínico Farmacêutico (Visão Geral)', icon: 'fa-chart-line', tabColor: '#818cf8' },
-      { id: 'escalas', label: 'Escalas de Trabalho & Plantões', icon: 'fa-user-clock', tabColor: '#a855f7' },
-      { id: 'agenda', label: 'Agenda & Consultas', icon: 'fa-calendar-check', tabColor: '#93c5fd' },
-      { id: 'pacientes', label: 'Recepção & Pacientes', icon: 'fa-user-injured', tabColor: '#38bdf8' },
-      { id: 'atendimento', label: 'Atendimentos & Prontuário Médico', icon: 'fa-stethoscope', tabColor: '#fcd34d' },
-      { id: 'tv_panel', label: 'Painel TV & Sala de Espera', icon: 'fa-tv', tabColor: '#a78bfa' },
-      { id: 'estagnacao', label: 'Alertas & Estagnação', icon: 'fa-triangle-exclamation', tabColor: '#f59e0b' },
-      { id: 'leitos', label: 'Gestão de Leitos & Internação', icon: 'fa-bed-pulse', tabColor: '#f9a8d4' },
-      { id: 'kanban', label: 'Quadro Kanban Hospitalar', icon: 'fa-table-columns', tabColor: '#60a5fa' },
-      { id: 'farmacia', label: 'Farmácia & Estoque', icon: 'fa-pills', tabColor: '#fbbf24' },
-      { id: 'financeiro', label: 'Faturamento & Financeiro', icon: 'fa-hand-holding-dollar', tabColor: '#34d399' },
-      { id: 'medicos', label: 'Profissionais & Equipe', icon: 'fa-user-nurse', tabColor: '#818cf8' },
-      { id: 'consultorios', label: 'Salas & Consultórios', icon: 'fa-door-open', tabColor: '#c084fc' },
-      { id: 'relatorios', label: 'Relatórios & Métricas', icon: 'fa-file-contract', tabColor: '#06b6d4' },
-      { id: 'configuracoes', label: 'Configurações & Turso Cloud DB', icon: 'fa-gear', tabColor: '#a5b4fc' }
+      { id: 'farmacia', label: 'CRM Farmacêutico & Balcão', icon: 'fa-prescription-bottle-medical', tabColor: '#10b981' },
+      { id: 'pacientes', label: 'Prontuário & Pacientes', icon: 'fa-user-nurse', tabColor: '#38bdf8' },
+      { id: 'agenda', label: 'Agenda de Serviços Clínicos', icon: 'fa-calendar-check', tabColor: '#818cf8' },
+      { id: 'relatorios', label: 'Declarações (DSF) & Relatórios', icon: 'fa-file-signature', tabColor: '#f59e0b' },
+      { id: 'dashboard', label: 'Métricas do Consultório', icon: 'fa-chart-line', tabColor: '#06b6d4' },
+      { id: 'configuracoes', label: 'Configurações & Gestão', icon: 'fa-sliders', tabColor: '#a855f7' }
     ];
 
     const tabMatches = allNavItems.filter(item => {
@@ -1746,7 +1731,7 @@ function initGlobalSystemSearch() {
       return lbl.includes(qNorm) || id.includes(qNorm) || queryTokens.every(t => lbl.includes(t));
     });
 
-    // 3. Pesquisar Pacientes cadastrados
+    // Pesquisar Pacientes cadastrados
     const patientMatches = [];
     if (state.patients && Array.isArray(state.patients)) {
       state.patients.forEach(p => {
@@ -1760,111 +1745,12 @@ function initGlobalSystemSearch() {
       });
     }
 
-    // 🤖 Nexus AI Knowledge Copilot Engine v2.5
-    const aiCopilot = searchResult && searchResult.aiCopilot ? searchResult.aiCopilot : getNexusAICopilotResponse(qNorm, rawQuery);
-
-    if (buttonMatches.length === 0 && tabMatches.length === 0 && patientMatches.length === 0 && faqMatches.length === 0) {
-      searchResultsContainer.innerHTML = `
-        <div style="padding: 14px; background: linear-gradient(135deg, rgba(124, 58, 237, 0.18) 0%, rgba(79, 70, 229, 0.18) 100%); border: 1px solid rgba(167, 139, 250, 0.35); border-radius: 12px; margin-bottom: 12px;">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-            <strong style="color: #c4b5fd; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
-              <i class="fa-solid fa-wand-magic-sparkles" style="color: #a78bfa;"></i> ${aiCopilot.title}
-            </strong>
-            <span style="font-size: 0.65rem; background: rgba(167, 139, 250, 0.25); color: #e9d5ff; padding: 2px 8px; border-radius: 10px; font-weight: 700;">IA Ativa</span>
-          </div>
-          <p style="color: #f3e8ff; font-size: 0.81rem; margin: 0 0 10px 0; line-height: 1.4;">
-            ${aiCopilot.summary}
-          </p>
-          ${aiCopilot.actionButton !== false ? `
-            <button class="search-result-item" data-type="ai_action" data-action="${aiCopilot.actionType}" data-target="${aiCopilot.actionTarget}" style="
-              background: #7c3aed; color: #ffffff; border: none; padding: 7px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
-            " onmouseover="this.style.background='#6d28d9'" onmouseout="this.style.background='#7c3aed'">
-              ${aiCopilot.actionText}
-            </button>
-          ` : ''}
-        </div>
-      `;
-      searchResultsContainer.style.display = 'block';
-      
-      // Setup listener for AI Action button when no other matches
-      const aiBtn = searchResultsContainer.querySelector('[data-type="ai_action"]');
-      if (aiBtn) {
-        aiBtn.addEventListener('click', () => {
-          const act = aiBtn.dataset.action;
-          const tgt = aiBtn.dataset.target;
-          if (act === 'openDoctorModal') {
-            switchTab('medicos');
-            setTimeout(() => { document.getElementById('btn-open-doctor-modal')?.click(); }, 350);
-          } else if (act === 'openPatientModal') {
-            switchTab('pacientes');
-            setTimeout(() => { document.getElementById('btn-open-patient-modal')?.click(); }, 350);
-          } else if (act === 'switchTab') {
-            switchTab(tgt);
-          } else if (act === 'requestPushNotifications') {
-            if (typeof window.requestPushNotifications === 'function') window.requestPushNotifications();
-          } else if (act === 'openManual') {
-            if (typeof showInteractiveManualModal === 'function') showInteractiveManualModal(tgt);
-          }
-          searchResultsContainer.style.display = 'none';
-          searchInput.value = '';
-        });
-      }
-      return;
-    }
-
     let html = '';
-
-    // Renderizar Card da IA Assistente no topo dos resultados
-    html += `
-      <div style="padding: 12px 14px; background: linear-gradient(135deg, rgba(124, 58, 237, 0.22) 0%, rgba(79, 70, 229, 0.22) 100%); border: 1px solid rgba(167, 139, 250, 0.4); border-radius: 12px; margin-bottom: 12px; box-shadow: 0 4px 16px rgba(124, 58, 237, 0.15);">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-          <strong style="color: #ddd6fe; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
-            <i class="fa-solid fa-wand-magic-sparkles" style="color: #c084fc;"></i> ${aiCopilot.title}
-          </strong>
-          <span style="font-size: 0.65rem; background: rgba(167, 139, 250, 0.25); color: #e9d5ff; padding: 2px 8px; border-radius: 10px; font-weight: 700;">IA Ativa</span>
-        </div>
-        <p style="color: #f3e8ff; font-size: 0.81rem; margin: 0 0 10px 0; line-height: 1.4;">
-          ${aiCopilot.summary}
-        </p>
-        <button class="search-result-item" data-type="ai_action" data-action="${aiCopilot.actionType}" data-target="${aiCopilot.actionTarget}" style="
-          background: #7c3aed; color: #ffffff; border: none; padding: 7px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
-        " onmouseover="this.style.background='#6d28d9'" onmouseout="this.style.background='#7c3aed'">
-          ${aiCopilot.actionText}
-        </button>
-      </div>
-    `;
-
-    // Renderizar Funcionalidades & Botões Encontrados (Ordenados por Relevância)
-    if (buttonMatches.length > 0) {
-      const isDeleteSearch = buttonMatches.some(b => b._isDelete);
-      html += `<div style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: ${isDeleteSearch ? '#f87171' : '#10b981'}; letter-spacing: 0.5px; padding: 6px 8px 4px 8px;">${isDeleteSearch ? '🗑️ Ações de Exclusão & Desativação' : '⚙️ Funcionalidades & Ações Relevantes'} (${buttonMatches.length})</div>`;
-      buttonMatches.slice(0, 10).forEach(btn => {
-        html += `
-          <div class="search-result-item" data-type="btn" data-mod-id="${btn._moduleId}" data-btn-name="${encodeURIComponent(btn.name)}" style="
-            padding: 10px 12px; border-radius: 10px; cursor: pointer; transition: all 0.2s;
-            background: rgba(15, 23, 42, 0.75); margin-bottom: 6px; border: 1px solid ${btn._isDelete ? 'rgba(239, 68, 68, 0.25)' : 'rgba(255,255,255,0.07)'};
-          " onmouseover="this.style.background='${btn._isDelete ? 'rgba(239, 68, 68, 0.22)' : 'rgba(16, 185, 129, 0.22)'}'; this.style.borderColor='${btn.color}'" onmouseout="this.style.background='rgba(15, 23, 42, 0.75)'; this.style.borderColor='${btn._isDelete ? 'rgba(239, 68, 68, 0.25)' : 'rgba(255,255,255,0.07)'}'">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
-              <strong style="color: #ffffff; font-size: 0.88rem; display: flex; align-items: center; gap: 8px;">
-                <i class="fa-solid ${btn.icon}" style="color: ${btn.color}; font-size: 0.95rem;"></i>
-                ${btn.name}
-              </strong>
-              <span style="font-size: 0.65rem; background: rgba(255,255,255,0.08); color: ${btn._moduleColor || '#818cf8'}; padding: 3px 8px; border-radius: 8px; font-weight: 700;">
-                ${btn._moduleTitle}
-              </span>
-            </div>
-            <p style="color: #cbd5e1; font-size: 0.78rem; margin: 0; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
-              ${btn.description}
-            </p>
-          </div>
-        `;
-      });
-    }
 
     // Renderizar Abas Encontradas
     if (tabMatches.length > 0) {
-      html += `<div style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: #818cf8; letter-spacing: 0.5px; padding: 10px 8px 4px 8px;">📌 Módulos & Abas (${tabMatches.length})</div>`;
-      tabMatches.slice(0, 4).forEach(t => {
+      html += `<div style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: #818cf8; letter-spacing: 0.5px; padding: 10px 8px 4px 8px;">📌 Módulos do CRM (${tabMatches.length})</div>`;
+      tabMatches.forEach(t => {
         html += `
           <div class="search-result-item" data-type="tab" data-tab-id="${t.id}" style="
             display: flex; align-items: center; justify-content: space-between;
@@ -1881,25 +1767,10 @@ function initGlobalSystemSearch() {
       });
     }
 
-    // Renderizar Pacientes Encontrados (se houver)
+    // Renderizar Pacientes Encontrados
     if (patientMatches.length > 0) {
-      html += `<div style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: #38bdf8; letter-spacing: 0.5px; padding: 10px 8px 4px 8px;">👤 Pacientes Cadastrados & Localização Atual (${patientMatches.length})</div>`;
-      patientMatches.slice(0, 4).forEach(p => {
-        let statusBadge = '<span style="font-size: 0.68rem; background: rgba(56, 189, 248, 0.2); color: #38bdf8; padding: 3px 9px; border-radius: 10px; font-weight: 700;">Ver Prontuário ➔</span>';
-        if (state.encounters && Array.isArray(state.encounters)) {
-          const activeEnc = state.encounters.find(e => (e.patientId === p.id || e.patientName === p.name) && e.status !== 'Finalizado' && e.status !== 'Cancelado');
-          if (activeEnc) {
-            if (activeEnc.status === 'Em_Atendimento') {
-              statusBadge = '<span style="font-size: 0.68rem; background: rgba(16, 185, 129, 0.25); color: #10b981; border: 1px solid #10b981; padding: 3px 9px; border-radius: 10px; font-weight: 700;">🩺 Consultório 01 (Em Atendimento) ➔</span>';
-            } else if (activeEnc.status === 'Aguardando_Atendimento') {
-              statusBadge = '<span style="font-size: 0.68rem; background: rgba(245, 158, 11, 0.25); color: #fbbf24; border: 1px solid #f59e0b; padding: 3px 9px; border-radius: 10px; font-weight: 700;">⏳ Aguardando Médico (Atendimentos) ➔</span>';
-            } else if (activeEnc.status === 'Aguardando_Triagem') {
-              statusBadge = '<span style="font-size: 0.68rem; background: rgba(139, 92, 246, 0.25); color: #c084fc; border: 1px solid #8b5cf6; padding: 3px 9px; border-radius: 10px; font-weight: 700;">🩺 Aguardando Triagem ➔</span>';
-            } else if (activeEnc.status === 'Em_Observacao') {
-              statusBadge = '<span style="font-size: 0.68rem; background: rgba(239, 68, 68, 0.25); color: #f87171; border: 1px solid #ef4444; padding: 3px 9px; border-radius: 10px; font-weight: 700;">⏱️ Observação PS ➔</span>';
-            }
-          }
-        }
+      html += `<div style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: #38bdf8; letter-spacing: 0.5px; padding: 10px 8px 4px 8px;">👤 Pacientes Encontrados (${patientMatches.length})</div>`;
+      patientMatches.slice(0, 5).forEach(p => {
         html += `
           <div class="search-result-item" data-type="patient" data-patient-id="${p.id}" style="
             display: flex; align-items: center; justify-content: space-between;
@@ -1908,124 +1779,35 @@ function initGlobalSystemSearch() {
           " onmouseover="this.style.background='rgba(56, 189, 248, 0.2)'; this.style.borderColor='rgba(56, 189, 248, 0.5)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'; this.style.borderColor='rgba(255,255,255,0.05)'">
             <div>
               <strong style="color: #f8fafc; font-size: 0.86rem; display: block;">${p.name}</strong>
-              <small style="color: #94a3b8; font-size: 0.75rem;">CPF: ${p.cpf || 'Não informado'}</small>
+              <small style="color: #94a3b8; font-size: 0.75rem;">CPF: ${p.cpf || 'Não informado'} | Tel: ${p.phone || 'N/A'}</small>
             </div>
-            ${statusBadge}
+            <span style="font-size: 0.68rem; background: rgba(56, 189, 248, 0.2); color: #38bdf8; padding: 3px 9px; border-radius: 10px; font-weight: 700;">Ver Prontuário ➔</span>
           </div>
         `;
       });
     }
 
-    // Renderizar Dúvidas Operacionais / FAQ Encontradas
-    if (faqMatches.length > 0) {
-      html += `<div style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: #f59e0b; letter-spacing: 0.5px; padding: 10px 8px 4px 8px;">❓ Dúvidas Operacionais & Respostas (${faqMatches.length})</div>`;
-      faqMatches.slice(0, 3).forEach(f => {
-        const { item, module } = f;
-        html += `
-          <div class="search-result-item" data-type="faq" data-mod-id="${module.id}" style="
-            padding: 10px 12px; border-radius: 10px; cursor: pointer; transition: all 0.2s;
-            background: rgba(245, 158, 11, 0.08); margin-bottom: 5px; border: 1px solid rgba(245, 158, 11, 0.25);
-          " onmouseover="this.style.background='rgba(245, 158, 11, 0.2)'; this.style.borderColor='#f59e0b'" onmouseout="this.style.background='rgba(245, 158, 11, 0.08)'; this.style.borderColor='rgba(245, 158, 11, 0.25)'">
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 3px;">
-              <strong style="color: #fbbf24; font-size: 0.86rem; display: flex; align-items: center; gap: 8px;">
-                <i class="fa-solid fa-circle-question"></i> ${item.q}
-              </strong>
-              <span style="font-size: 0.65rem; background: rgba(245, 158, 11, 0.2); color: #fcd34d; padding: 2px 7px; border-radius: 8px; font-weight: 700;">
-                ${module.title}
-              </span>
-            </div>
-            <p style="color: #cbd5e1; font-size: 0.78rem; margin: 0; line-height: 1.35;">
-              ${item.a}
-            </p>
-          </div>
-        `;
-      });
+    if (tabMatches.length === 0 && patientMatches.length === 0) {
+      html = `
+        <div style="padding: 16px; text-align: center; color: #94a3b8; font-size: 0.84rem;">
+          <i class="fa-solid fa-magnifying-glass" style="font-size: 1.5rem; margin-bottom: 8px; opacity: 0.5; display: block;"></i>
+          Nenhum paciente ou módulo encontrado para <strong>"${rawQuery}"</strong>.
+        </div>
+      `;
     }
 
     searchResultsContainer.innerHTML = html;
     searchResultsContainer.style.display = 'block';
 
-    // Handler de clique nos resultados
+    // Click handlers
     searchResultsContainer.querySelectorAll('.search-result-item').forEach(item => {
       item.addEventListener('click', () => {
         const itemType = item.dataset.type;
-        if (itemType === 'ai_action') {
-          const act = item.dataset.action;
-          const tgt = item.dataset.target;
-          if (act === 'openDoctorModal') {
-            switchTab('medicos');
-            setTimeout(() => { document.getElementById('btn-open-doctor-modal')?.click(); }, 350);
-            if (typeof showManualReturnBeacon === 'function') {
-              showManualReturnBeacon({ moduleId: 'medicos', moduleTitle: 'Corpo Clínico', btnName: 'Cadastrar / Incluir Novo Profissional', targetTab: 'medicos' });
-            }
-          } else if (act === 'openPatientModal') {
-            switchTab('pacientes');
-            setTimeout(() => { document.getElementById('btn-open-patient-modal')?.click(); }, 350);
-            if (typeof showManualReturnBeacon === 'function') {
-              showManualReturnBeacon({ moduleId: 'recepcao', moduleTitle: 'Recepção & Pacientes', btnName: '➕ Novo Paciente', targetTab: 'pacientes' });
-            }
-          } else if (act === 'switchTab') {
-            switchTab(tgt);
-            if (typeof showManualReturnBeacon === 'function') {
-              showManualReturnBeacon({ moduleId: tgt, moduleTitle: tgt, btnName: 'Navegação por IA', targetTab: tgt });
-            }
-          } else if (act === 'openManual') {
-            if (typeof showInteractiveManualModal === 'function') showInteractiveManualModal(tgt);
-          }
-        } else if (itemType === 'tab') {
-          const tabId = item.dataset.tabId;
-          switchTab(tabId);
-          if (typeof showManualReturnBeacon === 'function') {
-            showManualReturnBeacon({ moduleId: tabId, moduleTitle: tabId, btnName: `Módulo: ${tabId}`, targetTab: tabId });
-          }
-        } else if (itemType === 'btn') {
-          const modId = item.dataset.modId;
-          const btnName = decodeURIComponent(item.dataset.btnName || '');
-          const mod = manualData.find(m => m.id === modId);
-          const btn = mod ? mod.buttons.find(b => b.name === btnName) : null;
-          if (btn && mod) {
-            const navMap = {
-              'geral': 'dashboard',
-              'agenda': 'agenda',
-              'recepcao': 'pacientes',
-              'prontuario': 'atendimento',
-              'tv': 'tv_panel',
-              'estagnacao': 'estagnacao',
-              'leitos': 'leitos',
-              'kanban': 'kanban',
-              'farmacia': 'farmacia',
-              'financeiro': 'financeiro',
-              'medicos': 'medicos',
-              'consultorios': 'consultorios',
-              'escalas': 'escalas',
-              'relatorios': 'relatorios',
-              'configuracoes': 'configuracoes'
-            };
-            if (navMap[modId]) switchTab(navMap[modId]);
-            if (btnName.includes('Cadastrar / Incluir Novo Médico') || btnName.includes('Cadastrar / Incluir Novo Profissional')) {
-              setTimeout(() => { document.getElementById('btn-open-doctor-modal')?.click(); }, 350);
-            } else if (typeof showCardDetailModal === 'function') {
-              showCardDetailModal(btn, mod);
-            }
-
-            if (typeof showManualReturnBeacon === 'function') {
-              showManualReturnBeacon({
-                moduleId: modId,
-                moduleTitle: mod.title,
-                btnName: btn.name,
-                targetTab: navMap[modId] || 'dashboard'
-              });
-            }
-          }
+        if (itemType === 'tab') {
+          switchTab(item.dataset.tabId);
         } else if (itemType === 'patient') {
           switchTab('pacientes');
-        } else if (itemType === 'faq') {
-          const modId = item.dataset.modId;
-          if (typeof showInteractiveManualModal === 'function') {
-            showInteractiveManualModal(modId);
-          }
         }
-
         searchResultsContainer.style.display = 'none';
         searchInput.value = '';
       });
@@ -2091,20 +1873,12 @@ function switchTab(tabName, isBack = false) {
   
   // Mapa de nomes de exibição por aba
   const tabLabels = {
-    dashboard:     'CRM Clínico Farmacêutico',
-    pacientes:     'Pacientes',
-    medicos:        'Corpo Clínico',
-    consultorios:  'Consultórios',
-    farmacia:      'Farmácia & Estoque',
-    tv_panel:      'Painel TV (Chamador)',
-    agenda:        'Agenda Médica',
-    atendimento:   'Atendimentos',
-    estagnacao:    'Alertas & Estagnação',
-    leitos:        'Gestão de Leitos',
-    kanban:        'Kanban de Internação',
-    financeiro:    'Gestão Financeira & Títulos',
-    relatorios:    'Relatórios',
-    configuracoes: 'Configurações'
+    farmacia:      'CRM Farmacêutico & Balcão de Atendimento',
+    pacientes:     'Prontuário Longitudinal & Pacientes',
+    agenda:        'Agenda de Serviços Clínicos & Consultas',
+    relatorios:    'Declarações Farmacêuticas (DSF) & Relatórios',
+    dashboard:     'Métricas & Indicadores do Consultório',
+    configuracoes: 'Configurações & Gestão de Operadores'
   };
 
   // Atualiza classes ativas na barra lateral
@@ -2126,25 +1900,40 @@ function switchTab(tabName, isBack = false) {
   renderTabContent();
 }
 
+// --- CONTEÚDO DAS ABAS (ORQUESTRADOR MODULAR CRM CLÍNICO FARMACÊUTICO v3.0) ---
+async function renderTabContent() {
+  const contentArea = document.getElementById('main-content');
+  if (!contentArea) return;
+  
+  if (state.activeTab === 'farmacia') {
+    renderPharmacyTab();
+  } else if (state.activeTab === 'pacientes') {
+    renderPatientsTab(contentArea);
+  } else if (state.activeTab === 'agenda') {
+    renderAgendaTab();
+  } else if (state.activeTab === 'relatorios') {
+    renderReportsTab(contentArea);
+  } else if (state.activeTab === 'dashboard') {
+    await renderDashboardTab(contentArea);
+  } else if (state.activeTab === 'configuracoes') {
+    renderSettingsTab(contentArea);
+  } else {
+    state.activeTab = 'farmacia';
+    renderPharmacyTab();
+  }
+}
+
 function updateGlobalBackButton() {
   const backBtn = document.getElementById('global-back-btn');
   const backLabel = document.getElementById('global-back-label');
   if (!backBtn) return;
 
   const tabShortLabels = {
-    dashboard: 'CRM Clínico Farmacêutico',
+    farmacia: 'Balcão',
     pacientes: 'Pacientes',
-    medicos: 'Médicos',
-    consultorios: 'Consultórios',
-    farmacia: 'Farmácia',
-    tv_panel: 'Painel TV',
     agenda: 'Agenda',
-    atendimento: 'Atendimentos',
-    estagnacao: 'Alertas',
-    leitos: 'Leitos',
-    kanban: 'Kanban',
-    financeiro: 'Financeiro',
     relatorios: 'Relatórios',
+    dashboard: 'Métricas',
     configuracoes: 'Configurações'
   };
 
@@ -2165,48 +1954,6 @@ function goBack() {
       showToast(`⬅️ Voltando para a tela anterior...`);
     }
     switchTab(prevTab, true);
-  }
-}
-
-// --- CONTEÚDO DAS ABAS (ORQUESTRADOR MODULAR CRM CLÍNICO FARMACÊUTICO v2.7.2) ---
-async function renderTabContent() {
-  const contentArea = document.getElementById('main-content');
-  if (!contentArea) return;
-  
-  if (state.activeTab === 'dashboard') {
-    await renderDashboardTab(contentArea);
-  } else if (state.activeTab === 'pacientes') {
-    renderPatientsTab(contentArea);
-  } else if (state.activeTab === 'medicos') {
-    renderDoctorsTab();
-  } else if (state.activeTab === 'escalas') {
-    renderSchedulesTab();
-  } else if (state.activeTab === 'consultorios') {
-    renderConsultingRoomsTab();
-  } else if (state.activeTab === 'farmacia') {
-    renderPharmacyTab();
-  } else if (state.activeTab === 'tv_panel') {
-    renderTVPanelTab();
-  } else if (state.activeTab === 'agenda') {
-    renderAgendaTab();
-  } else if (state.activeTab === 'atendimento') {
-    renderAttendanceTab(contentArea);
-  } else if (state.activeTab === 'estagnacao') {
-    renderStagnationTab(contentArea);
-  } else if (state.activeTab === 'kanban') {
-    if (typeof window.renderKanbanTab === 'function') window.renderKanbanTab();
-  } else if (state.activeTab === 'leitos') {
-    renderLeitosTab();
-  } else if (state.activeTab === 'financeiro') {
-    renderReportsTab(contentArea);
-    setTimeout(() => {
-      const btnFin = document.getElementById('tab-btn-financial');
-      if (btnFin) btnFin.click();
-    }, 20);
-  } else if (state.activeTab === 'relatorios') {
-    renderReportsTab(contentArea);
-  } else if (state.activeTab === 'configuracoes') {
-    renderSettingsTab(contentArea);
   }
 }
 

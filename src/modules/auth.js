@@ -13,195 +13,121 @@ export const getRolePermissions = (user) => {
   const username = (user?.username || '').toLowerCase();
   const role = (user?.role || '').trim();
 
-  // Garantia: admin e perfil Master possuem acesso Master (inclui mazzarowysk)
+  // 1. Gestor Master Oficial (mazzarowysk / admin / Role Master)
   if (username === 'admin' || username === 'mazzarowysk' || role === 'Master') {
     return {
       role: 'Master',
-      label: '👑 Master (Acesso Total)',
+      label: '👑 Master Gestor (Acesso Total)',
       badgeColor: 'linear-gradient(135deg, #f59e0b, #d97706)',
-      allowedTabs: ['dashboard', 'pacientes', 'medicos', 'escalas', 'agenda', 'atendimento', 'consultorios', 'farmacia', 'tv_panel', 'estagnacao', 'leitos', 'kanban', 'financeiro', 'relatorios', 'configuracoes'],
+      allowedTabs: ['farmacia', 'pacientes', 'agenda', 'relatorios', 'dashboard', 'configuracoes'],
       canApproveUsers: true,
       canManageUsers: true,
       canDeleteRecords: true,
       canSignPEP: true,
       canDoTriage: true,
-      canManageBeds: true,
       canManagePharmacy: true,
-      canManageFinance: true,
-      canManageSchedules: true,
-      canEditProfessionals: true
+      canManageSchedules: true
     };
   }
 
-  // Função: Desenvolvedor (bcoltri, ffacco, etc)
+  // 2. Farmacêutico(a) Responsável Técnico (RT)
+  if (role === 'Farmacêutico RT' || role === 'Farmacêutica RT' || role === 'Responsável Técnico') {
+    return {
+      role: 'Farmacêutico RT',
+      label: '💊 Farmacêutico(a) RT',
+      badgeColor: 'linear-gradient(135deg, #0d9488, #0f766e)',
+      allowedTabs: ['farmacia', 'pacientes', 'agenda', 'relatorios', 'dashboard', 'configuracoes'],
+      canApproveUsers: true,
+      canManageUsers: true,
+      canDeleteRecords: false,
+      canSignPEP: true,
+      canDoTriage: true,
+      canManagePharmacy: true,
+      canManageSchedules: true
+    };
+  }
+
+  // 3. Farmacêutico(a) Clínico(a)
+  if (role === 'Farmacêutico' || role === 'Farmacêutica' || role === 'Farmacêutico Clínico') {
+    return {
+      role: 'Farmacêutico',
+      label: '🩺 Farmacêutico(a) Clínico(a)',
+      badgeColor: 'linear-gradient(135deg, #14b8a6, #0d9488)',
+      allowedTabs: ['farmacia', 'pacientes', 'agenda', 'relatorios', 'dashboard'],
+      canApproveUsers: false,
+      canManageUsers: false,
+      canDeleteRecords: false,
+      canSignPEP: true,
+      canDoTriage: true,
+      canManagePharmacy: true,
+      canManageSchedules: true
+    };
+  }
+
+  // 4. Atendente de Balcão / Triagem
+  if (role === 'Atendente' || role === 'Recepcionista' || role === 'Balcão') {
+    return {
+      role: 'Atendente',
+      label: '📋 Atendente de Balcão',
+      badgeColor: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+      allowedTabs: ['farmacia', 'pacientes', 'agenda'],
+      canApproveUsers: false,
+      canManageUsers: false,
+      canDeleteRecords: false,
+      canSignPEP: false,
+      canDoTriage: true,
+      canManagePharmacy: false,
+      canManageSchedules: true
+    };
+  }
+
+  // 5. Administrador do Sistema
+  if (role === 'Administrador' || role === 'Admin') {
+    return {
+      role: 'Administrador',
+      label: '🛠️ Administrador',
+      badgeColor: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+      allowedTabs: ['farmacia', 'pacientes', 'agenda', 'relatorios', 'dashboard', 'configuracoes'],
+      canApproveUsers: true,
+      canManageUsers: true,
+      canDeleteRecords: true,
+      canSignPEP: true,
+      canDoTriage: true,
+      canManagePharmacy: true,
+      canManageSchedules: true
+    };
+  }
+
+  // 6. Desenvolvedor
   if (username === 'bcoltri' || role === 'Desenvolvedor' || role === 'Dev') {
     return {
       role: 'Desenvolvedor',
       label: '💻 Desenvolvedor',
       badgeColor: 'linear-gradient(135deg, #a855f7, #7e22ce)',
-      allowedTabs: ['dashboard', 'pacientes', 'medicos', 'escalas', 'agenda', 'atendimento', 'consultorios', 'farmacia', 'tv_panel', 'estagnacao', 'leitos', 'kanban', 'financeiro', 'relatorios', 'configuracoes'],
-      canApproveUsers: false,
-      canManageUsers: false,
-      canDeleteRecords: false,
-      canSignPEP: true,
-      canDoTriage: true,
-      canManageBeds: true,
-      canManagePharmacy: true,
-      canManageFinance: true,
-      canManageSchedules: true,
-      canEditProfessionals: true
-    };
-  }
-
-  if (role === 'Administrador') {
-    return {
-      role: 'Administrador',
-      label: '🛠️ Administrador',
-      badgeColor: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-      allowedTabs: ['dashboard', 'pacientes', 'medicos', 'escalas', 'agenda', 'atendimento', 'consultorios', 'farmacia', 'tv_panel', 'estagnacao', 'leitos', 'kanban', 'financeiro', 'relatorios', 'configuracoes'],
+      allowedTabs: ['farmacia', 'pacientes', 'agenda', 'relatorios', 'dashboard', 'configuracoes'],
       canApproveUsers: true,
       canManageUsers: true,
       canDeleteRecords: true,
       canSignPEP: true,
       canDoTriage: true,
-      canManageBeds: true,
       canManagePharmacy: true,
-      canManageFinance: true,
-      canManageSchedules: true,
-      canEditProfessionals: true
+      canManageSchedules: true
     };
   }
 
-  if (role === 'Enfermeiro' || role === 'Enfermeira') {
-    return {
-      role: 'Enfermeiro',
-      label: '🩺 Enfermeiro(a)',
-      badgeColor: 'linear-gradient(135deg, #06b6d4, #0891b2)',
-      allowedTabs: ['dashboard', 'pacientes', 'escalas', 'atendimento', 'consultorios', 'farmacia', 'tv_panel', 'estagnacao', 'leitos', 'kanban'],
-      canApproveUsers: false,
-      canManageUsers: false,
-      canDeleteRecords: false,
-      canSignPEP: false,
-      canDoTriage: true,
-      canManageBeds: true,
-      canManagePharmacy: true,
-      canManageFinance: false,
-      canManageSchedules: true,
-      canEditProfessionals: false
-    };
-  }
-
-  if (role === 'Recepcionista') {
-    return {
-      role: 'Recepcionista',
-      label: '📋 Recepcionista',
-      badgeColor: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
-      allowedTabs: ['dashboard', 'pacientes', 'escalas', 'agenda', 'atendimento', 'consultorios', 'tv_panel'],
-      canApproveUsers: false,
-      canManageUsers: false,
-      canDeleteRecords: false,
-      canSignPEP: false,
-      canDoTriage: false,
-      canManageBeds: false,
-      canManagePharmacy: false,
-      canManageFinance: false,
-      canManageSchedules: false,
-      canEditProfessionals: false
-    };
-  }
-
-  if (role === 'Farmacêutico' || role === 'Farmacêutica') {
-    return {
-      role: 'Farmacêutico',
-      label: '💊 Farmacêutico(a)',
-      badgeColor: 'linear-gradient(135deg, #ec4899, #db2777)',
-      allowedTabs: ['dashboard', 'pacientes', 'farmacia', 'relatorios'],
-      canApproveUsers: false,
-      canManageUsers: false,
-      canDeleteRecords: false,
-      canSignPEP: false,
-      canDoTriage: false,
-      canManageBeds: false,
-      canManagePharmacy: true,
-      canManageFinance: false,
-      canManageSchedules: false,
-      canEditProfessionals: false
-    };
-  }
-
-  if (role === 'Biomédico' || role === 'Biomédica') {
-    return {
-      role: 'Biomédico',
-      label: '🧪 Biomédico(a)',
-      badgeColor: 'linear-gradient(135deg, #14b8a6, #0d9488)',
-      allowedTabs: ['dashboard', 'pacientes', 'atendimento', 'consultorios', 'relatorios'],
-      canApproveUsers: false,
-      canManageUsers: false,
-      canDeleteRecords: false,
-      canSignPEP: false,
-      canDoTriage: false,
-      canManageBeds: false,
-      canManagePharmacy: false,
-      canManageFinance: false,
-      canManageSchedules: false,
-      canEditProfessionals: false
-    };
-  }
-
-  if (role === 'Gestor Financeiro' || role === 'Faturamento') {
-    return {
-      role: 'Gestor Financeiro',
-      label: '📊 Gestor Financeiro',
-      badgeColor: 'linear-gradient(135deg, #3b82f6, #1d4ed8)',
-      allowedTabs: ['dashboard', 'pacientes', 'financeiro', 'relatorios'],
-      canApproveUsers: false,
-      canManageUsers: false,
-      canDeleteRecords: false,
-      canSignPEP: false,
-      canDoTriage: false,
-      canManageBeds: false,
-      canManagePharmacy: false,
-      canManageFinance: true,
-      canManageSchedules: false,
-      canEditProfessionals: false
-    };
-  }
-
-  if (role === 'Auxiliar de Enfermagem') {
-    return {
-      role: 'Auxiliar de Enfermagem',
-      label: '🏥 Aux. de Enfermagem',
-      badgeColor: 'linear-gradient(135deg, #64748b, #475569)',
-      allowedTabs: ['dashboard', 'pacientes', 'escalas', 'atendimento', 'consultorios', 'leitos', 'kanban'],
-      canApproveUsers: false,
-      canManageUsers: false,
-      canDeleteRecords: false,
-      canSignPEP: false,
-      canDoTriage: true,
-      canManageBeds: true,
-      canManagePharmacy: false,
-      canManageFinance: false,
-      canManageSchedules: false,
-      canEditProfessionals: false
-    };
-  }
-
-  // Padrão: Médico
+  // Padrão: Farmacêutico Clínico
   return {
-    role: 'Médico',
-    label: '🩺 Médico',
-    badgeColor: 'linear-gradient(135deg, #10b981, #059669)',
-    allowedTabs: ['dashboard', 'pacientes', 'medicos', 'escalas', 'agenda', 'atendimento', 'consultorios', 'farmacia', 'tv_panel', 'estagnacao', 'leitos', 'kanban', 'relatorios'],
+    role: 'Farmacêutico',
+    label: '💊 Farmacêutico(a)',
+    badgeColor: 'linear-gradient(135deg, #0d9488, #0f766e)',
+    allowedTabs: ['farmacia', 'pacientes', 'agenda', 'relatorios', 'dashboard'],
     canApproveUsers: false,
     canManageUsers: false,
     canDeleteRecords: false,
     canSignPEP: true,
     canDoTriage: true,
-    canManageBeds: true,
     canManagePharmacy: true,
-    canManageFinance: false,
-    canManageSchedules: true,
-    canEditProfessionals: false
+    canManageSchedules: true
   };
 };
 
