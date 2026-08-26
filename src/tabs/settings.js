@@ -22,13 +22,13 @@ export function renderSettingsTab(contentArea) {
     <div class="tab-section active" style="padding: 20px; max-width: 1300px; margin: 0 auto;">
       
       <!-- Cabeçalho da Aba Configurações -->
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 16px;">
         <div>
           <h2 style="font-family: 'Outfit', sans-serif; font-size: 1.45rem; font-weight: 700; color: #fff; margin: 0 0 4px; display: flex; align-items: center; gap: 10px;">
             <i class="fa-solid fa-sliders" style="color: #14b8a6;"></i> Configurações &amp; Gestão do CRM Farmacêutico
           </h2>
           <p style="font-size: 0.85rem; color: #94a3b8; margin: 0;">
-            Gerenciamento de operadores, credenciais do Turso Cloud, dados da farmácia (CFF 585/586) e backups.
+            Gerenciamento integrado de operadores, aprovações, cluster Turso Cloud, dados de RT e redundância.
           </p>
         </div>
 
@@ -39,239 +39,382 @@ export function renderSettingsTab(contentArea) {
         </div>
       </div>
 
-      <!-- Navegação Interna por Sub-seções de Configuração -->
-      <div class="pharmacy-subnav" style="margin-bottom: 22px; display: flex; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px; overflow-x: auto;">
-        <button class="pharmacy-nav-btn active" data-cfg-pane="users" style="padding: 9px 18px; border-radius: 10px; font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; cursor: pointer;">
-          <i class="fa-solid fa-users-gear" style="color: #14b8a6;"></i> Gestão de Usuários
-        </button>
-        <button class="pharmacy-nav-btn" data-cfg-pane="turso" style="padding: 9px 18px; border-radius: 10px; font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; cursor: pointer;">
-          <i class="fa-solid fa-cloud" style="color: #38bdf8;"></i> Banco Turso Cloud
-        </button>
-        <button class="pharmacy-nav-btn" data-cfg-pane="establishment" style="padding: 9px 18px; border-radius: 10px; font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; cursor: pointer;">
-          <i class="fa-solid fa-store" style="color: #fbbf24;"></i> Dados da Farmácia / RT (CFF)
-        </button>
-        <button class="pharmacy-nav-btn" data-cfg-pane="backup" style="padding: 9px 18px; border-radius: 10px; font-weight: 600; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; cursor: pointer;">
-          <i class="fa-solid fa-box-archive" style="color: #a78bfa;"></i> Backup &amp; Restauração
-        </button>
+      <!-- Barra de Controle dos Agrupamentos em Acordeão -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; background: rgba(15, 23, 42, 0.65); border: 1px solid rgba(255,255,255,0.08); padding: 12px 18px; border-radius: 14px; backdrop-filter: blur(12px);">
+        <div style="display: flex; align-items: center; gap: 10px; color: #94a3b8; font-size: 0.84rem;">
+          <i class="fa-solid fa-layer-group" style="color: #14b8a6; font-size: 1rem;"></i>
+          <span>Módulos de Configuração &bull; <strong>4 Agrupamentos Estruturados</strong></span>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button id="btn-cfg-expand-all" class="btn" style="background: rgba(20, 184, 166, 0.15); border: 1px solid rgba(20, 184, 166, 0.35); color: #2dd4bf; font-size: 0.78rem; font-weight: 700; padding: 7px 14px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
+            <i class="fa-solid fa-angles-down"></i> Expandir Todos
+          </button>
+          <button id="btn-cfg-collapse-all" class="btn" style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.12); color: #94a3b8; font-size: 0.78rem; font-weight: 700; padding: 7px 14px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
+            <i class="fa-solid fa-angles-up"></i> Recolher Todos
+          </button>
+        </div>
       </div>
 
-      <!-- PAINEL 1: GESTÃO DE USUÁRIOS -->
-      <div id="cfg-pane-users" class="cfg-pane active">
-        <!-- Cards de Métricas de Usuários -->
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 20px;">
-          <div class="pharmacy-kpi-card" style="background: rgba(30, 41, 59, 0.45); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 16px;">
-            <div style="font-size: 0.76rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Total de Operadores</div>
-            <div id="kpi-users-total" style="font-size: 1.6rem; font-weight: 800; color: #fff; margin-top: 4px;">--</div>
-            <small style="color: #14b8a6; font-size: 0.72rem;"><i class="fa-solid fa-circle-check"></i> Cadastrados no CRM</small>
-          </div>
-          <div class="pharmacy-kpi-card" style="background: rgba(30, 41, 59, 0.45); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 16px;">
-            <div style="font-size: 0.76rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Farmacêuticos(as)</div>
-            <div id="kpi-users-pharm" style="font-size: 1.6rem; font-weight: 800; color: #2dd4bf; margin-top: 4px;">--</div>
-            <small style="color: #2dd4bf; font-size: 0.72rem;"><i class="fa-solid fa-prescription-bottle-medical"></i> Habilitados Prescrição MIPs</small>
-          </div>
-          <div class="pharmacy-kpi-card" style="background: rgba(30, 41, 59, 0.45); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 16px;">
-            <div style="font-size: 0.76rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Gestores &amp; Master</div>
-            <div id="kpi-users-master" style="font-size: 1.6rem; font-weight: 800; color: #fbbf24; margin-top: 4px;">--</div>
-            <small style="color: #fbbf24; font-size: 0.72rem;"><i class="fa-solid fa-crown"></i> Acesso Irrestrito / RT</small>
-          </div>
-          <div class="pharmacy-kpi-card" style="background: rgba(30, 41, 59, 0.45); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 16px;">
-            <div style="font-size: 0.76rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Status do Usuário Atual</div>
-            <div style="font-size: 1rem; font-weight: 700; color: #fff; margin-top: 6px; display: flex; align-items: center; gap: 6px;">
-              <span style="padding: 2px 10px; border-radius: 20px; font-size: 0.75rem; background: ${perms.badgeColor};">${perms.role}</span>
+      <!-- CONTAINER DOS AGRUPAMENTOS EXPANSÍVEIS E RETRÁTEIS -->
+      <div class="cfg-accordion-container" style="display: flex; flex-direction: column; gap: 18px;">
+
+        <!-- ==================================================================== -->
+        <!-- AGRUPAMENTO 1: GESTÃO DE OPERADORES & USUÁRIOS                       -->
+        <!-- ==================================================================== -->
+        <div class="cfg-accordion-card open" id="accordion-group-users" style="background: rgba(15, 23, 42, 0.75); border: 1.5px solid rgba(20, 184, 166, 0.35); border-radius: 18px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.35); transition: all 0.3s ease;">
+          <!-- Header Clicável com Ícone Ilustrativo -->
+          <div class="cfg-accordion-header" data-target="body-users" style="padding: 16px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(90deg, rgba(20, 184, 166, 0.15), rgba(15, 23, 42, 0.6)); border-bottom: 1px solid rgba(20, 184, 166, 0.25); user-select: none;">
+            <div style="display: flex; align-items: center; gap: 16px;">
+              <div style="width: 46px; height: 46px; border-radius: 14px; background: linear-gradient(135deg, rgba(20, 184, 166, 0.25), rgba(13, 148, 136, 0.45)); border: 1.5px solid rgba(45, 212, 191, 0.6); display: flex; align-items: center; justify-content: center; color: #2dd4bf; font-size: 1.3rem; box-shadow: 0 0 18px rgba(20, 184, 166, 0.25);">
+                <i class="fa-solid fa-users-gear"></i>
+              </div>
+              <div>
+                <div style="font-family: 'Outfit', sans-serif; font-size: 1.12rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                  Gestão de Usuários &amp; Operadores Farmacêuticos
+                  <span id="badge-users-status" style="font-size: 0.72rem; background: rgba(20, 184, 166, 0.2); color: #2dd4bf; border: 1px solid rgba(20, 184, 166, 0.4); padding: 2px 9px; border-radius: 12px; font-weight: 700;">
+                    Controle de Acesso RBAC
+                  </span>
+                </div>
+                <p style="margin: 3px 0 0; font-size: 0.82rem; color: #94a3b8;">
+                  Aprovação Master de acessos, atribuição de cargos (Master, RT, Clínico), senhas e auditoria de operadores.
+                </p>
+              </div>
             </div>
-            <small style="color: #94a3b8; font-size: 0.72rem;">@${currentUser.username || 'usuario'}</small>
+
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div class="cfg-chevron-btn" style="width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; color: #2dd4bf; transition: transform 0.3s ease;">
+                <i class="fa-solid fa-chevron-down cfg-chevron-icon"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Corpo Expansível -->
+          <div id="body-users" class="cfg-accordion-body" style="padding: 20px; display: block;">
+            <!-- Cards de Métricas de Usuários -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 20px;">
+              <div class="pharmacy-kpi-card" style="background: rgba(30, 41, 59, 0.45); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 16px;">
+                <div style="font-size: 0.76rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Total de Operadores</div>
+                <div id="kpi-users-total" style="font-size: 1.6rem; font-weight: 800; color: #fff; margin-top: 4px;">--</div>
+                <small style="color: #14b8a6; font-size: 0.72rem;"><i class="fa-solid fa-circle-check"></i> Cadastrados no CRM</small>
+              </div>
+              <div class="pharmacy-kpi-card" style="background: rgba(30, 41, 59, 0.45); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 16px;">
+                <div style="font-size: 0.76rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Farmacêuticos(as)</div>
+                <div id="kpi-users-pharm" style="font-size: 1.6rem; font-weight: 800; color: #2dd4bf; margin-top: 4px;">--</div>
+                <small style="color: #2dd4bf; font-size: 0.72rem;"><i class="fa-solid fa-prescription-bottle-medical"></i> Habilitados Prescrição MIPs</small>
+              </div>
+              <div class="pharmacy-kpi-card" style="background: rgba(30, 41, 59, 0.45); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 16px;">
+                <div style="font-size: 0.76rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Gestores &amp; Master</div>
+                <div id="kpi-users-master" style="font-size: 1.6rem; font-weight: 800; color: #fbbf24; margin-top: 4px;">--</div>
+                <small style="color: #fbbf24; font-size: 0.72rem;"><i class="fa-solid fa-crown"></i> Acesso Irrestrito / RT</small>
+              </div>
+              <div class="pharmacy-kpi-card" style="background: rgba(30, 41, 59, 0.45); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 14px; padding: 16px;">
+                <div style="font-size: 0.76rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Status do Usuário Atual</div>
+                <div style="font-size: 1rem; font-weight: 700; color: #fff; margin-top: 6px; display: flex; align-items: center; gap: 6px;">
+                  <span style="padding: 2px 10px; border-radius: 20px; font-size: 0.75rem; background: ${perms.badgeColor};">${perms.role}</span>
+                </div>
+                <small style="color: #94a3b8; font-size: 0.72rem;">@${currentUser.username || 'usuario'}</small>
+              </div>
+            </div>
+
+            <!-- PAINEL DE APROVAÇÃO DE ACESSOS PENDENTES (MASTER) -->
+            <div id="cfg-pending-approvals-area"></div>
+
+            <!-- Barra de Ações & Busca de Usuários -->
+            <div style="background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 18px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;">
+                <div style="position: relative; flex: 1; min-width: 260px;">
+                  <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #64748b; font-size: 0.9rem;"></i>
+                  <input type="text" id="cfg-user-search" class="form-input" placeholder="Buscar operador por nome, @login ou função..." style="width: 100%; padding-left: 40px; background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; font-size: 0.88rem;">
+                </div>
+
+                <div style="display: flex; gap: 10px; align-items: center;">
+                  ${isMaster ? `
+                    <button id="btn-open-new-user-form" class="btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; padding: 9px 18px; border-radius: 10px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);">
+                      <i class="fa-solid fa-user-plus"></i> Novo Operador Farmacêutico
+                    </button>
+                  ` : `
+                    <span style="font-size: 0.78rem; color: #94a3b8; background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: 8px;">
+                      <i class="fa-solid fa-lock"></i> Somente Master pode criar/editar operadores
+                    </span>
+                  `}
+                </div>
+              </div>
+
+              <!-- Tabela de Usuários -->
+              <div id="cfg-users-table-container">
+                <div style="text-align: center; padding: 30px; color: #94a3b8;">
+                  <i class="fa-solid fa-spinner fa-spin" style="font-size: 1.5rem; color: #14b8a6; margin-bottom: 8px;"></i>
+                  <p>Carregando operadores do CRM...</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- PAINEL DE APROVAÇÃO DE ACESSOS PENDENTES (MASTER) -->
-        <div id="cfg-pending-approvals-area"></div>
-
-        <!-- Barra de Ações & Busca de Usuários -->
-        <div style="background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 18px; margin-bottom: 20px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;">
-            <div style="position: relative; flex: 1; min-width: 260px;">
-              <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #64748b; font-size: 0.9rem;"></i>
-              <input type="text" id="cfg-user-search" class="form-input" placeholder="Buscar operador por nome, @login ou função..." style="width: 100%; padding-left: 40px; background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; font-size: 0.88rem;">
+        <!-- ==================================================================== -->
+        <!-- AGRUPAMENTO 2: BANCO TURSO CLOUD                                     -->
+        <!-- ==================================================================== -->
+        <div class="cfg-accordion-card open" id="accordion-group-turso" style="background: rgba(15, 23, 42, 0.75); border: 1.5px solid rgba(56, 189, 248, 0.35); border-radius: 18px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.35); transition: all 0.3s ease;">
+          <div class="cfg-accordion-header" data-target="body-turso" style="padding: 16px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(90deg, rgba(56, 189, 248, 0.15), rgba(15, 23, 42, 0.6)); border-bottom: 1px solid rgba(56, 189, 248, 0.25); user-select: none;">
+            <div style="display: flex; align-items: center; gap: 16px;">
+              <div style="width: 46px; height: 46px; border-radius: 14px; background: linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(2, 132, 199, 0.45)); border: 1.5px solid rgba(56, 189, 248, 0.6); display: flex; align-items: center; justify-content: center; color: #38bdf8; font-size: 1.3rem; box-shadow: 0 0 18px rgba(56, 189, 248, 0.25);">
+                <i class="fa-solid fa-cloud-bolt"></i>
+              </div>
+              <div>
+                <div style="font-family: 'Outfit', sans-serif; font-size: 1.12rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                  Banco de Dados Turso Cloud (LibSQL Distribuído)
+                  <span style="font-size: 0.72rem; background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); padding: 2px 9px; border-radius: 12px; font-weight: 700;">
+                    AWS Edge Cluster
+                  </span>
+                </div>
+                <p style="margin: 3px 0 0; font-size: 0.82rem; color: #94a3b8;">
+                  Sincronização em tempo real na nuvem, replicação de borda e alta disponibilidade com redundância offline.
+                </p>
+              </div>
             </div>
 
-            <div style="display: flex; gap: 10px; align-items: center;">
-              ${isMaster ? `
-                <button id="btn-open-new-user-form" class="btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; padding: 9px 18px; border-radius: 10px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);">
-                  <i class="fa-solid fa-user-plus"></i> Novo Operador Farmacêutico
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div class="cfg-chevron-btn" style="width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; color: #38bdf8; transition: transform 0.3s ease;">
+                <i class="fa-solid fa-chevron-down cfg-chevron-icon"></i>
+              </div>
+            </div>
+          </div>
+
+          <div id="body-turso" class="cfg-accordion-body" style="padding: 20px; display: block;">
+            <div style="background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 20px;">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 20px;">
+                <div style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 12px; padding: 16px;">
+                  <div style="font-size: 0.76rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Status do Cluster Cloud</div>
+                  <div id="turso-settings-status-badge" style="margin-top: 6px; font-weight: 700; font-size: 0.92rem; color: #34d399; display: flex; align-items: center; gap: 8px;">
+                    <span class="status-indicator success"></span> Conectado (AWS US-East-1)
+                  </div>
+                </div>
+                <div style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 12px; padding: 16px;">
+                  <div style="font-size: 0.76rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Última Sincronização</div>
+                  <div id="turso-last-sync-time" style="margin-top: 6px; font-weight: 700; font-size: 0.92rem; color: #38bdf8;">
+                    --
+                  </div>
+                </div>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px;">
+                <div class="form-group">
+                  <label class="form-label" for="turso-cfg-url" style="color: #cbd5e1; font-weight: 600; font-size: 0.85rem;">URL do Banco Turso (LibSQL):</label>
+                  <input type="text" id="turso-cfg-url" class="form-input" style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; font-family: monospace; font-size: 0.85rem;" value="libsql://crm-clinico-farmaceutico-mazzarowysk.aws-us-east-1.turso.io" placeholder="libsql://...">
+                </div>
+                <div class="form-group">
+                  <label class="form-label" for="turso-cfg-token" style="color: #cbd5e1; font-weight: 600; font-size: 0.85rem;">Token de Autenticação JWT (Turso):</label>
+                  <input type="password" id="turso-cfg-token" class="form-input" style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; font-family: monospace; font-size: 0.85rem;" placeholder="Deixe em branco para manter o token atual">
+                </div>
+              </div>
+
+              <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button id="btn-save-turso-cfg" class="btn btn-primary" style="background: linear-gradient(135deg, #0d9488, #0f766e); border: none; padding: 10px 20px; font-weight: 700; font-size: 0.85rem; cursor: pointer;">
+                  <i class="fa-solid fa-floppy-disk"></i> Salvar Configuração
                 </button>
-              ` : `
-                <span style="font-size: 0.78rem; color: #94a3b8; background: rgba(255,255,255,0.05); padding: 6px 12px; border-radius: 8px;">
-                  <i class="fa-solid fa-lock"></i> Somente Master pode criar/editar operadores
-                </span>
-              `}
-            </div>
-          </div>
-
-          <!-- Tabela de Usuários -->
-          <div id="cfg-users-table-container">
-            <div style="text-align: center; padding: 30px; color: #94a3b8;">
-              <i class="fa-solid fa-spinner fa-spin" style="font-size: 1.5rem; color: #14b8a6; margin-bottom: 8px;"></i>
-              <p>Carregando operadores do CRM...</p>
+                <button id="btn-test-turso-cfg" class="btn" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; padding: 10px 18px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">
+                  <i class="fa-solid fa-arrows-rotate"></i> Testar Conexão
+                </button>
+                <button id="btn-sync-turso-now" class="btn" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; padding: 10px 18px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">
+                  <i class="fa-solid fa-cloud-arrow-up"></i> Forçar Sincronização Agora
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <!-- PAINEL 2: TURSO CLOUD -->
-      <div id="cfg-pane-turso" class="cfg-pane" style="display: none;">
-        <div style="background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 24px;">
-          <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.15rem; font-weight: 700; color: #fff; margin: 0 0 8px; display: flex; align-items: center; gap: 8px;">
-            <i class="fa-solid fa-database" style="color: #38bdf8;"></i> Conexão com o Banco de Dados Turso Cloud (LibSQL)
-          </h3>
-          <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 20px; line-height: 1.5;">
-            O CRM Clínico Farmacêutico sincroniza automaticamente todos os pacientes, triagens e decisões clínicas com o cluster de borda distribuído na nuvem.
-          </p>
-
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 22px;">
-            <div style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 12px; padding: 16px;">
-              <div style="font-size: 0.76rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Status do Cluster Cloud</div>
-              <div id="turso-settings-status-badge" style="margin-top: 6px; font-weight: 700; font-size: 0.92rem; color: #34d399; display: flex; align-items: center; gap: 8px;">
-                <span class="status-indicator success"></span> Conectado (AWS US-East-1)
+        <!-- ==================================================================== -->
+        <!-- AGRUPAMENTO 3: DADOS DA FARMÁCIA & RT (CFF 585/586)                  -->
+        <!-- ==================================================================== -->
+        <div class="cfg-accordion-card open" id="accordion-group-establishment" style="background: rgba(15, 23, 42, 0.75); border: 1.5px solid rgba(245, 158, 11, 0.35); border-radius: 18px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.35); transition: all 0.3s ease;">
+          <div class="cfg-accordion-header" data-target="body-establishment" style="padding: 16px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(90deg, rgba(245, 158, 11, 0.15), rgba(15, 23, 42, 0.6)); border-bottom: 1px solid rgba(245, 158, 11, 0.25); user-select: none;">
+            <div style="display: flex; align-items: center; gap: 16px;">
+              <div style="width: 46px; height: 46px; border-radius: 14px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(217, 119, 6, 0.45)); border: 1.5px solid rgba(245, 158, 11, 0.6); display: flex; align-items: center; justify-content: center; color: #fbbf24; font-size: 1.3rem; box-shadow: 0 0 18px rgba(245, 158, 11, 0.25);">
+                <i class="fa-solid fa-id-card-clip"></i>
               </div>
-            </div>
-            <div style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 12px; padding: 16px;">
-              <div style="font-size: 0.76rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Última Sincronização</div>
-              <div id="turso-last-sync-time" style="margin-top: 6px; font-weight: 700; font-size: 0.92rem; color: #38bdf8;">
-                --
-              </div>
-            </div>
-          </div>
-
-          <div style="display: flex; flex-direction: column; gap: 14px; margin-bottom: 20px;">
-            <div class="form-group">
-              <label class="form-label" for="turso-cfg-url" style="color: #cbd5e1; font-weight: 600; font-size: 0.85rem;">URL do Banco Turso (LibSQL):</label>
-              <input type="text" id="turso-cfg-url" class="form-input" style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; font-family: monospace; font-size: 0.85rem;" value="libsql://crm-clinico-farmaceutico-mazzarowysk.aws-us-east-1.turso.io" placeholder="libsql://...">
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="turso-cfg-token" style="color: #cbd5e1; font-weight: 600; font-size: 0.85rem;">Token de Autenticação JWT (Turso):</label>
-              <input type="password" id="turso-cfg-token" class="form-input" style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255, 255, 255, 0.1); color: #fff; font-family: monospace; font-size: 0.85rem;" placeholder="Deixe em branco para manter o token atual">
-            </div>
-          </div>
-
-          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <button id="btn-save-turso-cfg" class="btn btn-primary" style="background: linear-gradient(135deg, #0d9488, #0f766e); border: none; padding: 10px 20px; font-weight: 700; font-size: 0.85rem;">
-              <i class="fa-solid fa-floppy-disk"></i> Salvar Configuração
-            </button>
-            <button id="btn-test-turso-cfg" class="btn" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; padding: 10px 18px; font-weight: 600; font-size: 0.85rem;">
-              <i class="fa-solid fa-arrows-rotate"></i> Testar Conexão
-            </button>
-            <button id="btn-sync-turso-now" class="btn" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; padding: 10px 18px; font-weight: 600; font-size: 0.85rem;">
-              <i class="fa-solid fa-cloud-arrow-up"></i> Forçar Sincronização Agora
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- PAINEL 3: DADOS DA FARMÁCIA & RT (CFF 585/586) -->
-      <div id="cfg-pane-establishment" class="cfg-pane" style="display: none;">
-        <div style="background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 24px;">
-          <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.15rem; font-weight: 700; color: #fff; margin: 0 0 8px; display: flex; align-items: center; gap: 8px;">
-            <i class="fa-solid fa-id-card-clip" style="color: #fbbf24;"></i> Dados do Estabelecimento &amp; Farmacêutico RT (CFF 585/586)
-          </h3>
-          <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 20px;">
-            Estas informações serão impressas automaticamente no cabeçalho das Declarações de Serviços Farmacêuticos (DSF) e guias de encaminhamento.
-          </p>
-
-          <form id="pharmacy-details-form" style="display: flex; flex-direction: column; gap: 16px;">
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-              <div class="form-group">
-                <label class="form-label" for="pharm-name">* Razão Social / Nome da Drogaria:</label>
-                <input type="text" id="pharm-name" class="form-input" required value="Farmácia Clínica &amp; Consultório Especializado" placeholder="Ex: Drogaria Santa Fé Ltda">
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="pharm-cnpj">* CNPJ:</label>
-                <input type="text" id="pharm-cnpj" class="form-input" value="12.345.678/0001-90" placeholder="00.000.000/0000-00">
-              </div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-              <div class="form-group">
-                <label class="form-label" for="pharm-rt-name">* Farmacêutico(a) Responsável Técnico:</label>
-                <input type="text" id="pharm-rt-name" class="form-input" required value="Dr(a). Farmacêutico(a) Clínico(a)" placeholder="Nome completo do RT">
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="pharm-rt-crf">* Registro Profissional (CRF e UF):</label>
-                <input type="text" id="pharm-rt-crf" class="form-input" required value="CRF-SP 54180" placeholder="Ex: CRF-SP 12345">
-              </div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
-              <div class="form-group">
-                <label class="form-label" for="pharm-phone">Telefone / WhatsApp Comercial:</label>
-                <input type="text" id="pharm-phone" class="form-input" value="(11) 98765-4321" placeholder="(00) 00000-0000">
-              </div>
-              <div class="form-group">
-                <label class="form-label" for="pharm-address">Endereço Completo:</label>
-                <input type="text" id="pharm-address" class="form-input" value="Av. Paulista, 1000 - São Paulo/SP" placeholder="Rua, Número, Bairro, Cidade/UF">
-              </div>
-            </div>
-
-            <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
-              <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #0d9488, #0f766e); border: none; padding: 10px 22px; font-weight: 700; font-size: 0.88rem;">
-                <i class="fa-solid fa-floppy-disk"></i> Salvar Dados do Estabelecimento
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      <!-- PAINEL 4: BACKUP & RESTAURAÇÃO -->
-      <div id="cfg-pane-backup" class="cfg-pane" style="display: none;">
-        <div style="background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 24px;">
-          <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.15rem; font-weight: 700; color: #fff; margin: 0 0 8px; display: flex; align-items: center; gap: 8px;">
-            <i class="fa-solid fa-box-archive" style="color: #a78bfa;"></i> Backup, Exportação &amp; Redundância de Dados
-          </h3>
-          <p style="font-size: 0.85rem; color: #94a3b8; margin-bottom: 20px;">
-            Exporte o banco de dados completo do CRM Farmacêutico em formato JSON seguro para contingência offline.
-          </p>
-
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
-            <div style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between;">
               <div>
-                <h4 style="font-family: 'Outfit', sans-serif; font-size: 0.95rem; font-weight: 700; color: #38bdf8; margin: 0 0 6px;">
-                  <i class="fa-solid fa-download"></i> Exportar Base Completa
-                </h4>
-                <p style="font-size: 0.78rem; color: #94a3b8; margin: 0 0 14px;">Gera arquivo .JSON com todos os pacientes, medicamentos e atendimentos.</p>
+                <div style="font-family: 'Outfit', sans-serif; font-size: 1.12rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                  Dados do Estabelecimento &amp; Farmacêutico(a) RT (CFF)
+                  <span style="font-size: 0.72rem; background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); padding: 2px 9px; border-radius: 12px; font-weight: 700;">
+                    Resoluções 585 / 586 CFF
+                  </span>
+                </div>
+                <p style="margin: 3px 0 0; font-size: 0.82rem; color: #94a3b8;">
+                  Razão Social, CNPJ, Farmacêutico Responsável Técnico e registro CRF para emissão de Declarações (DSF).
+                </p>
               </div>
-              <button id="btn-export-json-crm" class="btn" style="background: rgba(2, 132, 199, 0.2); border: 1px solid rgba(2, 132, 199, 0.4); color: #38bdf8; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 0.82rem; cursor: pointer;">
-                <i class="fa-solid fa-file-export"></i> Baixar Arquivo JSON
-              </button>
             </div>
 
-            <div style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between;">
-              <div>
-                <h4 style="font-family: 'Outfit', sans-serif; font-size: 0.95rem; font-weight: 700; color: #fbbf24; margin: 0 0 6px;">
-                  <i class="fa-solid fa-upload"></i> Restaurar de Backup
-                </h4>
-                <p style="font-size: 0.78rem; color: #94a3b8; margin: 0 0 14px;">Restaura os dados salvos previamente de um arquivo .JSON.</p>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div class="cfg-chevron-btn" style="width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; color: #fbbf24; transition: transform 0.3s ease;">
+                <i class="fa-solid fa-chevron-down cfg-chevron-icon"></i>
               </div>
-              <input type="file" id="import-json-file-crm" accept=".json" style="display: none;" />
-              <button id="btn-import-json-crm" class="btn" style="background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.4); color: #fbbf24; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 0.82rem; cursor: pointer;">
-                <i class="fa-solid fa-file-import"></i> Selecionar Arquivo JSON
-              </button>
+            </div>
+          </div>
+
+          <div id="body-establishment" class="cfg-accordion-body" style="padding: 20px; display: block;">
+            <div style="background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 20px;">
+              <form id="pharmacy-details-form" style="display: flex; flex-direction: column; gap: 16px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+                  <div class="form-group">
+                    <label class="form-label" for="pharm-name">* Razão Social / Nome da Drogaria:</label>
+                    <input type="text" id="pharm-name" class="form-input" required value="Farmácia Clínica &amp; Consultório Especializado" placeholder="Ex: Drogaria Santa Fé Ltda">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="pharm-cnpj">* CNPJ:</label>
+                    <input type="text" id="pharm-cnpj" class="form-input" value="12.345.678/0001-90" placeholder="00.000.000/0000-00">
+                  </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+                  <div class="form-group">
+                    <label class="form-label" for="pharm-rt-name">* Farmacêutico(a) Responsável Técnico:</label>
+                    <input type="text" id="pharm-rt-name" class="form-input" required value="Dr(a). Farmacêutico(a) Clínico(a)" placeholder="Nome completo do RT">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="pharm-rt-crf">* Registro Profissional (CRF e UF):</label>
+                    <input type="text" id="pharm-rt-crf" class="form-input" required value="CRF-SP 54180" placeholder="Ex: CRF-SP 12345">
+                  </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+                  <div class="form-group">
+                    <label class="form-label" for="pharm-phone">Telefone / WhatsApp Comercial:</label>
+                    <input type="text" id="pharm-phone" class="form-input" value="(11) 98765-4321" placeholder="(00) 00000-0000">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="pharm-address">Endereço Completo:</label>
+                    <input type="text" id="pharm-address" class="form-input" value="Av. Paulista, 1000 - São Paulo/SP" placeholder="Rua, Número, Bairro, Cidade/UF">
+                  </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
+                  <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #0d9488, #0f766e); border: none; padding: 10px 22px; font-weight: 700; font-size: 0.88rem; cursor: pointer;">
+                    <i class="fa-solid fa-floppy-disk"></i> Salvar Dados do Estabelecimento
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>
+
+        <!-- ==================================================================== -->
+        <!-- AGRUPAMENTO 4: BACKUP & RESTAURAÇÃO                                  -->
+        <!-- ==================================================================== -->
+        <div class="cfg-accordion-card open" id="accordion-group-backup" style="background: rgba(15, 23, 42, 0.75); border: 1.5px solid rgba(168, 85, 247, 0.35); border-radius: 18px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.35); transition: all 0.3s ease;">
+          <div class="cfg-accordion-header" data-target="body-backup" style="padding: 16px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(90deg, rgba(168, 85, 247, 0.15), rgba(15, 23, 42, 0.6)); border-bottom: 1px solid rgba(168, 85, 247, 0.25); user-select: none;">
+            <div style="display: flex; align-items: center; gap: 16px;">
+              <div style="width: 46px; height: 46px; border-radius: 14px; background: linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(126, 34, 206, 0.45)); border: 1.5px solid rgba(168, 85, 247, 0.6); display: flex; align-items: center; justify-content: center; color: #c084fc; font-size: 1.3rem; box-shadow: 0 0 18px rgba(168, 85, 247, 0.25);">
+                <i class="fa-solid fa-box-archive"></i>
+              </div>
+              <div>
+                <div style="font-family: 'Outfit', sans-serif; font-size: 1.12rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                  Backup, Exportação &amp; Contingência Offline
+                  <span style="font-size: 0.72rem; background: rgba(168, 85, 247, 0.2); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.4); padding: 2px 9px; border-radius: 12px; font-weight: 700;">
+                    Snapshot JSON Criptografado
+                  </span>
+                </div>
+                <p style="margin: 3px 0 0; font-size: 0.82rem; color: #94a3b8;">
+                  Download de segurança da base completa do CRM e restauração instantânea em caso de manutenção ou contingência.
+                </p>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div class="cfg-chevron-btn" style="width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; color: #c084fc; transition: transform 0.3s ease;">
+                <i class="fa-solid fa-chevron-down cfg-chevron-icon"></i>
+              </div>
+            </div>
+          </div>
+
+          <div id="body-backup" class="cfg-accordion-body" style="padding: 20px; display: block;">
+            <div style="background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 20px;">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
+                <div style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div>
+                    <h4 style="font-family: 'Outfit', sans-serif; font-size: 0.95rem; font-weight: 700; color: #38bdf8; margin: 0 0 6px;">
+                      <i class="fa-solid fa-download"></i> Exportar Base Completa
+                    </h4>
+                    <p style="font-size: 0.78rem; color: #94a3b8; margin: 0 0 14px;">Gera arquivo .JSON com todos os pacientes, medicamentos e atendimentos.</p>
+                  </div>
+                  <button id="btn-export-json-crm" class="btn" style="background: rgba(2, 132, 199, 0.2); border: 1px solid rgba(2, 132, 199, 0.4); color: #38bdf8; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 0.82rem; cursor: pointer;">
+                    <i class="fa-solid fa-file-export"></i> Baixar Arquivo JSON
+                  </button>
+                </div>
+
+                <div style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div>
+                    <h4 style="font-family: 'Outfit', sans-serif; font-size: 0.95rem; font-weight: 700; color: #fbbf24; margin: 0 0 6px;">
+                      <i class="fa-solid fa-upload"></i> Restaurar de Backup
+                    </h4>
+                    <p style="font-size: 0.78rem; color: #94a3b8; margin: 0 0 14px;">Restaura os dados salvos previamente de um arquivo .JSON.</p>
+                  </div>
+                  <input type="file" id="import-json-file-crm" accept=".json" style="display: none;" />
+                  <button id="btn-import-json-crm" class="btn" style="background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.4); color: #fbbf24; padding: 8px 16px; border-radius: 8px; font-weight: 600; font-size: 0.82rem; cursor: pointer;">
+                    <i class="fa-solid fa-file-import"></i> Selecionar Arquivo JSON
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
     </div>
   `;
 
-  // --- LÓGICA DE SUB-ABAS ---
-  contentArea.querySelectorAll('.pharmacy-nav-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      contentArea.querySelectorAll('.pharmacy-nav-btn').forEach(b => b.classList.remove('active'));
-      contentArea.querySelectorAll('.cfg-pane').forEach(p => p.style.display = 'none');
-      btn.classList.add('active');
-      const targetPane = btn.getAttribute('data-cfg-pane');
-      const paneEl = document.getElementById(`cfg-pane-${targetPane}`);
-      if (paneEl) paneEl.style.display = 'block';
+  // --- LÓGICA DE EXPANSÃO / RETRAÇÃO DOS AGRUPAMENTOS EM ACORDEÃO ---
+  contentArea.querySelectorAll('.cfg-accordion-header').forEach(header => {
+    header.addEventListener('click', () => {
+      const card = header.closest('.cfg-accordion-card');
+      const targetBodyId = header.getAttribute('data-target');
+      const body = document.getElementById(targetBodyId);
+      const chevron = header.querySelector('.cfg-chevron-btn');
+
+      if (body) {
+        const isCurrentlyOpen = body.style.display !== 'none';
+        if (isCurrentlyOpen) {
+          body.style.display = 'none';
+          header.style.borderBottom = 'none';
+          card.classList.remove('open');
+          if (chevron) chevron.style.transform = 'rotate(-90deg)';
+        } else {
+          body.style.display = 'block';
+          header.style.borderBottom = '1px solid rgba(255,255,255,0.15)';
+          card.classList.add('open');
+          if (chevron) chevron.style.transform = 'rotate(0deg)';
+        }
+      }
     });
+  });
+
+  // Expandir Todos os Agrupamentos
+  document.getElementById('btn-cfg-expand-all')?.addEventListener('click', () => {
+    contentArea.querySelectorAll('.cfg-accordion-card').forEach(card => {
+      const body = card.querySelector('.cfg-accordion-body');
+      const header = card.querySelector('.cfg-accordion-header');
+      const chevron = card.querySelector('.cfg-chevron-btn');
+      if (body) body.style.display = 'block';
+      if (header) header.style.borderBottom = '1px solid rgba(255,255,255,0.15)';
+      card.classList.add('open');
+      if (chevron) chevron.style.transform = 'rotate(0deg)';
+    });
+    showToast('Todos os agrupamentos foram expandidos.');
+  });
+
+  // Recolher Todos os Agrupamentos
+  document.getElementById('btn-cfg-collapse-all')?.addEventListener('click', () => {
+    contentArea.querySelectorAll('.cfg-accordion-card').forEach(card => {
+      const body = card.querySelector('.cfg-accordion-body');
+      const header = card.querySelector('.cfg-accordion-header');
+      const chevron = card.querySelector('.cfg-chevron-btn');
+      if (body) body.style.display = 'none';
+      if (header) header.style.borderBottom = 'none';
+      card.classList.remove('open');
+      if (chevron) chevron.style.transform = 'rotate(-90deg)';
+    });
+    showToast('Todos os agrupamentos foram recolhidos.');
   });
 
   // --- RENDERIZAR TABELA DE USUÁRIOS ---
@@ -328,6 +471,22 @@ export function renderSettingsTab(contentArea) {
       const pendingUsers = allUsers.filter(u => u.status === 'Pendente');
       const activeUsers = allUsers.filter(u => u.status !== 'Pendente');
 
+      // Atualizar badge do header do acordeão
+      const badgeUsersStatus = document.getElementById('badge-users-status');
+      if (badgeUsersStatus) {
+        if (pendingUsers.length > 0) {
+          badgeUsersStatus.style.background = '#d97706';
+          badgeUsersStatus.style.color = '#fff';
+          badgeUsersStatus.style.borderColor = '#f59e0b';
+          badgeUsersStatus.innerHTML = `⚡ ${pendingUsers.length} Pendência${pendingUsers.length > 1 ? 's' : ''} de Aprovação`;
+        } else {
+          badgeUsersStatus.style.background = 'rgba(20, 184, 166, 0.2)';
+          badgeUsersStatus.style.color = '#2dd4bf';
+          badgeUsersStatus.style.borderColor = 'rgba(20, 184, 166, 0.4)';
+          badgeUsersStatus.innerHTML = `✓ ${activeUsers.length} Operador${activeUsers.length > 1 ? 'es' : ''} Ativo${activeUsers.length > 1 ? 's' : ''}`;
+        }
+      }
+
       // KPIs
       const totalUsers = activeUsers.length;
       const pharmUsers = activeUsers.filter(u => u.role === 'Farmacêutico' || u.role === 'Farmacêutico RT' || u.role === 'Master').length;
@@ -341,7 +500,7 @@ export function renderSettingsTab(contentArea) {
       if (pendingArea) {
         if (pendingUsers.length > 0) {
           pendingArea.innerHTML = `
-            <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.16), rgba(217, 119, 6, 0.08)); border: 1.5px solid rgba(245, 158, 11, 0.5); border-radius: 16px; padding: 20px; box-shadow: 0 10px 30px rgba(245, 158, 11, 0.15); animation: pulseBorder 3s infinite ease-in-out;">
+            <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.16), rgba(217, 119, 6, 0.08)); border: 1.5px solid rgba(245, 158, 11, 0.5); border-radius: 16px; padding: 20px; margin-bottom: 20px; box-shadow: 0 10px 30px rgba(245, 158, 11, 0.15); animation: pulseBorder 3s infinite ease-in-out;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
                 <div style="display: flex; align-items: center; gap: 12px;">
                   <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(245, 158, 11, 0.25); border: 1px solid rgba(245, 158, 11, 0.6); display: flex; align-items: center; justify-content: center; color: #fbbf24; font-size: 1.25rem;">
@@ -361,7 +520,7 @@ export function renderSettingsTab(contentArea) {
 
               <div style="display: flex; flex-direction: column; gap: 12px;">
                 ${pendingUsers.map(p => `
-                  <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+                  <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 12px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
                     <div style="display: flex; align-items: center; gap: 12px;">
                       <div style="width: 38px; height: 38px; border-radius: 50%; background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.4); display: flex; align-items: center; justify-content: center; color: #fbbf24; font-weight: 700; font-size: 0.9rem;">
                         ${(p.name || 'U').charAt(0).toUpperCase()}
@@ -376,10 +535,11 @@ export function renderSettingsTab(contentArea) {
                       <div style="display: flex; flex-direction: column; gap: 2px;">
                         <label style="font-size: 0.72rem; color: #cbd5e1; font-weight: 600;">Cargo a Atribuir:</label>
                         <select id="pending-role-${p.id}" class="form-input" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.15); color: #fff; font-size: 0.82rem; padding: 6px 10px; border-radius: 8px;">
-                          <option value="Farmacêutico" ${p.role === 'Farmacêutico' ? 'selected' : ''}>🩺 Farmacêutico Clínico</option>
-                          <option value="Farmacêutico RT" ${p.role === 'Farmacêutico RT' ? 'selected' : ''}>💊 Farmacêutico(a) RT</option>
-                          <option value="Atendente" ${p.role === 'Atendente' || p.role === 'Recepcionista' ? 'selected' : ''}>📋 Atendente de Balcão</option>
+                          <option value="Master" ${p.role === 'Master' ? 'selected' : ''}>👑 Master Gestor (Acesso Total)</option>
+                          <option value="Farmacêutico RT" ${p.role === 'Farmacêutico RT' ? 'selected' : ''}>💊 Farmacêutico(a) RT (Responsável Técnico)</option>
+                          <option value="Farmacêutico" ${p.role === 'Farmacêutico' || !p.role ? 'selected' : ''}>🩺 Farmacêutico Clínico</option>
                           <option value="Administrador" ${p.role === 'Administrador' ? 'selected' : ''}>🛠️ Administrador</option>
+                          <option value="Atendente" ${p.role === 'Atendente' || p.role === 'Recepcionista' ? 'selected' : ''}>📋 Atendente de Balcão</option>
                         </select>
                       </div>
 
@@ -418,7 +578,7 @@ export function renderSettingsTab(contentArea) {
                 crf: inputCrf
               });
 
-              showToast(`✅ Acesso de @${uname} aprovado com sucesso!`);
+              showToast(`✅ Acesso de @${uname} como ${selectedRole} aprovado!`);
               syncManager.pushToCloud(false);
               loadUsersList();
             });
