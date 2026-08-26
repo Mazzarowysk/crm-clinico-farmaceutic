@@ -9,6 +9,7 @@
     "dev:backend": "nodemon backend/server.js",
     "dev": "concurrently --kill-others \"node node_modules/vite/bin/vite.js\" \"cross-env NODE_ENV=development node backend/server.js\"",
     "build": "vite build",
+    "build:pdf": "node scripts/generate_executive_report_pdf.mjs",
     "preview": "vite preview",
     "start": "node backend/server.js"
   },
