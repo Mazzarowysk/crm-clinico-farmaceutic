@@ -10,8 +10,8 @@ async function generateExecutiveReport() {
 <head>
   <meta charset="UTF-8">
   <title>Relatório Executivo — CRM Clínico Farmacêutico v3.0</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; }
     body {
@@ -20,109 +20,112 @@ async function generateExecutiveReport() {
       padding: 0;
       color: #1e293b;
       background: #ffffff;
-      font-size: 13px;
-      line-height: 1.6;
+      font-size: 12px;
+      line-height: 1.55;
     }
     
     @page {
       size: A4;
-      margin: 14mm 16mm 14mm 16mm;
+      margin: 12mm 14mm 12mm 14mm;
     }
 
     .page-break {
       page-break-after: always;
+      break-after: page;
     }
 
     /* CAPA */
     .cover {
       background: linear-gradient(135deg, #042f2e 0%, #0f172a 60%, #064e3b 100%);
       color: #ffffff;
-      padding: 60px 40px;
-      border-radius: 16px;
+      padding: 40px 30px;
+      border-radius: 14px;
       text-align: center;
-      margin-bottom: 20px;
-      position: relative;
+      margin-bottom: 16px;
+      border: 1px solid #14b8a6;
     }
     .cover-badge {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
       background: rgba(45, 212, 191, 0.2);
       border: 1px solid rgba(45, 212, 191, 0.5);
       color: #2dd4bf;
-      padding: 6px 18px;
+      padding: 5px 14px;
       border-radius: 999px;
       font-weight: 700;
-      font-size: 11px;
-      letter-spacing: 1px;
+      font-size: 10px;
+      letter-spacing: 0.8px;
       text-transform: uppercase;
-      margin-bottom: 18px;
+      margin-bottom: 12px;
     }
     .cover-title {
       font-family: 'Outfit', sans-serif;
-      font-size: 30px;
+      font-size: 26px;
       font-weight: 800;
-      margin: 0 0 10px;
+      margin: 0 0 8px;
       color: #ffffff;
       letter-spacing: -0.5px;
     }
     .cover-subtitle {
-      font-size: 15px;
-      color: #94a3b8;
-      max-width: 600px;
-      margin: 0 auto 25px;
-      line-height: 1.5;
+      font-size: 13px;
+      color: #cbd5e1;
+      max-width: 620px;
+      margin: 0 auto 16px;
+      line-height: 1.45;
     }
     .cover-meta {
       display: flex;
       justify-content: center;
-      gap: 24px;
-      font-size: 12px;
-      color: #cbd5e1;
-      border-top: 1px solid rgba(255,255,255,0.15);
-      padding-top: 18px;
+      gap: 20px;
+      font-size: 11px;
+      color: #94a3b8;
+      border-top: 1px solid rgba(255,255,255,0.12);
+      padding-top: 12px;
+    }
+    .cover-meta strong {
+      color: #2dd4bf;
     }
 
     /* SEÇÕES */
     .section-title {
       font-family: 'Outfit', sans-serif;
-      font-size: 18px;
+      font-size: 15px;
       font-weight: 800;
       color: #0f766e;
       border-bottom: 2px solid #14b8a6;
-      padding-bottom: 6px;
-      margin-top: 24px;
-      margin-bottom: 14px;
+      padding-bottom: 4px;
+      margin-top: 16px;
+      margin-bottom: 10px;
       display: flex;
       align-items: center;
       gap: 8px;
-    }
-    .section-title i {
-      color: #0d9488;
     }
 
     /* CARDS DE KPI */
     .kpi-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      margin-bottom: 18px;
+      gap: 10px;
+      margin-bottom: 14px;
     }
     .kpi-card {
       background: #f8fafc;
       border: 1px solid #e2e8f0;
-      border-radius: 10px;
-      padding: 12px;
+      border-radius: 8px;
+      padding: 10px;
       text-align: center;
     }
     .kpi-value {
       font-family: 'Outfit', sans-serif;
-      font-size: 22px;
+      font-size: 18px;
       font-weight: 800;
       color: #0f766e;
       margin-bottom: 2px;
     }
     .kpi-label {
-      font-size: 10px;
-      font-weight: 600;
+      font-size: 9.5px;
+      font-weight: 700;
       color: #64748b;
       text-transform: uppercase;
     }
@@ -131,8 +134,8 @@ async function generateExecutiveReport() {
     table {
       width: 100%;
       border-collapse: collapse;
-      margin: 12px 0 18px;
-      font-size: 11.5px;
+      margin: 10px 0 14px;
+      font-size: 11px;
     }
     th {
       background: #0f172a;
@@ -140,13 +143,13 @@ async function generateExecutiveReport() {
       font-family: 'Outfit', sans-serif;
       font-weight: 700;
       text-align: left;
-      padding: 8px 10px;
-      font-size: 11px;
+      padding: 6px 8px;
+      font-size: 10.5px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
     td {
-      padding: 8px 10px;
+      padding: 6px 8px;
       border-bottom: 1px solid #e2e8f0;
       color: #334155;
     }
@@ -158,20 +161,11 @@ async function generateExecutiveReport() {
     .highlight-box {
       background: #f0fdf4;
       border-left: 4px solid #10b981;
-      padding: 12px 16px;
-      border-radius: 0 8px 8px 0;
-      margin: 14px 0;
-      font-size: 12px;
+      padding: 8px 12px;
+      border-radius: 0 6px 6px 0;
+      margin: 10px 0;
+      font-size: 11.5px;
       color: #166534;
-    }
-    .highlight-box-alert {
-      background: #fff1f2;
-      border-left: 4px solid #f43f5e;
-      padding: 12px 16px;
-      border-radius: 0 8px 8px 0;
-      margin: 14px 0;
-      font-size: 12px;
-      color: #9f1239;
     }
 
     /* GRID DE MÓDULOS */
@@ -179,42 +173,62 @@ async function generateExecutiveReport() {
       background: #ffffff;
       border: 1px solid #cbd5e1;
       border-radius: 8px;
-      padding: 12px 14px;
-      margin-bottom: 10px;
+      padding: 9px 12px;
+      margin-bottom: 8px;
       border-left: 4px solid #0d9488;
+      page-break-inside: avoid;
+      break-inside: avoid;
     }
     .module-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 4px;
+      margin-bottom: 3px;
     }
     .module-name {
       font-family: 'Outfit', sans-serif;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
       color: #0f172a;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .module-name i {
+      color: #0d9488;
+      font-size: 13px;
     }
     .module-tag {
-      font-size: 9.5px;
+      font-size: 9px;
       font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 12px;
+      padding: 2px 7px;
+      border-radius: 10px;
       background: #e6fffa;
       color: #0d9488;
       border: 1px solid #99f6e4;
     }
     .module-desc {
-      font-size: 11.5px;
+      font-size: 11px;
       color: #475569;
       margin: 0;
+      line-height: 1.45;
+    }
+    .badge-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      padding: 1px 4px;
+      border-radius: 4px;
+      color: #0f766e;
+      font-weight: 600;
     }
 
     .footer-stamp {
       border-top: 1px solid #e2e8f0;
-      padding-top: 10px;
-      margin-top: 24px;
-      font-size: 10px;
+      padding-top: 8px;
+      margin-top: 16px;
+      font-size: 9.5px;
       color: #94a3b8;
       display: flex;
       justify-content: space-between;
@@ -223,7 +237,7 @@ async function generateExecutiveReport() {
 </head>
 <body>
 
-  <!-- CAPA EXECUTIVA -->
+  <!-- PÁGINA 1: CAPA & VISÃO GERAL & OS 7 MÓDULOS -->
   <div class="cover">
     <div class="cover-badge"><i class="fa-solid fa-certificate"></i> Relatório Executivo Oficial &bull; Versão 3.0</div>
     <h1 class="cover-title">CRM Clínico Farmacêutico</h1>
@@ -237,12 +251,7 @@ async function generateExecutiveReport() {
     </div>
   </div>
 
-  <!-- SEÇÃO 1: RESUMO EXECUTIVO & KPIs -->
   <h2 class="section-title"><i class="fa-solid fa-chart-pie"></i> 1. Resumo Executivo & Impacto Clínico</h2>
-  <p>
-    O <strong>CRM Clínico Farmacêutico v3.0</strong> consolida a prática clínica avançada no ambiente de farmácias comunitárias e consultórios farmacêuticos, promovendo a integração entre segurança farmacoterapêutica, rastreabilidade sanitária e gestão financeira de alto nível.
-  </p>
-
   <div class="kpi-grid">
     <div class="kpi-card">
       <div class="kpi-value">&lt; 60s</div>
@@ -262,72 +271,74 @@ async function generateExecutiveReport() {
     </div>
   </div>
 
-  <div class="highlight-box">
-    <strong><i class="fa-solid fa-check-circle"></i> Marco Regulatório:</strong> O sistema atende integralmente às Resoluções CFF nº 585/2013 e 586/2013 (Prescrição Farmacêutica e Serviços Clínicos), CFF nº 654/2018 (Vacinação e Injetáveis) e ANVISA RDC nº 44/2009 e RDC nº 786/2023 (Testes Laboratoriais Remotos - TLR).
-  </div>
+  <h2 class="section-title"><i class="fa-solid fa-layer-group"></i> 2. Estrutura Completa dos 7 Módulos Operacionais</h2>
 
-  <!-- SEÇÃO 2: ARQUITETURA DOS 7 MÓDULOS -->
-  <h2 class="section-title"><i class="fa-solid fa-layer-group"></i> 2. Estrutura dos Módulos Operacionais</h2>
-
+  <!-- MÓDULO 1 -->
   <div class="module-card">
     <div class="module-header">
-      <span class="module-name">1. 📊 Métricas do Consultório & Faturamento</span>
+      <span class="module-name"><i class="fa-solid fa-chart-line"></i> 1. Métricas do Consultório & Faturamento</span>
       <span class="module-tag">BI & KPIs</span>
     </div>
     <p class="module-desc">Indicadores em tempo real de atendimentos clínicos, taxa de adesão ao tratamento (Escala de Morisky), bloqueios preventivos de iatrogenias pelo CDSS 4D e faturamento consolidado.</p>
   </div>
 
+  <!-- MÓDULO 2 -->
   <div class="module-card">
     <div class="module-header">
-      <span class="module-name">2. 🩺 CRM Farmacêutico & Balcão (SOAP + CDSS 4D)</span>
+      <span class="module-name"><i class="fa-solid fa-prescription-bottle-medical"></i> 2. CRM Farmacêutico & Balcão (SOAP + CDSS 4D)</span>
       <span class="module-tag">Clínica & Balcão</span>
     </div>
-    <p class="module-desc">Triagem guiada por queixas frequentes, checagem mandatória de <em>Red Flags</em> com emissão de Guia de Encaminhamento Médico, prescrição segura de MIPs, registro de vacinas/injetáveis e despacho de posologia via WhatsApp.</p>
+    <p class="module-desc">Triagem guiada por queixas frequentes, checagem mandatória de <em>Red Flags</em> com emissão de Guia de Encaminhamento Médico, prescrição segura de MIPs, registro de vacinas/injetáveis (CFF 654) e despacho de posologia via WhatsApp.</p>
   </div>
 
+  <!-- MÓDULO 3 -->
   <div class="module-card">
     <div class="module-header">
-      <span class="module-name">3. 👤 Prontuário Longitudinal & Portal do Paciente PWA</span>
+      <span class="module-name"><i class="fa-solid fa-user-nurse"></i> 3. Prontuário Longitudinal & Portal do Paciente PWA</span>
       <span class="module-tag">Cuidado Contínuo</span>
     </div>
-    <p class="module-desc">Cadastro com validação estrita de CPF, comorbidades, alergias estruturadas, convênios PBMs (com botão <code>+</code> rápido) e acesso móvel do paciente à sua carteirinha digital e despertador inteligente de remédios.</p>
+    <p class="module-desc">Cadastro com validação estrita de CPF, comorbidades, alergias estruturadas, convênios PBMs (com botão <span class="badge-code">+</span> rápido) e acesso móvel do paciente à sua carteirinha digital e despertador inteligente de remédios.</p>
   </div>
 
+  <!-- MÓDULO 4 -->
   <div class="module-card">
     <div class="module-header">
-      <span class="module-name">4. 📦 Controle de Estoque & Catálogo com Leitor de Código de Barras</span>
+      <span class="module-name"><i class="fa-solid fa-boxes-stacked"></i> 4. Controle de Estoque & Catálogo com Leitor de Código de Barras</span>
       <span class="module-tag">Logística & Rastreio</span>
     </div>
     <p class="module-desc">Scanner de código de barras (Câmera e USB), entrada de notas com controle de lotes e validades, Curva ABC, alertas de vencimento (&lt; 90 dias) e ajustes de inventário auditados.</p>
   </div>
 
+  <!-- MÓDULO 5 -->
   <div class="module-card">
     <div class="module-header">
-      <span class="module-name">5. 💰 Controle Financeiro & Fluxo de Caixa (Abas Neon)</span>
+      <span class="module-name"><i class="fa-solid fa-sack-dollar"></i> 5. Controle Financeiro & Fluxo de Caixa (Abas Neon)</span>
       <span class="module-tag">Gestão Financeira</span>
     </div>
-    <p class="module-desc">Abas Neon de alto contraste (<code>Todos</code>, <code>⬇️ Receitas</code>, <code>⬆️ Despesas</code>), botões <code>+</code> para cadastro instantâneo de novas categorias e formas de pagamento, e Demonstrativo de Resultados do Exercício (DRE) em PDF.</p>
+    <p class="module-desc">Abas Neon de alto contraste (<span class="badge-code">Todos</span>, <span class="badge-code">Receitas</span>, <span class="badge-code">Despesas</span>), botões <span class="badge-code">+</span> para cadastro instantâneo de novas categorias e formas de pagamento, e Demonstrativo de Resultados do Exercício (DRE) em PDF.</p>
   </div>
 
+  <!-- MÓDULO 6 -->
   <div class="module-card">
     <div class="module-header">
-      <span class="module-name">6. 📜 Declarações de Serviços Farmacêuticos (DSF)</span>
+      <span class="module-name"><i class="fa-solid fa-file-signature"></i> 6. Declarações de Serviços Farmacêuticos (DSF)</span>
       <span class="module-tag">Regulatório CFF</span>
     </div>
-    <p class="module-desc">Emissão oficial de DSF com carimbo temporal, número de CRF do Farmacêutico RT, parâmetros aferidos e Hash de Autenticidade para comprovação sanitária.</p>
+    <p class="module-desc">Emissão oficial de DSF com carimbo temporal, número de CRF do Farmacêutico RT, parâmetros aferidos e Hash de Autenticidade para comprovação sanitária conforme Resoluções CFF nº 585 e 586/2013.</p>
   </div>
 
+  <!-- MÓDULO 7 -->
   <div class="module-card">
     <div class="module-header">
-      <span class="module-name">7. ⚙️ Central de Configurações em 7 Agrupamentos Estruturados</span>
-      <span class="module-tag">Governança</span>
+      <span class="module-name"><i class="fa-solid fa-sliders"></i> 7. Central de Configurações em 7 Agrupamentos Estruturados</span>
+      <span class="module-tag">Governança & Parâmetros</span>
     </div>
-    <p class="module-desc">Controle de acesso RBAC, monitoramento do Turso Cloud, dados do RT, backup/restauração JSON, protocolos clínicos, Sandbox de simulação com limpeza seletiva protegida por senha e Gestão de Parâmetros Financeiros.</p>
+    <p class="module-desc">Controle de acesso RBAC, monitoramento do Turso Cloud, dados do RT, backup/restauração JSON, protocolos clínicos, Sandbox de simulação com limpeza seletiva protegida por senha e Gestão de Parâmetros Financeiros vinculada aos botões <span class="badge-code">+</span>.</p>
   </div>
 
   <div class="page-break"></div>
 
-  <!-- SEÇÃO 3: MOTOR CDSS 4D E MATRIZ DE RISCO -->
+  <!-- PÁGINA 2: MOTOR CDSS 4D, NUVEM E GOVERNANÇA -->
   <h2 class="section-title"><i class="fa-solid fa-shield-halved"></i> 3. Motor de Suporte à Decisão Clínica (CDSS 4D)</h2>
   <p>
     O motor de checagem farmacológica atua como barreira proativa contra iatrogenias, avaliando 4 dimensões críticas de segurança antes de permitir qualquer dispensação:
@@ -365,7 +376,6 @@ async function generateExecutiveReport() {
     </tbody>
   </table>
 
-  <!-- SEÇÃO 4: INFRAESTRUTURA DE NUVEM & SEGURANÇA -->
   <h2 class="section-title"><i class="fa-solid fa-cloud-arrow-up"></i> 4. Infraestrutura de Nuvem, Offline-First & Redundância</h2>
 
   <table>
@@ -411,20 +421,20 @@ async function generateExecutiveReport() {
 
   <div class="footer-stamp">
     <div>CRM Clínico Farmacêutico &bull; Relatório Executivo v3.0</div>
-    <div>Documento gerado automaticamente &bull; Em conformidade com o CFF e ANVISA</div>
+    <div>Documento oficial compilado em PDF &bull; Em conformidade com o CFF e ANVISA</div>
   </div>
 
 </body>
 </html>`;
 
   try {
-    const browser = await puppeteer.launch({ headless: true });
+    const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
     const page = await browser.newPage();
     await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
     await page.pdf({
       path: outputPath,
       format: 'A4',
-      margin: { top: '12mm', right: '14mm', bottom: '12mm', left: '14mm' },
+      margin: { top: '10mm', right: '12mm', bottom: '10mm', left: '12mm' },
       printBackground: true
     });
     await browser.close();
