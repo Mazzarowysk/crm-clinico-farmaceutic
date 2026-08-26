@@ -898,8 +898,8 @@ function renderAuthScreen() {
             </div>
 
             <div class="auth-brand-logo-wrap">
-              <div class="auth-brand-logo-box" style="background: linear-gradient(135deg, #0d9488, #0f766e); box-shadow: 0 4px 20px rgba(13, 148, 136, 0.4);">
-                <i class="fa-solid fa-pills" style="font-size: 2rem; color: #ffffff;"></i>
+              <div class="auth-brand-logo-box">
+                <img src="/assets/logo.png" alt="Logo CRM Clínico Farmacêutico" class="auth-brand-logo-img">
               </div>
               <div class="auth-brand-name">
                 CRM Farmacêutico
@@ -1377,12 +1377,12 @@ function renderAppStructure() {
     <div class="app-container">
       <!-- Sidebar de Navegação -->
       <aside class="app-sidebar">
-        <div class="brand-logo" style="padding: 16px 12px; display: flex; align-items: center; gap: 10px;">
-          <div style="width: 38px; height: 38px; border-radius: 10px; background: linear-gradient(135deg, #0d9488, #0f766e); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.4);">
-            <i class="fa-solid fa-notes-medical"></i>
+        <div class="brand-logo" style="padding: 16px 12px; display: flex; align-items: center; gap: 12px;">
+          <div class="system-sidebar-logo-box">
+            <img src="/assets/logo.png" alt="PharmaCRM Logo" class="system-sidebar-logo-img">
           </div>
           <div>
-            <div style="font-family: 'Outfit', sans-serif; font-weight: 700; color: #f8fafc; font-size: 1rem; line-height: 1.1;">PharmaCRM</div>
+            <div style="font-family: 'Outfit', sans-serif; font-weight: 700; color: #f8fafc; font-size: 1.05rem; line-height: 1.1;">PharmaCRM</div>
             <div style="font-size: 0.72rem; color: #14b8a6; font-weight: 600;">Clínico &amp; CDSS</div>
           </div>
         </div>
@@ -1410,15 +1410,18 @@ function renderAppStructure() {
 
       <!-- Cabeçalho Superior -->
       <header class="app-header" style="display: flex; justify-content: space-between; align-items: center; padding-right: 24px; gap: 16px;">
-        <div style="display: flex; align-items: center; gap: 14px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
           <button id="global-back-btn" style="display: none; background: rgba(13, 148, 136, 0.2); border: 1px solid rgba(20, 184, 166, 0.4); color: #2dd4bf; font-weight: 700; font-size: 0.82rem; padding: 7px 14px; border-radius: 20px; cursor: pointer; align-items: center; gap: 8px; transition: all 0.2s ease; box-shadow: 0 4px 12px rgba(0,0,0,0.25);" title="Voltar para a tela anterior (Atalho: Alt + Seta Esquerda)">
             <i class="fa-solid fa-arrow-left"></i>
             <span id="global-back-label">Voltar</span>
           </button>
-          <h1 class="page-title" id="page-title-label" style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.3rem;">CRM Clínico Farmacêutico</h1>
-          <div class="header-brand-text" style="margin: 0;">
-            <i class="fa-solid fa-shield-halved" style="color: #14b8a6;"></i>
-            <span>Cuidado Farmacêutico &amp; Suporte à Decisão Clínica (CDSS 4D)</span>
+          <img src="/assets/logo.png" alt="PharmaCRM" class="header-brand-logo-img">
+          <div>
+            <h1 class="page-title" id="page-title-label" style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.25rem; line-height: 1.2;">CRM Clínico Farmacêutico</h1>
+            <div class="header-brand-text" style="margin: 0; font-size: 0.76rem; color: #94a3b8;">
+              <i class="fa-solid fa-shield-halved" style="color: #14b8a6; font-size: 0.72rem;"></i>
+              <span>Cuidado Farmacêutico &amp; Suporte à Decisão Clínica (CDSS 4D)</span>
+            </div>
           </div>
         </div>
 
