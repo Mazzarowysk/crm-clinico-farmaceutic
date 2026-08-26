@@ -70,10 +70,20 @@ function ensureTable(db, table) {
       created_at: new Date().toISOString()
     };
 
-    // Remove usuários de teste ou demonstração antigos e mantém apenas o Master
-    const demoUsernames = ['farmacia', 'admin', 'atendente', 'medico', 'enfermeiro', 'recepcionista'];
+    // Remove usuários de teste, médicos legados ou demonstração antigos e mantém apenas o Master ou cadastros reais
     if (Array.isArray(db[table]) && db[table].length > 0) {
-      const filtered = db[table].filter(u => !demoUsernames.includes((u.username || '').toLowerCase().trim()));
+      const legacyUsernames = ['bcoltri', 'ffacco', 'pforte', 'farmacia', 'admin', 'atendente', 'medico', 'enfermeiro', 'recepcionista'];
+      const legacyRoles = ['Médico', 'Desenvolvedor', 'Enfermeiro', 'Plantonista'];
+      
+      const filtered = db[table].filter(u => {
+        const uname = (u.username || '').toLowerCase().trim();
+        if (uname === 'mazzarowysk') return true;
+        if (uname.startsWith('dr.') || uname.startsWith('dra.') || uname.startsWith('dr_') || uname.startsWith('dra_')) return false;
+        if (legacyUsernames.includes(uname)) return false;
+        if (legacyRoles.includes(u.role)) return false;
+        return true;
+      });
+
       if (filtered.length !== db[table].length) {
         db[table] = filtered;
         modified = true;

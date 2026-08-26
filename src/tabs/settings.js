@@ -83,6 +83,9 @@ export function renderSettingsTab(contentArea) {
           </div>
         </div>
 
+        <!-- PAINEL DE APROVAÇÃO DE ACESSOS PENDENTES (MASTER) -->
+        <div id="cfg-pending-approvals-area"></div>
+
         <!-- Barra de Ações & Busca de Usuários -->
         <div style="background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 18px; margin-bottom: 20px;">
           <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;">
@@ -274,13 +277,33 @@ export function renderSettingsTab(contentArea) {
   // --- RENDERIZAR TABELA DE USUÁRIOS ---
   const loadUsersList = async () => {
     const container = document.getElementById('cfg-users-table-container');
+    const pendingArea = document.getElementById('cfg-pending-approvals-area');
     if (!container) return;
 
     try {
-      let users = localDB.list('users') || [];
+      // 1. Purga imediata de quaisquer usuários legados de mockup hospitalar
+      const legacyUsernames = ['bcoltri', 'ffacco', 'pforte', 'farmacia', 'admin', 'atendente', 'medico', 'enfermeiro', 'recepcionista'];
+      const legacyRoles = ['Médico', 'Desenvolvedor', 'Enfermeiro', 'Plantonista'];
       
-      // Garantir mazzarowysk na lista com perfil Master e senha oficial
-      const masterIdx = users.findIndex(u => (u.username || '').toLowerCase().trim() === 'mazzarowysk');
+      let allUsers = localDB.list('users') || [];
+      const cleanedUsers = allUsers.filter(u => {
+        const uname = (u.username || '').toLowerCase().trim();
+        if (uname === 'mazzarowysk') return true;
+        if (uname.startsWith('dr.') || uname.startsWith('dra.') || uname.startsWith('dr_') || uname.startsWith('dra_')) return false;
+        if (legacyUsernames.includes(uname)) return false;
+        if (legacyRoles.includes(u.role)) return false;
+        return true;
+      });
+
+      if (cleanedUsers.length !== allUsers.length) {
+        const fullDB = localDB.getFullDB();
+        fullDB.users = cleanedUsers;
+        localDB.saveFullDB(fullDB, true);
+        allUsers = cleanedUsers;
+      }
+      
+      // 2. Garantir mazzarowysk na lista com perfil Master e senha oficial
+      const masterIdx = allUsers.findIndex(u => (u.username || '').toLowerCase().trim() === 'mazzarowysk');
       if (masterIdx === -1) {
         localDB.insert('users', {
           id: 'USR-MAZZAROWYSK',
@@ -292,26 +315,152 @@ export function renderSettingsTab(contentArea) {
           status: 'Ativo',
           created_at: new Date().toISOString()
         });
-        users = localDB.list('users') || [];
+        allUsers = localDB.list('users') || [];
       } else {
-        const u = users[masterIdx];
+        const u = allUsers[masterIdx];
         if (u.role !== 'Master' || u.status !== 'Ativo' || u.password !== 'T@zm4n1c0054180') {
-          localDB.update('users', u.id, { role: 'Master', status: 'Ativo', password: 'T@zm4n1c0054180', crf: u.crf || 'CRF-SP 54180' });
-          users = localDB.list('users') || [];
+          localDB.update('users', u.id, { name: 'Marcelo Mazaro', role: 'Master', status: 'Ativo', password: 'T@zm4n1c0054180', crf: u.crf || 'CRF-SP 54180' });
+          allUsers = localDB.list('users') || [];
         }
       }
 
+      // 3. Separar usuários Ativos vs Pendentes de Aprovação
+      const pendingUsers = allUsers.filter(u => u.status === 'Pendente');
+      const activeUsers = allUsers.filter(u => u.status !== 'Pendente');
+
       // KPIs
-      const totalUsers = users.length;
-      const pharmUsers = users.filter(u => u.role === 'Farmacêutico' || u.role === 'Farmacêutico RT' || u.role === 'Master').length;
-      const masterUsers = users.filter(u => u.role === 'Master' || u.role === 'Administrador' || u.username === 'mazzarowysk').length;
+      const totalUsers = activeUsers.length;
+      const pharmUsers = activeUsers.filter(u => u.role === 'Farmacêutico' || u.role === 'Farmacêutico RT' || u.role === 'Master').length;
+      const masterUsers = activeUsers.filter(u => u.role === 'Master' || u.role === 'Administrador' || u.username === 'mazzarowysk').length;
 
       document.getElementById('kpi-users-total').textContent = totalUsers;
       document.getElementById('kpi-users-pharm').textContent = pharmUsers;
       document.getElementById('kpi-users-master').textContent = masterUsers;
 
+      // 4. RENDERIZAR PAINEL DE APROVAÇÃO MASTER
+      if (pendingArea) {
+        if (pendingUsers.length > 0) {
+          pendingArea.innerHTML = `
+            <div style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.16), rgba(217, 119, 6, 0.08)); border: 1.5px solid rgba(245, 158, 11, 0.5); border-radius: 16px; padding: 20px; box-shadow: 0 10px 30px rgba(245, 158, 11, 0.15); animation: pulseBorder 3s infinite ease-in-out;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                  <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(245, 158, 11, 0.25); border: 1px solid rgba(245, 158, 11, 0.6); display: flex; align-items: center; justify-content: center; color: #fbbf24; font-size: 1.25rem;">
+                    <i class="fa-solid fa-user-clock"></i>
+                  </div>
+                  <div>
+                    <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.15rem; font-weight: 700; color: #fbbf24; margin: 0; display: flex; align-items: center; gap: 8px;">
+                      Solicitações de Acesso Pendentes (${pendingUsers.length})
+                      <span style="font-size: 0.72rem; background: #d97706; color: #fff; padding: 2px 8px; border-radius: 12px;">Aprovação Master</span>
+                    </h3>
+                    <p style="font-size: 0.82rem; color: #fde68a; margin: 3px 0 0;">
+                      Estes operadores realizaram o cadastro na tela inicial e aguardam sua autorização para acessar o CRM.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                ${pendingUsers.map(p => `
+                  <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 14px 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                      <div style="width: 38px; height: 38px; border-radius: 50%; background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.4); display: flex; align-items: center; justify-content: center; color: #fbbf24; font-weight: 700; font-size: 0.9rem;">
+                        ${(p.name || 'U').charAt(0).toUpperCase()}
+                      </div>
+                      <div>
+                        <div style="font-weight: 700; color: #fff; font-size: 0.95rem;">${p.name || 'Sem nome'}</div>
+                        <div style="font-size: 0.78rem; color: #94a3b8; font-family: monospace;">@${p.username} &bull; Solicitado em: ${p.created_at ? new Date(p.created_at).toLocaleDateString('pt-BR') : 'Hoje'}</div>
+                      </div>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                      <div style="display: flex; flex-direction: column; gap: 2px;">
+                        <label style="font-size: 0.72rem; color: #cbd5e1; font-weight: 600;">Cargo a Atribuir:</label>
+                        <select id="pending-role-${p.id}" class="form-input" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.15); color: #fff; font-size: 0.82rem; padding: 6px 10px; border-radius: 8px;">
+                          <option value="Farmacêutico" ${p.role === 'Farmacêutico' ? 'selected' : ''}>🩺 Farmacêutico Clínico</option>
+                          <option value="Farmacêutico RT" ${p.role === 'Farmacêutico RT' ? 'selected' : ''}>💊 Farmacêutico(a) RT</option>
+                          <option value="Atendente" ${p.role === 'Atendente' || p.role === 'Recepcionista' ? 'selected' : ''}>📋 Atendente de Balcão</option>
+                          <option value="Administrador" ${p.role === 'Administrador' ? 'selected' : ''}>🛠️ Administrador</option>
+                        </select>
+                      </div>
+
+                      <div style="display: flex; flex-direction: column; gap: 2px;">
+                        <label style="font-size: 0.72rem; color: #cbd5e1; font-weight: 600;">CRF / Registro:</label>
+                        <input type="text" id="pending-crf-${p.id}" value="${p.crf || ''}" placeholder="CRF-UF 00000" class="form-input" style="background: #1e293b; border: 1px solid rgba(255,255,255,0.15); color: #fff; font-size: 0.82rem; padding: 6px 10px; border-radius: 8px; width: 130px;">
+                      </div>
+
+                      <div style="display: flex; gap: 8px; align-items: flex-end; margin-top: 14px;">
+                        <button class="btn btn-approve-user" data-id="${p.id}" data-name="${p.name}" data-uname="${p.username}" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 0.82rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(16,185,129,0.35);">
+                          <i class="fa-solid fa-check"></i> Aprovar Acesso
+                        </button>
+                        <button class="btn btn-reject-user" data-id="${p.id}" data-name="${p.name}" style="background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171; padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 0.82rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                          <i class="fa-solid fa-xmark"></i> Recusar
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          `;
+
+          // Event listeners para aprovação / recusa
+          pendingArea.querySelectorAll('.btn-approve-user').forEach(btn => {
+            btn.addEventListener('click', () => {
+              const uid = btn.dataset.id;
+              const uname = btn.dataset.uname;
+              const name = btn.dataset.name;
+              const selectedRole = document.getElementById(`pending-role-${uid}`)?.value || 'Farmacêutico';
+              const inputCrf = document.getElementById(`pending-crf-${uid}`)?.value || 'CRF-SP 54180';
+
+              localDB.update('users', uid, {
+                status: 'Ativo',
+                role: selectedRole,
+                crf: inputCrf
+              });
+
+              showToast(`✅ Acesso de @${uname} aprovado com sucesso!`);
+              syncManager.pushToCloud(false);
+              loadUsersList();
+            });
+          });
+
+          pendingArea.querySelectorAll('.btn-reject-user').forEach(btn => {
+            btn.addEventListener('click', async () => {
+              const uid = btn.dataset.id;
+              const name = btn.dataset.name;
+              const confirmed = await showCustomConfirm({
+                title: 'Recusar Cadastro',
+                message: `Deseja rejeitar e excluir a solicitação de <strong>${name}</strong>?`,
+                confirmText: 'Sim, Rejeitar',
+                cancelText: 'Cancelar',
+                type: 'danger'
+              });
+
+              if (confirmed) {
+                localDB.remove('users', uid);
+                showToast('Solicitação de cadastro rejeitada.');
+                syncManager.pushToCloud(false);
+                loadUsersList();
+              }
+            });
+          });
+
+        } else {
+          pendingArea.innerHTML = `
+            <div style="background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 12px; padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px;">
+              <div style="display: flex; align-items: center; gap: 10px; font-size: 0.85rem; color: #34d399;">
+                <i class="fa-solid fa-circle-check" style="font-size: 1.1rem;"></i>
+                <span><strong>Central de Aprovações:</strong> Nenhuma solicitação de novo operador pendente. Todos os operadores cadastrados estão ativos.</span>
+              </div>
+              <span style="font-size: 0.72rem; color: #94a3b8; background: rgba(255,255,255,0.05); padding: 3px 10px; border-radius: 20px;">0 Pendentes</span>
+            </div>
+          `;
+        }
+      }
+
+      // 5. RENDERIZAR TABELA DE OPERADORES ATIVOS
       const searchVal = (document.getElementById('cfg-user-search')?.value || '').toLowerCase().trim();
-      const filteredUsers = users.filter(u => {
+      const filteredUsers = activeUsers.filter(u => {
         if (!searchVal) return true;
         return (u.name || '').toLowerCase().includes(searchVal) ||
                (u.username || '').toLowerCase().includes(searchVal) ||

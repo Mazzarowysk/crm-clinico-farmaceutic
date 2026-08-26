@@ -1340,7 +1340,7 @@ function initConstellationCanvas() {
 
     animationFrameId = requestAnimationFrame(animate);
   };
-          if (window._authConstellationCancel) {
+  if (window._authConstellationCancel) {
     window._authConstellationCancel();
   }
   window._authConstellationCancel = () => {
@@ -1357,6 +1357,7 @@ function initConstellationCanvas() {
 function renderAppStructure() {
   const root = document.getElementById('app');
   const perms = getRolePermissions(state.user);
+  const pendingApprovalsCount = (localDB.list('users') || []).filter(u => u.status === 'Pendente').length;
 
   const allNavItems = [
     { id: 'dashboard', label: 'Métricas do Consultório', icon: 'fa-chart-line' },
@@ -1364,7 +1365,7 @@ function renderAppStructure() {
     { id: 'pacientes', label: 'Prontuário & Pacientes', icon: 'fa-user-nurse' },
     { id: 'agenda', label: 'Agenda de Serviços Clínicos', icon: 'fa-calendar-check' },
     { id: 'relatorios', label: 'Declarações (DSF) & Relatórios', icon: 'fa-file-signature' },
-    { id: 'configuracoes', label: 'Configurações & Gestão', icon: 'fa-sliders' }
+    { id: 'configuracoes', label: 'Configurações & Gestão', icon: 'fa-sliders', badge: pendingApprovalsCount > 0 ? pendingApprovalsCount : null }
   ];
 
 
@@ -1382,6 +1383,7 @@ function renderAppStructure() {
       <a class="nav-item ${state.activeTab === item.id ? 'active' : ''}" data-tab="${item.id}" style="${item.hasBadge ? 'position: relative;' : ''}">
         <i class="fa-solid ${item.icon}"></i>
         <span>${item.label}</span>
+        ${item.badge ? `<span style="background: #d97706; color: #fff; font-size: 0.68rem; font-weight: 800; padding: 2px 7px; border-radius: 10px; margin-left: auto; box-shadow: 0 0 8px rgba(217, 119, 6, 0.6);">${item.badge}</span>` : ''}
       </a>
     </li>
   `).join('');
@@ -1464,6 +1466,11 @@ function renderAppStructure() {
         </div>
 
         <div id="sync-status-container" style="display: flex; align-items: center; gap: 10px;">
+          ${(perms.role === 'Master' && pendingApprovalsCount > 0) ? `
+            <button id="btn-header-pending-users" class="btn" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(217, 119, 6, 0.35)); border: 1.5px solid #f59e0b; color: #fbbf24; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0 14px; height: 40px; border-radius: 20px; font-size: 0.82rem; font-weight: 700; gap: 8px; transition: all 0.2s ease; box-shadow: 0 0 15px rgba(245, 158, 11, 0.3);" title="Aprovar novos cadastros de operadores na aba Configurações">
+              <i class="fa-solid fa-user-clock"></i> <span>${pendingApprovalsCount} Pendência${pendingApprovalsCount > 1 ? 's' : ''}</span>
+            </button>
+          ` : ''}
           <button id="btn-header-manual" class="btn" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.22), rgba(13, 148, 136, 0.32)); border: 1px solid rgba(16, 185, 129, 0.5); color: #34d399; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0 14px; height: 40px; border-radius: 20px; font-size: 0.82rem; font-weight: 700; gap: 6px; transition: all 0.2s ease; box-shadow: 0 2px 10px rgba(16, 185, 129, 0.2);" title="Abrir Manual Interativo do CRM Farmacêutico (Protocolos e Guia Rápido)">
             <i class="fa-solid fa-book-medical"></i> <span>Manual Interativo</span>
           </button>
@@ -1697,6 +1704,13 @@ function renderAppStructure() {
   if (sidebarManualBtn) {
     sidebarManualBtn.addEventListener('click', () => {
       showInteractiveManualModal(state.activeTab || 'farmacia');
+    });
+  }
+
+  const pendingUsersHeaderBtn = document.getElementById('btn-header-pending-users');
+  if (pendingUsersHeaderBtn) {
+    pendingUsersHeaderBtn.addEventListener('click', () => {
+      switchTab('configuracoes');
     });
   }
 

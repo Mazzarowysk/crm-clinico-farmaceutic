@@ -5598,39 +5598,39 @@ body.compact-mode .modal-content {
    ========================================================================== */
 
 .auth-brand-logo-box {
-  width: 64px;
-  height: 64px;
-  border-radius: 16px;
-  background: rgba(15, 23, 42, 0.75);
-  border: 1.5px solid rgba(20, 184, 166, 0.4);
+  width: 120px;
+  height: 120px;
+  border-radius: 24px;
+  background: #ffffff;
+  border: 2px solid rgba(20, 184, 166, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 8px 24px rgba(13, 148, 136, 0.35);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), 0 0 25px rgba(13, 148, 136, 0.4);
   overflow: hidden;
-  padding: 4px;
+  padding: 8px;
 }
 
 .auth-brand-logo-img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  border-radius: 12px;
-  filter: drop-shadow(0 2px 8px rgba(13, 148, 136, 0.5));
+  border-radius: 16px;
+  transform: scale(1.08);
 }
 
 .system-sidebar-logo-box {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: rgba(15, 23, 42, 0.85);
-  border: 1px solid rgba(20, 184, 166, 0.4);
+  width: 54px;
+  height: 54px;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1.5px solid rgba(20, 184, 166, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.3);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4), 0 0 14px rgba(13, 148, 136, 0.3);
   overflow: hidden;
-  padding: 3px;
+  padding: 4px;
   flex-shrink: 0;
 }
 
@@ -5638,15 +5638,18 @@ body.compact-mode .modal-content {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  border-radius: 8px;
+  border-radius: 10px;
 }
 
 .header-brand-logo-img {
-  width: 32px;
-  height: 32px;
+  width: 38px;
+  height: 38px;
   object-fit: contain;
-  border-radius: 8px;
-  filter: drop-shadow(0 2px 6px rgba(13, 148, 136, 0.4));
+  background: #ffffff;
+  padding: 3px;
+  border-radius: 10px;
+  border: 1px solid rgba(20, 184, 166, 0.4);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 
