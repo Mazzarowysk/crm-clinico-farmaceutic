@@ -108,41 +108,122 @@ export async function fetchDashboardData() {
 // HELPERS DE GRADIENTES & DESIGN MODERNO DE CANVAS
 // ─────────────────────────────────────────────────────────────────────────────
 
-function createLinearGradient(ctx2d, c1, c2, vertical = true, height = 300) {
-  const g = vertical 
+function createPlastic3DGradient(ctx2d, hexColor, vertical = true, height = 300) {
+  const hex = (hexColor || '#10b981').replace('#', '');
+  const r = parseInt(hex.substring(0, 2), 16) || 16;
+  const g = parseInt(hex.substring(2, 4), 16) || 185;
+  const b = parseInt(hex.substring(4, 6), 16) || 129;
+
+  const grad = vertical 
     ? ctx2d.createLinearGradient(0, 0, 0, height) 
-    : ctx2d.createLinearGradient(0, 0, 400, 0);
-  g.addColorStop(0, c1);
-  g.addColorStop(1, c2);
-  return g;
+    : ctx2d.createLinearGradient(0, 0, 420, 0);
+
+  // 1. Reflexo Especular Superior (Plastic Sheen Glare)
+  grad.addColorStop(0, `rgba(${Math.min(255, r + 110)}, ${Math.min(255, g + 110)}, ${Math.min(255, b + 110)}, 0.98)`);
+  // 2. Transição Plástica Esmaltada
+  grad.addColorStop(0.16, `rgba(${r}, ${g}, ${b}, 0.92)`);
+  // 3. Meia-Sombra Volumétrica 3D
+  grad.addColorStop(0.55, `rgba(${Math.max(0, r - 50)}, ${Math.max(0, g - 50)}, ${Math.max(0, b - 50)}, 0.96)`);
+  // 4. Luz de Rebote Ambiente (Rim Light)
+  grad.addColorStop(0.86, `rgba(${Math.min(255, r + 65)}, ${Math.min(255, g + 65)}, ${Math.min(255, b + 65)}, 0.88)`);
+  // 5. Oclusão de Contato 3D Escura
+  grad.addColorStop(1, `rgba(${Math.max(0, r - 90)}, ${Math.max(0, g - 90)}, ${Math.max(0, b - 90)}, 0.98)`);
+
+  return grad;
 }
 
-// Plugin customizado para desenhar o Total no centro do Gráfico de Rosca
+function createLinearGradient(ctx2d, c1, c2, vertical = true, height = 300) {
+  return createPlastic3DGradient(ctx2d, c1, vertical, height);
+}
+
+// Plugin customizado para desenhar o Total no centro da Rosca com Disco 3D Claymorphic
 const centerDoughnutPlugin = {
   id: 'centerDoughnutPlugin',
   afterDraw(chart) {
     if (chart.config.type !== 'doughnut') return;
-    const { ctx, chartArea: { top, bottom, left, right, width, height } } = chart;
+    const { ctx, chartArea: { top, bottom, left, right } } = chart;
     const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
     
     ctx.save();
     const centerX = (left + right) / 2;
     const centerY = (top + bottom) / 2;
+    const innerRadius = (chart.getDatasetMeta(0).data[0]?.innerRadius || 60) - 6;
 
-    // Número do Total
-    ctx.font = '800 1.85rem "Outfit", sans-serif';
+    if (innerRadius > 20) {
+      // 1. Disco 3D Esmaltado Central
+      const discGrad = ctx.createRadialGradient(centerX - 8, centerY - 8, 2, centerX, centerY, innerRadius);
+      discGrad.addColorStop(0, 'rgba(30, 41, 59, 0.95)');
+      discGrad.addColorStop(0.7, 'rgba(15, 23, 42, 0.98)');
+      discGrad.addColorStop(1, 'rgba(2, 6, 23, 1)');
+
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, innerRadius, 0, Math.PI * 2);
+      ctx.fillStyle = discGrad;
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+      ctx.shadowBlur = 14;
+      ctx.fill();
+
+      // Borda com Specular Ring
+      ctx.lineWidth = 1.5;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.16)';
+      ctx.stroke();
+    }
+
+    // 2. Número do Total em Destaque 3D
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+    ctx.shadowBlur = 8;
+    ctx.font = '800 1.95rem "Outfit", sans-serif';
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(total, centerX, centerY - 8);
+    ctx.fillText(total, centerX, centerY - 9);
 
-    // Label do Centro
+    // 3. Label do Centro
     ctx.font = '700 0.68rem "Inter", sans-serif';
-    ctx.fillStyle = '#94a3b8';
+    ctx.fillStyle = '#38bdf8';
     ctx.letterSpacing = '1px';
     ctx.fillText('PROCEDIMENTOS', centerX, centerY + 14);
 
     ctx.restore();
+  }
+};
+
+// Plugin customizado para renderizar Sombreamento Profundo e Curvatura Especular Plástica 3D
+const plastic3DGlossPlugin = {
+  id: 'plastic3DGlossPlugin',
+  beforeDatasetsDraw(chart) {
+    const { ctx } = chart;
+    ctx.save();
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.52)';
+    ctx.shadowBlur = 18;
+    ctx.shadowOffsetY = 10;
+    ctx.shadowOffsetX = 3;
+  },
+  afterDatasetsDraw(chart) {
+    const { ctx } = chart;
+    ctx.restore();
+
+    // Desenhar filete de brilho plástico (Specular Sheen) para roscas e pizzas
+    if (chart.config.type === 'doughnut' || chart.config.type === 'pie') {
+      const meta = chart.getDatasetMeta(0);
+      if (meta && meta.data) {
+        meta.data.forEach((arc) => {
+          if (!arc.startAngle && arc.startAngle !== 0) return;
+          ctx.save();
+          ctx.beginPath();
+          const sheenRadius = arc.outerRadius - 3;
+          if (sheenRadius > 0) {
+            ctx.arc(arc.x, arc.y, sheenRadius, arc.startAngle + 0.06, arc.endAngle - 0.06);
+            ctx.lineWidth = 2.4;
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+            ctx.shadowColor = 'rgba(255, 255, 255, 0.85)';
+            ctx.shadowBlur = 4;
+            ctx.stroke();
+          }
+          ctx.restore();
+        });
+      }
+    }
   }
 };
 
@@ -187,22 +268,19 @@ function renderServicesChart(ChartClass, data) {
   const currentTypeKey = chartModes.services[chartModes.servicesIdx % chartModes.services.length];
   let chartType = currentTypeKey;
 
-  // Gerar gradientes de alta fidelidade
+  // Gerar gradientes com brilho plástico 3D volumétrico
   const backgroundGradients = services.map(s => {
-    const pair = s.gradient || [s.color, s.color];
-    return createLinearGradient(ctx2d, pair[0], pair[1], chartType !== 'bar');
+    return createPlastic3DGradient(ctx2d, s.color, chartType !== 'bar', 280);
   });
-
-  const borderColors = services.map(s => s.color);
 
   // Atualizar badge do tipo no card
   const badgeEl = document.getElementById('badge-services-chart-type');
   if (badgeEl) {
     const names = { 
-      'doughnut': '🍩 Rosca Holográfica (Donut)', 
-      'bar': '📊 Barras Horizontais Glow', 
-      'pie': '🥧 Pizza Radial (Pie)', 
-      'polarArea': '🌐 Área Polar Dinâmica' 
+      'doughnut': '🔮 Rosca 3D Plástico Glossy (Donut)', 
+      'bar': '🧪 Cilindros 3D Glossy (Plastic Bar)', 
+      'pie': '💎 Pizza 3D Cristalina & Plástico', 
+      'polarArea': '🪐 Esfera Polar 3D Esmaltada' 
     };
     badgeEl.textContent = names[currentTypeKey] || currentTypeKey;
   }
@@ -223,8 +301,8 @@ function renderServicesChart(ChartClass, data) {
   } else if (chartType === 'polarArea') {
     customScales = {
       r: {
-        grid: { color: 'rgba(255, 255, 255, 0.06)', borderDash: [3, 3] },
-        angleLines: { color: 'rgba(255, 255, 255, 0.08)' },
+        grid: { color: 'rgba(255, 255, 255, 0.08)', borderDash: [3, 3] },
+        angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
         ticks: { display: false }
       }
     };
@@ -237,19 +315,19 @@ function renderServicesChart(ChartClass, data) {
       datasets: [{
         data: values,
         backgroundColor: backgroundGradients,
-        borderColor: chartType === 'doughnut' ? '#090d16' : borderColors,
-        borderWidth: chartType === 'doughnut' ? 3 : 1.5,
-        hoverOffset: 12,
-        borderRadius: chartType === 'bar' ? 8 : (chartType === 'doughnut' ? 8 : 0),
-        spacing: chartType === 'doughnut' ? 4 : 0,
+        borderColor: chartType === 'doughnut' ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.35)',
+        borderWidth: chartType === 'doughnut' ? 2.5 : 1.8,
+        hoverOffset: 14,
+        borderRadius: chartType === 'bar' ? 12 : (chartType === 'doughnut' ? 10 : 4),
+        spacing: chartType === 'doughnut' ? 6 : 2,
         borderSkipped: false
       }]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      animation: { duration: 650, easing: 'easeOutQuart' },
-      layout: { padding: 6 },
+      animation: { duration: 750, easing: 'easeOutQuart' },
+      layout: { padding: 8 },
       plugins: {
         legend: {
           display: chartType !== 'bar',
@@ -264,10 +342,10 @@ function renderServicesChart(ChartClass, data) {
           }
         },
         tooltip: {
-          backgroundColor: 'rgba(15, 23, 42, 0.94)',
+          backgroundColor: 'rgba(15, 23, 42, 0.95)',
           titleColor: '#38bdf8',
           bodyColor: '#f8fafc',
-          borderColor: 'rgba(56, 189, 248, 0.35)',
+          borderColor: 'rgba(56, 189, 248, 0.45)',
           borderWidth: 1.5,
           cornerRadius: 12,
           padding: 12,
@@ -284,7 +362,7 @@ function renderServicesChart(ChartClass, data) {
           }
         }
       },
-      cutout: chartType === 'doughnut' ? '72%' : '0%',
+      cutout: chartType === 'doughnut' ? '68%' : '0%',
       ...customScales
     }
   });
@@ -307,36 +385,32 @@ function renderCdssChart(ChartClass, data) {
   const badgeEl = document.getElementById('badge-cdss-chart-type');
   if (badgeEl) {
     const names = { 
-      'polarArea': '🌐 Área Polar Holográfica', 
-      'radar': '🕸️ Radar 4D Multidimensional', 
-      'doughnut': '🍩 Rosca Segmentada', 
-      'bar': '📊 Barras Verticais Glow', 
-      'pie': '🥧 Pizza Radial' 
+      'polarArea': '🪐 Esfera Polar 3D Esmaltada', 
+      'radar': '🕸️ Teia 3D Holográfica Neon', 
+      'doughnut': '🔮 Rosca CDSS 3D Acrílica', 
+      'bar': '📊 Colunas 3D Plástico Volumétrico', 
+      'pie': '🍰 Pizza 3D Alertas Esmaltada' 
     };
     badgeEl.textContent = names[currentTypeKey] || currentTypeKey;
   }
 
   const backgroundGradients = alerts.map(a => {
-    const pair = a.gradient || [a.color, a.color];
-    return createLinearGradient(ctx2d, pair[0], pair[1], true, 260);
+    return createPlastic3DGradient(ctx2d, a.color, true, 260);
   });
-
-  const borderColors = alerts.map(a => a.color);
 
   let datasetConfig = {
     data: values,
     backgroundColor: backgroundGradients,
-    borderColor: borderColors,
+    borderColor: 'rgba(255, 255, 255, 0.35)',
     borderWidth: 2,
-    borderRadius: chartType === 'bar' ? 8 : (chartType === 'doughnut' ? 6 : 0),
-    spacing: chartType === 'doughnut' ? 3 : 0,
-    hoverOffset: 10
+    borderRadius: chartType === 'bar' ? 10 : (chartType === 'doughnut' ? 8 : 4),
+    spacing: chartType === 'doughnut' ? 5 : 2,
+    hoverOffset: 12
   };
 
   if (chartType === 'radar') {
-    // Gradiente neon para radar
     const radarGrad = ctx2d.createLinearGradient(0, 0, 0, 260);
-    radarGrad.addColorStop(0, 'rgba(245, 158, 11, 0.45)');
+    radarGrad.addColorStop(0, 'rgba(245, 158, 11, 0.55)');
     radarGrad.addColorStop(1, 'rgba(239, 68, 68, 0.15)');
 
     datasetConfig = {
@@ -344,12 +418,12 @@ function renderCdssChart(ChartClass, data) {
       data: values,
       backgroundColor: radarGrad,
       borderColor: '#fbbf24',
-      borderWidth: 2.5,
+      borderWidth: 3,
       pointBackgroundColor: '#fbbf24',
       pointBorderColor: '#ffffff',
-      pointBorderWidth: 2,
-      pointRadius: 4,
-      pointHoverRadius: 7
+      pointBorderWidth: 2.5,
+      pointRadius: 5,
+      pointHoverRadius: 8
     };
   }
 
@@ -357,9 +431,9 @@ function renderCdssChart(ChartClass, data) {
   if (chartType === 'radar' || chartType === 'polarArea') {
     scalesConfig = {
       r: {
-        grid: { color: 'rgba(255, 255, 255, 0.06)', borderDash: [3, 3] },
-        angleLines: { color: 'rgba(255, 255, 255, 0.08)' },
-        pointLabels: { color: '#cbd5e1', font: { size: 10, family: 'Inter', weight: '500' } },
+        grid: { color: 'rgba(255, 255, 255, 0.08)', borderDash: [3, 3] },
+        angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+        pointLabels: { color: '#cbd5e1', font: { size: 10, family: 'Inter', weight: '600' } },
         ticks: { display: false }
       }
     };
@@ -385,7 +459,7 @@ function renderCdssChart(ChartClass, data) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      animation: { duration: 650, easing: 'easeOutQuart' },
+      animation: { duration: 750, easing: 'easeOutQuart' },
       layout: { padding: 6 },
       scales: scalesConfig,
       plugins: {
@@ -401,10 +475,10 @@ function renderCdssChart(ChartClass, data) {
           }
         },
         tooltip: {
-          backgroundColor: 'rgba(15, 23, 42, 0.94)',
+          backgroundColor: 'rgba(15, 23, 42, 0.95)',
           titleColor: '#fbbf24',
           bodyColor: '#f8fafc',
-          borderColor: 'rgba(245, 158, 11, 0.4)',
+          borderColor: 'rgba(245, 158, 11, 0.45)',
           borderWidth: 1.5,
           cornerRadius: 12,
           padding: 12,
@@ -412,7 +486,7 @@ function renderCdssChart(ChartClass, data) {
           bodyFont: { size: 11.5, family: 'Inter' }
         }
       },
-      cutout: chartType === 'doughnut' ? '68%' : '0%'
+      cutout: chartType === 'doughnut' ? '66%' : '0%'
     }
   });
 }
@@ -434,11 +508,11 @@ function renderWeeklyChart(ChartClass, data) {
   const badgeEl = document.getElementById('badge-weekly-chart-type');
   if (badgeEl) {
     const names = { 
-      'line-smooth': '📈 Linha Spline Glow', 
-      'bar': '📊 Barras Agrupadas 3D', 
-      'line-stepped': '⚡ Linha Degrau (Stepped)', 
-      'radar': '🕸️ Radar Semanal', 
-      'area-stacked': '🏔️ Área Fluida Empilhada' 
+      'line-smooth': '📈 Tubo Fluido 3D Neon Glossy', 
+      'bar': '📊 Colunas 3D Plástico Acrílico', 
+      'line-stepped': '⚡ Pulso 3D Degrau Glossy', 
+      'radar': '🕸️ Radar Semanal 3D', 
+      'area-stacked': '🏔️ Montanha 3D Resina Translúcida' 
     };
     badgeEl.textContent = names[currentTypeKey] || currentTypeKey;
   }
@@ -449,43 +523,38 @@ function renderWeeklyChart(ChartClass, data) {
 
   if (currentTypeKey === 'bar') {
     chartType = 'bar';
-  } else if (currentTypeKey === 'radar') {
-    chartType = 'radar';
   } else if (currentTypeKey === 'line-stepped') {
     chartType = 'line';
     isStepped = true;
+  } else if (currentTypeKey === 'radar') {
+    chartType = 'radar';
   } else if (currentTypeKey === 'area-stacked') {
     chartType = 'line';
     isStacked = true;
   }
 
-  // Gradiente suave de fade vertical
-  const emeraldGradient = ctx2d.createLinearGradient(0, 0, 0, 240);
-  emeraldGradient.addColorStop(0, 'rgba(16, 185, 129, 0.42)');
-  emeraldGradient.addColorStop(1, 'rgba(16, 185, 129, 0.01)');
+  // Gradientes 3D volumétricos
+  const emeraldGradient = createPlastic3DGradient(ctx2d, '#10b981', true, 260);
+  const amberGradient = createPlastic3DGradient(ctx2d, '#f59e0b', true, 260);
 
-  const amberGradient = ctx2d.createLinearGradient(0, 0, 0, 240);
-  amberGradient.addColorStop(0, 'rgba(245, 158, 11, 0.42)');
-  amberGradient.addColorStop(1, 'rgba(245, 158, 11, 0.01)');
+  let scalesConfig = {
+    x: {
+      grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false },
+      ticks: { color: '#cbd5e1', font: { family: 'Outfit', weight: '600', size: 11 } }
+    },
+    y: {
+      stacked: isStacked,
+      grid: { color: 'rgba(255,255,255,0.05)', borderDash: [4, 4], drawBorder: false },
+      ticks: { color: '#94a3b8', font: { family: 'Inter', size: 10.5 }, precision: 0 }
+    }
+  };
 
-  let scalesConfig = {};
-  if (chartType !== 'radar') {
-    scalesConfig = {
-      x: {
-        grid: { color: 'rgba(255, 255, 255, 0.04)', borderDash: [4, 4] },
-        ticks: { color: '#94a3b8', font: { family: 'Inter', weight: '600', size: 11 } }
-      },
-      y: {
-        stacked: isStacked,
-        grid: { color: 'rgba(255, 255, 255, 0.04)', borderDash: [4, 4] },
-        ticks: { color: '#94a3b8', font: { family: 'Inter' }, stepSize: 2 }
-      }
-    };
-  } else {
+  if (chartType === 'radar') {
     scalesConfig = {
       r: {
-        grid: { color: 'rgba(255, 255, 255, 0.06)', borderDash: [3, 3] },
-        angleLines: { color: 'rgba(255, 255, 255, 0.08)' },
+        grid: { color: 'rgba(255, 255, 255, 0.08)', borderDash: [3, 3] },
+        angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+        pointLabels: { color: '#cbd5e1', font: { size: 10.5, family: 'Outfit', weight: '600' } },
         ticks: { display: false }
       }
     };
@@ -499,43 +568,43 @@ function renderWeeklyChart(ChartClass, data) {
         {
           label: 'Atendimentos Clínicos',
           data: atendimentos,
-          borderColor: '#10b981',
-          borderWidth: 3,
+          borderColor: '#34d399',
+          borderWidth: 3.5,
           backgroundColor: emeraldGradient,
           fill: true,
           stepped: isStepped,
-          tension: isStepped ? 0 : 0.42,
+          tension: isStepped ? 0 : 0.45,
           pointBackgroundColor: '#10b981',
           pointBorderColor: '#ffffff',
-          pointBorderWidth: 2,
-          pointRadius: 4.5,
-          pointHoverRadius: 8,
+          pointBorderWidth: 2.5,
+          pointRadius: 5,
+          pointHoverRadius: 8.5,
           pointHoverBorderWidth: 3,
-          borderRadius: chartType === 'bar' ? 6 : 0
+          borderRadius: chartType === 'bar' ? 10 : 0
         },
         {
           label: 'Intervenções Farmacêuticas',
           data: intervencoes,
-          borderColor: '#f59e0b',
-          borderWidth: 3,
+          borderColor: '#fbbf24',
+          borderWidth: 3.5,
           backgroundColor: amberGradient,
           fill: true,
           stepped: isStepped,
-          tension: isStepped ? 0 : 0.42,
+          tension: isStepped ? 0 : 0.45,
           pointBackgroundColor: '#f59e0b',
           pointBorderColor: '#ffffff',
-          pointBorderWidth: 2,
-          pointRadius: 4.5,
-          pointHoverRadius: 8,
+          pointBorderWidth: 2.5,
+          pointRadius: 5,
+          pointHoverRadius: 8.5,
           pointHoverBorderWidth: 3,
-          borderRadius: chartType === 'bar' ? 6 : 0
+          borderRadius: chartType === 'bar' ? 10 : 0
         }
       ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      animation: { duration: 650, easing: 'easeOutQuart' },
+      animation: { duration: 750, easing: 'easeOutQuart' },
       layout: { padding: 4 },
       scales: scalesConfig,
       plugins: {
@@ -550,10 +619,10 @@ function renderWeeklyChart(ChartClass, data) {
           }
         },
         tooltip: {
-          backgroundColor: 'rgba(15, 23, 42, 0.94)',
+          backgroundColor: 'rgba(15, 23, 42, 0.95)',
           titleColor: '#34d399',
           bodyColor: '#f8fafc',
-          borderColor: 'rgba(16, 185, 129, 0.35)',
+          borderColor: 'rgba(16, 185, 129, 0.45)',
           borderWidth: 1.5,
           cornerRadius: 12,
           padding: 12,
@@ -564,6 +633,7 @@ function renderWeeklyChart(ChartClass, data) {
     }
   });
 }
+
 
 // ─────────────────────────────────────────────────────────────────────────────
 // FUNÇÕES GLOBAIS DE ALTERNÂNCIA RANDÔMICA / DINÂMICA
@@ -1566,7 +1636,7 @@ export async function renderDashboardTab(container) {
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 20px; margin-bottom: 24px;">
         
         <!-- Gráfico 1: Serviços Farmacêuticos Mais Realizados -->
-        <div style="background: rgba(15, 23, 42, 0.88); border: 1px solid rgba(20, 184, 166, 0.25); border-radius: 18px; padding: 22px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); position: relative; backdrop-filter: blur(12px);">
+        <div style="background: linear-gradient(145deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.95)); border: 1.5px solid rgba(20, 184, 166, 0.35); border-radius: 22px; padding: 22px; box-shadow: inset 0 1.5px 3px rgba(255, 255, 255, 0.18), inset 0 -3px 8px rgba(0, 0, 0, 0.6), 0 18px 40px rgba(0,0,0,0.5); position: relative; backdrop-filter: blur(16px);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
             <div>
               <h3 style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 700; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
@@ -1576,11 +1646,11 @@ export async function renderDashboardTab(container) {
             </div>
             
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span id="badge-services-chart-type" style="font-size: 0.7rem; background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 4px 10px; border-radius: 12px; font-weight: 700; border: 1px solid rgba(16,185,129,0.35);">
-                Rosca Holográfica
+              <span id="badge-services-chart-type" style="font-size: 0.7rem; background: rgba(16, 185, 129, 0.2); color: #34d399; padding: 4px 10px; border-radius: 12px; font-weight: 700; border: 1px solid rgba(16,185,129,0.4); box-shadow: inset 0 1px 2px rgba(255,255,255,0.2);">
+                🔮 Rosca 3D Plástico Glossy
               </span>
-              <button onclick="window.toggleServicesChart(event)" class="btn btn-sm" title="Alternar formato visual do gráfico (Donut, Barras, Pizza, Polar)" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.35)); border: 1px solid rgba(16, 185, 129, 0.5); color: #34d399; font-size: 0.78rem; font-weight: 700; padding: 6px 12px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); transition: all 0.2s ease;">
-                <i class="fa-solid fa-shuffle"></i> Alternar
+              <button onclick="window.toggleServicesChart(event)" class="btn btn-sm" title="Alternar formato visual do gráfico (Donut, Barras, Pizza, Polar)" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(5, 150, 105, 0.45)); border: 1px solid rgba(16, 185, 129, 0.6); color: #34d399; font-size: 0.78rem; font-weight: 700; padding: 6px 12px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: inset 0 1px 2px rgba(255,255,255,0.3), 0 4px 12px rgba(16, 185, 129, 0.3); transition: all 0.2s ease;">
+                <i class="fa-solid fa-shuffle"></i> Alternar 3D
               </button>
             </div>
           </div>
@@ -1597,7 +1667,7 @@ export async function renderDashboardTab(container) {
         </div>
 
         <!-- Gráfico 2: Alertas do Motor CDSS 4D por Categoria -->
-        <div style="background: rgba(15, 23, 42, 0.88); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 18px; padding: 22px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); position: relative; backdrop-filter: blur(12px);">
+        <div style="background: linear-gradient(145deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.95)); border: 1.5px solid rgba(245, 158, 11, 0.35); border-radius: 22px; padding: 22px; box-shadow: inset 0 1.5px 3px rgba(255, 255, 255, 0.18), inset 0 -3px 8px rgba(0, 0, 0, 0.6), 0 18px 40px rgba(0,0,0,0.5); position: relative; backdrop-filter: blur(16px);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
             <div>
               <h3 style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 700; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
@@ -1607,11 +1677,11 @@ export async function renderDashboardTab(container) {
             </div>
             
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span id="badge-cdss-chart-type" style="font-size: 0.7rem; background: rgba(245, 158, 11, 0.15); color: #fbbf24; padding: 4px 10px; border-radius: 12px; font-weight: 700; border: 1px solid rgba(245,158,11,0.35);">
-                Área Polar Holográfica
+              <span id="badge-cdss-chart-type" style="font-size: 0.7rem; background: rgba(245, 158, 11, 0.2); color: #fbbf24; padding: 4px 10px; border-radius: 12px; font-weight: 700; border: 1px solid rgba(245,158,11,0.4); box-shadow: inset 0 1px 2px rgba(255,255,255,0.2);">
+                🪐 Esfera Polar 3D Esmaltada
               </span>
-              <button onclick="window.toggleCdssChart(event)" class="btn btn-sm" title="Alternar formato visual do gráfico (Polar, Radar, Donut, Barras)" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(217, 119, 6, 0.35)); border: 1px solid rgba(245, 158, 11, 0.5); color: #fbbf24; font-size: 0.78rem; font-weight: 700; padding: 6px 12px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2); transition: all 0.2s ease;">
-                <i class="fa-solid fa-shuffle"></i> Alternar
+              <button onclick="window.toggleCdssChart(event)" class="btn btn-sm" title="Alternar formato visual do gráfico (Polar, Radar, Donut, Barras)" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(217, 119, 6, 0.45)); border: 1px solid rgba(245, 158, 11, 0.6); color: #fbbf24; font-size: 0.78rem; font-weight: 700; padding: 6px 12px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: inset 0 1px 2px rgba(255,255,255,0.3), 0 4px 12px rgba(245, 158, 11, 0.3); transition: all 0.2s ease;">
+                <i class="fa-solid fa-shuffle"></i> Alternar 3D
               </button>
             </div>
           </div>
@@ -1633,7 +1703,7 @@ export async function renderDashboardTab(container) {
       <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: start;">
         
         <!-- Gráfico 3: Evolução Semanal de Atendimentos e Intervenções -->
-        <div style="background: rgba(15, 23, 42, 0.88); border: 1px solid rgba(129, 140, 248, 0.25); border-radius: 18px; padding: 22px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); backdrop-filter: blur(12px);">
+        <div style="background: linear-gradient(145deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.95)); border: 1.5px solid rgba(129, 140, 248, 0.35); border-radius: 22px; padding: 22px; box-shadow: inset 0 1.5px 3px rgba(255, 255, 255, 0.18), inset 0 -3px 8px rgba(0, 0, 0, 0.6), 0 18px 40px rgba(0,0,0,0.5); backdrop-filter: blur(16px);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
             <div>
               <h3 style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 700; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
@@ -1643,11 +1713,11 @@ export async function renderDashboardTab(container) {
             </div>
             
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span id="badge-weekly-chart-type" style="font-size: 0.7rem; background: rgba(129, 140, 248, 0.15); color: #a5b4fc; padding: 4px 10px; border-radius: 12px; font-weight: 700; border: 1px solid rgba(129,140,248,0.35);">
-                Linha Spline Glow
+              <span id="badge-weekly-chart-type" style="font-size: 0.7rem; background: rgba(129, 140, 248, 0.2); color: #a5b4fc; padding: 4px 10px; border-radius: 12px; font-weight: 700; border: 1px solid rgba(129,140,248,0.4); box-shadow: inset 0 1px 2px rgba(255,255,255,0.2);">
+                📈 Tubo Fluido 3D Neon Glossy
               </span>
-              <button onclick="window.toggleWeeklyChart(event)" class="btn btn-sm" title="Alternar formato visual (Linha, Barras, Degrau, Radar, Área)" style="background: linear-gradient(135deg, rgba(129, 140, 248, 0.25), rgba(99, 102, 241, 0.35)); border: 1px solid rgba(129, 140, 248, 0.5); color: #a5b4fc; font-size: 0.78rem; font-weight: 700; padding: 6px 12px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(129, 140, 248, 0.2); transition: all 0.2s ease;">
-                <i class="fa-solid fa-shuffle"></i> Alternar
+              <button onclick="window.toggleWeeklyChart(event)" class="btn btn-sm" title="Alternar formato visual (Linha, Barras, Degrau, Radar, Área)" style="background: linear-gradient(135deg, rgba(129, 140, 248, 0.3), rgba(99, 102, 241, 0.45)); border: 1px solid rgba(129, 140, 248, 0.6); color: #a5b4fc; font-size: 0.78rem; font-weight: 700; padding: 6px 12px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: inset 0 1px 2px rgba(255,255,255,0.3), 0 4px 12px rgba(129, 140, 248, 0.3); transition: all 0.2s ease;">
+                <i class="fa-solid fa-shuffle"></i> Alternar 3D
               </button>
             </div>
           </div>
