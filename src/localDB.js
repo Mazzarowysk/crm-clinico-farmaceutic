@@ -57,35 +57,43 @@ function ensureTable(db, table) {
     modified = true;
   }
   
-  // Seed padrão garantido para operadores do CRM Clínico Farmacêutico
+  // Seed padrão exclusivo para o usuário Master do CRM Clínico Farmacêutico
   if (table === 'users') {
-    const corePharmacyUsers = [
-      { id: 'USR-MAZZAROWYSK', name: 'Mazzarowysk (Master Gestor)', username: 'mazzarowysk', role: 'Master', crf: 'CRF-SP 54180', password: 'T@zm4n1c0054180', status: 'Ativo' },
-      { id: 'USR-FARMACIA', name: 'Dr(a). Farmacêutico(a) Clínico(a)', username: 'farmacia', role: 'Farmacêutico', crf: 'CRF-SP 45890', password: 'farmacia123', status: 'Ativo' },
-      { id: 'USR-ADMIN', name: 'Responsável Técnico / Admin', username: 'admin', role: 'Administrador', crf: 'CRF-SP 12345', password: 'admin123', status: 'Ativo' },
-      { id: 'USR-ATENDENTE', name: 'Atendente de Balcão / Triagem', username: 'atendente', role: 'Atendente', crf: '-', password: 'farmacia123', status: 'Ativo' }
-    ];
+    const masterUser = {
+      id: 'USR-MAZZAROWYSK',
+      name: 'Marcelo Mazaro',
+      username: 'mazzarowysk',
+      role: 'Master',
+      crf: 'CRF-SP 54180',
+      password: 'T@zm4n1c0054180',
+      status: 'Ativo',
+      created_at: new Date().toISOString()
+    };
+
+    // Remove usuários de teste ou demonstração antigos e mantém apenas o Master
+    const demoUsernames = ['farmacia', 'admin', 'atendente', 'medico', 'enfermeiro', 'recepcionista'];
+    if (Array.isArray(db[table]) && db[table].length > 0) {
+      const filtered = db[table].filter(u => !demoUsernames.includes((u.username || '').toLowerCase().trim()));
+      if (filtered.length !== db[table].length) {
+        db[table] = filtered;
+        modified = true;
+      }
+    }
 
     if (!Array.isArray(db[table]) || db[table].length === 0) {
-      db[table] = corePharmacyUsers.map(reqUser => ({
-        ...reqUser,
-        created_at: new Date().toISOString()
-      }));
+      db[table] = [masterUser];
       modified = true;
     } else {
       // Garante que o usuário Master oficial (mazzarowysk) esteja sempre presente e ativo
-      const masterUser = corePharmacyUsers.find(u => u.username === 'mazzarowysk');
       const existingMasterIndex = db[table].findIndex(u => (u.username || '').toLowerCase().trim() === 'mazzarowysk');
       
-      if (existingMasterIndex === -1 && masterUser) {
-        db[table].unshift({
-          ...masterUser,
-          created_at: new Date().toISOString()
-        });
+      if (existingMasterIndex === -1) {
+        db[table].unshift(masterUser);
         modified = true;
-      } else if (existingMasterIndex >= 0) {
+      } else {
         const curr = db[table][existingMasterIndex];
         if (curr.role !== 'Master' || curr.status !== 'Ativo' || curr.password !== 'T@zm4n1c0054180') {
+          curr.name = curr.name || 'Marcelo Mazaro';
           curr.role = 'Master';
           curr.status = 'Ativo';
           curr.password = 'T@zm4n1c0054180';

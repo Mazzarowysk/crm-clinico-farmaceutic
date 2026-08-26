@@ -100,7 +100,7 @@ export const apiFetch = async (url, options = {}) => {
       if (!user && cleanInput === 'mazzarowysk') {
         user = {
           id: 'USR-MAZZAROWYSK',
-          name: 'Mazzarowysk (Master Gestor)',
+          name: 'Marcelo Mazaro',
           username: 'mazzarowysk',
           role: 'Master',
           crf: 'CRF-SP 54180',

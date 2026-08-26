@@ -284,7 +284,7 @@ export function renderSettingsTab(contentArea) {
       if (masterIdx === -1) {
         localDB.insert('users', {
           id: 'USR-MAZZAROWYSK',
-          name: 'Mazzarowysk (Master Gestor)',
+          name: 'Marcelo Mazaro',
           username: 'mazzarowysk',
           role: 'Master',
           crf: 'CRF-SP 54180',
