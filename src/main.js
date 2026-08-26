@@ -899,7 +899,7 @@ function renderAuthScreen() {
 
             <div class="auth-brand-logo-wrap">
               <div class="auth-brand-logo-box">
-                <img src="/assets/crm-logo.png?v=2" alt="Logo CRM Clínico Farmacêutico" class="auth-brand-logo-img">
+                <img src="/assets/crm_logo_v10.png" alt="Logo CRM Clínico Farmacêutico" class="auth-brand-logo-img">
               </div>
               <div class="auth-brand-name">
                 CRM Farmacêutico
@@ -1379,7 +1379,7 @@ function renderAppStructure() {
       <aside class="app-sidebar">
         <div class="brand-logo" style="padding: 16px 12px; display: flex; align-items: center; gap: 12px;">
           <div class="system-sidebar-logo-box">
-            <img src="/assets/crm-logo.png?v=2" alt="PharmaCRM Logo" class="system-sidebar-logo-img">
+            <img src="/assets/crm_logo_v10.png" alt="PharmaCRM Logo" class="system-sidebar-logo-img">
           </div>
           <div>
             <div style="font-family: 'Outfit', sans-serif; font-weight: 700; color: #f8fafc; font-size: 1.05rem; line-height: 1.1;">PharmaCRM</div>
@@ -1415,7 +1415,7 @@ function renderAppStructure() {
             <i class="fa-solid fa-arrow-left"></i>
             <span id="global-back-label">Voltar</span>
           </button>
-          <img src="/assets/crm-logo.png?v=2" alt="PharmaCRM" class="header-brand-logo-img">
+          <img src="/assets/crm_logo_v10.png" alt="PharmaCRM" class="header-brand-logo-img">
           <div>
             <h1 class="page-title" id="page-title-label" style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.25rem; line-height: 1.2;">CRM Clínico Farmacêutico</h1>
             <div class="header-brand-text" style="margin: 0; font-size: 0.76rem; color: #94a3b8;">

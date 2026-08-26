@@ -8,9 +8,26 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="/manifest.webmanifest">
+  
+  <!-- Script para limpar Service Workers antigos e Caches do navegador -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for (let registration of registrations) {
+          registration.unregister();
+        }
+      });
+    }
+    if ('caches' in window) {
+      caches.keys().then(function(names) {
+        for (let name of names) caches.delete(name);
+      });
+    }
+  </script>
+
   <!-- Favicon / Ícone do Sistema -->
-  <link rel="icon" type="image/png" href="/assets/crm-logo.png?v=2">
-  <link rel="apple-touch-icon" href="/assets/crm-logo.png?v=2">
+  <link rel="icon" type="image/png" href="/assets/crm_logo_v10.png">
+  <link rel="apple-touch-icon" href="/assets/crm_logo_v10.png">
   <!-- Fontes Corporativas: Outfit (títulos) e Inter (corpo) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,7 +48,7 @@
     body {
       margin: 0;
       padding: 0;
-      background: #0b0f19;
+      background: #080c14;
       color: #f8fafc;
       font-family: 'Inter', sans-serif;
     }
@@ -42,23 +59,31 @@
       justify-content: center;
       height: 100vh;
       width: 100vw;
-      background: radial-gradient(circle at center, #131b2e 0%, #0b0f19 100%);
+      background: radial-gradient(circle at center, #0f172a 0%, #080c14 100%);
       gap: 16px;
     }
-    .loader-logo {
-      width: 96px;
-      height: 96px;
-      object-fit: contain;
+    .loader-logo-box {
+      width: 90px;
+      height: 90px;
       border-radius: 20px;
-      box-shadow: 0 8px 32px rgba(13, 148, 136, 0.4);
-      border: 2px solid rgba(20, 184, 166, 0.4);
       background: rgba(15, 23, 42, 0.85);
+      border: 1.5px solid rgba(20, 184, 166, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 25px rgba(13, 148, 136, 0.35);
       padding: 6px;
       animation: pulseLogo 2s infinite ease-in-out;
     }
+    .loader-logo {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      border-radius: 14px;
+    }
     .loader-spinner {
-      width: 36px;
-      height: 36px;
+      width: 32px;
+      height: 32px;
       border: 3px solid rgba(20, 184, 166, 0.2);
       border-top-color: #14b8a6;
       border-radius: 50%;
@@ -84,7 +109,9 @@
   <div id="app">
     <!-- Tela de Inicialização / Carregamento com Logomarca -->
     <div class="initial-loader">
-      <img src="/assets/crm-logo.png?v=2" alt="CRM Clínico Farmacêutico" class="loader-logo">
+      <div class="loader-logo-box">
+        <img src="/assets/crm_logo_v10.png" alt="CRM Clínico Farmacêutico" class="loader-logo">
+      </div>
       <div class="loader-spinner"></div>
       <p class="loader-text">Inicializando CRM Clínico Farmacêutico...</p>
     </div>
