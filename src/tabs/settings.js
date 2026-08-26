@@ -9,6 +9,7 @@ import { showToast, showCustomAlert, showCustomConfirm } from '../modules/ui.js'
 import { getRolePermissions, showUserSessionsHistory } from '../modules/auth.js';
 import { syncManager, getSyncStatus, formatSyncDate } from '../modules/sync.js';
 import { showInteractiveManualModal } from '../manualTabbed.js';
+import { renderFinancialParamsManagement } from '../modules/financialParams.js';
 import {
   generateSimulatedPatients,
   generateSimulatedConsultations,
@@ -54,7 +55,7 @@ export function renderSettingsTab(contentArea) {
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; background: rgba(15, 23, 42, 0.65); border: 1px solid rgba(255,255,255,0.08); padding: 12px 18px; border-radius: 14px; backdrop-filter: blur(12px);">
         <div style="display: flex; align-items: center; gap: 10px; color: #94a3b8; font-size: 0.84rem;">
           <i class="fa-solid fa-layer-group" style="color: #14b8a6; font-size: 1rem;"></i>
-          <span>Módulos de Configuração &bull; <strong>6 Agrupamentos Estruturados (Com Simulador &amp; Gestão de Bases)</strong></span>
+          <span>Módulos de Configuração &bull; <strong>7 Agrupamentos Estruturados (Com Parâmetros Financeiros, Simulador &amp; Gestão de Bases)</strong></span>
         </div>
         <div style="display: flex; gap: 8px;">
           <button id="btn-cfg-expand-all" class="btn" style="background: rgba(20, 184, 166, 0.15); border: 1px solid rgba(20, 184, 166, 0.35); color: #2dd4bf; font-size: 0.78rem; font-weight: 700; padding: 7px 14px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
@@ -634,6 +635,40 @@ export function renderSettingsTab(contentArea) {
           </div>
         </div>
 
+        <!-- ==================================================================== -->
+        <!-- AGRUPAMENTO 7: GESTÃO DE PARÂMETROS FINANCEIROS (RECEITAS & DESPESAS) -->
+        <!-- ==================================================================== -->
+        <div class="cfg-accordion-card open" id="accordion-group-fin-params" style="background: rgba(15, 23, 42, 0.75); border: 1.5px solid rgba(16, 185, 129, 0.4); border-radius: 18px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.35); transition: all 0.3s ease;">
+          <div class="cfg-accordion-header" data-target="body-fin-params" style="padding: 16px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(90deg, rgba(16, 185, 129, 0.18), rgba(15, 23, 42, 0.6)); border-bottom: 1px solid rgba(16, 185, 129, 0.25); user-select: none;">
+            <div style="display: flex; align-items: center; gap: 16px;">
+              <div style="width: 46px; height: 46px; border-radius: 14px; background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.45)); border: 1.5px solid rgba(52, 211, 153, 0.6); display: flex; align-items: center; justify-content: center; color: #34d399; font-size: 1.3rem; box-shadow: 0 0 18px rgba(16, 185, 129, 0.25);">
+                <i class="fa-solid fa-tags"></i>
+              </div>
+              <div>
+                <div style="font-family: 'Outfit', sans-serif; font-size: 1.12rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                  Gestão de Categorias Financeiras &amp; Formas de Pagamento
+                  <span style="font-size: 0.72rem; background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); padding: 2px 9px; border-radius: 12px; font-weight: 700;">
+                    Receitas, Despesas &amp; Meios de Pagamento
+                  </span>
+                </div>
+                <p style="margin: 3px 0 0; font-size: 0.82rem; color: #94a3b8;">
+                  Cadastre, edite e exclua situações de receitas, despesas e formas de pagamento. Qualquer item cadastrado via botão <code>+</code> no fluxo é gerenciado aqui automaticamente.
+                </p>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div class="cfg-chevron-btn" style="width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; color: #34d399; transition: transform 0.3s ease;">
+                <i class="fa-solid fa-chevron-down cfg-chevron-icon"></i>
+              </div>
+            </div>
+          </div>
+
+          <div id="body-fin-params" class="cfg-accordion-body" style="padding: 20px; display: block;">
+            <div id="cfg-financial-params-container"></div>
+          </div>
+        </div>
+
       </div>
 
     </div>
@@ -1199,6 +1234,12 @@ export function renderSettingsTab(contentArea) {
 
   // Carregar lista de usuários na inicialização
   loadUsersList();
+
+  // Carregar Gestão de Parâmetros Financeiros (Receitas, Despesas & Meios de Pagamento)
+  const finParamsContainer = document.getElementById('cfg-financial-params-container');
+  if (finParamsContainer) {
+    renderFinancialParamsManagement(finParamsContainer);
+  }
 }
 
 // ─── MODAL DE CONFIRMAÇÃO DE SEGURANÇA COM SENHA ───

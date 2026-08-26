@@ -7,6 +7,12 @@ import { state } from '../state.js';
 import * as localDB from '../localDB.js';
 import { apiFetch } from '../modules/api.js';
 import { showToast, showCustomAlert, showCustomConfirm } from '../modules/ui.js';
+import {
+  getFinancialCategories,
+  addFinancialCategory,
+  getPaymentMethods,
+  addPaymentMethod
+} from '../modules/financialParams.js';
 
 let currentFilterType = 'todos'; // 'todos' | 'receita' | 'despesa'
 let currentFilterPeriod = 'mes'; // 'hoje' | '7dias' | 'mes' | 'ano' | 'todos'
@@ -550,25 +556,11 @@ export function openNewTransactionModal() {
               <div style="display: flex; gap: 6px;">
                 <select id="fin-category" class="form-input" style="flex: 1; height: 42px; font-size: 0.88rem; line-height: 1.4; padding: 6px 10px; background: rgba(30, 41, 59, 0.95); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 8px;" required>
                   <optgroup label="── Receitas Clínicas &amp; Balcão ──">
-                    <option value="Consulta Farmacêutica (Balcão)">Consulta Farmacêutica (Balcão)</option>
-                    <option value="Venda de Medicamentos (PDV)">Venda de Medicamentos (PDV)</option>
-                    <option value="Aplicação de Injetáveis &amp; Vacinas">Aplicação de Injetáveis &amp; Vacinas</option>
-                    <option value="Testes Rápidos / TLR (RDC 786)">Testes Rápidos / TLR (RDC 786)</option>
-                    <option value="Aferição de Pressão / Glicemia">Aferição de Pressão / Glicemia</option>
+                    ${getFinancialCategories('receita').map(c => `<option value="${c.name}">${c.name}</option>`).join('')}
                   </optgroup>
                   <optgroup label="── Despesas Operacionais &amp; Compras ──">
-                    <option value="Compra de Medicamentos (Distribuidora)">Compra de Medicamentos (Distribuidora)</option>
-                    <option value="Insumos &amp; Descartáveis">Insumos &amp; Descartáveis (Seringas/EPIs)</option>
-                    <option value="Aluguel &amp; Instalações">Aluguel &amp; Instalações</option>
-                    <option value="Energia, Água &amp; Internet">Energia, Água &amp; Internet</option>
-                    <option value="Anuidade CRF / Taxas ANVISA">Anuidade CRF / Taxas ANVISA</option>
-                    <option value="Folha de Pagamento">Folha de Pagamento / Salários</option>
+                    ${getFinancialCategories('despesa').map(c => `<option value="${c.name}">${c.name}</option>`).join('')}
                   </optgroup>
-                  ${(JSON.parse(localStorage.getItem('crm_custom_fin_categories') || '[]')).length > 0 ? `
-                    <optgroup label="── Categorias Personalizadas ──">
-                      ${(JSON.parse(localStorage.getItem('crm_custom_fin_categories') || '[]')).map(c => `<option value="${c}">${c}</option>`).join('')}
-                    </optgroup>
-                  ` : ''}
                 </select>
                 <button type="button" id="btn-plus-icon-category" title="Adicionar Categoria" style="width: 42px; height: 42px; border-radius: 8px; background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                   <i class="fa-solid fa-plus"></i>
@@ -595,13 +587,7 @@ export function openNewTransactionModal() {
               </div>
               <div style="display: flex; gap: 6px;">
                 <select id="fin-payment-method" class="form-input" style="flex: 1; height: 42px; font-size: 0.88rem; line-height: 1.4; padding: 6px 10px; background: rgba(30, 41, 59, 0.95); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 8px;">
-                  <option value="PIX">PIX</option>
-                  <option value="Cartão de Débito">Cartão de Débito</option>
-                  <option value="Cartão de Crédito">Cartão de Crédito</option>
-                  <option value="Dinheiro">Dinheiro</option>
-                  <option value="Boleto Bancário">Boleto Bancário</option>
-                  <option value="Crediário / Fiado">Crediário / Convênio Farmácia</option>
-                  ${(JSON.parse(localStorage.getItem('crm_custom_fin_payments') || '[]')).map(p => `<option value="${p}">${p}</option>`).join('')}
+                  ${getPaymentMethods().map(p => `<option value="${p.name}">${p.name}</option>`).join('')}
                 </select>
                 <button type="button" id="btn-plus-icon-payment" title="Adicionar Forma de Pagamento" style="width: 42px; height: 42px; border-radius: 8px; background: rgba(56, 189, 248, 0.2); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                   <i class="fa-solid fa-plus"></i>
@@ -642,23 +628,29 @@ export function openNewTransactionModal() {
 
   // Ação dos botões + de Adicionar Nova Categoria
   const handleAddNewCategory = () => {
-    const newCat = prompt('Digite o nome da nova Categoria Farmacêutica:');
+    const selectedType = overlay.querySelector('input[name="trans-type"]:checked')?.value || 'receita';
+    const typeLabel = selectedType === 'receita' ? 'Receita' : 'Despesa';
+    const newCat = prompt(`Digite o nome da nova Categoria de ${typeLabel}:`);
     if (!newCat || !newCat.trim()) return;
     const cleanCat = newCat.trim();
-    const currentCats = JSON.parse(localStorage.getItem('crm_custom_fin_categories') || '[]');
-    if (!currentCats.includes(cleanCat)) {
-      currentCats.push(cleanCat);
-      localStorage.setItem('crm_custom_fin_categories', JSON.stringify(currentCats));
-    }
+    
+    // Cadastra via módulo centralizado
+    addFinancialCategory(cleanCat, selectedType, false);
+
     const selectEl = document.getElementById('fin-category');
     if (selectEl) {
-      const opt = document.createElement('option');
-      opt.value = cleanCat;
-      opt.textContent = `⭐ ${cleanCat}`;
-      opt.selected = true;
-      selectEl.appendChild(opt);
+      // Re-popula para ter a lista 100% atualizada
+      selectEl.innerHTML = `
+        <optgroup label="── Receitas Clínicas &amp; Balcão ──">
+          ${getFinancialCategories('receita').map(c => `<option value="${c.name}">${c.name}</option>`).join('')}
+        </optgroup>
+        <optgroup label="── Despesas Operacionais &amp; Compras ──">
+          ${getFinancialCategories('despesa').map(c => `<option value="${c.name}">${c.name}</option>`).join('')}
+        </optgroup>
+      `;
+      selectEl.value = cleanCat;
     }
-    showToast(`✅ Categoria "${cleanCat}" adicionada e selecionada!`);
+    showToast(`✅ Categoria de ${typeLabel} "${cleanCat}" adicionada e sincronizada com Configurações!`);
   };
 
   document.getElementById('btn-quick-plus-category')?.addEventListener('click', handleAddNewCategory);
@@ -669,20 +661,16 @@ export function openNewTransactionModal() {
     const newPay = prompt('Digite a nova Forma de Pagamento (Ex.: Cheque, Crediário, Convênio Local):');
     if (!newPay || !newPay.trim()) return;
     const cleanPay = newPay.trim();
-    const currentPays = JSON.parse(localStorage.getItem('crm_custom_fin_payments') || '[]');
-    if (!currentPays.includes(cleanPay)) {
-      currentPays.push(cleanPay);
-      localStorage.setItem('crm_custom_fin_payments', JSON.stringify(currentPays));
-    }
+    
+    // Cadastra via módulo centralizado
+    addPaymentMethod(cleanPay, false);
+
     const selectEl = document.getElementById('fin-payment-method');
     if (selectEl) {
-      const opt = document.createElement('option');
-      opt.value = cleanPay;
-      opt.textContent = `⭐ ${cleanPay}`;
-      opt.selected = true;
-      selectEl.appendChild(opt);
+      selectEl.innerHTML = getPaymentMethods().map(p => `<option value="${p.name}">${p.name}</option>`).join('');
+      selectEl.value = cleanPay;
     }
-    showToast(`✅ Forma de pagamento "${cleanPay}" adicionada e selecionada!`);
+    showToast(`✅ Forma de pagamento "${cleanPay}" adicionada e sincronizada com Configurações!`);
   };
 
   document.getElementById('btn-quick-plus-payment')?.addEventListener('click', handleAddNewPayment);
