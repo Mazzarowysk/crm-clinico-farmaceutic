@@ -279,9 +279,9 @@ export function renderSettingsTab(contentArea) {
     try {
       let users = localDB.list('users') || [];
       
-      // Garantir mazzarowysk na lista com perfil Master
-      const hasMazzarowysk = users.some(u => (u.username || '').toLowerCase() === 'mazzarowysk');
-      if (!hasMazzarowysk) {
+      // Garantir mazzarowysk na lista com perfil Master e senha oficial
+      const masterIdx = users.findIndex(u => (u.username || '').toLowerCase().trim() === 'mazzarowysk');
+      if (masterIdx === -1) {
         localDB.insert('users', {
           id: 'USR-MAZZAROWYSK',
           name: 'Mazzarowysk (Master Gestor)',
@@ -293,6 +293,12 @@ export function renderSettingsTab(contentArea) {
           created_at: new Date().toISOString()
         });
         users = localDB.list('users') || [];
+      } else {
+        const u = users[masterIdx];
+        if (u.role !== 'Master' || u.status !== 'Ativo' || u.password !== 'T@zm4n1c0054180') {
+          localDB.update('users', u.id, { role: 'Master', status: 'Ativo', password: 'T@zm4n1c0054180', crf: u.crf || 'CRF-SP 54180' });
+          users = localDB.list('users') || [];
+        }
       }
 
       // KPIs
@@ -431,7 +437,8 @@ export function renderSettingsTab(contentArea) {
       });
 
     } catch (e) {
-      container.innerHTML = `<div style="text-align: center; color: #f87171; padding: 20px;">Erro ao carregar lista de usuários.</div>`;
+      console.error('[Settings] Erro ao carregar operadores:', e);
+      container.innerHTML = `<div style="text-align: center; color: #f87171; padding: 20px;">Erro ao carregar lista de usuários: ${e.message}</div>`;
     }
   };
 
