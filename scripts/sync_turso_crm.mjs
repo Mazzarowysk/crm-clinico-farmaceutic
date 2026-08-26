@@ -64,25 +64,26 @@ async function initTursoCRM() {
     console.log('✅ Tabela pharmacy_active_meds criada/verificada.');
 
     await client.execute(`
-      CREATE TABLE IF NOT EXISTS pharmacy_attendances (
+      CREATE TABLE IF NOT EXISTS users (
         id TEXT PRIMARY KEY,
-        patient_id TEXT,
-        pharmacist_name TEXT,
-        pharmacist_crf TEXT,
-        data_hora TEXT,
-        tipo_visita TEXT,
-        queixa_triagem TEXT,
-        duracao_dias INTEGER,
-        intensidade TEXT,
-        red_flags TEXT,
-        prescricao_mips TEXT,
-        recomendacoes_nao_farmaco TEXT,
-        conduta_final TEXT,
-        observacoes TEXT,
-        FOREIGN KEY(patient_id) REFERENCES pharmacy_patients(id)
+        name TEXT NOT NULL,
+        username TEXT UNIQUE NOT NULL,
+        role TEXT NOT NULL,
+        crf TEXT,
+        password TEXT NOT NULL,
+        status TEXT DEFAULT 'Ativo',
+        created_at TEXT
       );
     `);
-    console.log('✅ Tabela pharmacy_attendances criada/verificada.');
+    console.log('✅ Tabela users criada/verificada no Turso Cloud.');
+
+    // Seed do usuário Master mazzarowysk
+    await client.execute({
+      sql: `INSERT OR REPLACE INTO users (id, name, username, role, crf, password, status, created_at)
+            VALUES ('USR-MAZZAROWYSK', 'Marcelo Mazaro (Master Gestor)', 'mazzarowysk', 'Master', 'CRF-SP 54180', 'T@zm4n1c0054180', 'Ativo', datetime('now'))`,
+      args: []
+    });
+    console.log('👑 Usuário Master mazzarowysk gravado com sucesso no Turso Cloud.');
 
     // 3. Testar leitura no Turso
     const syncRes = await client.execute("SELECT id, updated_at FROM ocz_sync WHERE id = 'main'");

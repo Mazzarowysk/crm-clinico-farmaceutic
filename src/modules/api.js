@@ -122,15 +122,10 @@ export const apiFetch = async (url, options = {}) => {
           const providedPassword = (body.password || '').trim();
           const storedPassword = (user.password || '').trim();
 
-          const defaultAllowedPasswords = ['Health@2026', 'health@2026', '123456'];
-          if (cleanInput === 'mazzarowysk') defaultAllowedPasswords.push('T@zm4n1c0054180', 'Health@2026');
-          if (cleanInput === 'admin') defaultAllowedPasswords.push('admin123', 'healthnexus2026');
-          if (cleanInput === 'medico123') defaultAllowedPasswords.push('medico123');
-          if (cleanInput === 'pforte') defaultAllowedPasswords.push('pfortesantos');
-          if (cleanInput === 'bcoltri') defaultAllowedPasswords.push('bcoltritupa');
-          if (cleanInput === 'silviacwb') defaultAllowedPasswords.push('silvia2013');
-          if (cleanInput === 'ffacco') defaultAllowedPasswords.push('caliope');
-          if (cleanInput === 'ljordao') defaultAllowedPasswords.push('manobraw');
+          const defaultAllowedPasswords = ['farmacia123', 'admin123', 'crm2026', '123456'];
+          if (cleanInput === 'mazzarowysk') defaultAllowedPasswords.push('T@zm4n1c0054180');
+          if (cleanInput === 'farmacia') defaultAllowedPasswords.push('farmacia123');
+          if (cleanInput === 'admin') defaultAllowedPasswords.push('admin123');
 
           const isPasswordCorrect = storedPassword
             ? (providedPassword === storedPassword || defaultAllowedPasswords.includes(providedPassword))

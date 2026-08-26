@@ -601,11 +601,26 @@ function openLoginInstructionsModal() {
 
       <!-- Cartões de Credenciais -->
       <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 22px;">
-        <!-- Perfil Farmacêutico Responsável -->
-        <div style="background: rgba(30, 41, 59, 0.65); border: 1px solid rgba(20, 184, 166, 0.4); border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;">
+        <!-- Perfil Master Oficial -->
+        <div style="background: rgba(30, 41, 59, 0.75); border: 1.5px solid rgba(245, 158, 11, 0.45); border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.15);">
           <div>
-            <div style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 0.92rem; color: #14b8a6; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
-              <i class="fa-solid fa-user-doctor"></i> Farmacêutico(a) Clínico(a)
+            <div style="font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.95rem; color: #fbbf24; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+              <i class="fa-solid fa-crown" style="color: #f59e0b;"></i> Gestor Master (Acesso Total)
+            </div>
+            <div style="font-size: 0.82rem; color: #94a3b8; font-family: monospace;">
+              Usuário: <strong style="color: #fff;">mazzarowysk</strong> &nbsp;|&nbsp; Senha: <strong style="color: #fff;">T@zm4n1c0054180</strong>
+            </div>
+          </div>
+          <button type="button" class="btn-fill-cred" data-user="mazzarowysk" data-pass="T@zm4n1c0054180" style="background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.5); color: #fbbf24; padding: 7px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.2s;">
+            Preencher
+          </button>
+        </div>
+
+        <!-- Perfil Farmacêutico Clínico -->
+        <div style="background: rgba(30, 41, 59, 0.65); border: 1px solid rgba(20, 184, 166, 0.35); border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;">
+          <div>
+            <div style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 0.92rem; color: #2dd4bf; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
+              <i class="fa-solid fa-pills"></i> Farmacêutico(a) Clínico(a) / Balcão
             </div>
             <div style="font-size: 0.82rem; color: #94a3b8; font-family: monospace;">
               Usuário: <strong style="color: #fff;">farmacia</strong> &nbsp;|&nbsp; Senha: <strong style="color: #fff;">farmacia123</strong>
@@ -620,7 +635,7 @@ function openLoginInstructionsModal() {
         <div style="background: rgba(30, 41, 59, 0.65); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;">
           <div>
             <div style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 0.92rem; color: #38bdf8; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
-              <i class="fa-solid fa-user-shield"></i> Administrador Geral
+              <i class="fa-solid fa-user-shield"></i> Responsável Técnico / Admin
             </div>
             <div style="font-size: 0.82rem; color: #94a3b8; font-family: monospace;">
               Usuário: <strong style="color: #fff;">admin</strong> &nbsp;|&nbsp; Senha: <strong style="color: #fff;">admin123</strong>
