@@ -1576,7 +1576,85 @@ window.openPatientHistoryModal = async function(patientId, patientName) {
           </div>
         `}
       </div>
+
+      <!-- SEÇÃO 3: HISTÓRICO DE COMPRAS, DISPENSAÇÕES & ADESÃO TERAPÊUTICA -->
+      <div style="margin-top: 20px; background: rgba(15, 23, 42, 0.85); border: 1.5px solid rgba(16, 185, 129, 0.35); border-radius: 14px; padding: 18px;">
+        <div style="margin-bottom: 14px; font-weight: 700; color: #fff; font-size: 1rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-cart-shopping" style="color: #10b981;"></i>
+            <span>Histórico de Compras &amp; Adesão Terapêutica (${(() => {
+              const allP = (typeof localDB !== 'undefined' && localDB.list ? localDB.list('patient_purchases') : []) || [];
+              return allP.filter(p => String(p.patient_id) === String(patientId) || (patient.fullName && p.patient_name && p.patient_name.toLowerCase().includes(patient.fullName.toLowerCase()))).length;
+            })()})</span>
+          </div>
+          <button type="button" class="btn btn-sm" onclick="document.getElementById('patient-history-modal')?.remove(); if(typeof switchTab === 'function') switchTab('estoque');" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; font-size: 0.78rem; font-weight: 700; border-radius: 8px; padding: 5px 12px; cursor: pointer;">
+            <i class="fa-solid fa-boxes-stacked"></i> Ver Estoque Central
+          </button>
+        </div>
+
+        ${(() => {
+          const allP = (typeof localDB !== 'undefined' && localDB.list ? localDB.list('patient_purchases') : []) || [];
+          const patsPurchases = allP.filter(p => String(p.patient_id) === String(patientId) || (patient.fullName && p.patient_name && p.patient_name.toLowerCase().includes(patient.fullName.toLowerCase())));
+          
+          if (patsPurchases.length === 0) {
+            return `
+              <div style="background: rgba(255,255,255,0.02); border: 1px dashed rgba(255,255,255,0.1); border-radius: 10px; padding: 18px; text-align: center; color: #94a3b8; font-size: 0.84rem;">
+                <i class="fa-solid fa-bag-shopping" style="font-size: 1.5rem; opacity: 0.4; margin-bottom: 6px; display: block;"></i>
+                Nenhuma compra ou dispensação de medicamento registrada para este cliente/paciente ainda.
+              </div>
+            `;
+          }
+
+          return `
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+              ${patsPurchases.map(pur => {
+                const dt = pur.created_at ? new Date(pur.created_at).toLocaleDateString('pt-BR') : 'Recentemente';
+                const isContinuous = pur.is_continuous;
+                let refillBadge = '';
+                if (isContinuous && pur.refill_date) {
+                  const daysToRefill = Math.ceil((new Date(pur.refill_date) - new Date()) / (1000 * 60 * 60 * 24));
+                  refillBadge = `
+                    <div style="margin-top: 8px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; background: rgba(56, 189, 248, 0.08); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 8px; padding: 6px 10px;">
+                      <span style="font-size: 0.76rem; color: #38bdf8;">
+                        <i class="fa-solid fa-clock-rotate-left"></i> Uso Contínuo: Previsão de Recompra em <strong>${pur.refill_date.split('-').reverse().join('/')} (${daysToRefill > 0 ? `faltam ${daysToRefill} dias` : 'Hoje / Vencido'})</strong>
+                      </span>
+                      <button type="button" class="btn btn-sm" onclick="window.sendRefillWhatsAppReminder('${(patient.fullName || patientName || '').replace(/'/g, "\\'")}', '${(pur.product_name||'').replace(/'/g, "\\'")}', '${pur.refill_date}', '${(patient.phone || patient.cellphone || '').replace(/\D/g, '')}')" style="background: #25d366; color: #000; font-size: 0.72rem; font-weight: 800; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                        <i class="fa-brands fa-whatsapp"></i> Lembrar Recompra
+                      </button>
+                    </div>
+                  `;
+                }
+
+                return `
+                  <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 12px 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px;">
+                      <div>
+                        <strong style="color: #fff; font-size: 0.9rem;">${pur.product_name}</strong>
+                        <div style="font-size: 0.78rem; color: #94a3b8; margin-top: 2px;">
+                          Lote: <span style="color: #cbd5e1; font-family: monospace;">${pur.batch || 'N/A'}</span> &bull; Farmacêutico: ${pur.pharmacist_name || 'Equipe Farmácia'} &bull; Data: ${dt}
+                        </div>
+                      </div>
+                      <div style="text-align: right;">
+                        <span style="font-size: 0.9rem; font-weight: 800; color: #34d399;">R$ ${(parseFloat(pur.total_price || 0)).toFixed(2).replace('.', ',')}</span>
+                        <div style="font-size: 0.72rem; color: #94a3b8;">${pur.quantity || 1} un</div>
+                      </div>
+                    </div>
+                    ${refillBadge}
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `;
+        })()}
+      </div>
     `;
+
+    // Função global de lembrete de recompra WhatsApp
+    window.sendRefillWhatsAppReminder = function(pName, prodName, refillDate, phone) {
+      const cleanPhone = (phone || '').replace(/\D/g, '');
+      const msg = encodeURIComponent(`Olá, ${pName}! Aqui é da Farmácia Clínica. Notamos que seu medicamento de uso contínuo (${prodName}) está previsto para terminar em breve (${refillDate.split('-').reverse().join('/')}). Deseja que separemos sua próxima caixa para garantir a continuidade do seu tratamento sem interrupção?`);
+      window.open(`https://api.whatsapp.com/send?phone=55${cleanPhone}&text=${msg}`, '_blank');
+    };
 
     const bodyEl = document.getElementById('history-modal-body');
     if (bodyEl) {

@@ -235,6 +235,225 @@ function ensureTable(db, table) {
     modified = true;
   }
 
+  if (table === 'products' && db[table].length === 0) {
+    db[table] = [
+      {
+        id: 'PROD-001',
+        name: 'Dipirona Monoidratada 500mg/ml Gotas 20ml',
+        dci: 'Dipirona Sódica',
+        ean: '7891058001234',
+        category: 'MIP / Analgésico',
+        presentation: 'Frasco conta-gotas 20ml',
+        current_stock: 45,
+        min_stock: 15,
+        cost_price: 3.50,
+        sale_price: 8.90,
+        batch: 'L-24089',
+        expiry_date: '2027-08-30',
+        supplier: 'Medley / Sanofi',
+        status: 'Normal'
+      },
+      {
+        id: 'PROD-002',
+        name: 'Paracetamol 750mg c/ 20 comprimidos',
+        dci: 'Paracetamol',
+        ean: '7896004701235',
+        category: 'MIP / Antitérmico',
+        presentation: 'Caixa com 20 comprimidos',
+        current_stock: 32,
+        min_stock: 10,
+        cost_price: 4.20,
+        sale_price: 11.50,
+        batch: 'L-98412',
+        expiry_date: '2027-11-15',
+        supplier: 'EMS Pharma',
+        status: 'Normal'
+      },
+      {
+        id: 'PROD-003',
+        name: 'Losartana Potássica 50mg c/ 30 comprimidos',
+        dci: 'Losartana Potássica',
+        ean: '7896422509871',
+        category: 'Uso Contínuo / Anti-hipertensivo',
+        presentation: 'Caixa com 30 comprimidos revestidos',
+        current_stock: 60,
+        min_stock: 20,
+        cost_price: 5.80,
+        sale_price: 14.90,
+        batch: 'L-77621',
+        expiry_date: '2027-05-20',
+        supplier: 'Eurofarma',
+        status: 'Normal'
+      },
+      {
+        id: 'PROD-004',
+        name: 'Omeprazol 20mg c/ 28 cápsulas',
+        dci: 'Omeprazol',
+        ean: '7891058223344',
+        category: 'MIP / Antiácido e IBP',
+        presentation: 'Caixa com 28 cápsulas gelatinosas duras',
+        current_stock: 25,
+        min_stock: 12,
+        cost_price: 6.90,
+        sale_price: 16.80,
+        batch: 'L-33410',
+        expiry_date: '2026-10-10',
+        supplier: 'Aché Laboratórios',
+        status: 'Vencimento Próximo'
+      },
+      {
+        id: 'PROD-005',
+        name: 'Vitamina C 1g + Zinco 10mg Efervescente c/ 10 comprimidos',
+        dci: 'Ácido Ascórbico + Zinco',
+        ean: '7898040319800',
+        category: 'Suplemento / Imunidade',
+        presentation: 'Tubo com 10 comprimidos efervescentes sabor laranja',
+        current_stock: 18,
+        min_stock: 8,
+        cost_price: 8.50,
+        sale_price: 19.90,
+        batch: 'L-88712',
+        expiry_date: '2027-12-31',
+        supplier: 'Bayer / Redoxon',
+        status: 'Normal'
+      },
+      {
+        id: 'PROD-006',
+        name: 'Soro Fisiológico 0.9% 500ml',
+        dci: 'Cloreto de Sódio 0,9%',
+        ean: '7896006203010',
+        category: 'MIP / Solução Nasal e Lavagem',
+        presentation: 'Frasco plástico 500ml',
+        current_stock: 40,
+        min_stock: 15,
+        cost_price: 2.80,
+        sale_price: 7.50,
+        batch: 'L-11290',
+        expiry_date: '2028-02-15',
+        supplier: 'Farmax',
+        status: 'Normal'
+      },
+      {
+        id: 'PROD-007',
+        name: 'Tiras de Teste de Glicemia Accu-Chek Guide c/ 50 unidades',
+        dci: 'Tiras Reagentes para Glicose',
+        ean: '7612980209876',
+        category: 'Correlatos / Diagnóstico Clínico',
+        presentation: 'Caixa com 50 tiras reagentes',
+        current_stock: 8,
+        min_stock: 10,
+        cost_price: 68.00,
+        sale_price: 119.90,
+        batch: 'L-GUIDE-99',
+        expiry_date: '2026-12-31',
+        supplier: 'Roche Diabetes Care',
+        status: 'Estoque Baixo'
+      },
+      {
+        id: 'PROD-008',
+        name: 'Ibuprofeno 400mg c/ 10 cápsulas líquidas',
+        dci: 'Ibuprofeno',
+        ean: '7896422501123',
+        category: 'MIP / Anti-inflamatório e Analgésico',
+        presentation: 'Blíster com 10 cápsulas moles',
+        current_stock: 22,
+        min_stock: 10,
+        cost_price: 7.20,
+        sale_price: 17.50,
+        batch: 'L-IBU-400',
+        expiry_date: '2027-09-18',
+        supplier: 'Alivium / Mantecorp',
+        status: 'Normal'
+      }
+    ];
+    modified = true;
+  }
+
+  if (table === 'inventory_movements' && db[table].length === 0) {
+    db[table] = [
+      {
+        id: 'MOV-001',
+        product_id: 'PROD-003',
+        product_name: 'Losartana Potássica 50mg c/ 30 comprimidos',
+        type: 'Entrada',
+        quantity: 60,
+        batch: 'L-77621',
+        cost_unit: 5.80,
+        total_value: 348.00,
+        reason: 'Nota Fiscal de Compra NF-e 49812 - Eurofarma',
+        operator_name: 'Marcelo Mazaro (Master)',
+        created_at: new Date(Date.now() - 10 * 86400000).toISOString()
+      },
+      {
+        id: 'MOV-002',
+        product_id: 'PROD-001',
+        product_name: 'Dipirona Monoidratada 500mg/ml Gotas 20ml',
+        type: 'Entrada',
+        quantity: 50,
+        batch: 'L-24089',
+        cost_unit: 3.50,
+        total_value: 175.00,
+        reason: 'Entrada de Estoque Inicial',
+        operator_name: 'Marcelo Mazaro (Master)',
+        created_at: new Date(Date.now() - 8 * 86400000).toISOString()
+      },
+      {
+        id: 'MOV-003',
+        product_id: 'PROD-002',
+        product_name: 'Paracetamol 750mg c/ 20 comprimidos',
+        type: 'Dispensação Clínica',
+        quantity: -1,
+        batch: 'L-98412',
+        cost_unit: 4.20,
+        total_value: 11.50,
+        patient_id: 'PHARM-PAT-001',
+        patient_name: 'Dona Maria de Lourdes Santos',
+        reason: 'Atendimento de Balcão e Orientação Farmacêutica',
+        operator_name: 'Dr. Lucas Ferreira (CRF/SP 48.912)',
+        created_at: new Date(Date.now() - 2 * 86400000).toISOString()
+      }
+    ];
+    modified = true;
+  }
+
+  if (table === 'patient_purchases' && db[table].length === 0) {
+    db[table] = [
+      {
+        id: 'PURCH-001',
+        patient_id: 'PHARM-PAT-001',
+        patient_name: 'Dona Maria de Lourdes Santos',
+        product_id: 'PROD-002',
+        product_name: 'Paracetamol 750mg c/ 20 comprimidos',
+        quantity: 1,
+        unit_price: 11.50,
+        total_price: 11.50,
+        is_continuous: false,
+        batch: 'L-98412',
+        attendance_id: 'PHARM-ATT-001',
+        pharmacist_name: 'Dr. Lucas Ferreira',
+        created_at: new Date(Date.now() - 2 * 86400000).toISOString()
+      },
+      {
+        id: 'PURCH-002',
+        patient_id: 'PHARM-PAT-001',
+        patient_name: 'Dona Maria de Lourdes Santos',
+        product_id: 'PROD-003',
+        product_name: 'Losartana Potássica 50mg c/ 30 comprimidos',
+        quantity: 1,
+        unit_price: 14.90,
+        total_price: 14.90,
+        is_continuous: true,
+        days_supply: 30,
+        refill_date: new Date(Date.now() + 5 * 86400000).toISOString().split('T')[0],
+        batch: 'L-77621',
+        attendance_id: null,
+        pharmacist_name: 'Marcelo Mazaro',
+        created_at: new Date(Date.now() - 25 * 86400000).toISOString()
+      }
+    ];
+    modified = true;
+  }
+
   if (table === 'pharmacy_decision_audit' && db[table].length === 0) {
     db[table] = [
       {

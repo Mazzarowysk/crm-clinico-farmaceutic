@@ -809,6 +809,56 @@ function setupBalcaoStepListeners(step, allPatients) {
       };
       localDB.insert('pharmacy_attendances', attRecord);
 
+      // BAIXA AUTOMÁTICA NO ESTOQUE E REGISTRO DE COMPRA DO PACIENTE
+      const allProducts = localDB.list('products') || [];
+      currentClinicalEncounter.prescribedMIPs.forEach(item => {
+        const medName = item.name || item;
+        const matchedProd = allProducts.find(prod => 
+          (prod.name && prod.name.toLowerCase().includes(medName.toLowerCase())) ||
+          (medName && prod.name && medName.toLowerCase().includes(prod.name.toLowerCase()))
+        );
+
+        if (matchedProd) {
+          const newQty = Math.max(0, parseInt(matchedProd.current_stock || 0, 10) - 1);
+          localDB.update('products', matchedProd.id, { current_stock: newQty });
+
+          // Movimentação de estoque
+          localDB.insert('inventory_movements', {
+            product_id: matchedProd.id,
+            product_name: matchedProd.name,
+            type: 'Dispensação Balcão',
+            quantity: -1,
+            batch: matchedProd.batch || 'L-DISP',
+            cost_unit: matchedProd.cost_price || 0,
+            total_value: matchedProd.sale_price || 0,
+            patient_id: p.id,
+            patient_name: p.name,
+            reason: `Dispensação Clínica - Atendimento #${attRecord.id.slice(-6)}`,
+            operator_name: `${state.user?.name || 'Farmacêutico'} (${state.user?.role || 'Farmacêutico'})`,
+            created_at: new Date().toISOString()
+          });
+
+          // Registro de compra/aquisição do paciente
+          localDB.insert('patient_purchases', {
+            id: localDB.generateId('PURCH'),
+            patient_id: p.id,
+            patient_name: p.name,
+            product_id: matchedProd.id,
+            product_name: matchedProd.name,
+            quantity: 1,
+            unit_price: matchedProd.sale_price || 0,
+            total_price: matchedProd.sale_price || 0,
+            is_continuous: matchedProd.category?.includes('Contínuo') || false,
+            days_supply: matchedProd.category?.includes('Contínuo') ? 30 : null,
+            refill_date: matchedProd.category?.includes('Contínuo') ? new Date(Date.now() + 25 * 86400000).toISOString().split('T')[0] : null,
+            batch: matchedProd.batch || 'L-DISP',
+            attendance_id: attRecord.id,
+            pharmacist_name: state.user?.name || 'Farmacêutico',
+            created_at: new Date().toISOString()
+          });
+        }
+      });
+
       // Salvar auditoria de decisão se houve alerta
       if (currentClinicalEncounter.detectedAlerts.length > 0) {
         localDB.insert('pharmacy_decision_audit', {
@@ -818,11 +868,12 @@ function setupBalcaoStepListeners(step, allPatients) {
           severity: currentClinicalEncounter.detectedAlerts[0]?.severity || 'Grave',
           acao_tomada: currentClinicalEncounter.isBlockerOverridden ? 'Aceito com Justificativa' : 'Dispensação Aprovada',
           justificativa: currentClinicalEncounter.technicalJustification,
-          pharmacist_crf: state.user?.username === 'mazzarowysk' ? 'CRF/SP 48.912' : 'CRF/SP 55.432',
+          pharmacist_crf: state.user?.username === 'mazzarowysk' ? 'CRF/SP 54180' : 'CRF/SP 48.912',
           timestamp: new Date().toISOString()
         });
       }
 
+      syncManager.pushToCloud(false);
       currentClinicalEncounter.step = 5;
       renderBalcaoAtendimentoView(document.getElementById('pharmacy-subtab-content'));
     });

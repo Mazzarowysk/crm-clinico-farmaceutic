@@ -16,6 +16,7 @@ import { renderDashboardTab, fetchDashboardData, initDashboardCharts } from './t
 import { renderPatientsTab } from './tabs/patients.js';
 import { renderAttendanceTab } from './tabs/attendance.js';
 import { renderSettingsTab, showSimulationSummaryModal } from './tabs/settings.js';
+import { renderInventoryTab } from './tabs/inventory.js';
 import { realtimeHub } from './modules/realtime.js';
 import { setActivePatientContext, renderPatientJourneyStepper, renderFloatingPatientHUD } from './modules/journey.js';
 import { generateMockData } from './mockDataGenerator.js';
@@ -1363,6 +1364,7 @@ function renderAppStructure() {
     { id: 'dashboard', label: 'Métricas do Consultório', icon: 'fa-chart-line' },
     { id: 'farmacia', label: 'CRM Farmacêutico & Balcão', icon: 'fa-prescription-bottle-medical' },
     { id: 'pacientes', label: 'Prontuário & Pacientes', icon: 'fa-user-nurse' },
+    { id: 'estoque', label: 'Estoque & Produtos', icon: 'fa-boxes-stacked' },
     { id: 'agenda', label: 'Agenda de Serviços Clínicos', icon: 'fa-calendar-check' },
     { id: 'relatorios', label: 'Declarações (DSF) & Relatórios', icon: 'fa-file-signature' },
     { id: 'configuracoes', label: 'Configurações & Gestão', icon: 'fa-sliders', badge: pendingApprovalsCount > 0 ? pendingApprovalsCount : null }
@@ -1755,6 +1757,7 @@ function initGlobalSystemSearch() {
       { id: 'dashboard', label: 'Métricas do Consultório', icon: 'fa-chart-line', tabColor: '#06b6d4' },
       { id: 'farmacia', label: 'CRM Farmacêutico & Balcão', icon: 'fa-prescription-bottle-medical', tabColor: '#10b981' },
       { id: 'pacientes', label: 'Prontuário & Pacientes', icon: 'fa-user-nurse', tabColor: '#38bdf8' },
+      { id: 'estoque', label: 'Estoque & Produtos', icon: 'fa-boxes-stacked', tabColor: '#10b981' },
       { id: 'agenda', label: 'Agenda de Serviços Clínicos', icon: 'fa-calendar-check', tabColor: '#818cf8' },
       { id: 'relatorios', label: 'Declarações (DSF) & Relatórios', icon: 'fa-file-signature', tabColor: '#f59e0b' },
       { id: 'configuracoes', label: 'Configurações & Gestão', icon: 'fa-sliders', tabColor: '#a855f7' }
@@ -1910,6 +1913,7 @@ function switchTab(tabName, isBack = false) {
   const tabLabels = {
     farmacia:      'CRM Farmacêutico & Balcão de Atendimento',
     pacientes:     'Prontuário Longitudinal & Pacientes',
+    estoque:       'Controle de Estoque & Catálogo Farmacêutico',
     agenda:        'Agenda de Serviços Clínicos & Consultas',
     relatorios:    'Declarações Farmacêuticas (DSF) & Relatórios',
     dashboard:     'Métricas & Indicadores do Consultório',
@@ -1944,6 +1948,8 @@ async function renderTabContent() {
     renderPharmacyTab();
   } else if (state.activeTab === 'pacientes') {
     renderPatientsTab(contentArea);
+  } else if (state.activeTab === 'estoque') {
+    renderInventoryTab(contentArea);
   } else if (state.activeTab === 'agenda') {
     renderAgendaTab();
   } else if (state.activeTab === 'relatorios') {
@@ -1966,6 +1972,7 @@ function updateGlobalBackButton() {
   const tabShortLabels = {
     farmacia: 'Balcão',
     pacientes: 'Pacientes',
+    estoque: 'Estoque',
     agenda: 'Agenda',
     relatorios: 'Relatórios',
     dashboard: 'Métricas',
