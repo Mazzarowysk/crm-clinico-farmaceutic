@@ -1359,22 +1359,22 @@ function renderAppStructure() {
   const perms = getRolePermissions(state.user);
 
   const allNavItems = [
+    { id: 'dashboard', label: 'Métricas do Consultório', icon: 'fa-chart-line' },
     { id: 'farmacia', label: 'CRM Farmacêutico & Balcão', icon: 'fa-prescription-bottle-medical' },
     { id: 'pacientes', label: 'Prontuário & Pacientes', icon: 'fa-user-nurse' },
     { id: 'agenda', label: 'Agenda de Serviços Clínicos', icon: 'fa-calendar-check' },
     { id: 'relatorios', label: 'Declarações (DSF) & Relatórios', icon: 'fa-file-signature' },
-    { id: 'dashboard', label: 'Métricas do Consultório', icon: 'fa-chart-line' },
     { id: 'configuracoes', label: 'Configurações & Gestão', icon: 'fa-sliders' }
   ];
 
 
   const visibleNavItems = allNavItems.filter(item => perms.allowedTabs.includes(item.id));
 
-  // Ajusta aba ativa para abrir diretamente no CRM Farmacêutico
+  // Ajusta aba ativa para abrir diretamente nas Métricas do Consultório (dashboard)
   if (!perms.allowedTabs.includes(state.activeTab)) {
-    state.activeTab = perms.allowedTabs.includes('farmacia') ? 'farmacia' : (perms.allowedTabs[0] || 'farmacia');
-  } else if (!state.activeTab || state.activeTab === 'dashboard') {
-    state.activeTab = 'farmacia';
+    state.activeTab = perms.allowedTabs.includes('dashboard') ? 'dashboard' : (perms.allowedTabs[0] || 'dashboard');
+  } else if (!state.activeTab) {
+    state.activeTab = 'dashboard';
   }
 
   const navHtml = visibleNavItems.map(item => `
@@ -1738,11 +1738,11 @@ function initGlobalSystemSearch() {
 
     // Abas oficiais do CRM Clínico Farmacêutico
     const allNavItems = [
+      { id: 'dashboard', label: 'Métricas do Consultório', icon: 'fa-chart-line', tabColor: '#06b6d4' },
       { id: 'farmacia', label: 'CRM Farmacêutico & Balcão', icon: 'fa-prescription-bottle-medical', tabColor: '#10b981' },
       { id: 'pacientes', label: 'Prontuário & Pacientes', icon: 'fa-user-nurse', tabColor: '#38bdf8' },
       { id: 'agenda', label: 'Agenda de Serviços Clínicos', icon: 'fa-calendar-check', tabColor: '#818cf8' },
       { id: 'relatorios', label: 'Declarações (DSF) & Relatórios', icon: 'fa-file-signature', tabColor: '#f59e0b' },
-      { id: 'dashboard', label: 'Métricas do Consultório', icon: 'fa-chart-line', tabColor: '#06b6d4' },
       { id: 'configuracoes', label: 'Configurações & Gestão', icon: 'fa-sliders', tabColor: '#a855f7' }
     ];
 

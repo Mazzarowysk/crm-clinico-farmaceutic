@@ -44,6 +44,44 @@ export const expandQueryTokens = (rawQuery) => {
 
 export const manualData = [
   {
+    id: 'dashboard',
+    title: 'Métricas do Consultório',
+    icon: 'fa-chart-line',
+    color: '#06b6d4',
+    summary: 'Inteligência e indicadores clínicos: volume de procedimentos, taxa de adesão farmacoterapêutica, intervenções CDSS 4D e perfil de Red Flags.',
+    roles: ['Master', 'Farmacêutico RT', 'Farmacêutico', 'Administrador'],
+    buttons: [
+      {
+        icon: 'fa-chart-pie',
+        name: '📊 Gráficos de Serviços Farmacêuticos',
+        type: 'Inteligência Clínica',
+        color: '#10b981',
+        description: 'Visualiza a distribuição percentual de procedimentos clínicos mais demandados (PA, Glicemia, Injetáveis, Revisão).',
+        shortcut: 'Painel Superior do Dashboard',
+        rules: 'Atualizado em tempo real a cada novo atendimento concluído.',
+        keywords: ['graficos', 'servicos mais realizados', 'procedimentos', 'distribuicao', 'kpi']
+      },
+      {
+        icon: 'fa-shield-virus',
+        name: '🛡️ Painel de Intervenções CDSS 4D',
+        type: 'Segurança do Paciente',
+        color: '#f59e0b',
+        description: 'Mede quantas interações graves, duplicidades e riscos em idosos (Beers) foram prevenidos pelo sistema.',
+        shortcut: 'Painel Central do Dashboard',
+        rules: 'Evidencia o valor clínico e preventivo da atuação farmacêutica.',
+        keywords: ['intervencoes evitadas', 'cdss metricas', 'alertas barrados', 'iatrogenia']
+      }
+    ],
+    workflow: [
+      { step: 1, title: 'Análise de Volume', desc: 'Acompanhe a evolução de consultas na semana e no mês.' },
+      { step: 2, title: 'Monitoramento de Adesão', desc: 'Avalie a porcentagem de pacientes com adesão satisfatória ao tratamento.' },
+      { step: 3, title: 'Relatório de Impacto Clínico', desc: 'Utilize as métricas para comprovar a eficácia das intervenções farmacêuticas.' }
+    ],
+    faq: [
+      { q: 'Como são calculados os índices de intervenção?', a: 'O sistema contabiliza todas as vezes em que um alerta do motor CDSS 4D (interação grave, duplicidade ou alergia) impediu uma conduta inadequada.' }
+    ]
+  },
+  {
     id: 'farmacia',
     title: 'CRM Farmacêutico & Balcão',
     icon: 'fa-prescription-bottle-medical',
@@ -238,44 +276,6 @@ export const manualData = [
     ]
   },
   {
-    id: 'dashboard',
-    title: 'Métricas do Consultório',
-    icon: 'fa-chart-line',
-    color: '#06b6d4',
-    summary: 'Inteligência e indicadores clínicos: volume de procedimentos, taxa de adesão farmacoterapêutica, intervenções CDSS 4D e perfil de Red Flags.',
-    roles: ['Master', 'Farmacêutico RT', 'Farmacêutico', 'Administrador'],
-    buttons: [
-      {
-        icon: 'fa-chart-pie',
-        name: '📊 Gráficos de Serviços Farmacêuticos',
-        type: 'Inteligência Clínica',
-        color: '#10b981',
-        description: 'Visualiza a distribuição percentual de procedimentos clínicos mais demandados (PA, Glicemia, Injetáveis, Revisão).',
-        shortcut: 'Painel Superior do Dashboard',
-        rules: 'Atualizado em tempo real a cada novo atendimento concluído.',
-        keywords: ['graficos', 'servicos mais realizados', 'procedimentos', 'distribuicao', 'kpi']
-      },
-      {
-        icon: 'fa-shield-virus',
-        name: '🛡️ Painel de Intervenções CDSS 4D',
-        type: 'Segurança do Paciente',
-        color: '#f59e0b',
-        description: 'Mede quantas interações graves, duplicidades e riscos em idosos (Beers) foram prevenidos pelo sistema.',
-        shortcut: 'Painel Central do Dashboard',
-        rules: 'Evidencia o valor clínico e preventivo da atuação farmacêutica.',
-        keywords: ['intervencoes evitadas', 'cdss metricas', 'alertas barrados', 'iatrogenia']
-      }
-    ],
-    workflow: [
-      { step: 1, title: 'Análise de Volume', desc: 'Acompanhe a evolução de consultas na semana e no mês.' },
-      { step: 2, title: 'Monitoramento de Adesão', desc: 'Avalie a porcentagem de pacientes com adesão satisfatória ao tratamento.' },
-      { step: 3, title: 'Relatório de Impacto Clínico', desc: 'Utilize as métricas para comprovar a eficácia das intervenções farmacêuticas.' }
-    ],
-    faq: [
-      { q: 'Como são calculados os índices de intervenção?', a: 'O sistema contabiliza todas as vezes em que um alerta do motor CDSS 4D (interação grave, duplicidade ou alergia) impediu uma conduta inadequada.' }
-    ]
-  },
-  {
     id: 'configuracoes',
     title: 'Configurações & Gestão',
     icon: 'fa-sliders',
@@ -397,11 +397,11 @@ export const searchManualEngine = (query, userRole = 'Master') => {
 };
 
 // ─── MODAL DO MANUAL INTERATIVO ───────────────────────────────────────────────
-export const showInteractiveManualModal = (initialTabId = 'farmacia') => {
+export const showInteractiveManualModal = (initialTabId = 'dashboard') => {
   const existing = document.getElementById('hn-interactive-manual-modal');
   if (existing) existing.remove();
 
-  let activeTabId = initialTabId || 'farmacia';
+  let activeTabId = initialTabId || 'dashboard';
   let searchQuery = '';
 
   const overlay = document.createElement('div');
