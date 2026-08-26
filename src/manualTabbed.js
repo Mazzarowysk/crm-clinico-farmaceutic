@@ -1,4 +1,4 @@
-// ─── MANUAL INTERATIVO POR ABAS (HEALTH NEXUS v2.7.2) ────────────────────────
+// ─── MANUAL INTERATIVO POR ABAS (CRM CLÍNICO FARMACÊUTICO v2.7.2) ────────────────────────
 import { getNexusAICopilotResponse } from './aiCopilot.js';
 
 // Normalizador de strings e remoção de acentos
@@ -76,7 +76,7 @@ export const manualData = [
     title: 'Geral & Visão Geral',
     icon: 'fa-hospital',
     color: '#818cf8',
-    summary: 'Visão holística da arquitetura do Health Nexus, fluxo do paciente e papéis de acesso do sistema.',
+    summary: 'Visão holística da arquitetura do CRM Clínico Farmacêutico, fluxo do paciente e papéis de acesso do sistema.',
     roles: ['Master', 'Médico', 'Enfermeiro', 'Recepcionista', 'Farmacêutico'],
     buttons: [
       {
@@ -164,7 +164,7 @@ export const manualData = [
         name: '📲 App Mobile PWA & Notificações Push de Plantão',
         type: 'Mobile & Notificações',
         color: '#06b6d4',
-        description: 'Transforma o Health Nexus em aplicativo standalone instalável em celulares e tablets, com Service Worker para navegação ultrarrápida e notificações push para médicos de sobreaviso e alertas de emergência.',
+        description: 'Transforma o CRM Clínico Farmacêutico em aplicativo standalone instalável em celulares e tablets, com Service Worker para navegação ultrarrápida e notificações push para médicos de sobreaviso e alertas de emergência.',
         shortcut: 'Configurações / Notificações',
         rules: 'Funciona em Android, iOS e Windows com suporte offline.',
         keywords: ['pwa', 'aplicativo celular', 'mobile', 'push', 'notificações push', 'sobreaviso', 'service worker', 'instalar app', 'offline']
@@ -187,7 +187,7 @@ export const manualData = [
       { step: 4, title: 'Desfecho / Encaminhamento', desc: 'O paciente recebe medicação na Farmácia ou é internado na Central de Leitos.' }
     ],
     faq: [
-      { q: 'O sistema funciona se a internet da clínica cair?', a: 'Sim! O Health Nexus opera no conceito Offline-First. Toda operação é salva instantaneamente no IndexedDB/LocalStorage do computador local e enviada ao Turso Cloud DB assim que a conexão retornar.' },
+      { q: 'O sistema funciona se a internet da clínica cair?', a: 'Sim! O CRM Clínico Farmacêutico opera no conceito Offline-First. Toda operação é salva instantaneamente no IndexedDB/LocalStorage do computador local e enviada ao Turso Cloud DB assim que a conexão retornar.' },
       { q: 'Quem tem acesso ao reset de senhas e exclusões?', a: 'Por segurança, apenas o usuário Master (mazzarowysk) possui autorização para resetar senhas, gerenciar usuários e executar auditorias.' }
     ]
   },

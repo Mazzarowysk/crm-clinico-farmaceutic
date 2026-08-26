@@ -5,7 +5,7 @@ import { getNexusAICopilotResponse } from '../src/aiCopilot.js';
 import fs from 'fs';
 
 console.log('🧪 ========================================================');
-console.log('🧪 TESTE AUTOMATIZADO: HEALTH NEXUS v2.9.0 NOOK & CRANNY');
+console.log('🧪 TESTE AUTOMATIZADO: CRM CLÍNICO FARMACÊUTICO v2.9.0 NOOK & CRANNY');
 console.log('🧪 ========================================================\n');
 
 let passCount = 0;
@@ -59,7 +59,7 @@ const tiss = generateTISS401XML({
   registroANS: '359012',
   cnpjPrestador: '12345678000199',
   cnesHospital: '7654321',
-  nomeHospital: 'Hospital & Maternidade Health Nexus',
+  nomeHospital: 'Hospital & Maternidade CRM Clínico Farmacêutico',
   atendimentos: testEncounters
 });
 
@@ -77,7 +77,7 @@ assert(tiss.valorTotal === 370.00, 'Valor financeiro total do lote apurado: R$ 3
 console.log('\n📲 [3/4] Testando Arquivos PWA & Service Worker:');
 assert(fs.existsSync('public/sw.js'), 'Arquivo public/sw.js (Service Worker) existe.');
 const swContent = fs.readFileSync('public/sw.js', 'utf8');
-assert(swContent.includes('health-nexus-v2.9.0'), 'Cache versionado v2.9.0 no Service Worker.');
+assert(swContent.includes('crm-clinico-farmaceutico-v2.9.0'), 'Cache versionado v2.9.0 no Service Worker.');
 assert(swContent.includes('push'), 'Handler de push notifications configurado no Service Worker.');
 
 assert(fs.existsSync('public/manifest.webmanifest'), 'Arquivo public/manifest.webmanifest existe.');

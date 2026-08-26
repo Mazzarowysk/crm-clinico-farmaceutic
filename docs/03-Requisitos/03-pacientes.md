@@ -1,6 +1,6 @@
-# Health Nexus — Módulo 03: Pacientes
+# CRM Clínico Farmacêutico — Módulo 03: Pacientes
 
-Este documento detalha os requisitos e especificações para o módulo de **Pacientes** (Cadastro Central) do Health Nexus.
+Este documento detalha os requisitos e especificações para o módulo de **Pacientes** (Cadastro Central) do CRM Clínico Farmacêutico.
 
 ---
 
@@ -114,7 +114,7 @@ Pesquisa pacientes por CPF, CNS ou Nome Completo.
 ## 6. Wireframe (Textual)
 ```
 +----------------------------------------------------------------------------------+
-|  [HEALTH NEXUS]  |  Pacientes > Novo Cadastro                                    |
+|  [CRM CLÍNICO FARMACÊUTICO]  |  Pacientes > Novo Cadastro                                    |
 +----------------------------------------------------------------------------------+
 |  *Nome Completo: [ Maria de Souza Silva                                       ]  |
 |  Nome Social:    [                                                            ]  |

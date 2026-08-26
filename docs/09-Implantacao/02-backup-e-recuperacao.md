@@ -1,6 +1,6 @@
-# Health Nexus — Política de Backup e Recuperação de Desastres
+# CRM Clínico Farmacêutico — Política de Backup e Recuperação de Desastres
 
-Este documento detalha os processos de salvaguarda de dados (backup), as políticas de retenção histórica e o Plano de Recuperação de Desastres (DRP) do **Health Nexus**.
+Este documento detalha os processos de salvaguarda de dados (backup), as políticas de retenção histórica e o Plano de Recuperação de Desastres (DRP) do **CRM Clínico Farmacêutico**.
 
 ---
 

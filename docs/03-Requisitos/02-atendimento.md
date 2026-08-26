@@ -1,6 +1,6 @@
-# Health Nexus — Módulo 02: Atendimento
+# CRM Clínico Farmacêutico — Módulo 02: Atendimento
 
-Este documento detalha os requisitos e especificações para o módulo de **Atendimento** do Health Nexus.
+Este documento detalha os requisitos e especificações para o módulo de **Atendimento** do CRM Clínico Farmacêutico.
 
 ---
 
@@ -114,7 +114,7 @@ Registra a triagem Manchester do atendimento.
 ## 6. Wireframe (Textual)
 ```
 +----------------------------------------------------------------------------------+
-|  [HEALTH NEXUS]  |  Atendimento > Nova Triagem                                   |
+|  [CRM CLÍNICO FARMACÊUTICO]  |  Atendimento > Nova Triagem                                   |
 +----------------------------------------------------------------------------------+
 |  Paciente: Maria de Souza | ID: 124.532-A                                        |
 |                                                                                  |

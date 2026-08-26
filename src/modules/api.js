@@ -1,5 +1,5 @@
 // ==========================================
-// Health Nexus — API & LocalDB Router Module
+// CRM Clínico Farmacêutico — API & LocalDB Router Module
 // Interceptador Local-First com suporte a cache e sync
 // ==========================================
 

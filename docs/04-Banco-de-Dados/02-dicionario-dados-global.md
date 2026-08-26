@@ -1,6 +1,6 @@
-# Health Nexus — Dicionário de Dados Global (Turso/SQLite)
+# CRM Clínico Farmacêutico — Dicionário de Dados Global (Turso/SQLite)
 
-Este documento especifica a estrutura física global das tabelas do banco de dados Turso (LibSQL/SQLite) do **Health Nexus**, detalhando as colunas de auditoria padronizadas, estratégias de indexação e mapeamento de tipos de dados.
+Este documento especifica a estrutura física global das tabelas do banco de dados Turso (LibSQL/SQLite) do **CRM Clínico Farmacêutico**, detalhando as colunas de auditoria padronizadas, estratégias de indexação e mapeamento de tipos de dados.
 
 ---
 

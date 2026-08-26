@@ -11,7 +11,7 @@ globalThis.window = {
 const { calculateMEWS, checkDrugInteractions, generateWhatsAppClinicalMessage } = await import('../src/modules/clinicalAI.js');
 
 console.log('\n=============================================================');
-console.log('  🧪 HEALTH NEXUS — BATERIA DE TESTES DE INTELIGÊNCIA CLÍNICA ');
+console.log('  🧪 CRM CLÍNICO FARMACÊUTICO — BATERIA DE TESTES DE INTELIGÊNCIA CLÍNICA ');
 console.log('=============================================================\n');
 
 // --------------------------------------------------------------------------

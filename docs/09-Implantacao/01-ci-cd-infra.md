@@ -1,18 +1,18 @@
-# Health Nexus — Implantação, CI/CD e Infraestrutura
+# CRM Clínico Farmacêutico — Implantação, CI/CD e Infraestrutura
 
-Este documento especifica a arquitetura de infraestrutura de servidores, configuração de containers Docker, parametrização do proxy reverso e a esteira de implantação contínua (CI/CD) do **Health Nexus**.
+Este documento especifica a arquitetura de infraestrutura de servidores, configuração de containers Docker, parametrização do proxy reverso e a esteira de implantação contínua (CI/CD) do **CRM Clínico Farmacêutico**.
 
 ---
 
 ## 1. Topologia de Infraestrutura
 
-O Health Nexus adota uma arquitetura conteinerizada escalável horizontalmente, suportando deploys em ambientes on-premise (servidor local do hospital) ou multi-cloud (AWS, GCP, Azure).
+O CRM Clínico Farmacêutico adota uma arquitetura conteinerizada escalável horizontalmente, suportando deploys em ambientes on-premise (servidor local do hospital) ou multi-cloud (AWS, GCP, Azure).
 
 ```mermaid
 graph TD
     Client([Usuários / Navegadores]) <-->|HTTPS / WSS| Nginx[Proxy Reverso: Nginx]
-    Nginx <-->|Balanceamento de Carga| App1[Health Nexus App Container 1]
-    Nginx <-->|Balanceamento de Carga| App2[Health Nexus App Container 2]
+    Nginx <-->|Balanceamento de Carga| App1[CRM Clínico Farmacêutico App Container 1]
+    Nginx <-->|Balanceamento de Carga| App2[CRM Clínico Farmacêutico App Container 2]
     
     App1 & App2 <-->|Pool de Conexões| PG[(Banco PostgreSQL)]
     App1 & App2 <-->|Cache & Filas| Redis[(Redis Server)]

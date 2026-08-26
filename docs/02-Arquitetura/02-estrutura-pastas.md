@@ -1,15 +1,15 @@
-# Health Nexus — Estrutura de Pastas e Padrões de Código
+# CRM Clínico Farmacêutico — Estrutura de Pastas e Padrões de Código
 
-Este documento estabelece a organização física dos arquivos do **Health Nexus** (v2.7.2), define as convenções de nomenclatura e descreve as diretrizes de desenvolvimento (Clean Code, SOLID, Acessibilidade WCAG).
+Este documento estabelece a organização física dos arquivos do **CRM Clínico Farmacêutico** (v2.7.2), define as convenções de nomenclatura e descreve as diretrizes de desenvolvimento (Clean Code, SOLID, Acessibilidade WCAG).
 
 ---
 
 ## 1. Estrutura Física do Projeto
 
-O repositório está centralizado na pasta `c:\Health Nexus` e organizado com arquitetura SPA modular no frontend (Vite), backend proxy no Express/Vercel e documentações técnicas em `docs/`.
+O repositório está centralizado na pasta `c:\CRM Clínico Farmacêutico` e organizado com arquitetura SPA modular no frontend (Vite), backend proxy no Express/Vercel e documentações técnicas em `docs/`.
 
 ```
-C:\Health Nexus\
+C:\CRM Clínico Farmacêutico\
 ├── api/                       # Funções Serverless Edge Vercel
 │   ├── events.js              # Server-Sent Events (SSE) push hub
 │   └── index.js               # Handler API principal Vercel
@@ -128,7 +128,7 @@ A padronização dos nomes de arquivos, tabelas e elementos visuais é fundament
 *   **Dependency Inversion Principle (DIP)**: Módulos de alto nível não devem depender de módulos de baixo nível. Ambos devem depender de abstrações. (Ex: Injetar o cliente do banco de dados no repositório).
 
 ### Acessibilidade (WCAG 2.1)
-O frontend do Health Nexus deve ser acessível de ponta a ponta:
+O frontend do CRM Clínico Farmacêutico deve ser acessível de ponta a ponta:
 *   **Semântica**: Uso estrito de tags `<main>`, `<nav>`, `<header>`, `<footer>`, `<section>` e `<article>`.
 *   **Leitores de Tela**: Uso de atributos `aria-label`, `aria-describedby` e `role` em componentes personalizados (ex: modais, tabs).
 *   **Teclado**: Todo elemento interativo (botão, input, link) deve ser alcançável e ativável usando apenas a tecla `Tab` e `Enter/Espaço`, mantendo um anel de foco visível (`:focus-visible`).

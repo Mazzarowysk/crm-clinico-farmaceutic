@@ -1,12 +1,12 @@
-# Health Nexus — Estratégia de Testes
+# CRM Clínico Farmacêutico — Estratégia de Testes
 
-Este documento estabelece a metodologia, ferramentas e padrões exigidos para os ciclos de testes manuais e automatizados do **Health Nexus**.
+Este documento estabelece a metodologia, ferramentas e padrões exigidos para os ciclos de testes manuais e automatizados do **CRM Clínico Farmacêutico**.
 
 ---
 
 ## 1. Pirâmide de Testes e Cobertura
 
-O Health Nexus adota uma estratégia equilibrada de testes estruturada na pirâmide de testes para garantir estabilidade funcional:
+O CRM Clínico Farmacêutico adota uma estratégia equilibrada de testes estruturada na pirâmide de testes para garantir estabilidade funcional:
 *   **Testes Unitários (Base)**: Foco na camada de *Services* (regras de negócio) e utilitários da API. Devem cobrir 100% dos cálculos clínicos, validações de interações de medicamentos e regras de faturamento.
 *   **Testes de Integração (Meio)**: Foco nas camadas de *Controllers* e *Repositories*, testando a comunicação de rotas HTTP com o banco de dados (usando transações isoladas que dão rollback pós-teste).
 *   **Testes End-to-End (E2E) (Topo)**: Foco nas jornadas críticas do usuário do frontend até a persistência no banco (ex: Admissão de paciente, Classificação de risco e Fechamento de prontuário).

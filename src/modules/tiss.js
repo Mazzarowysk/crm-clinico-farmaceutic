@@ -1,5 +1,5 @@
 /**
- * Health Nexus - Módulo de Faturamento & Exportação de Lotes TISS 4.01 XML
+ * CRM Clínico Farmacêutico - Módulo de Faturamento & Exportação de Lotes TISS 4.01 XML
  * Em conformidade com o padrão TISS 4.01.00 da Agência Nacional de Saúde Suplementar (ANS)
  */
 
@@ -179,7 +179,7 @@ export function generateTISS401XML({
   registroANS = '359012',
   cnpjPrestador = '12345678000199',
   cnesHospital = '7654321',
-  nomeHospital = 'Hospital & Maternidade Health Nexus',
+  nomeHospital = 'Hospital & Maternidade CRM Clínico Farmacêutico',
   operadoraNome = 'Unimed Central',
   atendimentos = []
 }) {
@@ -204,7 +204,7 @@ export function generateTISS401XML({
           </ans:cabecalhoConsulta>
           <ans:dadosBeneficiario>
             <ans:numeroCarteira>${at.carteirinha || '0000000000000000'}</ans:numeroCarteira>
-            <ans:nomeBeneficiario>${at.paciente_nome || 'Paciente Health Nexus'}</ans:nomeBeneficiario>
+            <ans:nomeBeneficiario>${at.paciente_nome || 'Paciente CRM Clínico Farmacêutico'}</ans:nomeBeneficiario>
             <ans:atendimentoRN>N</ans:atendimentoRN>
           </ans:dadosBeneficiario>
           <ans:dadosContratadoExecutante>

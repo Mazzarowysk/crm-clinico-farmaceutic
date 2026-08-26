@@ -1,6 +1,6 @@
-# Health Nexus — Módulo 08: Farmácia
+# CRM Clínico Farmacêutico — Módulo 08: Farmácia
 
-Este documento detalha os requisitos e especificações para o módulo de **Farmácia** do Health Nexus.
+Este documento detalha os requisitos e especificações para o módulo de **Farmácia** do CRM Clínico Farmacêutico.
 
 ---
 
@@ -137,7 +137,7 @@ Farmacêutico assina digitalmente a validação da prescrição.
 ## 6. Wireframe (Textual)
 ```
 +----------------------------------------------------------------------------------+
-|  [HEALTH NEXUS]  |  Farmácia > Fila de Dispensação                               |
+|  [CRM CLÍNICO FARMACÊUTICO]  |  Farmácia > Fila de Dispensação                               |
 +----------------------------------------------------------------------------------+
 |  FILTRAR: [X] Aguardando Validação  [ ] Em Separação  [ ] Dispensados             |
 +----------------------------------------------------------------------------------+

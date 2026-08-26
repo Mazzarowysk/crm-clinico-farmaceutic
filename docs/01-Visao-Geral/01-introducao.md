@@ -1,6 +1,6 @@
-# Health Nexus — Introdução e Visão Geral
+# CRM Clínico Farmacêutico — Introdução e Visão Geral
 
-O **Health Nexus** é um sistema integrado de gestão hospitalar (ERP de Saúde) projetado para otimizar fluxos administrativos, assistenciais, clínicos e financeiros de instituições de saúde de diferentes portes.
+O **CRM Clínico Farmacêutico** é um sistema integrado de gestão hospitalar (ERP de Saúde) projetado para otimizar fluxos administrativos, assistenciais, clínicos e financeiros de instituições de saúde de diferentes portes.
 
 ## 1. Missão e Visão
 
@@ -11,7 +11,7 @@ O **Health Nexus** é um sistema integrado de gestão hospitalar (ERP de Saúde)
 
 ## 2. Escopo de Atuação
 
-O Health Nexus foi projetado para operar nos seguintes ambientes:
+O CRM Clínico Farmacêutico foi projetado para operar nos seguintes ambientes:
 
 | Tipo de Unidade | Escopo de Utilização |
 | :--- | :--- |
@@ -40,7 +40,7 @@ O sistema disponibiliza interfaces e fluxos customizados para diferentes perfis 
 
 ## 4. Objetivos Técnicos
 
-O Health Nexus adere aos seguintes requisitos não funcionais e arquiteturais:
+O CRM Clínico Farmacêutico adere aos seguintes requisitos não funcionais e arquiteturais:
 
 1.  **Interface Moderna**: UI intuitiva, focada na usabilidade clínica para reduzir o tempo de cliques e evitar a fadiga do usuário.
 2.  **Arquitetura Modular**: Possibilidade de habilitar ou desabilitar módulos sob demanda (ex: uma clínica pode desabilitar o Centro Cirúrgico).
@@ -83,7 +83,7 @@ O Health Nexus adere aos seguintes requisitos não funcionais e arquiteturais:
 
 ## 6. Princípios de Engenharia de Software
 
-O desenvolvimento do Health Nexus baseia-se em:
+O desenvolvimento do CRM Clínico Farmacêutico baseia-se em:
 
 *   **Clean Code (Código Limpo)**: Nomes autoexplicativos, funções pequenas com responsabilidade única e DRY (*Don't Repeat Yourself*).
 *   **Separação de Responsabilidades**: Divisão explícita em camadas (*Controllers*, *Services*, *Repositories*).

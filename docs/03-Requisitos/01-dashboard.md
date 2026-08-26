@@ -1,6 +1,6 @@
-# Health Nexus — Módulo 01: Dashboard
+# CRM Clínico Farmacêutico — Módulo 01: Dashboard
 
-Este documento detalha os requisitos e especificações para o módulo de **Dashboard** do Health Nexus.
+Este documento detalha os requisitos e especificações para o módulo de **Dashboard** do CRM Clínico Farmacêutico.
 
 ---
 
@@ -104,7 +104,7 @@ Salva as preferências de layout de widgets da dashboard do usuário logado.
 ## 6. Wireframe (Textual)
 ```
 +----------------------------------------------------------------------------------+
-|  [HEALTH NEXUS]  |  Dashboard  |  Pacientes  |  Agenda  |        Usuario: Dr. João  |
+|  [CRM CLÍNICO FARMACÊUTICO]  |  Dashboard  |  Pacientes  |  Agenda  |        Usuario: Dr. João  |
 +----------------------------------------------------------------------------------+
 |  FILTROS: [ Hoje | 7 dias | Mês ]   [ Unidade: Hospital Central ]                |
 +----------------------------------------------------------------------------------+

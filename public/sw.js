@@ -1,13 +1,13 @@
 /**
- * Health Nexus - Service Worker de Alta Resiliência Hospitalar & Push Notifications
+ * CRM Clínico Farmacêutico - Service Worker de Alta Resiliência Hospitalar & Push Notifications
  * Versão: 3.15.0
  */
 
-const CACHE_NAME = 'health-nexus-v3.15.0';
+const CACHE_NAME = 'crm-clinico-farmaceutico-v3.15.0';
 const STATIC_ASSETS = [
   '/',
   '/index.html',
-  '/assets/logo.png',
+  '/assets/crm-logo.png?v=2',
   '/manual_do_usuario.html',
   '/manifest.webmanifest'
 ];
@@ -70,7 +70,7 @@ self.addEventListener('fetch', (event) => {
 
 // Suporte a Notificações Push para Médicos de Sobreaviso e Alertas de Pacientes Críticos
 self.addEventListener('push', (event) => {
-  let data = { title: 'Health Nexus Hospitalar', body: 'Novo alerta assistencial de plantão.' };
+  let data = { title: 'CRM Clínico Farmacêutico Hospitalar', body: 'Novo alerta assistencial de plantão.' };
   if (event.data) {
     try {
       data = event.data.json();
@@ -81,8 +81,8 @@ self.addEventListener('push', (event) => {
 
   const options = {
     body: data.body,
-    icon: '/assets/logo.png',
-    badge: '/assets/logo.png',
+    icon: '/assets/crm-logo.png?v=2',
+    badge: '/assets/crm-logo.png?v=2',
     vibrate: [200, 100, 200],
     data: {
       url: data.url || '/'

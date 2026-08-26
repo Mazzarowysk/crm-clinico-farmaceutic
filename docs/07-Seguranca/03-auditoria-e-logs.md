@@ -1,6 +1,6 @@
-# Health Nexus — Trilha de Auditoria e Logs
+# CRM Clínico Farmacêutico — Trilha de Auditoria e Logs
 
-Este documento define as especificações e políticas para o registro de logs do sistema e rastreabilidade total (trilha de auditoria) de ações executadas no **Health Nexus**.
+Este documento define as especificações e políticas para o registro de logs do sistema e rastreabilidade total (trilha de auditoria) de ações executadas no **CRM Clínico Farmacêutico**.
 
 ---
 
@@ -43,7 +43,7 @@ router.get('/patients/:id/medical-records', authMiddleware, auditPepAccess, reco
 
 ## 2. Logs de Sistema e Erros (Application Logs)
 
-O backend do Health Nexus adota o **Winston** em conjunto com o **Morgan** para gerenciamento de logs de requisições HTTP e erros de programação.
+O backend do CRM Clínico Farmacêutico adota o **Winston** em conjunto com o **Morgan** para gerenciamento de logs de requisições HTTP e erros de programação.
 
 ### Níveis de Log (RFC 5424)
 1.  **`error`**: Erros críticos no servidor que interrompem requisições (ex: falha de conexão com PostgreSQL, estouro de memória, erros 500).

@@ -9,8 +9,8 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="/manifest.webmanifest">
   <!-- Favicon / Ícone do Sistema -->
-  <link rel="icon" type="image/png" href="/assets/logo.png">
-  <link rel="apple-touch-icon" href="/assets/logo.png">
+  <link rel="icon" type="image/png" href="/assets/crm-logo.png?v=2">
+  <link rel="apple-touch-icon" href="/assets/crm-logo.png?v=2">
   <!-- Fontes Corporativas: Outfit (títulos) e Inter (corpo) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,14 +27,66 @@
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <!-- Estilos Globais e Design System -->
   <link rel="stylesheet" href="/src/styles.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: #0b0f19;
+      color: #f8fafc;
+      font-family: 'Inter', sans-serif;
+    }
+    .initial-loader {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      width: 100vw;
+      background: radial-gradient(circle at center, #131b2e 0%, #0b0f19 100%);
+      gap: 16px;
+    }
+    .loader-logo {
+      width: 96px;
+      height: 96px;
+      object-fit: contain;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(13, 148, 136, 0.4);
+      border: 2px solid rgba(20, 184, 166, 0.4);
+      background: rgba(15, 23, 42, 0.85);
+      padding: 6px;
+      animation: pulseLogo 2s infinite ease-in-out;
+    }
+    .loader-spinner {
+      width: 36px;
+      height: 36px;
+      border: 3px solid rgba(20, 184, 166, 0.2);
+      border-top-color: #14b8a6;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    .loader-text {
+      font-family: 'Outfit', sans-serif;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #94a3b8;
+      letter-spacing: 0.5px;
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    @keyframes pulseLogo {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.04); }
+    }
+  </style>
 </head>
 <body>
   <div id="app">
     <!-- Tela de Inicialização / Carregamento com Logomarca -->
     <div class="initial-loader">
-      <img src="/assets/logo.png" alt="CRM Clínico Farmacêutico" class="loader-logo">
+      <img src="/assets/crm-logo.png?v=2" alt="CRM Clínico Farmacêutico" class="loader-logo">
       <div class="loader-spinner"></div>
-      <p class="loader-text">Inicializando o Sistema...</p>
+      <p class="loader-text">Inicializando CRM Clínico Farmacêutico...</p>
     </div>
   </div>
   <!-- Script de Entrada SPA -->

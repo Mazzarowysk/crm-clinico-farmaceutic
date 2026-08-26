@@ -1,7 +1,7 @@
-# Health Nexus — Guia de UI/UX e Interfaces
+# CRM Clínico Farmacêutico — Guia de UI/UX e Interfaces
 
 > **Versão:** 1.3.0 — Agosto/2026  
-> Documento de referência para padrões de experiência do usuário (UX) e especificações de interface visual (UI) do **Health Nexus**.
+> Documento de referência para padrões de experiência do usuário (UX) e especificações de interface visual (UI) do **CRM Clínico Farmacêutico**.
 
 ---
 

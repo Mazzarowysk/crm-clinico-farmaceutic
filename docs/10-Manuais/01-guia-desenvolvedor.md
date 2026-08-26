@@ -1,4 +1,4 @@
-# 💻 Health Nexus — Guia Completo do Desenvolvedor & Arquitetura de Software
+# 💻 CRM Clínico Farmacêutico — Guia Completo do Desenvolvedor & Arquitetura de Software
 
 > **Versão:** 1.3.0  
 > **Arquitetura:** Monólito Híbrido Local-First (Vanilla JS Single Page Application + Express REST API + Dual-Database SQLite/Turso LibSQL)  
@@ -8,7 +8,7 @@
 
 ## 📐 1. Organograma da Arquitetura do Sistema
 
-O **Health Nexus** foi construído com separação limpa de responsabilidades, mantendo extrema simplicidade operacional (zero frameworks pesados no frontend, performance instantânea < 5ms localmente).
+O **CRM Clínico Farmacêutico** foi construído com separação limpa de responsabilidades, mantendo extrema simplicidade operacional (zero frameworks pesados no frontend, performance instantânea < 5ms localmente).
 
 ```mermaid
 graph TD
@@ -370,7 +370,7 @@ node backend/server.js
 ### Variáveis de Ambiente (.env)
 
 ```env
-TURSO_DATABASE_URL=libsql://health-nexus-XXXXX.aws-us-east-1.turso.io
+TURSO_DATABASE_URL=libsql://crm-clinico-farmaceutico-XXXXX.aws-us-east-1.turso.io
 TURSO_AUTH_TOKEN=eyJhbGc...
 JWT_SECRET=sua_chave_secreta_aqui
 PORT=3001
@@ -378,4 +378,4 @@ PORT=3001
 
 ---
 
-*Documentação mantida pela equipe de Engenharia de Software — Health Nexus v1.3.0 — Agosto/2026*
+*Documentação mantida pela equipe de Engenharia de Software — CRM Clínico Farmacêutico v1.3.0 — Agosto/2026*

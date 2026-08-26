@@ -1,5 +1,5 @@
 // ==========================================
-// Health Nexus — Telemedicina & Sala Virtual WebRTC Module
+// CRM Clínico Farmacêutico — Telemedicina & Sala Virtual WebRTC Module
 // Atendimento Médico Remoto, Câmera/Vídeo, Áudio e Compartilhamento
 // ==========================================
 

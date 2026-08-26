@@ -164,7 +164,7 @@ function renderReportsTab(contentArea) {
           registroANS: '359012',
           cnpjPrestador: '12345678000199',
           cnesHospital: '7654321',
-          nomeHospital: 'Hospital & Maternidade Health Nexus',
+          nomeHospital: 'Hospital & Maternidade CRM Clínico Farmacêutico',
           atendimentos: listToExport.map(item => ({
             paciente_nome: item.patientName || item.fullName || item.name || 'Paciente Beneficiário',
             carteirinha: (item.susNumber || item.cpf ? item.cpf.replace(/\D/g, '') : '3254980001234567'),
@@ -1854,9 +1854,9 @@ function renderReportsTab(contentArea) {
   function exportHtmlXLS(columns, rows, filename) {
     const tableHTML = `
       <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
-      <head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Relatório Health Nexus</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head>
+      <head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>Relatório CRM Clínico Farmacêutico</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head>
       <body style="font-family: Arial; padding: 20px;">
-        <h2 style="color: #4f46e5;">Health Nexus — Relatório Oficial</h2>
+        <h2 style="color: #4f46e5;">CRM Clínico Farmacêutico — Relatório Oficial</h2>
         <p style="color: #64748b; font-size: 0.9rem;">Emissão: ${new Date().toLocaleString('pt-BR')}</p>
         <table border="1" style="border-collapse: collapse; width: 100%; font-family: Arial;">
           <thead>
@@ -1963,7 +1963,7 @@ function renderReportsTab(contentArea) {
       <html lang="pt-BR">
       <head>
         <meta charset="UTF-8">
-        <title>${title} — Health Nexus</title>
+        <title>${title} — CRM Clínico Farmacêutico</title>
         <style>
           @page { size: A4 portrait; margin: 15mm; }
           body { font-family: 'Segoe UI', Arial, sans-serif; color: #0f172a; margin: 0; padding: 15px; font-size: 10pt; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -1988,10 +1988,10 @@ function renderReportsTab(contentArea) {
         <div class="header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #6366f1; padding-bottom: 14px; margin-bottom: 20px;">
           <div style="display: flex; align-items: center; gap: 14px;">
             <div style="background: #ffffff; padding: 6px 14px; border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.08); border: 1.5px solid #e2e8f0; display: flex; align-items: center; justify-content: center;">
-              <img src="/assets/logo.png" alt="Health Nexus" style="height: 42px; width: auto; object-fit: contain;">
+              <img src="/assets/crm-logo.png?v=2" alt="CRM Clínico Farmacêutico" style="height: 42px; width: auto; object-fit: contain;">
             </div>
             <div>
-              <div style="font-family: 'Outfit', sans-serif; font-size: 16pt; font-weight: 800; color: #1e1b4b; margin: 0; line-height: 1.1;">HEALTH NEXUS</div>
+              <div style="font-family: 'Outfit', sans-serif; font-size: 16pt; font-weight: 800; color: #1e1b4b; margin: 0; line-height: 1.1;">CRM CLÍNICO FARMACÊUTICO</div>
               <div style="font-size: 8.5pt; color: #64748b; font-weight: 500; margin-top: 2px;">Gestão Hospitalar &amp; Inteligência Médica</div>
             </div>
           </div>
@@ -2028,7 +2028,7 @@ function renderReportsTab(contentArea) {
         </table>
 
         <div class="footer">
-          Health Nexus © 2026 — Sistema Integrado de Saúde Hospitalar • Documento impresso digitalmente.
+          CRM Clínico Farmacêutico © 2026 — Sistema Integrado de Saúde Hospitalar • Documento impresso digitalmente.
         </div>
         <script>
           window.onload = function() { window.print(); };
@@ -2571,7 +2571,7 @@ function renderReportsTab(contentArea) {
     }
 
     const linhaDigitavel = `34191.79001 01043.510047 91020.150008 5 94100000035000`;
-    const pixCopyPaste = `00020126580014br.gov.bcb.pix0136123e4567-e89b-12d3-a456-426614174000520400005303986540${t.amount ? t.amount.toFixed(2) : '350.00'}5802BR5912HEALTH NEXUS6009SAO PAULO62070503***6304A1B2`;
+    const pixCopyPaste = `00020126580014br.gov.bcb.pix0136123e4567-e89b-12d3-a456-426614174000520400005303986540${t.amount ? t.amount.toFixed(2) : '350.00'}5802BR5912CRM CLÍNICO FARMACÊUTICO6009SAO PAULO62070503***6304A1B2`;
 
     modal.innerHTML = `
       <div class="modal-card glass-card" style="max-width: 840px; width: 94%; padding: 24px; border-radius: 20px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-primary); max-height: 90vh; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6); position: relative;">
@@ -2584,7 +2584,7 @@ function renderReportsTab(contentArea) {
             </div>
             <div>
               <h3 style="margin: 0; font-size: 1.15rem; font-weight: 700; font-family: 'Outfit', sans-serif;">2Âª Via do Boleto Bancário FEBRABAN</h3>
-              <span style="font-size: 0.78rem; color: var(--text-muted);">Nosso Número: <strong>${t.id}</strong> • Health Nexus Bank (341-7)</span>
+              <span style="font-size: 0.78rem; color: var(--text-muted);">Nosso Número: <strong>${t.id}</strong> • CRM Clínico Farmacêutico Bank (341-7)</span>
             </div>
           </div>
           
@@ -2618,10 +2618,10 @@ function renderReportsTab(contentArea) {
           <!-- 1. RECIBO DO PAGADOR (CANHOTO SUPERIOR COM LOGOTIPO) -->
           <div style="margin-bottom: 12px;">
             <div style="display: flex; align-items: center; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 6px;">
-              <!-- LOGO BRANDED HEALTH NEXUS -->
+              <!-- LOGO BRANDED CRM CLÍNICO FARMACÊUTICO -->
               <div style="display: flex; align-items: center; gap: 8px; flex: 1;">
                 <div style="background: #ffffff; padding: 4px 10px; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.06); display: inline-flex; align-items: center; justify-content: center;">
-                  <img src="/assets/logo.png" alt="Health Nexus" style="height: 32px; width: auto; object-fit: contain;">
+                  <img src="/assets/crm-logo.png?v=2" alt="CRM Clínico Farmacêutico" style="height: 32px; width: auto; object-fit: contain;">
                 </div>
                 <div>
                   <div style="font-size: 1.15rem; font-weight: 900; color: #1e1b4b; font-family: 'Outfit', sans-serif; line-height: 1; letter-spacing: -0.4px;">HEALTH <span style="color: #4f46e5;">NEXUS</span></div>
@@ -2638,7 +2638,7 @@ function renderReportsTab(contentArea) {
               <tr>
                 <td style="border: 1px solid #000; padding: 4px 6px; width: 50%;">
                   <span style="color: #475569; display: block; font-size: 6.5pt; text-transform: uppercase;">Beneficiário</span>
-                  <strong style="font-size: 8.5pt;">Health Nexus Serviços Médicos Hospitalares Ltda - CNPJ: 42.109.843/0001-90</strong>
+                  <strong style="font-size: 8.5pt;">CRM Clínico Farmacêutico Serviços Médicos Hospitalares Ltda - CNPJ: 42.109.843/0001-90</strong>
                 </td>
                 <td style="border: 1px solid #000; padding: 4px 6px; width: 25%;">
                   <span style="color: #475569; display: block; font-size: 6.5pt; text-transform: uppercase;">Agência / Código Beneficiário</span>
@@ -2683,10 +2683,10 @@ function renderReportsTab(contentArea) {
           <div style="margin-top: 14px;">
             <!-- CABEÇALHO DO BANCO COM LOGO -->
             <div style="display: flex; align-items: center; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 4px;">
-              <!-- LOGO BRANDED HEALTH NEXUS -->
+              <!-- LOGO BRANDED CRM CLÍNICO FARMACÊUTICO -->
               <div style="display: flex; align-items: center; gap: 10px; flex: 1;">
                 <div style="background: #ffffff; padding: 4px 10px; border-radius: 8px; border: 1px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.06); display: inline-flex; align-items: center; justify-content: center;">
-                  <img src="/assets/logo.png" alt="Health Nexus" style="height: 32px; width: auto; object-fit: contain;">
+                  <img src="/assets/crm-logo.png?v=2" alt="CRM Clínico Farmacêutico" style="height: 32px; width: auto; object-fit: contain;">
                 </div>
                 <div>
                   <div style="font-size: 1.15rem; font-weight: 900; color: #1e1b4b; font-family: 'Outfit', sans-serif; line-height: 1; letter-spacing: -0.4px;">HEALTH <span style="color: #4f46e5;">NEXUS</span></div>
@@ -2713,7 +2713,7 @@ function renderReportsTab(contentArea) {
               <tr>
                 <td colspan="5" style="border: 1px solid #000; padding: 3px 6px;">
                   <span style="color: #475569; display: block; font-size: 6.5pt; text-transform: uppercase;">Beneficiário</span>
-                  <strong style="font-size: 8.5pt;">Health Nexus Serviços Médicos Hospitalares Ltda - CNPJ: 42.109.843/0001-90</strong>
+                  <strong style="font-size: 8.5pt;">CRM Clínico Farmacêutico Serviços Médicos Hospitalares Ltda - CNPJ: 42.109.843/0001-90</strong>
                 </td>
                 <td style="border: 1px solid #000; padding: 3px 6px;">
                   <span style="color: #475569; display: block; font-size: 6.5pt; text-transform: uppercase;">Agência / Código Beneficiário</span>
@@ -2813,7 +2813,7 @@ function renderReportsTab(contentArea) {
                   <span style="color: #475569; display: block; font-size: 6.5pt; text-transform: uppercase;">Pagador / Sacado</span>
                   <strong style="font-size: 8.5pt;">${t.client} — CPF: 384.910.284-00</strong><br>
                   <span style="font-size: 7.5pt; color: #475569;">Av. Paulista, 1000 - Bela Vista - São Paulo / SP - CEP: 01310-100</span>
-                  <span style="float: right; font-size: 7pt; color: #64748b;">Sacador / Avalista: Health Nexus S.A.</span>
+                  <span style="float: right; font-size: 7pt; color: #64748b;">Sacador / Avalista: CRM Clínico Farmacêutico S.A.</span>
                 </td>
               </tr>
             </table>
@@ -3819,10 +3819,10 @@ async function openEncounterReportDetail(encId) {
       @media print{body{padding:14px 18px;}}</style></head><body>
       <div class="hdr" style="display: flex; gap: 14px; align-items: center; padding-bottom: 14px; border-bottom: 3px solid #6366f1; margin-bottom: 18px;">
         <div style="background: #ffffff; padding: 6px 12px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1.5px solid #e2e8f0; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-          <img src="/assets/logo.png" alt="Health Nexus" style="height: 38px; width: auto; object-fit: contain;">
+          <img src="/assets/crm-logo.png?v=2" alt="CRM Clínico Farmacêutico" style="height: 38px; width: auto; object-fit: contain;">
         </div>
         <div style="flex:1;">
-          <div style="font-size:7.5pt;color:#6366f1;font-weight:800;text-transform:uppercase;letter-spacing:.05em;">Health Nexus — Resumo do Atendimento</div>
+          <div style="font-size:7.5pt;color:#6366f1;font-weight:800;text-transform:uppercase;letter-spacing:.05em;">CRM Clínico Farmacêutico — Resumo do Atendimento</div>
           <h1 style="font-size:15pt;font-weight:800;color:#0f172a;margin:3px 0;">${enc.patientName||'Paciente'}</h1>
           <div style="margin-top:5px;">
             ${mc?`<span class="badge" style="background:${manchColor}18;color:${manchColor};border:1px solid ${manchColor}40;">${mc.toUpperCase()}</span>`:''}
@@ -3852,7 +3852,7 @@ async function openEncounterReportDetail(encId) {
       ${note.assessment?`<div class="sb" style="border-color:#f97316"><div class="sl" style="color:#f97316">A — Avaliação</div><div class="sc">${note.assessment}</div></div>`:''}
       ${note.plan?`<div class="sb" style="border-color:#22c55e"><div class="sl" style="color:#22c55e">P — Plano</div><div class="sc">${note.plan}</div></div>`:''}
       `:`<div class="sec">📋 Nota SOAP</div><p style="font-size:9pt;color:#94a3b8;"><em>Nenhuma nota registrada.</em></p>`}
-      <div class="ftr"><span>Health Nexus — Sistema de Gestão Hospitalar</span><span>Gerado: ${new Date().toLocaleString('pt-BR')}</span></div>
+      <div class="ftr"><span>CRM Clínico Farmacêutico — Sistema de Gestão Hospitalar</span><span>Gerado: ${new Date().toLocaleString('pt-BR')}</span></div>
       </body></html>`;
     };
 

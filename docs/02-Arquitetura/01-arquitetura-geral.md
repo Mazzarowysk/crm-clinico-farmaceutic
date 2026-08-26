@@ -1,10 +1,10 @@
-# Health Nexus — Arquitetura Geral de Software
+# CRM Clínico Farmacêutico — Arquitetura Geral de Software
 
 > **Versão do documento:** 2.7.2 (alinhado ao código em produção)  
 > **Última atualização:** Agosto 2026  
 > **Arquitetura atual:** Modular Offline-First (SPA Modular + localStorage + Dual-Pipeline Turso Cloud)
 
-Este documento descreve a arquitetura **implementada** na v2.7.2 do Health Nexus.
+Este documento descreve a arquitetura **implementada** na v2.7.2 do CRM Clínico Farmacêutico.
 
 ---
 

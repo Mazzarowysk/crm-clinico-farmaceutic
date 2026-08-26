@@ -1,4 +1,4 @@
-// ─── MÓDULO DA ABA ATENDIMENTOS & TRIAGEM MANCHESTER (HEALTH NEXUS v2.7.2) ──────
+// ─── MÓDULO DA ABA ATENDIMENTOS & TRIAGEM MANCHESTER (CRM CLÍNICO FARMACÊUTICO v2.7.2) ──────
 import { state } from '../state.js';
 import { apiFetch, removeAccents } from '../modules/api.js';
 import { showToast, showCustomAlert } from '../modules/ui.js';

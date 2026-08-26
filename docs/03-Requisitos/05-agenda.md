@@ -1,6 +1,6 @@
-# Health Nexus — Módulo 05: Agenda
+# CRM Clínico Farmacêutico — Módulo 05: Agenda
 
-Este documento detalha os requisitos e especificações para o módulo de **Agenda** do Health Nexus.
+Este documento detalha os requisitos e especificações para o módulo de **Agenda** do CRM Clínico Farmacêutico.
 
 ---
 
@@ -100,7 +100,7 @@ Retorna horários livres para um médico ou especialidade em um intervalo de dat
 ## 6. Wireframe (Textual)
 ```
 +----------------------------------------------------------------------------------+
-|  [HEALTH NEXUS]  |  Agenda > Calendário                                          |
+|  [CRM CLÍNICO FARMACÊUTICO]  |  Agenda > Calendário                                          |
 +----------------------------------------------------------------------------------+
 |  MÉDICO: [ Dr. Carlos Alberto ]  SALA: [ Consultório 03 ]    DATA: [ 20/07/2026] |
 +----------------------------------------------------------------------------------+

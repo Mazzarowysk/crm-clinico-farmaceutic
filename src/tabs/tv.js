@@ -35,7 +35,7 @@ async function renderTVPanelTab() {
           <div style="display: flex; align-items: center; gap: 12px;">
             <i class="fa-solid fa-hospital-user" style="font-size: 2rem; color: #38bdf8;"></i>
             <div>
-              <h3 style="margin: 0; font-size: 1.3rem; font-weight: 800; letter-spacing: 0.5px;">HEALTH NEXUS | PAINEL DE ATENDIMENTO</h3>
+              <h3 style="margin: 0; font-size: 1.3rem; font-weight: 800; letter-spacing: 0.5px;">CRM CLÍNICO FARMACÊUTICO | PAINEL DE ATENDIMENTO</h3>
               <span style="font-size: 0.8rem; color: #94a3b8;">SISTEMA DE CHAMADA AUD&#205;VEL &amp; TRIAGEM VISUAL</span>
             </div>
           </div>
@@ -604,7 +604,7 @@ window.generatePrescriptionPDF = async function(prescription, administrations = 
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
   const loadLogo = () => new Promise(resolve => {
-    const img = new Image(); img.src = '/assets/logo.png';
+    const img = new Image(); img.src = '/assets/crm-logo.png?v=2';
     img.onload = () => resolve(img); img.onerror = () => resolve(null);
   });
 
@@ -616,7 +616,7 @@ window.generatePrescriptionPDF = async function(prescription, administrations = 
   if (logoImg) doc.addImage(logoImg, 'PNG', 8, 5, 18, 18);
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(15); doc.setFont('helvetica', 'bold');
-  doc.text('HEALTH NEXUS', 30, 13);
+  doc.text('CRM CLÍNICO FARMACÊUTICO', 30, 13);
   doc.setFontSize(8.5); doc.setFont('helvetica', 'normal');
   doc.text('Sistema de Gestão Hospitalar & Prontuário', 30, 19);
   doc.text('RECEITUÁRIO & PRESCRIÇÃO MÉDICA', 125, 13);
@@ -702,7 +702,7 @@ window.generatePrescriptionPDF = async function(prescription, administrations = 
     doc.setPage(i);
     doc.setFontSize(8); doc.setTextColor(160, 160, 160);
     doc.line(14, 283, 196, 283);
-    doc.text(`Health Nexus — Prescrição Hospitalar Oficial | Página ${i} de ${pageCount}`, 105, 288, { align: 'center' });
+    doc.text(`CRM Clínico Farmacêutico — Prescrição Hospitalar Oficial | Página ${i} de ${pageCount}`, 105, 288, { align: 'center' });
   }
 
   const safeName = (prescription.patientName || 'paciente').replace(/[^a-zA-Z0-9]/g, '_').substring(0, 25);

@@ -1,7 +1,7 @@
-# Health Nexus — Autenticação, Autorização e Controle de Acesso
+# CRM Clínico Farmacêutico — Autenticação, Autorização e Controle de Acesso
 
 > **Versão:** 1.3.0 — Agosto/2026  
-> Este documento descreve os mecanismos reais de autenticação, autorização e RBAC implementados no **Health Nexus**.
+> Este documento descreve os mecanismos reais de autenticação, autorização e RBAC implementados no **CRM Clínico Farmacêutico**.
 
 ---
 
@@ -83,7 +83,7 @@ O fluxo de aprovação de acesso Master para novos usuários:
 
 ## 5. Segurança de Dados (LGPD)
 
-O Health Nexus processa dados de saúde — classificados como **dados pessoais sensíveis** pelo Art. 11 da LGPD (Lei 13.709/2018). As medidas implementadas:
+O CRM Clínico Farmacêutico processa dados de saúde — classificados como **dados pessoais sensíveis** pelo Art. 11 da LGPD (Lei 13.709/2018). As medidas implementadas:
 
 - **Bcrypt:** Hashing de senhas com salt automático (nunca texto puro).
 - **JWT com expiração:** Sessões de 12 horas — reduz janela de exposição.
@@ -94,4 +94,4 @@ O Health Nexus processa dados de saúde — classificados como **dados pessoais 
 
 ---
 
-*Documentação mantida pela equipe de Engenharia — Health Nexus v1.3.0 — Agosto/2026*
+*Documentação mantida pela equipe de Engenharia — CRM Clínico Farmacêutico v1.3.0 — Agosto/2026*

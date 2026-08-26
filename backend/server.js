@@ -16,7 +16,7 @@ process.on('uncaughtException', (err) => {
 const start = async () => {
   app.listen(PORT, () => {
     console.log(`=========================================`);
-    console.log(` Health Nexus API rodando no Localhost!`);
+    console.log(` CRM Clínico Farmacêutico API rodando no Localhost!`);
     console.log(` Endpoint: http://localhost:${PORT}`);
     console.log(` Modo: ${process.env.NODE_ENV || 'development'}`);
     console.log(`=========================================`);

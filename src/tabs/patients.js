@@ -1,4 +1,4 @@
-// ─── MÓDULO DA ABA PACIENTES (HEALTH NEXUS v2.7.2) ──────────────────────────────
+// ─── MÓDULO DA ABA PACIENTES (CRM CLÍNICO FARMACÊUTICO v2.7.2) ──────────────────────────────
 import { state, dataCache } from '../state.js';
 import { apiFetch, cachedApiGet, removeAccents } from '../modules/api.js';
 import { showToast, showCustomAlert, showCustomConfirm } from '../modules/ui.js';

@@ -1,4 +1,4 @@
-// ─── MÓDULO DA ABA DASHBOARD & MÉTRICAS (HEALTH NEXUS v2.7.2) ───────────────────
+// ─── MÓDULO DA ABA DASHBOARD & MÉTRICAS (CRM CLÍNICO FARMACÊUTICO v2.7.2) ───────────────────
 import { state } from '../state.js';
 import { apiFetch } from '../modules/api.js';
 

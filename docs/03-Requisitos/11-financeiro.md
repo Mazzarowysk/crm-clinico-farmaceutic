@@ -1,6 +1,6 @@
-# Health Nexus — Módulo 11: Financeiro
+# CRM Clínico Farmacêutico — Módulo 11: Financeiro
 
-Este documento detalha os requisitos e especificações para o módulo **Financeiro** do Health Nexus.
+Este documento detalha os requisitos e especificações para o módulo **Financeiro** do CRM Clínico Farmacêutico.
 
 ---
 
@@ -131,7 +131,7 @@ Gera QR Code dinâmico para recebimento imediato via PIX.
 ## 6. Wireframe (Textual)
 ```
 +----------------------------------------------------------------------------------+
-|  [HEALTH NEXUS]  |  Financeiro > Baixa de Contas a Receber                       |
+|  [CRM CLÍNICO FARMACÊUTICO]  |  Financeiro > Baixa de Contas a Receber                       |
 +----------------------------------------------------------------------------------+
 |  BUSCAR PACIENTE: [ Maria de Souza Silva                                  ]      |
 +----------------------------------------------------------------------------------+

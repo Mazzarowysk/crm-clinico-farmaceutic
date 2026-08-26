@@ -1,5 +1,5 @@
 // ==========================================================================
-// 🌿 HEALTH NEXUS — PHARMACEUTICAL CLINICAL DECISION SUPPORT SYSTEM (CDSS)
+// 🌿 CRM CLÍNICO FARMACÊUTICO — PHARMACEUTICAL CLINICAL DECISION SUPPORT SYSTEM (CDSS)
 // Módulo de Assistência Farmacêutica Avançada, Triagem Clínica, Red Flags,
 // Prescrição de MIPs, Cruzamento em Tempo Real & Documentos Farmacêuticos
 // Em total conformidade com LGPD, CFF (Res. 585/586) e ANVISA (RDC 20/2011)

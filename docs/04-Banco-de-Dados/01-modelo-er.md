@@ -1,6 +1,6 @@
-# Health Nexus — Modelo Entidade-Relacionamento (ERD)
+# CRM Clínico Farmacêutico — Modelo Entidade-Relacionamento (ERD)
 
-Este documento apresenta o modelo lógico-relacional consolidado do banco de dados PostgreSQL do **Health Nexus**.
+Este documento apresenta o modelo lógico-relacional consolidado do banco de dados PostgreSQL do **CRM Clínico Farmacêutico**.
 
 ---
 

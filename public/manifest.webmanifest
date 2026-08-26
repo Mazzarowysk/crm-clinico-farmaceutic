@@ -1,6 +1,6 @@
 {
-  "name": "Health Nexus — Sistema Hospitalar Enterprise",
-  "short_name": "Health Nexus",
+  "name": "CRM Clínico Farmacêutico — Sistema Hospitalar Enterprise",
+  "short_name": "CRM Clínico Farmacêutico",
   "description": "Plataforma de Gestão Hospitalar & Decisão Clínica com IA, PEP SOAP, Manchester MEWS e Telemedicina",
   "start_url": "/",
   "display": "standalone",
@@ -9,13 +9,13 @@
   "orientation": "any",
   "icons": [
     {
-      "src": "/assets/logo.png",
+      "src": "/assets/crm-logo.png?v=2",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/assets/logo.png",
+      "src": "/assets/crm-logo.png?v=2",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"

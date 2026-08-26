@@ -1,7 +1,7 @@
-# Health Nexus — Integrações Externas
+# CRM Clínico Farmacêutico — Integrações Externas
 
 > **Versão:** 1.3.0 — Agosto/2026  
-> Este documento detalha as APIs externas **ativas e em produção** no sistema Health Nexus.
+> Este documento detalha as APIs externas **ativas e em produção** no sistema CRM Clínico Farmacêutico.
 
 ---
 
@@ -80,4 +80,4 @@
 
 ---
 
-*Documentação mantida pela equipe de Engenharia — Health Nexus v1.3.0 — Agosto/2026*
+*Documentação mantida pela equipe de Engenharia — CRM Clínico Farmacêutico v1.3.0 — Agosto/2026*

@@ -1,5 +1,5 @@
 // ==========================================
-// Health Nexus — UI & Design System Module
+// CRM Clínico Farmacêutico — UI & Design System Module
 // Modais, Alertas, Toasts, Seleção Customizada e Tema
 // ==========================================
 
@@ -393,7 +393,7 @@ export function showToast(message) {
   }, 3500);
 }
 
-// Sobrescrever alert global nativo com a UI moderna do Health Nexus
+// Sobrescrever alert global nativo com a UI moderna do CRM Clínico Farmacêutico
 if (typeof window !== 'undefined') {
   window.alert = function(msg) {
     if (!msg) return;

@@ -1,6 +1,6 @@
-# Health Nexus — Glossário de Termos e Siglas
+# CRM Clínico Farmacêutico — Glossário de Termos e Siglas
 
-Este documento reúne e define as principais siglas, termos técnicos e conceitos de saúde (clínicos e administrativos) utilizados no ecossistema do **Health Nexus**.
+Este documento reúne e define as principais siglas, termos técnicos e conceitos de saúde (clínicos e administrativos) utilizados no ecossistema do **CRM Clínico Farmacêutico**.
 
 ## 1. Siglas e Conceitos Clínicos
 

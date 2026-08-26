@@ -1,5 +1,5 @@
 // ==========================================================================
-// 🌿 HEALTH NEXUS — BASE CANÔNICA DE MEDICAMENTOS & FARMACOLOGIA (ANVISA / DCB)
+// 🌿 CRM CLÍNICO FARMACÊUTICO — BASE CANÔNICA DE MEDICAMENTOS & FARMACOLOGIA (ANVISA / DCB)
 // Catálogo farmacoterapêutico de referência para busca, triagem e cruzamento
 // ==========================================================================
 

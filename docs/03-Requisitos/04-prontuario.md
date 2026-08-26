@@ -1,6 +1,6 @@
-# Health Nexus — Módulo 04: Prontuário
+# CRM Clínico Farmacêutico — Módulo 04: Prontuário
 
-Este documento detalha os requisitos e especificações para o módulo de **Prontuário** (Prontuário Eletrônico do Paciente - PEP) do Health Nexus.
+Este documento detalha os requisitos e especificações para o módulo de **Prontuário** (Prontuário Eletrônico do Paciente - PEP) do CRM Clínico Farmacêutico.
 
 ---
 
@@ -125,7 +125,7 @@ Assina e finaliza o prontuário do atendimento em caráter irrevogável.
 ## 6. Wireframe (Textual)
 ```
 +----------------------------------------------------------------------------------+
-|  [HEALTH NEXUS]  |  PEP > Atendimento Clínico                                    |
+|  [CRM CLÍNICO FARMACÊUTICO]  |  PEP > Atendimento Clínico                                    |
 +----------------------------------------------------------------------------------+
 |  Paciente: Maria de Souza | Idade: 41 anos | Sinais Vitais: PA 12/8 - Temp 37.8°C|
 +----------------------------------------------------------------------------------+

@@ -17,7 +17,7 @@ async function generateManual() {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Manual do Usuário — Health Nexus</title>
+  <title>Manual do Usuário — CRM Clínico Farmacêutico</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
@@ -334,7 +334,7 @@ async function generateManual() {
 
   <div class="cover-page">
     <div class="brand-badge">
-      <i class="fa-solid fa-hospital-user"></i> Health Nexus v1.2.1
+      <i class="fa-solid fa-hospital-user"></i> CRM Clínico Farmacêutico v1.2.1
     </div>
     <h1 class="cover-title">Manual do Usuário & Guia Operacional</h1>
     <p class="cover-subtitle">Documentação técnica e passo a passo detalhado de todas as telas, botões, protocolos médicos e fluxos da plataforma hospitalar.</p>
@@ -452,7 +452,7 @@ async function generateManual() {
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Manual do Usuário — Health Nexus</title>
+  <title>Manual do Usuário — CRM Clínico Farmacêutico</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <style>
@@ -553,7 +553,7 @@ async function generateManual() {
 </head>
 <body>
   <div class="pdf-header">
-    <h1>🏥 Health Nexus — Manual do Usuário</h1>
+    <h1>🏥 CRM Clínico Farmacêutico — Manual do Usuário</h1>
     <p>Manual Operacional Oficial & Guia de Uso do Sistema</p>
   </div>
   ${renderedBody}

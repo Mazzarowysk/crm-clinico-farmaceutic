@@ -1,6 +1,6 @@
-# Health Nexus — Módulo 12: Convênios
+# CRM Clínico Farmacêutico — Módulo 12: Convênios
 
-Este documento detalha os requisitos e especificações para o módulo de **Convênios** (Faturamento de Saúde Suplementar - ANS) do Health Nexus.
+Este documento detalha os requisitos e especificações para o módulo de **Convênios** (Faturamento de Saúde Suplementar - ANS) do CRM Clínico Farmacêutico.
 
 ---
 
@@ -33,7 +33,7 @@ stateDiagram-v2
 ## 3. Regras de Negócio
 1.  **Padrão TISS Obrigatório**: Toda a comunicação eletrônica com as operadoras de planos de saúde deve respeitar rigidamente a versão ativa do Padrão TISS (Troca de Informação de Saúde Suplementar) da ANS.
 2.  **Tabelas TUSS**: O sistema deve parametrizar os códigos de procedimentos, exames, taxas, diárias e materiais com base na Terminologia Unificada da Saúde Suplementar (TUSS).
-3.  **Validação Prévia do XML (XSD)**: Antes de autorizar o download de qualquer lote de guias, o backend do Health Nexus deve rodar uma validação sintática do XML contra os arquivos XSD correspondentes à versão TISS utilizada pelo convênio, bloqueando o envio em caso de erros de tags.
+3.  **Validação Prévia do XML (XSD)**: Antes de autorizar o download de qualquer lote de guias, o backend do CRM Clínico Farmacêutico deve rodar uma validação sintática do XML contra os arquivos XSD correspondentes à versão TISS utilizada pelo convênio, bloqueando o envio em caso de erros de tags.
 4.  **Gestão de Glosas**: Ao receber o arquivo XML de demonstrativo de pagamento da operadora, o sistema deve confrontar os itens pagos com os itens faturados originais. Itens não pagos (glosados) devem ser destacados com os respectivos códigos de glosa da ANS, abrindo um processo de "Recurso de Glosa" interno.
 
 ---
@@ -136,7 +136,7 @@ Gera e valida o arquivo XML TISS do lote para exportação.
 ## 6. Wireframe (Textual)
 ```
 +----------------------------------------------------------------------------------+
-|  [HEALTH NEXUS]  |  Convênios > Detalhes do Lote de Faturamento                 |
+|  [CRM CLÍNICO FARMACÊUTICO]  |  Convênios > Detalhes do Lote de Faturamento                 |
 +----------------------------------------------------------------------------------+
 |  LOTE #: 202607180001 | Convênio: Bradesco Saúde | Status: Aberto                |
 +----------------------------------------------------------------------------------+

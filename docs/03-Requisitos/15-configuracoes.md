@@ -1,6 +1,6 @@
-# Health Nexus — Módulo 15: Configurações
+# CRM Clínico Farmacêutico — Módulo 15: Configurações
 
-Este documento detalha os requisitos e especificações para o módulo de **Configurações** do Health Nexus.
+Este documento detalha os requisitos e especificações para o módulo de **Configurações** do CRM Clínico Farmacêutico.
 
 ---
 
@@ -117,7 +117,7 @@ Altera as diretrizes de segurança globais do sistema.
 ## 6. Wireframe (Textual)
 ```
 +----------------------------------------------------------------------------------+
-|  [HEALTH NEXUS]  |  Configurações > Perfis e Permissões (RBAC)                   |
+|  [CRM CLÍNICO FARMACÊUTICO]  |  Configurações > Perfis e Permissões (RBAC)                   |
 +----------------------------------------------------------------------------------+
 |  PERFIL: [ Enfermeiro                                                        ]  |
 +----------------------------------------------------------------------------------+

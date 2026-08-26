@@ -1,5 +1,5 @@
 // ============================================================
-// mockDataGenerator.js — Simulação Completa Health Nexus
+// mockDataGenerator.js — Simulação Completa CRM Clínico Farmacêutico
 // Cobre: Pacientes, Médicos, Agenda, Atendimentos, Triagens,
 //        Leitos, Internações, Financeiro, TV/Chamadas,
 //        Farmácia, Escalas, Estagnação

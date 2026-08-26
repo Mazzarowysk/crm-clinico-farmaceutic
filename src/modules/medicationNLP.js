@@ -1,5 +1,5 @@
 // ==========================================================================
-// 🧠 HEALTH NEXUS — CLINICAL PHARMACEUTICAL NLP & FUZZY SEARCH ENGINE
+// 🧠 CRM CLÍNICO FARMACÊUTICO — CLINICAL PHARMACEUTICAL NLP & FUZZY SEARCH ENGINE
 // Processamento de Linguagem Natural (PLN), Reconhecimento de Entidades (NER),
 // Distância Fonética / Levenshtein e Mapeamento Semântico de Sintomas x Fármacos
 // ==========================================================================

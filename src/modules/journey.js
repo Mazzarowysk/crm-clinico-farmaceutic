@@ -1,4 +1,4 @@
-// ─── MÓDULO DE LINHA DE CUIDADO GUIADA & JOURNEY STEPPER (HEALTH NEXUS v2.7.2) ───
+// ─── MÓDULO DE LINHA DE CUIDADO GUIADA & JOURNEY STEPPER (CRM CLÍNICO FARMACÊUTICO v2.7.2) ───
 import { state } from '../state.js';
 import { showToast } from './ui.js';
 import { apiFetch } from './api.js';

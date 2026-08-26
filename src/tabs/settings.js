@@ -1,4 +1,4 @@
-// ─── MÓDULO DA ABA CONFIGURAÇÕES & ADMINISTRAÇÃO (HEALTH NEXUS v2.7.2) ───────────
+// ─── MÓDULO DA ABA CONFIGURAÇÕES & ADMINISTRAÇÃO (CRM CLÍNICO FARMACÊUTICO v2.7.2) ───────────
 import { state } from '../state.js';
 import * as localDB from '../localDB.js';
 import { generateMockData } from '../mockDataGenerator.js';
@@ -32,7 +32,7 @@ export function renderSettingsTab(contentArea) {
               </div>
               <div style="display: flex; justify-content: space-between;">
                 <span style="color: var(--text-secondary);">Ambiente Web (Vercel)</span>
-                <span style="color: var(--text-primary); font-family: monospace;">health-nexus-beryl.vercel.app</span>
+                <span style="color: var(--text-primary); font-family: monospace;">crm-clinico-farmaceutico-beryl.vercel.app</span>
               </div>
             </div>
           </div>
@@ -45,7 +45,7 @@ export function renderSettingsTab(contentArea) {
           </summary>
           <div class="settings-accordion-body">
             <p style="color: var(--text-secondary); margin-bottom: 16px; line-height: 1.6;">
-              Acesse a documentação unificada e exaustiva do <strong>Health Nexus v2.7.2</strong>. Disponível em portal web interativo com navegação rápida e em documento PDF corporativo para download ou impressão.
+              Acesse a documentação unificada e exaustiva do <strong>CRM Clínico Farmacêutico v2.7.2</strong>. Disponível em portal web interativo com navegação rápida e em documento PDF corporativo para download ou impressão.
             </p>
             <div style="display: flex; gap: 14px; flex-wrap: wrap; margin-top: 14px;">
               <button id="btn-open-tabbed-manual-modal" class="btn" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 600; padding: 10px 18px; border-radius: 8px; background: linear-gradient(135deg, rgba(99, 102, 241, 0.35), rgba(168, 85, 247, 0.28)); border: 1px solid rgba(168, 85, 247, 0.5); color: #f3e8ff; cursor: pointer; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='none'">
@@ -374,7 +374,7 @@ export function renderSettingsTab(contentArea) {
 
         const urlInput = document.getElementById('turso-cfg-url');
         const tokenInput = document.getElementById('turso-cfg-token');
-        if (urlInput) urlInput.value = tursoData.url || 'libsql://health-nexus-mazzarowysk.aws-us-east-1.turso.io';
+        if (urlInput) urlInput.value = tursoData.url || 'libsql://crm-clinico-farmaceutico-mazzarowysk.aws-us-east-1.turso.io';
         if (tokenInput) tokenInput.value = (tursoData.token && tursoData.token !== '') ? tursoData.token : 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3ODYxNDU1NTgsImlkIjoiMDE5Zjc1YmYtMTUwMS03YmMyLTlkYTQtZTA1ZGIxMzdiYjEyIiwia2lkIjoiU0RZWEtINkIzZWg1b3JtRDBPRXpUbmhUaGpFMllXRXJxbjhCNVFnSmVLZyIsInJpZCI6Ijg4YTY2NjM0LTM3YWQtNGEyZC04ZmUxLTFmYjM3ZDAxNGE4YiJ9.teLr9MEIIXvjkOJh_nUWWaGwJuF0vnFwaMdUsyQLQba1kLOP30ziYQJkCWDDbADYl74zhYLujOwdr0Gg5EWoAg';
 
         const statusBadge = document.getElementById('turso-settings-status-badge');

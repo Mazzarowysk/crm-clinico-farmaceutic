@@ -1,5 +1,5 @@
 // ==========================================
-// Health Nexus — Clinical AI & Smart Care Module
+// CRM Clínico Farmacêutico — Clinical AI & Smart Care Module
 // Ditado por Voz (Voice-to-SOAP), Escore MEWS, Alerta de Sepse,
 // Verificador de Interações Medicamentosas e Integração WhatsApp
 // ==========================================
@@ -801,7 +801,7 @@ export const queryOpenFDADrugSafety = async (drugName = '') => {
 export const generateWhatsAppClinicalMessage = (data = {}) => {
   const patientName = data.patientName || 'Paciente';
   const doctorName = data.doctorName || 'Dr(a). Médico(a) Assistente';
-  const clinicName = 'Health Nexus · Hospital & Centro de Medicina Integrada';
+  const clinicName = 'CRM Clínico Farmacêutico · Hospital & Centro de Medicina Integrada';
   const dateStr = new Date().toLocaleDateString('pt-BR');
   const timeStr = new Date().toLocaleTimeString('pt-BR').slice(0, 5);
 

@@ -1,5 +1,5 @@
 // ==========================================
-// Health Nexus — Cloud Sync Module (Turso LibSQL Dual-Pipeline)
+// CRM Clínico Farmacêutico — Cloud Sync Module (Turso LibSQL Dual-Pipeline)
 // ==========================================
 
 import * as localDB from '../localDB.js';
@@ -304,7 +304,7 @@ export class SyncManager {
   }
 
   async pushDirectToTurso(dados_json, config_json) {
-    const directUrl = 'https://health-nexus-mazzarowysk.aws-us-east-1.turso.io/v2/pipeline';
+    const directUrl = 'https://crm-clinico-farmaceutico-mazzarowysk.aws-us-east-1.turso.io/v2/pipeline';
     const directToken = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3ODYxNDU1NTgsImlkIjoiMDE5Zjc1YmYtMTUwMS03YmMyLTlkYTQtZTA1ZGIxMzdiYjEyIiwia2lkIjoiU0RZWEtINkIzZWg1b3JtRDBPRXpUbmhUaGpFMllXRXJxbjhCNVFnSmVLZyIsInJpZCI6Ijg4YTY2NjM0LTM3YWQtNGEyZC04ZmUxLTFmYjM3ZDAxNGE4YiJ9.teLr9MEIIXvjkOJh_nUWWaGwJuF0vnFwaMdUsyQLQba1kLOP30ziYQJkCWDDbADYl74zhYLujOwdr0Gg5EWoAg';
     const now = Date.now();
 
@@ -333,7 +333,7 @@ export class SyncManager {
   }
 
   async pullDirectFromTurso() {
-    const directUrl = 'https://health-nexus-mazzarowysk.aws-us-east-1.turso.io/v2/pipeline';
+    const directUrl = 'https://crm-clinico-farmaceutico-mazzarowysk.aws-us-east-1.turso.io/v2/pipeline';
     const directToken = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3ODYxNDU1NTgsImlkIjoiMDE5Zjc1YmYtMTUwMS03YmMyLTlkYTQtZTA1ZGIxMzdiYjEyIiwia2lkIjoiU0RZWEtINkIzZWg1b3JtRDBPRXpUbmhUaGpFMllXRXJxbjhCNVFnSmVLZyIsInJpZCI6Ijg4YTY2NjM0LTM3YWQtNGEyZC04ZmUxLTFmYjM3ZDAxNGE4YiJ9.teLr9MEIIXvjkOJh_nUWWaGwJuF0vnFwaMdUsyQLQba1kLOP30ziYQJkCWDDbADYl74zhYLujOwdr0Gg5EWoAg';
 
     const pipelineBody = {

@@ -1,12 +1,12 @@
-# Health Nexus — Arquitetura de APIs
+# CRM Clínico Farmacêutico — Arquitetura de APIs
 
-Este documento estabelece os padrões e convenções adotados na construção das APIs REST e conexões via WebSocket do **Health Nexus**.
+Este documento estabelece os padrões e convenções adotados na construção das APIs REST e conexões via WebSocket do **CRM Clínico Farmacêutico**.
 
 ---
 
 ## 1. Padrões REST e Estrutura de Requisição/Resposta
 
-As APIs REST do Health Nexus operam exclusivamente sobre o protocolo HTTPS, utilizando o formato JSON para o tráfego de dados.
+As APIs REST do CRM Clínico Farmacêutico operam exclusivamente sobre o protocolo HTTPS, utilizando o formato JSON para o tráfego de dados.
 
 ### Métodos HTTP Padronizados
 *   `GET`: Recuperar informações (recursos individuais ou coleções). Não altera estados.
@@ -64,7 +64,7 @@ A resposta de uma listagem deve envelopar os resultados em uma chave `data` e as
 
 ## 3. Protocolo WebSocket para Eventos Real-Time
 
-Para processos assistenciais críticos, o Health Nexus utiliza o protocolo WebSocket via `Socket.io` para notificar os clientes em tempo real, eliminando a necessidade de polling de API.
+Para processos assistenciais críticos, o CRM Clínico Farmacêutico utiliza o protocolo WebSocket via `Socket.io` para notificar os clientes em tempo real, eliminando a necessidade de polling de API.
 
 ### Fluxo de Autenticação no WebSocket
 A conexão WebSocket exige a passagem do token JWT no ato do aperto de mão (handshake):

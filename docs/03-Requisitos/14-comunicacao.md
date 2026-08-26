@@ -1,6 +1,6 @@
-# Health Nexus — Módulo 14: Comunicação
+# CRM Clínico Farmacêutico — Módulo 14: Comunicação
 
-Este documento detalha os requisitos e especificações para o módulo de **Comunicação** do Health Nexus.
+Este documento detalha os requisitos e especificações para o módulo de **Comunicação** do CRM Clínico Farmacêutico.
 
 ---
 
@@ -93,7 +93,7 @@ Webhook público exposto para receber confirmações de entrega e respostas de p
 ## 6. Wireframe (Textual)
 ```
 +----------------------------------------------------------------------------------+
-|  [HEALTH NEXUS]  |  Comunicação > Painel de Chamada (Configurações)               |
+|  [CRM CLÍNICO FARMACÊUTICO]  |  Comunicação > Painel de Chamada (Configurações)               |
 +----------------------------------------------------------------------------------+
 |  MONITOR DA RECEPÇÃO: [ TV Recepção Principal                                v ] |
 +----------------------------------------------------------------------------------+

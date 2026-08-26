@@ -1,12 +1,12 @@
-# Health Nexus — Design System
+# CRM Clínico Farmacêutico — Design System
 
-Este documento define o guia de estilos visuais, tokens e componentes do **Design System** do **Health Nexus**, visando garantir uma interface moderna, consistente e visualmente premium para todas as telas do sistema.
+Este documento define o guia de estilos visuais, tokens e componentes do **Design System** do **CRM Clínico Farmacêutico**, visando garantir uma interface moderna, consistente e visualmente premium para todas as telas do sistema.
 
 ---
 
 ## 1. Tipografia e Fontes
 
-O Health Nexus utiliza fontes modernas do Google Fonts para otimizar a legibilidade em ambientes clínicos e administrativos sob diferentes condições de iluminação.
+O CRM Clínico Farmacêutico utiliza fontes modernas do Google Fonts para otimizar a legibilidade em ambientes clínicos e administrativos sob diferentes condições de iluminação.
 
 *   **Fonte de Títulos e Headers**: **Outfit** (Ideal para interfaces digitais, com geometria moderna e excelente leitura em alta densidade de dados).
 *   **Fonte de Corpo e Leitura**: **Inter** (Fonte sem serifa otimizada para telas de computador e dispositivos móveis, garantindo legibilidade para textos pequenos e dados tabulares).
@@ -219,5 +219,5 @@ Utilizados para classificar criticidade ou status do fluxo de atendimento sem po
 .badge-manchester-blue { background-color: rgba(0, 120, 255, 0.15); color: var(--color-primary); border: 1px solid var(--color-primary); }
 ```
 `
-*   As micro-animações do Health Nexus não adicionam atraso operacional, usando `cubic-bezier(0.4, 0, 0.2, 1)` com duração máxima de `300ms` para transições de hover e carregamentos de dados assíncronos.
+*   As micro-animações do CRM Clínico Farmacêutico não adicionam atraso operacional, usando `cubic-bezier(0.4, 0, 0.2, 1)` com duração máxima de `300ms` para transições de hover e carregamentos de dados assíncronos.
 *   Esquemas de cores de acessibilidade e testes de contraste são integrados diretamente ao workflow de QA da interface.

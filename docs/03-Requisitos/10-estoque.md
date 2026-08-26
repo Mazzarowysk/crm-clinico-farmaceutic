@@ -1,6 +1,6 @@
-# Health Nexus — Módulo 10: Estoque
+# CRM Clínico Farmacêutico — Módulo 10: Estoque
 
-Este documento detalha os requisitos e especificações para o módulo de **Estoque** (Almoxarifado e Suprimentos) do Health Nexus.
+Este documento detalha os requisitos e especificações para o módulo de **Estoque** (Almoxarifado e Suprimentos) do CRM Clínico Farmacêutico.
 
 ---
 
@@ -133,7 +133,7 @@ Efetua transferência de insumos entre almoxarifados.
 ## 6. Wireframe (Textual)
 ```
 +----------------------------------------------------------------------------------+
-|  [HEALTH NEXUS]  |  Estoque > Nova Requisição de Transferência                   |
+|  [CRM CLÍNICO FARMACÊUTICO]  |  Estoque > Nova Requisição de Transferência                   |
 +----------------------------------------------------------------------------------+
 |  Origem: [ Almoxarifado Central ]     Destino: [ Farmácia Centro Cirúrgico ]     |
 +----------------------------------------------------------------------------------+

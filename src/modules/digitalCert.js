@@ -1,5 +1,5 @@
 /**
- * Health Nexus - Módulo de Assinatura Digital ICP-Brasil em Nuvem & A1 Local
+ * CRM Clínico Farmacêutico - Módulo de Assinatura Digital ICP-Brasil em Nuvem & A1 Local
  * Em conformidade com a MP 2.200-2/2001, Lei Federal 14.063/2020 e Resolução CFM nº 2.299/2021
  */
 

@@ -1,6 +1,6 @@
-# Health Nexus — Módulo 13: Relatórios
+# CRM Clínico Farmacêutico — Módulo 13: Relatórios
 
-Este documento detalha os requisitos e especificações para o módulo de **Relatórios** do Health Nexus.
+Este documento detalha os requisitos e especificações para o módulo de **Relatórios** do CRM Clínico Farmacêutico.
 
 ---
 
@@ -117,7 +117,7 @@ Consulta o status do processamento da exportação.
 ## 6. Wireframe (Textual)
 ```
 +----------------------------------------------------------------------------------+
-|  [HEALTH NEXUS]  |  Relatórios > Exportação de Dados                             |
+|  [CRM CLÍNICO FARMACÊUTICO]  |  Relatórios > Exportação de Dados                             |
 +----------------------------------------------------------------------------------+
 |  Selecione o Relatório: [ Faturamento de Convênios                             v ] |
 |  Formato de Saída:      ( ) PDF (Documento Impresso)   (X) XLSX (Planilha Excel) |

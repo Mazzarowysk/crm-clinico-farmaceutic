@@ -1,5 +1,5 @@
 // ==========================================
-// Health Nexus — Authentication & RBAC Module
+// CRM Clínico Farmacêutico — Authentication & RBAC Module
 // Gestão de Usuários, Perfis, Permissões e Auditoria de Acessos
 // ==========================================
 

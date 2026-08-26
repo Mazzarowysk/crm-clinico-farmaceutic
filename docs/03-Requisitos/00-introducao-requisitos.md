@@ -1,6 +1,6 @@
-# Health Nexus — Introdução aos Requisitos e Especificações de Módulos
+# CRM Clínico Farmacêutico — Introdução aos Requisitos e Especificações de Módulos
 
-Esta seção da documentação descreve os requisitos funcionais do **Health Nexus** de forma modular. O sistema é composto por 15 módulos clínicos, assistenciais, de apoio e administrativos.
+Esta seção da documentação descreve os requisitos funcionais do **CRM Clínico Farmacêutico** de forma modular. O sistema é composto por 15 módulos clínicos, assistenciais, de apoio e administrativos.
 
 ## Estrutura da Especificação de Módulo
 
@@ -21,7 +21,7 @@ Para manter a consistência metodológica da documentação de engenharia de sof
 
 ## Relação dos Módulos
 
-Abaixo está o índice de especificação dos 15 módulos do Health Nexus:
+Abaixo está o índice de especificação dos 15 módulos do CRM Clínico Farmacêutico:
 
 1.  **[Módulo 01: Dashboard](file:///c:/Health%20Nexus/docs/03-Requisitos/01-dashboard.md)**: Painéis de indicadores clínicos, de ocupação e financeiros.
 2.  **[Módulo 02: Atendimento](file:///c:/Health%20Nexus/docs/03-Requisitos/02-atendimento.md)**: Triagem Manchester e recepção de prontos-socorros.

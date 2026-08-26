@@ -357,7 +357,7 @@ export function showFlowCompletionNotification(options = {}) {
   }
 
   const tabLabelsMap = {
-    dashboard:     'Visão Geral (Health Nexus)',
+    dashboard:     'Visão Geral (CRM Clínico Farmacêutico)',
     pacientes:     'Recepção & Pacientes',
     medicos:        'Corpo Clínico & Médicos',
     consultorios:  'Salas & Consultórios',
@@ -692,7 +692,7 @@ function showGoogleDriveAuthModal(defaultEmail = 'usuario.hospitalar@gmail.com')
 
         <!-- Descrição -->
         <p style="font-size: 0.88rem; color: #cbd5e1; line-height: 1.55; margin-bottom: 20px; background: rgba(14, 165, 233, 0.08); padding: 14px 16px; border-radius: 12px; border-left: 4px solid #0284c7;">
-          Informe o e-mail da sua conta Google para autorizar o salvamento de cópias de segurança na nuvem (pasta <strong>Health Nexus Backups</strong>).
+          Informe o e-mail da sua conta Google para autorizar o salvamento de cópias de segurança na nuvem (pasta <strong>CRM Clínico Farmacêutico Backups</strong>).
         </p>
 
         <!-- Form Inputs -->
@@ -899,7 +899,7 @@ function renderAuthScreen() {
 
             <div class="auth-brand-logo-wrap">
               <div class="auth-brand-logo-box">
-                <img src="/assets/logo.png" alt="Logo CRM Clínico Farmacêutico" class="auth-brand-logo-img">
+                <img src="/assets/crm-logo.png?v=2" alt="Logo CRM Clínico Farmacêutico" class="auth-brand-logo-img">
               </div>
               <div class="auth-brand-name">
                 CRM Farmacêutico
@@ -1379,7 +1379,7 @@ function renderAppStructure() {
       <aside class="app-sidebar">
         <div class="brand-logo" style="padding: 16px 12px; display: flex; align-items: center; gap: 12px;">
           <div class="system-sidebar-logo-box">
-            <img src="/assets/logo.png" alt="PharmaCRM Logo" class="system-sidebar-logo-img">
+            <img src="/assets/crm-logo.png?v=2" alt="PharmaCRM Logo" class="system-sidebar-logo-img">
           </div>
           <div>
             <div style="font-family: 'Outfit', sans-serif; font-weight: 700; color: #f8fafc; font-size: 1.05rem; line-height: 1.1;">PharmaCRM</div>
@@ -1415,7 +1415,7 @@ function renderAppStructure() {
             <i class="fa-solid fa-arrow-left"></i>
             <span id="global-back-label">Voltar</span>
           </button>
-          <img src="/assets/logo.png" alt="PharmaCRM" class="header-brand-logo-img">
+          <img src="/assets/crm-logo.png?v=2" alt="PharmaCRM" class="header-brand-logo-img">
           <div>
             <h1 class="page-title" id="page-title-label" style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.25rem; line-height: 1.2;">CRM Clínico Farmacêutico</h1>
             <div class="header-brand-text" style="margin: 0; font-size: 0.76rem; color: #94a3b8;">
@@ -1708,7 +1708,7 @@ function initGlobalSystemSearch() {
 
     // 2. Pesquisar abas da aplicação
     const allNavItems = [
-      { id: 'dashboard', label: 'Health Nexus (Visão Geral)', icon: 'fa-chart-line', tabColor: '#818cf8' },
+      { id: 'dashboard', label: 'CRM Clínico Farmacêutico (Visão Geral)', icon: 'fa-chart-line', tabColor: '#818cf8' },
       { id: 'escalas', label: 'Escalas de Trabalho & Plantões', icon: 'fa-user-clock', tabColor: '#a855f7' },
       { id: 'agenda', label: 'Agenda & Consultas', icon: 'fa-calendar-check', tabColor: '#93c5fd' },
       { id: 'pacientes', label: 'Recepção & Pacientes', icon: 'fa-user-injured', tabColor: '#38bdf8' },
@@ -2076,7 +2076,7 @@ function switchTab(tabName, isBack = false) {
   
   // Mapa de nomes de exibição por aba
   const tabLabels = {
-    dashboard:     'Health Nexus',
+    dashboard:     'CRM Clínico Farmacêutico',
     pacientes:     'Pacientes',
     medicos:        'Corpo Clínico',
     consultorios:  'Consultórios',
@@ -2105,7 +2105,7 @@ function switchTab(tabName, isBack = false) {
   const label = tabLabels[tabName] || (tabName.charAt(0).toUpperCase() + tabName.slice(1));
   const pageTitle = document.getElementById('page-title-label');
   if (pageTitle) pageTitle.textContent = label;
-  document.title = `${label} — Health Nexus`;
+  document.title = `${label} — CRM Clínico Farmacêutico`;
 
   // Re-renderiza a área de conteúdo
   renderTabContent();
@@ -2117,7 +2117,7 @@ function updateGlobalBackButton() {
   if (!backBtn) return;
 
   const tabShortLabels = {
-    dashboard: 'Health Nexus',
+    dashboard: 'CRM Clínico Farmacêutico',
     pacientes: 'Pacientes',
     medicos: 'Médicos',
     consultorios: 'Consultórios',
@@ -2153,7 +2153,7 @@ function goBack() {
   }
 }
 
-// --- CONTEÚDO DAS ABAS (ORQUESTRADOR MODULAR HEALTH NEXUS v2.7.2) ---
+// --- CONTEÚDO DAS ABAS (ORQUESTRADOR MODULAR CRM CLÍNICO FARMACÊUTICO v2.7.2) ---
 async function renderTabContent() {
   const contentArea = document.getElementById('main-content');
   if (!contentArea) return;
@@ -2774,7 +2774,7 @@ window.generatePatientPDF = async function(patientId, patientName) {
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(14);
   doc.setFont('helvetica', 'bold');
-  doc.text('HEALTH NEXUS · HOSPITAL & CENTRO DE MEDICINA INTEGRADA', 14, 12);
+  doc.text('CRM CLÍNICO FARMACÊUTICO · HOSPITAL & CENTRO DE MEDICINA INTEGRADA', 14, 12);
 
   doc.setFontSize(8.5);
   doc.setFont('helvetica', 'normal');
@@ -3142,7 +3142,7 @@ window.generatePatientPDF = async function(patientId, patientName) {
   doc.setTextColor(100, 116, 139);
   const hashMock = 'SHA256-' + Array.from({length: 32}, () => Math.floor(Math.random()*16).toString(16)).join('').toUpperCase();
   doc.text(`Assinatura Digital: ICP-Brasil Certificado Digital Padrão A3 · Token Hash: ${hashMock}`, 16, currentY + 12);
-  doc.text('Este documento constitui reprodução fidedigna do Prontuário Eletrônico do Paciente sob guarda do Health Nexus.', 16, currentY + 17);
+  doc.text('Este documento constitui reprodução fidedigna do Prontuário Eletrônico do Paciente sob guarda do CRM Clínico Farmacêutico.', 16, currentY + 17);
   doc.text('Acesso restrito e protegido nos termos da Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018).', 16, currentY + 22);
 
   // Rodapé em todas as páginas
@@ -3153,7 +3153,7 @@ window.generatePatientPDF = async function(patientId, patientName) {
     doc.line(12, 285, 198, 285);
     doc.setFontSize(7.5);
     doc.setTextColor(148, 163, 184);
-    doc.text('Health Nexus · Sistema Integrado de Gestão Hospitalar & Prontuário Eletrônico (PEP)', 12, 290);
+    doc.text('CRM Clínico Farmacêutico · Sistema Integrado de Gestão Hospitalar & Prontuário Eletrônico (PEP)', 12, 290);
     doc.text(`Página ${i} de ${totalPages}`, 180, 290);
   }
 
@@ -3171,7 +3171,7 @@ window.generateAppointmentPDF = function(id, patientName, doctorName, date, time
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
   const loadLogo = () => new Promise(resolve => {
-    const img = new Image(); img.src = '/assets/logo.png';
+    const img = new Image(); img.src = '/assets/crm-logo.png?v=2';
     img.onload = () => resolve(img); img.onerror = () => resolve(null);
   });
 
@@ -3182,7 +3182,7 @@ window.generateAppointmentPDF = function(id, patientName, doctorName, date, time
     if (logoImg) doc.addImage(logoImg, 'PNG', 8, 5, 18, 18);
     doc.setTextColor(255, 255, 255);
     doc.setFontSize(16); doc.setFont('helvetica', 'bold');
-    doc.text('HEALTH NEXUS', 30, 13);
+    doc.text('CRM CLÍNICO FARMACÊUTICO', 30, 13);
     doc.setFontSize(9); doc.setFont('helvetica', 'normal');
     doc.text('Sistema de Gestão Hospitalar', 30, 19);
     doc.text('COMPROVANTE DE AGENDAMENTO', 135, 13);
@@ -3786,7 +3786,7 @@ window.populateFakeDatabase = async function() {
   }
 };
 
-async function exportToPDF(headers, rows, title = 'Relatório Health Nexus', filename = 'relatorio.pdf') {
+async function exportToPDF(headers, rows, title = 'Relatório CRM Clínico Farmacêutico', filename = 'relatorio.pdf') {
   if (!window.jspdf) {
     if (typeof showToast === 'function') showToast('⚠️ Biblioteca PDF não disponível');
     return;
@@ -3798,7 +3798,7 @@ async function exportToPDF(headers, rows, title = 'Relatório Health Nexus', fil
   doc.text(title, 14, 15);
   doc.setFontSize(8.5);
   doc.setFont('helvetica', 'normal');
-  doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')} · Health Nexus`, 14, 21);
+  doc.text(`Gerado em: ${new Date().toLocaleString('pt-BR')} · CRM Clínico Farmacêutico`, 14, 21);
   if (doc.autoTable) {
     doc.autoTable({
       startY: 26,

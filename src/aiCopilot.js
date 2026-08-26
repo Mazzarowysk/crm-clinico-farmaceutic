@@ -26,7 +26,7 @@ export const getNexusAICopilotResponse = (q, raw) => {
   if (qNorm === 'excluir' || qNorm === 'cancelar' || qNorm === 'lixeira') {
     return {
       title: 'Nexus AI Copilot — Opções de Exclusão & Desativação',
-      summary: `Você buscou por <strong>operações de exclusão/inativação</strong>. No Health Nexus, você pode realizar:<br>
+      summary: `Você buscou por <strong>operações de exclusão/inativação</strong>. No CRM Clínico Farmacêutico, você pode realizar:<br>
 • <strong>Excluir/Inativar Paciente:</strong> Acesse 👥 Recepção e use a 🗑️ Lixeira no card do paciente.<br>
 • <strong>Excluir/Desativar Colaborador ou Médico:</strong> Acesse 🩺 Corpo Clínico e use a 🗑️ Lixeira.<br>
 • <strong>Excluir Usuário de Acesso:</strong> Acesse ⚙️ Configurações → Gerenciar Usuários (perfil Master).<br>
@@ -125,7 +125,7 @@ export const getNexusAICopilotResponse = (q, raw) => {
   if (has('telemedicina', 'teleconsulta', 'videochamada', 'webrtc', 'consulta online', 'chamada de video', 'camera', 'atendimento remoto', 'consulta virtual', 'sala virtual')) {
     return {
       title: 'Nexus AI Copilot — Sala Virtual de Telemedicina WebRTC',
-      summary: 'A <strong>Telemedicina Integrada</strong> do Health Nexus permite realizar atendimentos médicos remotos com áudio e vídeo de alta definição criptografados ponta a ponta (WebRTC) diretamente no <strong>Prontuário Eletrônico (PEP)</strong>. O médico atende em tela dividida, registra anamnese SOAP, emite prescrições e envia receitas simultaneamente.',
+      summary: 'A <strong>Telemedicina Integrada</strong> do CRM Clínico Farmacêutico permite realizar atendimentos médicos remotos com áudio e vídeo de alta definição criptografados ponta a ponta (WebRTC) diretamente no <strong>Prontuário Eletrônico (PEP)</strong>. O médico atende em tela dividida, registra anamnese SOAP, emite prescrições e envia receitas simultaneamente.',
       actionText: '📹 Abrir Prontuário & Telemedicina',
       actionType: 'switchTab',
       actionTarget: 'atendimento'
@@ -158,7 +158,7 @@ export const getNexusAICopilotResponse = (q, raw) => {
   if (has('interacao', 'interacoes', 'incompatibilidade', 'interacao medicamentosa', 'farmacologia', 'contraindicacao', 'risco de sangramento')) {
     return {
       title: 'Nexus AI Copilot — Verificador de Interações Medicamentosas',
-      summary: 'A inteligência farmacológica do Health Nexus cruza em tempo real todos os medicamentos prescritos e dispensados. Identifica combinações de risco crítico (ex: Varfarina + AAS, Tramadol + Fluoxetina, Enalapril + Espironolactona) e exibe alertas imediatos com a <strong>conduta médica recomendada</strong> antes da gravação da receita.',
+      summary: 'A inteligência farmacológica do CRM Clínico Farmacêutico cruza em tempo real todos os medicamentos prescritos e dispensados. Identifica combinações de risco crítico (ex: Varfarina + AAS, Tramadol + Fluoxetina, Enalapril + Espironolactona) e exibe alertas imediatos com a <strong>conduta médica recomendada</strong> antes da gravação da receita.',
       actionText: '💊 Ver Prescrição Médica',
       actionType: 'switchTab',
       actionTarget: 'atendimento'
@@ -191,7 +191,7 @@ export const getNexusAICopilotResponse = (q, raw) => {
   if (has('icp-brasil', 'icp', 'assinatura digital', 'certificado digital', 'birdid', 'neoid', 'certisign', 'vidaas', 'cfm 2299', 'mp 2200', 'carimbo de tempo', 'sha256', 'validar')) {
     return {
       title: 'Nexus AI Copilot — Assinatura Digital ICP-Brasil em Nuvem',
-      summary: 'O Health Nexus integra emissão de <strong>Assinaturas Digitais Qualificadas ICP-Brasil</strong> em conformidade com a MP 2.200-2/2001 e Resolução CFM nº 2.299/2021. Suporta provedores em nuvem (<strong>BirdID, NeoID, Certisign RemoteID, VIDaaS</strong>) e certificados A1 locais, carimbando PDFs com Hash SHA-256 e QR Code rastreável no portal ITI.',
+      summary: 'O CRM Clínico Farmacêutico integra emissão de <strong>Assinaturas Digitais Qualificadas ICP-Brasil</strong> em conformidade com a MP 2.200-2/2001 e Resolução CFM nº 2.299/2021. Suporta provedores em nuvem (<strong>BirdID, NeoID, Certisign RemoteID, VIDaaS</strong>) e certificados A1 locais, carimbando PDFs com Hash SHA-256 e QR Code rastreável no portal ITI.',
       actionText: '🔐 Ver no Prontuário Médico',
       actionType: 'switchTab',
       actionTarget: 'atendimento'
@@ -213,7 +213,7 @@ export const getNexusAICopilotResponse = (q, raw) => {
   if (has('pwa', 'service worker', 'push', 'notificacao push', 'notificacoes', 'sobreaviso', 'alerta plantao', 'alerta celular', 'instalar app', 'offline')) {
     return {
       title: 'Nexus AI Copilot — PWA & Notificações Push de Plantão',
-      summary: 'O Health Nexus opera como um <strong>Progressive Web App (PWA) instalável</strong> com Service Worker de alta velocidade offline. Conta com sistema de <strong>Notificações Push</strong> para médicos de sobreaviso, disparando alertas imediatos de pacientes críticos (MEWS ≥ 5 / Manchester Vermelho).',
+      summary: 'O CRM Clínico Farmacêutico opera como um <strong>Progressive Web App (PWA) instalável</strong> com Service Worker de alta velocidade offline. Conta com sistema de <strong>Notificações Push</strong> para médicos de sobreaviso, disparando alertas imediatos de pacientes críticos (MEWS ≥ 5 / Manchester Vermelho).',
       actionText: '📲 Ativar Notificações Push',
       actionType: 'requestPushNotifications',
       actionTarget: 'pwa'
@@ -295,7 +295,7 @@ export const getNexusAICopilotResponse = (q, raw) => {
 
   // ── SINCRONIZAÇÃO / NUVEM ────────────────────────────────────────────
   if (has('sincronizar', 'nuvem', 'offline', 'backup', 'turso', 'banco dados', 'conexao')) {
-    return { title: 'Nexus AI Copilot', summary: 'O Health Nexus opera em modo <strong>Offline-First</strong>. Dados são gravados localmente e sincronizados automaticamente com o <strong>Turso Cloud DB</strong> quando a internet reconectar.', actionText: '⚙️ Ver Configurações de Banco', actionType: 'switchTab', actionTarget: 'configuracoes' };
+    return { title: 'Nexus AI Copilot', summary: 'O CRM Clínico Farmacêutico opera em modo <strong>Offline-First</strong>. Dados são gravados localmente e sincronizados automaticamente com o <strong>Turso Cloud DB</strong> quando a internet reconectar.', actionText: '⚙️ Ver Configurações de Banco', actionType: 'switchTab', actionTarget: 'configuracoes' };
   }
 
   // ── KANBAN ───────────────────────────────────────────────────────────
@@ -310,7 +310,7 @@ export const getNexusAICopilotResponse = (q, raw) => {
 
   // ── MANUAL / AJUDA ───────────────────────────────────────────────────
   if (has('manual', 'ajuda', 'como usar', 'tutorial', 'guia', 'instrucao', 'documentacao', 'help')) {
-    return { title: 'Nexus AI Copilot', summary: 'O <strong>Manual Interativo</strong> do Health Nexus cobre todos os módulos com guias passo a passo, FAQ operacional e descrição de cada botão. Clique abaixo para acessar.', actionText: '📖 Abrir Manual Interativo', actionType: 'openManual', actionTarget: 'geral' };
+    return { title: 'Nexus AI Copilot', summary: 'O <strong>Manual Interativo</strong> do CRM Clínico Farmacêutico cobre todos os módulos com guias passo a passo, FAQ operacional e descrição de cada botão. Clique abaixo para acessar.', actionText: '📖 Abrir Manual Interativo', actionType: 'openManual', actionTarget: 'geral' };
   }
 
   // ── DEFAULT ──────────────────────────────────────────────────────────
