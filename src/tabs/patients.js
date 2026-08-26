@@ -292,17 +292,28 @@ export function renderPatientsTab(contentArea) {
 
                 <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
                   <div class="form-group">
-                    <label class="form-label" for="healthPlan">Programa / Convênio PBM:</label>
-                    <select id="healthPlan" class="form-input">
-                      <option value="Particular">Particular (Sem Convênio)</option>
-                      <option value="Farmácia Popular">Farmácia Popular do Brasil</option>
-                      <option value="Funcional Card">Funcional Card (PBM)</option>
-                      <option value="Vidalink">Vidalink (PBM)</option>
-                      <option value="Epharma">Epharma (PBM)</option>
-                      <option value="Orizon">Orizon (PBM)</option>
-                      <option value="Convênio Empresa">Convênio Empresa / Parceiro</option>
-                      <option value="Outro PBM">Outro Convênio</option>
-                    </select>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                      <label class="form-label" for="healthPlan" style="margin-bottom: 0;">Programa / Convênio PBM:</label>
+                      <button type="button" id="btn-quick-plus-pbm" title="Adicionar Novo Convênio/PBM" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; font-size: 0.72rem; font-weight: 700; padding: 2px 7px; border-radius: 5px; cursor: pointer; display: inline-flex; align-items: center; gap: 3px;">
+                        <i class="fa-solid fa-plus"></i> Novo
+                      </button>
+                    </div>
+                    <div style="display: flex; gap: 6px;">
+                      <select id="healthPlan" class="form-input" style="flex: 1;">
+                        <option value="Particular">Particular (Sem Convênio)</option>
+                        <option value="Farmácia Popular">Farmácia Popular do Brasil</option>
+                        <option value="Funcional Card">Funcional Card (PBM)</option>
+                        <option value="Vidalink">Vidalink (PBM)</option>
+                        <option value="Epharma">Epharma (PBM)</option>
+                        <option value="Orizon">Orizon (PBM)</option>
+                        <option value="Convênio Empresa">Convênio Empresa / Parceiro</option>
+                        ${(JSON.parse(localStorage.getItem('crm_custom_pbms') || '[]')).map(p => `<option value="${p}">${p}</option>`).join('')}
+                        <option value="Outro PBM">Outro Convênio</option>
+                      </select>
+                      <button type="button" id="btn-plus-icon-pbm" title="Adicionar Convênio/PBM" style="width: 38px; height: 38px; border-radius: 6px; background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                        <i class="fa-solid fa-plus"></i>
+                      </button>
+                    </div>
                   </div>
                   <div class="form-group">
                     <label class="form-label" for="cardNumber">Nº Cartão / Matrícula PBM:</label>
@@ -574,6 +585,30 @@ export function renderPatientsTab(contentArea) {
   document.getElementById('btn-quick-portal-header')?.addEventListener('click', () => {
     openPatientPortalModal();
   });
+
+  // Ação de cadastrar novo Programa / Convênio PBM
+  const handleAddNewPBM = () => {
+    const newPBM = prompt('Digite o nome do novo Programa / Convênio PBM (Ex.: Convênio Unimed, Cartão de Todos, Mediservice):');
+    if (!newPBM || !newPBM.trim()) return;
+    const cleanPBM = newPBM.trim();
+    const currentPBMs = JSON.parse(localStorage.getItem('crm_custom_pbms') || '[]');
+    if (!currentPBMs.includes(cleanPBM)) {
+      currentPBMs.push(cleanPBM);
+      localStorage.setItem('crm_custom_pbms', JSON.stringify(currentPBMs));
+    }
+    const selectEl = document.getElementById('healthPlan');
+    if (selectEl) {
+      const opt = document.createElement('option');
+      opt.value = cleanPBM;
+      opt.textContent = `⭐ ${cleanPBM}`;
+      opt.selected = true;
+      selectEl.appendChild(opt);
+    }
+    showToast(`✅ Convênio/PBM "${cleanPBM}" adicionado e selecionado!`);
+  };
+
+  document.getElementById('btn-quick-plus-pbm')?.addEventListener('click', handleAddNewPBM);
+  document.getElementById('btn-plus-icon-pbm')?.addEventListener('click', handleAddNewPBM);
 
   const checkAgeValidation = () => {
     const birthVal = document.getElementById('birthDate')?.value;

@@ -541,54 +541,85 @@ export function openNewTransactionModal() {
           <!-- Categoria e Valor -->
           <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 14px;">
             <div>
-              <label style="display: block; font-size: 0.82rem; color: #cbd5e1; margin-bottom: 6px; font-weight: 600;">Categoria Farmacêutica *</label>
-              <select id="fin-category" class="form-input" style="width: 100%; height: 40px;" required>
-                <optgroup label="── Receitas Clínicas &amp; Balcão ──">
-                  <option value="Consulta Farmacêutica (Balcão)">Consulta Farmacêutica (Balcão)</option>
-                  <option value="Venda de Medicamentos (PDV)">Venda de Medicamentos (PDV)</option>
-                  <option value="Aplicação de Injetáveis &amp; Vacinas">Aplicação de Injetáveis &amp; Vacinas</option>
-                  <option value="Testes Rápidos / TLR (RDC 786)">Testes Rápidos / TLR (RDC 786)</option>
-                  <option value="Aferição de Pressão / Glicemia">Aferição de Pressão / Glicemia</option>
-                </optgroup>
-                <optgroup label="── Despesas Operacionais &amp; Compras ──">
-                  <option value="Compra de Medicamentos (Distribuidora)">Compra de Medicamentos (Distribuidora)</option>
-                  <option value="Insumos &amp; Descartáveis">Insumos &amp; Descartáveis (Seringas/EPIs)</option>
-                  <option value="Aluguel &amp; Instalações">Aluguel &amp; Instalações</option>
-                  <option value="Energia, Água &amp; Internet">Energia, Água &amp; Internet</option>
-                  <option value="Anuidade CRF / Taxas ANVISA">Anuidade CRF / Taxas ANVISA</option>
-                  <option value="Folha de Pagamento">Folha de Pagamento / Salários</option>
-                </optgroup>
-              </select>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label style="font-size: 0.82rem; color: #cbd5e1; font-weight: 600;">Categoria Farmacêutica *</label>
+                <button type="button" id="btn-quick-plus-category" title="Cadastrar Nova Categoria" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.45); color: #34d399; font-size: 0.74rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s;">
+                  <i class="fa-solid fa-plus"></i> Nova
+                </button>
+              </div>
+              <div style="display: flex; gap: 6px;">
+                <select id="fin-category" class="form-input" style="flex: 1; height: 42px; font-size: 0.88rem; line-height: 1.4; padding: 6px 10px; background: rgba(30, 41, 59, 0.95); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 8px;" required>
+                  <optgroup label="── Receitas Clínicas &amp; Balcão ──">
+                    <option value="Consulta Farmacêutica (Balcão)">Consulta Farmacêutica (Balcão)</option>
+                    <option value="Venda de Medicamentos (PDV)">Venda de Medicamentos (PDV)</option>
+                    <option value="Aplicação de Injetáveis &amp; Vacinas">Aplicação de Injetáveis &amp; Vacinas</option>
+                    <option value="Testes Rápidos / TLR (RDC 786)">Testes Rápidos / TLR (RDC 786)</option>
+                    <option value="Aferição de Pressão / Glicemia">Aferição de Pressão / Glicemia</option>
+                  </optgroup>
+                  <optgroup label="── Despesas Operacionais &amp; Compras ──">
+                    <option value="Compra de Medicamentos (Distribuidora)">Compra de Medicamentos (Distribuidora)</option>
+                    <option value="Insumos &amp; Descartáveis">Insumos &amp; Descartáveis (Seringas/EPIs)</option>
+                    <option value="Aluguel &amp; Instalações">Aluguel &amp; Instalações</option>
+                    <option value="Energia, Água &amp; Internet">Energia, Água &amp; Internet</option>
+                    <option value="Anuidade CRF / Taxas ANVISA">Anuidade CRF / Taxas ANVISA</option>
+                    <option value="Folha de Pagamento">Folha de Pagamento / Salários</option>
+                  </optgroup>
+                  ${(JSON.parse(localStorage.getItem('crm_custom_fin_categories') || '[]')).length > 0 ? `
+                    <optgroup label="── Categorias Personalizadas ──">
+                      ${(JSON.parse(localStorage.getItem('crm_custom_fin_categories') || '[]')).map(c => `<option value="${c}">${c}</option>`).join('')}
+                    </optgroup>
+                  ` : ''}
+                </select>
+                <button type="button" id="btn-plus-icon-category" title="Adicionar Categoria" style="width: 42px; height: 42px; border-radius: 8px; background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  <i class="fa-solid fa-plus"></i>
+                </button>
+              </div>
             </div>
 
             <div>
-              <label style="display: block; font-size: 0.82rem; color: #cbd5e1; margin-bottom: 6px; font-weight: 600;">Valor (R$) *</label>
-              <input type="number" id="fin-amount" class="form-input" step="0.01" min="0.01" placeholder="0,00" required style="width: 100%; height: 40px; font-weight: 700; color: #34d399;">
+              <div style="margin-bottom: 6px;">
+                <label style="font-size: 0.82rem; color: #cbd5e1; font-weight: 600;">Valor (R$) *</label>
+              </div>
+              <input type="number" id="fin-amount" class="form-input" step="0.01" min="0.01" placeholder="0,00" required style="width: 100%; height: 42px; font-weight: 700; font-size: 1.1rem; color: #34d399; background: rgba(30, 41, 59, 0.95); border: 1px solid rgba(255,255,255,0.15); padding: 0 12px; border-radius: 8px;">
             </div>
           </div>
 
           <!-- Forma de Pagamento e Cliente/Fornecedor -->
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
             <div>
-              <label style="display: block; font-size: 0.82rem; color: #cbd5e1; margin-bottom: 6px; font-weight: 600;">Forma de Pagamento</label>
-              <select id="fin-payment-method" class="form-input" style="width: 100%; height: 40px;">
-                <option value="PIX">PIX</option>
-                <option value="Cartão de Débito">Cartão de Débito</option>
-                <option value="Cartão de Crédito">Cartão de Crédito</option>
-                <option value="Dinheiro">Dinheiro</option>
-                <option value="Boleto Bancário">Boleto Bancário</option>
-              </select>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <label style="font-size: 0.82rem; color: #cbd5e1; font-weight: 600;">Forma de Pagamento</label>
+                <button type="button" id="btn-quick-plus-payment" title="Cadastrar Nova Forma de Pagamento" style="background: rgba(56, 189, 248, 0.2); border: 1px solid rgba(56, 189, 248, 0.45); color: #38bdf8; font-size: 0.74rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.2s;">
+                  <i class="fa-solid fa-plus"></i> Nova
+                </button>
+              </div>
+              <div style="display: flex; gap: 6px;">
+                <select id="fin-payment-method" class="form-input" style="flex: 1; height: 42px; font-size: 0.88rem; line-height: 1.4; padding: 6px 10px; background: rgba(30, 41, 59, 0.95); border: 1px solid rgba(255,255,255,0.15); color: #fff; border-radius: 8px;">
+                  <option value="PIX">PIX</option>
+                  <option value="Cartão de Débito">Cartão de Débito</option>
+                  <option value="Cartão de Crédito">Cartão de Crédito</option>
+                  <option value="Dinheiro">Dinheiro</option>
+                  <option value="Boleto Bancário">Boleto Bancário</option>
+                  <option value="Crediário / Fiado">Crediário / Convênio Farmácia</option>
+                  ${(JSON.parse(localStorage.getItem('crm_custom_fin_payments') || '[]')).map(p => `<option value="${p}">${p}</option>`).join('')}
+                </select>
+                <button type="button" id="btn-plus-icon-payment" title="Adicionar Forma de Pagamento" style="width: 42px; height: 42px; border-radius: 8px; background: rgba(56, 189, 248, 0.2); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  <i class="fa-solid fa-plus"></i>
+                </button>
+              </div>
             </div>
 
             <div>
-              <label style="display: block; font-size: 0.82rem; color: #cbd5e1; margin-bottom: 6px; font-weight: 600;">Cliente ou Fornecedor</label>
-              <input type="text" id="fin-client-supplier" class="form-input" placeholder="Nome do cliente ou distribuidora..." style="width: 100%; height: 40px;">
+              <div style="margin-bottom: 6px;">
+                <label style="font-size: 0.82rem; color: #cbd5e1; font-weight: 600;">Cliente ou Fornecedor</label>
+              </div>
+              <input type="text" id="fin-client-supplier" class="form-input" placeholder="Nome do cliente ou distribuidora..." style="width: 100%; height: 42px; font-size: 0.88rem; background: rgba(30, 41, 59, 0.95); border: 1px solid rgba(255,255,255,0.15); padding: 0 12px; border-radius: 8px;">
             </div>
           </div>
 
           <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08);">
             <button type="button" id="btn-cancel-fin" class="btn btn-secondary" style="padding: 10px 18px;">Cancelar</button>
-            <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #10b981, #059669); border: none; font-weight: 700; padding: 10px 24px; border-radius: 8px;">
+            <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #10b981, #059669); border: none; font-weight: 700; padding: 10px 24px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);">
               <i class="fa-solid fa-check"></i> Salvar Lançamento
             </button>
           </div>
@@ -608,6 +639,54 @@ export function openNewTransactionModal() {
 
   document.getElementById('btn-close-fin-modal')?.addEventListener('click', close);
   document.getElementById('btn-cancel-fin')?.addEventListener('click', close);
+
+  // Ação dos botões + de Adicionar Nova Categoria
+  const handleAddNewCategory = () => {
+    const newCat = prompt('Digite o nome da nova Categoria Farmacêutica:');
+    if (!newCat || !newCat.trim()) return;
+    const cleanCat = newCat.trim();
+    const currentCats = JSON.parse(localStorage.getItem('crm_custom_fin_categories') || '[]');
+    if (!currentCats.includes(cleanCat)) {
+      currentCats.push(cleanCat);
+      localStorage.setItem('crm_custom_fin_categories', JSON.stringify(currentCats));
+    }
+    const selectEl = document.getElementById('fin-category');
+    if (selectEl) {
+      const opt = document.createElement('option');
+      opt.value = cleanCat;
+      opt.textContent = `⭐ ${cleanCat}`;
+      opt.selected = true;
+      selectEl.appendChild(opt);
+    }
+    showToast(`✅ Categoria "${cleanCat}" adicionada e selecionada!`);
+  };
+
+  document.getElementById('btn-quick-plus-category')?.addEventListener('click', handleAddNewCategory);
+  document.getElementById('btn-plus-icon-category')?.addEventListener('click', handleAddNewCategory);
+
+  // Ação dos botões + de Adicionar Nova Forma de Pagamento
+  const handleAddNewPayment = () => {
+    const newPay = prompt('Digite a nova Forma de Pagamento (Ex.: Cheque, Crediário, Convênio Local):');
+    if (!newPay || !newPay.trim()) return;
+    const cleanPay = newPay.trim();
+    const currentPays = JSON.parse(localStorage.getItem('crm_custom_fin_payments') || '[]');
+    if (!currentPays.includes(cleanPay)) {
+      currentPays.push(cleanPay);
+      localStorage.setItem('crm_custom_fin_payments', JSON.stringify(currentPays));
+    }
+    const selectEl = document.getElementById('fin-payment-method');
+    if (selectEl) {
+      const opt = document.createElement('option');
+      opt.value = cleanPay;
+      opt.textContent = `⭐ ${cleanPay}`;
+      opt.selected = true;
+      selectEl.appendChild(opt);
+    }
+    showToast(`✅ Forma de pagamento "${cleanPay}" adicionada e selecionada!`);
+  };
+
+  document.getElementById('btn-quick-plus-payment')?.addEventListener('click', handleAddNewPayment);
+  document.getElementById('btn-plus-icon-payment')?.addEventListener('click', handleAddNewPayment);
 
   // Toggle visual radio buttons
   const radios = overlay.querySelectorAll('input[name="trans-type"]');

@@ -1161,14 +1161,25 @@ export function openProductModal(productToEdit = null, onSaved = null) {
 
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
           <div class="form-group">
-            <label class="form-label" for="p-category" style="color: #cbd5e1; font-weight: 600; font-size: 0.85rem;">* Categoria:</label>
-            <select id="p-category" class="form-input" style="background: #1e293b; color: #fff;">
-              <option value="MIP / Analgésico" ${productToEdit?.category?.includes('MIP') ? 'selected' : ''}>MIP / Analgésico &amp; Antitérmico</option>
-              <option value="Uso Contínuo / Anti-hipertensivo" ${productToEdit?.category?.includes('Contínuo') ? 'selected' : ''}>Uso Contínuo / Anti-hipertensivo / Diabetes</option>
-              <option value="Suplemento / Imunidade" ${productToEdit?.category?.includes('Suplemento') ? 'selected' : ''}>Suplementos &amp; Vitaminas</option>
-              <option value="Correlatos / Diagnóstico Clínico" ${productToEdit?.category?.includes('Correlatos') ? 'selected' : ''}>Correlatos &amp; Tiras de Glicose</option>
-              <option value="Perfumaria / Higiene" ${productToEdit?.category?.includes('Perfumaria') ? 'selected' : ''}>Perfumaria &amp; Higiene</option>
-            </select>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <label class="form-label" for="p-category" style="color: #cbd5e1; font-weight: 600; font-size: 0.85rem; margin: 0;">* Categoria:</label>
+              <button type="button" id="btn-quick-plus-prod-category" title="Cadastrar Nova Categoria" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; font-size: 0.72rem; font-weight: 700; padding: 2px 7px; border-radius: 5px; cursor: pointer; display: inline-flex; align-items: center; gap: 3px;">
+                <i class="fa-solid fa-plus"></i> Nova
+              </button>
+            </div>
+            <div style="display: flex; gap: 6px;">
+              <select id="p-category" class="form-input" style="flex: 1; background: #1e293b; color: #fff;">
+                <option value="MIP / Analgésico" ${productToEdit?.category?.includes('MIP') ? 'selected' : ''}>MIP / Analgésico &amp; Antitérmico</option>
+                <option value="Uso Contínuo / Anti-hipertensivo" ${productToEdit?.category?.includes('Contínuo') ? 'selected' : ''}>Uso Contínuo / Anti-hipertensivo / Diabetes</option>
+                <option value="Suplemento / Imunidade" ${productToEdit?.category?.includes('Suplemento') ? 'selected' : ''}>Suplementos &amp; Vitaminas</option>
+                <option value="Correlatos / Diagnóstico Clínico" ${productToEdit?.category?.includes('Correlatos') ? 'selected' : ''}>Correlatos &amp; Tiras de Glicose</option>
+                <option value="Perfumaria / Higiene" ${productToEdit?.category?.includes('Perfumaria') ? 'selected' : ''}>Perfumaria &amp; Higiene</option>
+                ${(JSON.parse(localStorage.getItem('crm_custom_prod_categories') || '[]')).map(c => `<option value="${c}" ${productToEdit?.category === c ? 'selected' : ''}>${c}</option>`).join('')}
+              </select>
+              <button type="button" id="btn-plus-icon-prod-cat" title="Adicionar Categoria" style="width: 38px; height: 38px; border-radius: 6px; background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <i class="fa-solid fa-plus"></i>
+              </button>
+            </div>
           </div>
           <div class="form-group">
             <label class="form-label" for="p-presentation" style="color: #cbd5e1; font-weight: 600; font-size: 0.85rem;">Apresentação:</label>
@@ -1219,6 +1230,30 @@ export function openProductModal(productToEdit = null, onSaved = null) {
   const closeModal = () => modal.remove();
   document.getElementById('close-prod-modal').addEventListener('click', closeModal);
   document.getElementById('cancel-prod-modal').addEventListener('click', closeModal);
+
+  // Ação dos botões + de Adicionar Nova Categoria de Produto
+  const handleAddNewProdCategory = () => {
+    const newCat = prompt('Digite o nome da nova Categoria de Produto (Ex.: Dermocosméticos, Ortopédicos, Fitoterápicos):');
+    if (!newCat || !newCat.trim()) return;
+    const cleanCat = newCat.trim();
+    const currentCats = JSON.parse(localStorage.getItem('crm_custom_prod_categories') || '[]');
+    if (!currentCats.includes(cleanCat)) {
+      currentCats.push(cleanCat);
+      localStorage.setItem('crm_custom_prod_categories', JSON.stringify(currentCats));
+    }
+    const selectEl = document.getElementById('p-category');
+    if (selectEl) {
+      const opt = document.createElement('option');
+      opt.value = cleanCat;
+      opt.textContent = `⭐ ${cleanCat}`;
+      opt.selected = true;
+      selectEl.appendChild(opt);
+    }
+    showToast(`✅ Categoria "${cleanCat}" adicionada e selecionada!`);
+  };
+
+  document.getElementById('btn-quick-plus-prod-category')?.addEventListener('click', handleAddNewProdCategory);
+  document.getElementById('btn-plus-icon-prod-cat')?.addEventListener('click', handleAddNewProdCategory);
 
   document.getElementById('btn-scan-product-ean')?.addEventListener('click', () => {
     openCameraBarcodeScanner((scannedEan) => {
