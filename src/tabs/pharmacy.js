@@ -8,6 +8,7 @@ import {
 } from '../modules/pharmacyCDSS.js';
 import { CANONICAL_MEDICATIONS_DB } from '../modules/medicationsDB.js';
 import { searchMedicationsNLP } from '../modules/medicationNLP.js';
+import { openQuickCheckoutModal } from '../modules/quickCheckoutModal.js';
 
 const API_URL = '/api';
 
@@ -56,7 +57,10 @@ export async function renderPharmacyTab() {
           </div>
         </div>
 
-        <div style="display: flex; gap: 10px; align-items: center;">
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <button id="btn-quick-checkout-pharm" class="btn" style="background: linear-gradient(135deg, #38bdf8, #0284c7); color: #fff; border: none; font-weight: 700; padding: 9px 16px; border-radius: 10px; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(56, 189, 248, 0.35); cursor: pointer;">
+            <i class="fa-solid fa-cash-register"></i> Saída / Venda (PDV)
+          </button>
           <button id="btn-open-interactive-manual-pharm" class="btn btn-secondary" style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.1); color: #38bdf8; font-weight: 600; padding: 9px 16px; border-radius: 10px; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(10px);">
             <i class="fa-solid fa-book-medical"></i> Manual Interativo &amp; Busca
           </button>
@@ -105,6 +109,13 @@ export async function renderPharmacyTab() {
   });
 
   document.getElementById('btn-quick-new-patient')?.addEventListener('click', openAddClinicalPatientModal);
+
+  document.getElementById('btn-quick-checkout-pharm')?.addEventListener('click', () => {
+    openQuickCheckoutModal(() => {
+      loadPharmacyData();
+      renderCurrentSubTab();
+    });
+  });
 
   // Carregar dados de estoque e renderizar a sub-aba ativa
   await loadPharmacyData();
@@ -247,71 +258,103 @@ function renderBalcaoStepContent(step, patient, allPatients, activeMeds) {
 
   if (step === 2) {
     const protocols = Object.values(PHARMACY_TRIAGE_PROTOCOLS);
+    const activeKey = currentClinicalEncounter.triageProtocolKey || 'gripe_resfriado';
+    
+    // Cálculo seguro de idade
+    let patientAgeDisplay = patient.age ? `${patient.age} anos` : '';
+    if (!patientAgeDisplay && patient.birthDate) {
+      const birth = new Date(patient.birthDate);
+      if (!isNaN(birth.getTime())) {
+        const diff = Date.now() - birth.getTime();
+        const ageYears = Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
+        patientAgeDisplay = `${ageYears} anos`;
+      }
+    }
+    if (!patientAgeDisplay) patientAgeDisplay = 'Adulto';
+
     return `
       <div>
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 14px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 14px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
           <div>
-            <h3 style="color: #f8fafc; font-family: 'Outfit', sans-serif; font-size: 1.25rem; margin: 0;">
-              Etapa 2 — Coleta Estruturada de Queixas &amp; Sintomas
+            <h3 style="color: #f8fafc; font-family: 'Outfit', sans-serif; font-size: 1.25rem; margin: 0; display: flex; align-items: center; gap: 8px;">
+              <i class="fa-solid fa-stethoscope" style="color: #2dd4bf;"></i> Etapa 2 — Coleta Estruturada de Queixas &amp; Sintomas
             </h3>
             <p style="color: #94a3b8; font-size: 0.86rem; margin: 2px 0 0 0;">
-              Paciente: <strong style="color: #14b8a6;">${patient.name}</strong> (${patient.age} anos) | Alergias: <span style="color: #f87171;">${patient.allergies || 'Nenhuma'}</span>
+              Paciente: <strong style="color: #2dd4bf;">${patient.name || patient.fullName}</strong> (${patientAgeDisplay}) | Alergias Conhecidas: <span style="color: ${patient.allergies ? '#f87171' : '#34d399'}; font-weight: 700;">${patient.allergies || 'Nenhuma declarada'}</span>
             </p>
           </div>
-          <button type="button" id="btn-step2-back" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.82rem;">
+          <button type="button" id="btn-step2-back" class="btn btn-secondary" style="padding: 7px 14px; font-size: 0.82rem; border-radius: 8px;">
             <i class="fa-solid fa-arrow-left"></i> Alterar Paciente
           </button>
         </div>
 
         <!-- Seletor de Protocolo Clínico Guiado -->
-        <h4 style="color: var(--text-secondary); font-size: 0.84rem; text-transform: uppercase; margin-bottom: 12px;">
-          Selecione a Queixa Principal / Protocolo de Triagem
-        </h4>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-bottom: 24px;">
-          ${protocols.map(prot => `
-            <div class="pharmacy-glass-card triage-protocol-card ${currentClinicalEncounter.triageProtocolKey === prot.id ? 'selected' : ''}" data-protocol-key="${prot.id}" style="padding: 16px; cursor: pointer; border: 1px solid ${currentClinicalEncounter.triageProtocolKey === prot.id ? '#0d9488' : 'rgba(255,255,255,0.07)'}; background: ${currentClinicalEncounter.triageProtocolKey === prot.id ? 'rgba(13, 148, 136, 0.2)' : 'rgba(30, 41, 59, 0.45)'};">
-              <div style="font-size: 1.4rem; color: #14b8a6; margin-bottom: 8px;">
-                <i class="fa-solid ${prot.icon}"></i>
-              </div>
-              <div style="font-weight: 700; color: #f8fafc; font-size: 0.95rem; margin-bottom: 4px;">${prot.title}</div>
-              <div style="font-size: 0.78rem; color: #94a3b8; line-height: 1.3;">${prot.description}</div>
-            </div>
-          `).join('')}
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <h4 style="color: #38bdf8; font-size: 0.86rem; font-weight: 700; text-transform: uppercase; margin: 0; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-clipboard-list"></i> Selecione a Queixa Principal / Protocolo de Triagem (${protocols.length} Protocolos Disponíveis)
+          </h4>
+          <span style="font-size: 0.76rem; color: #94a3b8;">Clique no card correspondente ao sintoma do cliente</span>
         </div>
 
-        <!-- Duração e Intensidade -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr 2fr; gap: 16px; margin-bottom: 20px;">
-          <div>
-            <label style="display: block; font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 6px; font-weight: 600;">
-              Tempo de Evolução (Dias)
-            </label>
-            <input type="number" id="input-symptom-days" class="form-input" min="1" max="90" value="${currentClinicalEncounter.symptomDurationDays || 1}" style="width: 100%;">
-          </div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; margin-bottom: 26px;">
+          ${protocols.map(prot => {
+            const isSelected = activeKey === prot.id;
+            return `
+              <div class="pharmacy-glass-card triage-protocol-card ${isSelected ? 'selected' : ''}" data-protocol-key="${prot.id}" style="padding: 16px 18px; cursor: pointer; border-radius: 14px; position: relative; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); border: ${isSelected ? '2px solid #2dd4bf' : '1.5px solid rgba(255,255,255,0.1)'}; background: ${isSelected ? 'linear-gradient(135deg, rgba(13, 148, 136, 0.35), rgba(15, 23, 42, 0.95))' : 'linear-gradient(180deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.85))'}; box-shadow: ${isSelected ? '0 0 24px rgba(20, 184, 166, 0.5), inset 0 1px 2px rgba(255,255,255,0.4)' : '0 4px 12px rgba(0,0,0,0.25)'}; transform: ${isSelected ? 'scale(1.02)' : 'scale(1)'};">
+                
+                ${isSelected ? `
+                  <div style="position: absolute; top: 10px; right: 10px; background: #10b981; color: #042f2e; font-size: 0.68rem; font-weight: 800; padding: 3px 8px; border-radius: 20px; display: flex; align-items: center; gap: 4px; box-shadow: 0 0 10px #10b981; text-transform: uppercase;">
+                    <i class="fa-solid fa-circle-check"></i> Selecionado
+                  </div>
+                ` : ''}
 
-          <div>
-            <label style="display: block; font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 6px; font-weight: 600;">
-              Intensidade Relatada
-            </label>
-            <select id="select-symptom-intensity" class="form-input" style="width: 100%;">
-              <option value="Leve" ${currentClinicalEncounter.symptomSeverity === 'Leve' ? 'selected' : ''}>Leve</option>
-              <option value="Leve a Moderado" ${currentClinicalEncounter.symptomSeverity === 'Leve a Moderado' ? 'selected' : ''}>Leve a Moderado</option>
-              <option value="Moderado a Forte" ${currentClinicalEncounter.symptomSeverity === 'Moderado a Forte' ? 'selected' : ''}>Moderado a Forte</option>
-              <option value="Severo / Incapacitante" ${currentClinicalEncounter.symptomSeverity === 'Severo / Incapacitante' ? 'selected' : ''}>Severo / Incapacitante</option>
-            </select>
-          </div>
+                <div style="font-size: 1.5rem; color: ${isSelected ? '#34d399' : '#38bdf8'}; margin-bottom: 10px; text-shadow: ${isSelected ? '0 0 12px #34d399' : 'none'};">
+                  <i class="fa-solid ${prot.icon}"></i>
+                </div>
+                <div style="font-weight: 700; color: ${isSelected ? '#ffffff' : '#f1f5f9'}; font-size: 0.96rem; margin-bottom: 6px; font-family: 'Outfit', sans-serif;">${prot.title}</div>
+                <div style="font-size: 0.79rem; color: ${isSelected ? '#e2e8f0' : '#94a3b8'}; line-height: 1.35;">${prot.description}</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
 
-          <div>
-            <label style="display: block; font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 6px; font-weight: 600;">
-              Observações Adicionais da Queixa
-            </label>
-            <input type="text" id="input-complaint-notes" class="form-input" placeholder="Ex.: Piora no período noturno, tosse produtiva clara..." value="${currentClinicalEncounter.customComplaintNotes || ''}" style="width: 100%;">
+        <!-- Duração, Intensidade e Observações com Botões de Ajuda (?) -->
+        <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 18px; margin-bottom: 20px;">
+          <div style="display: grid; grid-template-columns: 1fr 1.2fr 2fr; gap: 18px;">
+            <div>
+              <label style="display: flex; align-items: center; justify-content: space-between; font-size: 0.84rem; color: #cbd5e1; margin-bottom: 8px; font-weight: 700;">
+                <span>Tempo de Evolução (Dias)</span>
+                <button type="button" onclick="window.showClinicalFieldHelp && window.showClinicalFieldHelp('tempo_evolucao')" title="Entenda o que é o Tempo de Evolução" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; border-radius: 50%; width: 20px; height: 20px; font-size: 0.72rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; transition: all 0.2s;">?</button>
+              </label>
+              <input type="number" id="input-symptom-days" class="form-input" min="1" max="90" value="${currentClinicalEncounter.symptomDurationDays || 1}" style="width: 100%; height: 42px; font-size: 0.95rem; font-weight: 700; color: #38bdf8;">
+            </div>
+
+            <div>
+              <label style="display: flex; align-items: center; justify-content: space-between; font-size: 0.84rem; color: #cbd5e1; margin-bottom: 8px; font-weight: 700;">
+                <span>Intensidade Relatada</span>
+                <button type="button" onclick="window.showClinicalFieldHelp && window.showClinicalFieldHelp('intensidade_relatada')" title="Entenda a Escala de Intensidade" style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); color: #fbbf24; border-radius: 50%; width: 20px; height: 20px; font-size: 0.72rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; transition: all 0.2s;">?</button>
+              </label>
+              <select id="select-symptom-intensity" class="form-input" style="width: 100%; height: 42px; font-size: 0.92rem; font-weight: 600; color: #f8fafc;">
+                <option value="Leve" ${currentClinicalEncounter.symptomSeverity === 'Leve' ? 'selected' : ''}>🟢 Leve (Incômodo suportável)</option>
+                <option value="Leve a Moderado" ${currentClinicalEncounter.symptomSeverity === 'Leve a Moderado' ? 'selected' : ''}>🟡 Leve a Moderado (Afeta atividades parciais)</option>
+                <option value="Moderado a Forte" ${currentClinicalEncounter.symptomSeverity === 'Moderado a Forte' ? 'selected' : ''}>🟠 Moderado a Forte (Dificulta rotina/sono)</option>
+                <option value="Severo / Incapacitante" ${currentClinicalEncounter.symptomSeverity === 'Severo / Incapacitante' ? 'selected' : ''}>🔴 Severo / Incapacitante (Alerta Clínico)</option>
+              </select>
+            </div>
+
+            <div>
+              <label style="display: flex; align-items: center; justify-content: space-between; font-size: 0.84rem; color: #cbd5e1; margin-bottom: 8px; font-weight: 700;">
+                <span>Observações Adicionais da Queixa</span>
+                <button type="button" onclick="window.showClinicalFieldHelp && window.showClinicalFieldHelp('observacoes_queixa')" title="Entenda o campo de Observações" style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; border-radius: 50%; width: 20px; height: 20px; font-size: 0.72rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; transition: all 0.2s;">?</button>
+              </label>
+              <input type="text" id="input-complaint-notes" class="form-input" placeholder="Ex.: Piora à noite, dor latejante, tomou chá em casa..." value="${currentClinicalEncounter.customComplaintNotes || ''}" style="width: 100%; height: 42px; font-size: 0.92rem;">
+            </div>
           </div>
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
-          <button type="button" id="btn-advance-to-step-3" class="btn btn-primary" style="background: linear-gradient(135deg, #0d9488, #0f766e); border: none; padding: 10px 24px; font-weight: 700;">
-            Checar Sinais de Alerta (Red Flags) <i class="fa-solid fa-arrow-right" style="margin-left: 6px;"></i>
+          <button type="button" id="btn-advance-to-step-3" class="btn btn-primary" style="background: linear-gradient(135deg, #0d9488, #0f766e); border: 1px solid #2dd4bf; padding: 12px 28px; font-weight: 700; font-size: 0.95rem; border-radius: 10px; box-shadow: 0 4px 16px rgba(13, 148, 136, 0.4); display: flex; align-items: center; gap: 8px; cursor: pointer;">
+            Checar Sinais de Alerta (Red Flags) <i class="fa-solid fa-arrow-right"></i>
           </button>
         </div>
       </div>
@@ -1327,8 +1370,11 @@ function renderEstoqueCentralView(container) {
           <h3 style="margin: 0; font-size: 1.1rem; color: #f8fafc; font-family: 'Outfit', sans-serif;">
             Estoque Central de Medicamentos, Insumos &amp; Manipulados
           </h3>
-          <div style="display: flex; gap: 10px; align-items: center;">
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
             <input type="text" id="pharm-search-input" class="form-input" placeholder="Buscar medicamento ou lote..." style="max-width: 240px; height: 38px; font-size: 0.85rem;">
+            <button id="btn-pdv-dispense-pharm" class="btn btn-secondary" style="border-color: #38bdf8; color: #38bdf8; padding: 0 14px; height: 38px; font-size: 0.82rem; font-weight: 700;">
+              <i class="fa-solid fa-cash-register"></i> Saída por Bipe (PDV)
+            </button>
             <button id="btn-dispense-med" class="btn btn-secondary" style="border-color: #0d9488; color: #14b8a6; padding: 0 14px; height: 38px; font-size: 0.82rem;">
               <i class="fa-solid fa-hand-holding-medical"></i> Dispensar
             </button>
@@ -1366,6 +1412,12 @@ function renderEstoqueCentralView(container) {
   `;
 
   // Listeners de Estoque
+  document.getElementById('btn-pdv-dispense-pharm')?.addEventListener('click', () => {
+    openQuickCheckoutModal(() => {
+      loadPharmacyData();
+      renderCurrentSubTab();
+    });
+  });
   document.getElementById('btn-add-pharm-item')?.addEventListener('click', () => openAddPharmModal());
   document.getElementById('btn-dispense-med')?.addEventListener('click', openDispenseMedModal);
   document.getElementById('pharm-search-input')?.addEventListener('input', (e) => {
@@ -1791,6 +1843,135 @@ function openDispenseMedModal() {
 window.editPharmacyItem = function(id) {
   const item = currentPharmacyItems.find(i => i.id === id);
   if (item) openAddPharmModal(item);
+};
+
+window.startNewPharmacyConsultationForClient = function(clientId, clientName, complaintKey = 'gripe_resfriado', customNotes = '', directToStep = 3) {
+  const allPatients = (localDB.list('pharmacy_patients') || []).concat(localDB.list('patients') || []);
+  let found = allPatients.find(p => String(p.id) === String(clientId) || (clientName && p.name && p.name.toLowerCase() === clientName.toLowerCase()) || (clientName && p.fullName && p.fullName.toLowerCase() === clientName.toLowerCase()));
+  if (!found) {
+    found = {
+      id: clientId || localDB.generateId('PAT-PHARM'),
+      name: clientName || 'Cliente',
+      fullName: clientName || 'Cliente',
+      cpf: '000.000.000-00',
+      age: 40,
+      gender: 'Não informado',
+      allergies: '',
+      chronicConditions: ''
+    };
+  }
+  currentClinicalEncounter = {
+    step: directToStep || 3,
+    patient: found,
+    triageProtocolKey: complaintKey || 'gripe_resfriado',
+    selectedRedFlags: [],
+    symptomDurationDays: 1,
+    symptomSeverity: 'Leve a Moderado',
+    customComplaintNotes: customNotes || '',
+    prescribedMIPs: [],
+    nonPharmaRecommendations: [],
+    detectedAlerts: [],
+    technicalJustification: '',
+    isBlockerOverridden: false
+  };
+  const histModal = document.getElementById('patient-history-modal');
+  if (histModal) histModal.remove();
+  if (typeof window.setActivePatientContext === 'function') {
+    window.setActivePatientContext(found);
+  }
+  if (typeof switchTab === 'function') switchTab('farmacia');
+  activePharmacySubTab = 'crm_balcao';
+  renderCurrentSubTab();
+  if (typeof showToast === 'function') showToast(`🩺 Queixa registrada para ${found.name || found.fullName}: gerando indicações medicamentosas!`);
+};
+
+window.showClinicalFieldHelp = function(fieldKey) {
+  const helpContents = {
+    tempo_evolucao: {
+      icon: 'fa-calendar-days',
+      color: '#38bdf8',
+      title: 'Tempo de Evolução dos Sintomas (Dias)',
+      badge: 'Marcador Temporal de Segurança',
+      paragraphs: [
+        '<strong>Por que este campo é crucial?</strong> O tempo de evolução é o parâmetro clínico determinante para diferenciar um transtorno menor e autolimitado (apto para prescrição de MIPs pelo farmacêutico) de uma condição crônica ou potencialmente grave.',
+        '<strong>Critérios de Segurança Farmacêutica (CFF / ANVISA):</strong>',
+        '• <strong>Quadros Agudos (&le; 3 a 7 dias):</strong> Geralmente correspondem a condições autolimitadas (resfriados, cefaleia tensional, azia ocasional, dor muscular leve).',
+        '• <strong>Quadros Subagudos / Crônicos (> 7 a 14 dias):</strong> Tosse há mais de 3 semanas, diarreia há mais de 14 dias ou azia contínua há semanas exigem encaminhamento médico para diagnóstico diferencial.'
+      ]
+    },
+    intensidade_relatada: {
+      icon: 'fa-gauge-high',
+      color: '#fbbf24',
+      title: 'Escala de Intensidade & Impacto Funcional',
+      badge: 'Estratificação de Risco',
+      paragraphs: [
+        '<strong>Como orientar o preenchimento?</strong> Avalie a percepção de dor ou desconforto relatada pelo paciente na escala adaptada de dor:',
+        '• <strong style="color: #34d399;">🟢 Leve:</strong> Sintoma perceptível, mas não impede nenhuma atividade diária ou profissional.',
+        '• <strong style="color: #facc15;">🟡 Leve a Moderado:</strong> Gera desconforto durante o dia, mas permite realizar as tarefas básicas.',
+        '• <strong style="color: #fb923c;">🟠 Moderado a Forte:</strong> Interfere significativamente na concentração, sono ou mobilidade.',
+        '• <strong style="color: #f87171;">🔴 Severo / Incapacitante:</strong> Dor intolerável ou incapacitante. Dispara sinal de alerta clínico no sistema para investigar possível emergência.'
+      ]
+    },
+    observacoes_queixa: {
+      icon: 'fa-clipboard-notes',
+      color: '#c084fc',
+      title: 'Observações Adicionais da Queixa (HMA)',
+      badge: 'Histórico Qualitativo',
+      paragraphs: [
+        '<strong>O que registrar aqui?</strong> Detalhes subjetivos e objetivos que enriquecem o raciocínio clínico e o prontuário do paciente:',
+        '• <strong>Fatores de Melhora ou Piora:</strong> Se a dor piora ao deitar, após refeições gordurosas, sob estresse ou com esforço físico.',
+        '• <strong>Automedicação Prévia:</strong> Se o paciente já tomou algum analgésico, anti-inflamatório ou chá caseiro antes de vir à farmácia (fundamental para evitar intoxicação e duplicidade).',
+        '• <strong>Sintomas Acompanhantes:</strong> Presença de febre medida em termômetro, náuseas, vômitos, calafrios ou perda de apetite.'
+      ]
+    }
+  };
+
+  const item = helpContents[fieldKey];
+  if (!item) return;
+
+  const modalHtml = `
+    <div id="modal-clinical-help-overlay" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 10050; padding: 20px; animation: fadeIn 0.2s ease;">
+      <div style="background: linear-gradient(145deg, #1e293b, #0f172a); border: 1px solid ${item.color}; border-radius: 18px; max-width: 520px; width: 100%; box-shadow: 0 0 35px ${item.color}40; overflow: hidden;">
+        
+        <div style="padding: 20px 24px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.2);">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 42px; height: 42px; border-radius: 12px; background: ${item.color}25; border: 1px solid ${item.color}; display: flex; align-items: center; justify-content: center; font-size: 1.25rem; color: ${item.color};">
+              <i class="fa-solid ${item.icon}"></i>
+            </div>
+            <div>
+              <span style="font-size: 0.72rem; text-transform: uppercase; font-weight: 800; color: ${item.color}; letter-spacing: 0.5px;">${item.badge}</span>
+              <h3 style="color: #f8fafc; font-family: 'Outfit', sans-serif; font-size: 1.1rem; margin: 2px 0 0 0;">${item.title}</h3>
+            </div>
+          </div>
+          <button type="button" id="btn-close-clinical-help" style="background: transparent; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer; padding: 4px 8px; border-radius: 6px;">✕</button>
+        </div>
+
+        <div style="padding: 24px; color: #cbd5e1; font-size: 0.88rem; line-height: 1.6; display: flex; flex-direction: column; gap: 12px; max-height: 70vh; overflow-y: auto;">
+          ${item.paragraphs.map(p => `<div>${p}</div>`).join('')}
+        </div>
+
+        <div style="padding: 16px 24px; background: rgba(0,0,0,0.3); border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: flex-end;">
+          <button type="button" id="btn-ok-clinical-help" class="btn btn-primary" style="background: ${item.color}; color: #0f172a; font-weight: 800; border: none; padding: 10px 24px; border-radius: 8px; cursor: pointer;">
+            Entendido
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const existing = document.getElementById('modal-clinical-help-overlay');
+  if (existing) existing.remove();
+
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+  const overlay = document.getElementById('modal-clinical-help-overlay');
+  const close = () => overlay?.remove();
+
+  document.getElementById('btn-close-clinical-help')?.addEventListener('click', close);
+  document.getElementById('btn-ok-clinical-help')?.addEventListener('click', close);
+  overlay?.addEventListener('click', (e) => {
+    if (e.target === overlay) close();
+  });
 };
 
 window.renderPharmacyTab = renderPharmacyTab;

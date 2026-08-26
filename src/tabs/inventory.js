@@ -5,6 +5,12 @@ import * as localDB from '../localDB.js';
 import { state } from '../state.js';
 import { showToast, showCustomAlert, showCustomConfirm } from '../modules/ui.js';
 import { syncManager } from '../modules/sync.js';
+import { playBeepSound, openCameraBarcodeScanner } from '../modules/barcodeScanner.js';
+import { openQuickCheckoutModal } from '../modules/quickCheckoutModal.js';
+import { analyzeExpiryRisk, analyzeReplenishmentNeeds, openPromoDiscountModal, openQuarantineModal } from '../modules/stockIntelligence.js';
+import { openCashRegisterModal } from '../modules/cashRegister.js';
+import { openSngpcBookModal, openSngpcDispensationModal } from '../modules/sngpc.js';
+import { openNFeImporterModal } from '../modules/nfeImporter.js';
 
 export function renderInventoryTab(contentArea) {
   const currentUser = state.user || {};
@@ -23,12 +29,27 @@ export function renderInventoryTab(contentArea) {
           </p>
         </div>
 
-        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-          <button id="btn-quick-new-product" class="btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; padding: 9px 18px; border-radius: 10px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);">
-            <i class="fa-solid fa-plus"></i> Novo Produto
+        <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+          <button id="btn-quick-import-nfe" class="btn" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border: none; padding: 9px 14px; border-radius: 10px; font-weight: 700; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);" title="Importar arquivo XML de Nota Fiscal de Distribuidora">
+            <i class="fa-solid fa-file-invoice-dollar"></i> Importar NF-e (XML)
           </button>
-          <button id="btn-quick-stock-entry" class="btn" style="background: linear-gradient(135deg, #0d9488, #0f766e); color: #fff; border: none; padding: 9px 18px; border-radius: 10px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(13, 148, 136, 0.35);">
-            <i class="fa-solid fa-box-open"></i> Dar Entrada de Lote
+          <button id="btn-quick-sngpc" class="btn" style="background: linear-gradient(135deg, #ef4444, #b91c1c); color: #fff; border: none; padding: 9px 14px; border-radius: 10px; font-weight: 700; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);">
+            <i class="fa-solid fa-file-prescription"></i> SNGPC / Controlados
+          </button>
+          <button id="btn-quick-cash-register" class="btn" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border: none; padding: 9px 14px; border-radius: 10px; font-weight: 700; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);">
+            <i class="fa-solid fa-cash-register"></i> Caixa &amp; Turno
+          </button>
+          <button id="btn-quick-stock-intelligence" class="btn" style="background: linear-gradient(135deg, #a855f7, #7e22ce); color: #fff; border: none; padding: 9px 14px; border-radius: 10px; font-weight: 700; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 14px rgba(168, 85, 247, 0.35);">
+            <i class="fa-solid fa-hourglass-half"></i> Validades
+          </button>
+          <button id="btn-quick-stock-checkout" class="btn" style="background: linear-gradient(135deg, #38bdf8, #0284c7); color: #fff; border: none; padding: 9px 14px; border-radius: 10px; font-weight: 700; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 14px rgba(56, 189, 248, 0.35);">
+            <i class="fa-solid fa-barcode"></i> Saída / PDV
+          </button>
+          <button id="btn-quick-new-product" class="btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; padding: 9px 14px; border-radius: 10px; font-weight: 700; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);">
+            <i class="fa-solid fa-plus"></i> Novo
+          </button>
+          <button id="btn-quick-stock-entry" class="btn" style="background: linear-gradient(135deg, #0d9488, #0f766e); color: #fff; border: none; padding: 9px 14px; border-radius: 10px; font-weight: 700; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 14px rgba(13, 148, 136, 0.35);">
+            <i class="fa-solid fa-box-open"></i> Entrada
           </button>
         </div>
       </div>
@@ -175,6 +196,24 @@ export function renderInventoryTab(contentArea) {
 
           <div id="body-entry" class="cfg-accordion-body" style="padding: 20px; display: none;">
             <div style="background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 20px;">
+              
+              <!-- Barra de Bipe Rápido por Código de Barras / EAN -->
+              <div style="background: linear-gradient(135deg, rgba(56, 189, 248, 0.12), rgba(15, 23, 42, 0.6)); border: 1.5px solid rgba(56, 189, 248, 0.4); border-radius: 12px; padding: 14px 18px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <i class="fa-solid fa-barcode" style="color: #38bdf8; font-size: 1.6rem;"></i>
+                  <div>
+                    <div style="font-weight: 700; color: #fff; font-size: 0.95rem;">Entrada Rápida por Código de Barras / EAN</div>
+                    <div style="font-size: 0.78rem; color: #94a3b8;">Bipe o produto para carregar seus dados e dar entrada em 1 segundo.</div>
+                  </div>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                  <input type="text" id="entry-barcode-scan-input" placeholder="Bipar código EAN aqui..." class="form-input" style="width: 220px; height: 40px; font-family: monospace; font-size: 0.92rem; background: #0f172a; border-color: rgba(56, 189, 248, 0.5); color: #38bdf8; font-weight: 700;">
+                  <button type="button" id="btn-entry-camera-scan" class="btn" style="background: rgba(56, 189, 248, 0.2); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; padding: 0 14px; font-weight: 700; font-size: 0.82rem; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-camera"></i> Câmera
+                  </button>
+                </div>
+              </div>
+
               <form id="form-stock-entry" style="display: flex; flex-direction: column; gap: 16px;">
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px;">
                   <div class="form-group">
@@ -635,61 +674,247 @@ export function renderInventoryTab(contentArea) {
     `;
   };
 
-  // Renderizar Painel FEFO (Validades)
+  // Renderizar Painel Inteligente de Validades (FEFO) e Previsão de Reposição
+  let currentFefoFilter = 'all'; // 'all' | 'expired' | 'critical30' | 'attention60' | 'alert90' | 'safe'
+
   const renderFEFOPanel = (products) => {
     const container = document.getElementById('inv-fefo-container');
     if (!container) return;
 
-    const withExpiry = products
-      .filter(p => p.expiry_date)
-      .map(p => {
-        const exp = new Date(p.expiry_date);
-        const daysDiff = Math.ceil((exp - new Date()) / (1000 * 60 * 60 * 24));
-        return { ...p, daysDiff };
-      })
-      .sort((a, b) => a.daysDiff - b.daysDiff);
+    const riskAnalysis = analyzeExpiryRisk(products);
+    const movements = localDB.list('inventory_movements') || [];
+    const replenishmentList = analyzeReplenishmentNeeds(products, movements);
 
-    if (withExpiry.length === 0) {
-      container.innerHTML = `<div style="text-align: center; padding: 25px; color: #94a3b8;">Nenhum lote com data de validade cadastrado.</div>`;
-      return;
+    let displayLots = [];
+    if (currentFefoFilter === 'expired') displayLots = riskAnalysis.expired;
+    else if (currentFefoFilter === 'critical30') displayLots = riskAnalysis.critical30;
+    else if (currentFefoFilter === 'attention60') displayLots = riskAnalysis.attention60;
+    else if (currentFefoFilter === 'alert90') displayLots = riskAnalysis.alert90;
+    else if (currentFefoFilter === 'safe') displayLots = riskAnalysis.safe;
+    else {
+      displayLots = [...riskAnalysis.expired, ...riskAnalysis.critical30, ...riskAnalysis.attention60, ...riskAnalysis.alert90, ...riskAnalysis.safe];
     }
 
     container.innerHTML = `
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px;">
-        ${withExpiry.map(p => {
-          let cardBorder = 'rgba(255,255,255,0.08)';
-          let daysBadge = 'background: rgba(16, 185, 129, 0.15); color: #34d399;';
+      <div style="display: flex; flex-direction: column; gap: 20px;">
+        
+        <!-- CARDS DE FAIXAS DE RISCO DE VALIDADE (30/60/90 DIAS) -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 10px;">
+          
+          <div class="fefo-filter-card ${currentFefoFilter === 'all' ? 'active' : ''}" data-filter="all" style="background: rgba(30, 41, 59, 0.5); border: 1.5px solid ${currentFefoFilter === 'all' ? '#c084fc' : 'rgba(255,255,255,0.08)'}; border-radius: 12px; padding: 12px; cursor: pointer; text-align: center; transition: all 0.2s;">
+            <div style="font-size: 0.72rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Todos Rastreados</div>
+            <div style="font-size: 1.4rem; font-weight: 800; color: #fff; margin-top: 2px;">${riskAnalysis.totalTracked}</div>
+            <small style="color: #c084fc; font-size: 0.68rem;">Lotes com validade</small>
+          </div>
 
-          if (p.daysDiff < 0) {
-            cardBorder = 'rgba(239, 68, 68, 0.5)';
-            daysBadge = 'background: #dc2626; color: #fff; font-weight: 800;';
-          } else if (p.daysDiff <= 60) {
-            cardBorder = 'rgba(245, 158, 11, 0.5)';
-            daysBadge = 'background: #d97706; color: #fff; font-weight: 800;';
-          }
+          <div class="fefo-filter-card ${currentFefoFilter === 'expired' ? 'active' : ''}" data-filter="expired" style="background: rgba(239, 68, 68, 0.12); border: 1.5px solid ${currentFefoFilter === 'expired' ? '#ef4444' : 'rgba(239, 68, 68, 0.3)'}; border-radius: 12px; padding: 12px; cursor: pointer; text-align: center; transition: all 0.2s;">
+            <div style="font-size: 0.72rem; color: #fca5a5; text-transform: uppercase; font-weight: 700;">🔴 Vencidos</div>
+            <div style="font-size: 1.4rem; font-weight: 800; color: #ef4444; margin-top: 2px;">${riskAnalysis.expired.length}</div>
+            <small style="color: #f87171; font-size: 0.68rem;">Quarentena / Descarte</small>
+          </div>
 
-          return `
-            <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid ${cardBorder}; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between;">
-              <div>
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 8px;">
-                  <strong style="color: #fff; font-size: 0.95rem;">${p.name}</strong>
-                  <span style="font-size: 0.72rem; padding: 3px 8px; border-radius: 10px; ${daysBadge}">
-                    ${p.daysDiff < 0 ? 'VENCIDO' : `${p.daysDiff} dias`}
-                  </span>
-                </div>
-                <div style="font-size: 0.78rem; color: #94a3b8;">Lote: <span style="color: #cbd5e1; font-family: monospace;">${p.batch || 'N/A'}</span></div>
-                <div style="font-size: 0.78rem; color: #94a3b8;">Validade: <strong style="color: #fff;">${new Date(p.expiry_date).toLocaleDateString('pt-BR')}</strong></div>
-              </div>
+          <div class="fefo-filter-card ${currentFefoFilter === 'critical30' ? 'active' : ''}" data-filter="critical30" style="background: rgba(249, 115, 22, 0.12); border: 1.5px solid ${currentFefoFilter === 'critical30' ? '#f97316' : 'rgba(249, 115, 22, 0.3)'}; border-radius: 12px; padding: 12px; cursor: pointer; text-align: center; transition: all 0.2s;">
+            <div style="font-size: 0.72rem; color: #fdba74; text-transform: uppercase; font-weight: 700;">🟠 Críticos (&lt; 30d)</div>
+            <div style="font-size: 1.4rem; font-weight: 800; color: #f97316; margin-top: 2px;">${riskAnalysis.critical30.length}</div>
+            <small style="color: #fb923c; font-size: 0.68rem;">Queima / Promoção</small>
+          </div>
 
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06);">
-                <span style="font-size: 0.82rem; font-weight: 700; color: #34d399;">Saldo: ${p.current_stock || 0} un</span>
-                <span style="font-size: 0.74rem; color: #94a3b8;">Prioridade FEFO</span>
-              </div>
+          <div class="fefo-filter-card ${currentFefoFilter === 'attention60' ? 'active' : ''}" data-filter="attention60" style="background: rgba(245, 158, 11, 0.12); border: 1.5px solid ${currentFefoFilter === 'attention60' ? '#f59e0b' : 'rgba(245, 158, 11, 0.3)'}; border-radius: 12px; padding: 12px; cursor: pointer; text-align: center; transition: all 0.2s;">
+            <div style="font-size: 0.72rem; color: #fde68a; text-transform: uppercase; font-weight: 700;">🟡 Atenção (30-60d)</div>
+            <div style="font-size: 1.4rem; font-weight: 800; color: #fbbf24; margin-top: 2px;">${riskAnalysis.attention60.length}</div>
+            <small style="color: #f59e0b; font-size: 0.68rem;">Dispensar 1º (FEFO)</small>
+          </div>
+
+          <div class="fefo-filter-card ${currentFefoFilter === 'alert90' ? 'active' : ''}" data-filter="alert90" style="background: rgba(56, 189, 248, 0.12); border: 1.5px solid ${currentFefoFilter === 'alert90' ? '#38bdf8' : 'rgba(56, 189, 248, 0.3)'}; border-radius: 12px; padding: 12px; cursor: pointer; text-align: center; transition: all 0.2s;">
+            <div style="font-size: 0.72rem; color: #bae6fd; text-transform: uppercase; font-weight: 700;">🔵 Alerta (60-90d)</div>
+            <div style="font-size: 1.4rem; font-weight: 800; color: #38bdf8; margin-top: 2px;">${riskAnalysis.alert90.length}</div>
+            <small style="color: #0284c7; font-size: 0.68rem;">Giro sob controle</small>
+          </div>
+
+        </div>
+
+        <!-- LISTA DE LOTES COM AÇÕES RÁPIDAS -->
+        <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <strong style="color: #fff; font-size: 0.95rem; font-family: 'Outfit';">
+              <i class="fa-solid fa-list-check" style="color: #c084fc;"></i> Lotes com Vencimento Monitorado (${displayLots.length})
+            </strong>
+            <span style="font-size: 0.74rem; color: #94a3b8;">
+              Ordenado por menor prazo de validade (First Expire, First Out)
+            </span>
+          </div>
+
+          ${displayLots.length === 0 ? `
+            <div style="text-align: center; padding: 30px; color: #94a3b8; font-size: 0.85rem;">
+              Nenhum lote encontrado para o filtro selecionado.
             </div>
-          `;
-        }).join('')}
+          ` : `
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px;">
+              ${displayLots.map(p => {
+                let badgeStyle = 'background: rgba(16, 185, 129, 0.15); color: #34d399;';
+                let cardBorder = 'rgba(255,255,255,0.08)';
+
+                if (p.daysDiff < 0) {
+                  badgeStyle = 'background: #dc2626; color: #fff; font-weight: 800;';
+                  cardBorder = 'rgba(239, 68, 68, 0.45)';
+                } else if (p.daysDiff <= 30) {
+                  badgeStyle = 'background: #ea580c; color: #fff; font-weight: 800;';
+                  cardBorder = 'rgba(249, 115, 22, 0.45)';
+                } else if (p.daysDiff <= 60) {
+                  badgeStyle = 'background: #d97706; color: #fff; font-weight: 800;';
+                  cardBorder = 'rgba(245, 158, 11, 0.45)';
+                } else if (p.daysDiff <= 90) {
+                  badgeStyle = 'background: rgba(56, 189, 248, 0.2); color: #38bdf8; font-weight: 700;';
+                  cardBorder = 'rgba(56, 189, 248, 0.3)';
+                }
+
+                return `
+                  <div style="background: rgba(30, 41, 59, 0.6); border: 1px solid ${cardBorder}; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                      <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 6px; margin-bottom: 6px;">
+                        <strong style="color: #fff; font-size: 0.9rem; line-height: 1.25;">${p.name}</strong>
+                        <span style="font-size: 0.68rem; padding: 2px 7px; border-radius: 8px; ${badgeStyle} white-space: nowrap;">
+                          ${p.daysDiff < 0 ? 'VENCIDO' : `${p.daysDiff} dias`}
+                        </span>
+                      </div>
+                      <div style="font-size: 0.74rem; color: #94a3b8;">
+                        Lote: <span style="color: #cbd5e1; font-family: monospace;">${p.batch || 'N/A'}</span> • 
+                        Validade: <strong style="color: #fff;">${new Date(p.expiry_date).toLocaleDateString('pt-BR')}</strong>
+                      </div>
+                      <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 0.78rem;">
+                        <span style="color: #34d399; font-weight: 700;">Saldo: ${p.current_stock || 0} un</span>
+                        <span style="color: #38bdf8;">R$ ${(parseFloat(p.sale_price || 0)).toFixed(2).replace('.', ',')}</span>
+                      </div>
+                    </div>
+
+                    <div style="display: flex; gap: 6px; margin-top: 12px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06);">
+                      ${p.daysDiff <= 60 && p.daysDiff >= 0 ? `
+                        <button type="button" class="btn-promo-lot" data-id="${p.id}" style="flex: 1; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35); color: #fbbf24; font-size: 0.72rem; font-weight: 700; padding: 5px 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                          <i class="fa-solid fa-tags"></i> Promoção FEFO
+                        </button>
+                      ` : ''}
+                      ${p.daysDiff < 0 ? `
+                        <button type="button" class="btn-quarantine-lot" data-id="${p.id}" style="flex: 1; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.35); color: #f87171; font-size: 0.72rem; font-weight: 700; padding: 5px 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;">
+                          <i class="fa-solid fa-ban"></i> Quarentena Sanitária
+                        </button>
+                      ` : ''}
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `}
+        </div>
+
+        <!-- SEÇÃO: PREVISÃO INTELIGENTE DE REPOSIÇÃO & COMPRAS -->
+        <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px;">
+            <div>
+              <strong style="color: #fff; font-size: 0.95rem; font-family: 'Outfit'; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-truck-ramp-box" style="color: #38bdf8;"></i> Previsão de Reposição &amp; Ponto de Pedido
+              </strong>
+              <small style="color: #94a3b8; display: block; margin-top: 2px;">
+                Cálculo baseado no consumo médio diário (últimos 30 dias) e cobertura de estoque (Runway).
+              </small>
+            </div>
+
+            <button type="button" id="btn-export-purchase-list" class="btn" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border: none; padding: 6px 14px; border-radius: 8px; font-weight: 700; font-size: 0.78rem; display: flex; align-items: center; gap: 6px; cursor: pointer;">
+              <i class="fa-solid fa-file-arrow-down"></i> Exportar Lista de Compras
+            </button>
+          </div>
+
+          <div style="overflow-x: auto;">
+            <table class="patients-table" style="width: 100%; border-collapse: collapse; font-size: 0.82rem;">
+              <thead>
+                <tr style="border-bottom: 1px solid rgba(255,255,255,0.08); text-align: left; color: #94a3b8; font-size: 0.72rem; text-transform: uppercase;">
+                  <th style="padding: 8px;">Medicamento / Produto</th>
+                  <th style="padding: 8px; text-align: center;">Saldo Atual</th>
+                  <th style="padding: 8px; text-align: center;">Mínimo</th>
+                  <th style="padding: 8px; text-align: center;">Consumo/Dia</th>
+                  <th style="padding: 8px; text-align: center;">Cobertura (Dias)</th>
+                  <th style="padding: 8px; text-align: center;">Status</th>
+                  <th style="padding: 8px; text-align: center; color: #38bdf8;">Sugestão Compra</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${replenishmentList.slice(0, 15).map(r => `
+                  <tr style="border-bottom: 1px solid rgba(255,255,255,0.04);">
+                    <td style="padding: 8px; color: #fff; font-weight: 600;">
+                      ${r.product.name}
+                      <small style="display: block; color: #94a3b8; font-size: 0.7rem;">EAN: ${r.product.ean || 'N/A'}</small>
+                    </td>
+                    <td style="padding: 8px; text-align: center; font-weight: 700; color: ${r.currentStock <= r.minStock ? '#f87171' : '#34d399'};">
+                      ${r.currentStock} un
+                    </td>
+                    <td style="padding: 8px; text-align: center; color: #94a3b8;">${r.minStock} un</td>
+                    <td style="padding: 8px; text-align: center; color: #cbd5e1;">${r.dailyConsumption} un/dia</td>
+                    <td style="padding: 8px; text-align: center; font-weight: 700; color: ${r.runwayDays <= 15 ? '#fbbf24' : '#cbd5e1'};">
+                      ${r.runwayDays > 100 ? '+100d' : `${r.runwayDays} dias`}
+                    </td>
+                    <td style="padding: 8px; text-align: center;">
+                      <span style="font-size: 0.68rem; padding: 2px 6px; border-radius: 6px; ${r.badgeStyle}">
+                        ${r.statusLabel}
+                      </span>
+                    </td>
+                    <td style="padding: 8px; text-align: center; font-weight: 800; color: #38bdf8; font-family: monospace; font-size: 0.9rem;">
+                      ${r.suggestedBuy > 0 ? `+${r.suggestedBuy} un` : '—'}
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </div>
     `;
+
+    // Listeners dos cards de filtro
+    container.querySelectorAll('.fefo-filter-card').forEach(card => {
+      card.addEventListener('click', () => {
+        currentFefoFilter = card.dataset.filter;
+        renderFEFOPanel(products);
+      });
+    });
+
+    // Listener Promoção FEFO
+    container.querySelectorAll('.btn-promo-lot').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const prod = products.find(p => p.id === btn.dataset.id);
+        if (prod) openPromoDiscountModal(prod, loadInventoryData);
+      });
+    });
+
+    // Listener Quarentena
+    container.querySelectorAll('.btn-quarantine-lot').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const prod = products.find(p => p.id === btn.dataset.id);
+        if (prod) openQuarantineModal(prod, loadInventoryData);
+      });
+    });
+
+    // Listener Exportar Compras
+    container.querySelector('#btn-export-purchase-list')?.addEventListener('click', () => {
+      const needed = replenishmentList.filter(r => r.suggestedBuy > 0);
+      if (needed.length === 0) {
+        showToast('✅ Todos os produtos possuem estoque saudável. Nenhuma compra necessária.');
+        return;
+      }
+
+      let csv = 'Medicamento/Produto;EAN;Saldo Atual;Estoque Minimo;Consumo Mensal;Sugestao de Compra\n';
+      needed.forEach(n => {
+        csv += `"${n.product.name}";"${n.product.ean || ''}";${n.currentStock};${n.minStock};${n.monthlyConsumption};${n.suggestedBuy}\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Pedido_Reposicao_Estoque_${new Date().toISOString().slice(0, 10)}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('📄 Lista de reposição exportada com sucesso!');
+    });
   };
 
   // --- EVENT LISTENERS DA PÁGINA ---
@@ -701,6 +926,38 @@ export function renderInventoryTab(contentArea) {
   });
   document.getElementById('inv-status-filter')?.addEventListener('change', () => {
     renderProductsTable(localDB.list('products') || []);
+  });
+
+  document.getElementById('btn-quick-import-nfe')?.addEventListener('click', () => {
+    openNFeImporterModal();
+  });
+
+  document.getElementById('btn-quick-sngpc')?.addEventListener('click', () => {
+    openSngpcBookModal();
+  });
+
+  document.getElementById('btn-quick-cash-register')?.addEventListener('click', () => {
+    openCashRegisterModal(() => {
+      loadInventoryData();
+    });
+  });
+
+  document.getElementById('btn-quick-stock-intelligence')?.addEventListener('click', () => {
+    const fefoCard = document.getElementById('accordion-group-fefo');
+    const fefoBody = document.getElementById('body-fefo');
+    const chevron = fefoCard?.querySelector('.cfg-chevron-btn');
+    if (fefoBody) {
+      fefoBody.style.display = 'block';
+      fefoCard?.classList.add('open');
+      if (chevron) chevron.style.transform = 'rotate(0deg)';
+      fefoBody.scrollIntoView({ behavior: 'smooth' });
+    }
+  });
+
+  document.getElementById('btn-quick-stock-checkout')?.addEventListener('click', () => {
+    openQuickCheckoutModal(() => {
+      loadInventoryData();
+    });
   });
 
   document.getElementById('btn-quick-new-product')?.addEventListener('click', () => {
@@ -717,7 +974,69 @@ export function renderInventoryTab(contentArea) {
       entryCard?.classList.add('open');
       if (chevron) chevron.style.transform = 'rotate(0deg)';
       entryBody.scrollIntoView({ behavior: 'smooth' });
+      document.getElementById('entry-barcode-scan-input')?.focus();
     }
+  });
+
+  // Lógica de Leitura por Código de Barras na Entrada de Lotes
+  const handleEntryBarcodeScan = (scannedEan) => {
+    const rawEan = (scannedEan || '').trim();
+    if (!rawEan) return;
+
+    const products = localDB.list('products') || [];
+    const found = products.find(p => p.ean === rawEan || p.id === rawEan || (p.ean && p.ean.endsWith(rawEan)));
+
+    if (found) {
+      playBeepSound('success');
+      const selectEl = document.getElementById('entry-product-id');
+      if (selectEl) {
+        selectEl.value = found.id;
+        document.getElementById('entry-cost-price').value = found.cost_price || '';
+        document.getElementById('entry-sale-price').value = found.sale_price || '';
+        document.getElementById('entry-batch').value = found.batch || `L-${Math.floor(10000 + Math.random() * 90000)}`;
+        if (found.expiry_date) document.getElementById('entry-expiry').value = found.expiry_date;
+      }
+      showToast(`📦 Produto localizado: ${found.name} (Saldo: ${found.current_stock || 0} un). Digite a quantidade recebida.`);
+      const qtyInput = document.getElementById('entry-quantity');
+      if (qtyInput) {
+        qtyInput.focus();
+        qtyInput.select();
+      }
+    } else {
+      playBeepSound('error');
+      showCustomConfirm({
+        title: 'Produto Não Encontrado',
+        message: `O código de barras <strong>${rawEan}</strong> ainda não está cadastrado no catálogo de estoque.<br><br>Deseja cadastrar este novo produto agora?`,
+        confirmText: 'Cadastrar Novo Produto',
+        cancelText: 'Cancelar',
+        type: 'warning'
+      }).then(confirmed => {
+        if (confirmed) {
+          openProductModal({ ean: rawEan }, () => {
+            loadInventoryData();
+          });
+        }
+      });
+    }
+
+    const scanInput = document.getElementById('entry-barcode-scan-input');
+    if (scanInput) scanInput.value = '';
+  };
+
+  document.getElementById('entry-barcode-scan-input')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleEntryBarcodeScan(e.target.value);
+    }
+  });
+
+  document.getElementById('btn-entry-camera-scan')?.addEventListener('click', () => {
+    openCameraBarcodeScanner((scannedEan) => {
+      handleEntryBarcodeScan(scannedEan);
+    }, {
+      title: 'Entrada de Estoque por Câmera',
+      subtitle: 'Aponte a câmera para o código EAN do produto a ser recebido'
+    });
   });
 
   // Listener para preencher dados sugeridos na entrada ao selecionar produto
@@ -776,6 +1095,21 @@ export function renderInventoryTab(contentArea) {
     showToast(`✅ Entrada de ${quantity} un de ${prod.name} registrada com sucesso!`);
     syncManager.pushToCloud(false);
     document.getElementById('form-stock-entry').reset();
+
+    if (typeof window.showFlowCompletionNotification === 'function') {
+      window.showFlowCompletionNotification({
+        flowType: 'completed',
+        badgeText: 'FLUXO DE ENTRADA DE ESTOQUE CONCLUÍDO',
+        badgeIcon: 'fa-circle-check',
+        icon: 'fa-boxes-stacked',
+        actionTitle: `📦 Entrada Registrada: ${prod.name}`,
+        message: `Foram adicionadas <strong>${quantity} unidades</strong> (Lote: ${batch || 'Padrão'}). Novo saldo físico: <strong>${newStock} un</strong>.`,
+        targetTab: 'farmacia',
+        targetTabLabel: 'Farmácia & Estoque',
+        actionButtonText: 'Ver no Catálogo >'
+      });
+    }
+
     loadInventoryData();
   });
 
@@ -815,8 +1149,13 @@ export function openProductModal(productToEdit = null, onSaved = null) {
             <input type="text" id="p-dci" class="form-input" value="${productToEdit ? (productToEdit.dci || '') : ''}" placeholder="Ex: Losartana Potássica">
           </div>
           <div class="form-group">
-            <label class="form-label" for="p-ean" style="color: #cbd5e1; font-weight: 600; font-size: 0.85rem;">Código EAN / Barras:</label>
-            <input type="text" id="p-ean" class="form-input" value="${productToEdit ? (productToEdit.ean || '') : ''}" placeholder="7890000000000">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+              <label class="form-label" for="p-ean" style="color: #cbd5e1; font-weight: 600; font-size: 0.85rem; margin: 0;">Código EAN / Barras:</label>
+              <button type="button" id="btn-scan-product-ean" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; font-size: 0.72rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                <i class="fa-solid fa-camera"></i> Escanear
+              </button>
+            </div>
+            <input type="text" id="p-ean" class="form-input" value="${productToEdit ? (productToEdit.ean || '') : ''}" placeholder="7890000000000" style="font-family: monospace;">
           </div>
         </div>
 
@@ -881,6 +1220,19 @@ export function openProductModal(productToEdit = null, onSaved = null) {
   document.getElementById('close-prod-modal').addEventListener('click', closeModal);
   document.getElementById('cancel-prod-modal').addEventListener('click', closeModal);
 
+  document.getElementById('btn-scan-product-ean')?.addEventListener('click', () => {
+    openCameraBarcodeScanner((scannedEan) => {
+      const eanField = document.getElementById('p-ean');
+      if (eanField) {
+        eanField.value = scannedEan;
+        showToast(`📷 Código EAN "${scannedEan}" capturado com sucesso!`);
+      }
+    }, {
+      title: 'Escanear Código de Barras do Produto',
+      subtitle: 'Aponte a câmera para o código EAN da caixa do produto'
+    });
+  });
+
   document.getElementById('prod-crud-form').addEventListener('submit', (e) => {
     e.preventDefault();
     const name = document.getElementById('p-name').value.trim();
@@ -899,6 +1251,19 @@ export function openProductModal(productToEdit = null, onSaved = null) {
         name, dci, ean, category, presentation, current_stock, min_stock, expiry_date, cost_price, sale_price
       });
       showToast('Produto atualizado com sucesso!');
+      if (typeof window.showFlowCompletionNotification === 'function') {
+        window.showFlowCompletionNotification({
+          flowType: 'completed',
+          badgeText: 'CADASTRO DE PRODUTO ATUALIZADO',
+          badgeIcon: 'fa-circle-check',
+          icon: 'fa-pen-to-square',
+          actionTitle: `✓ Produto Atualizado: ${name}`,
+          message: `Alterações salvas no catálogo de estoque com sucesso.`,
+          targetTab: 'farmacia',
+          targetTabLabel: 'Farmácia & Estoque',
+          actionButtonText: 'Ver no Estoque >'
+        });
+      }
     } else {
       localDB.insert('products', {
         name, dci, ean, category, presentation, current_stock, min_stock, expiry_date, cost_price, sale_price,
@@ -906,6 +1271,19 @@ export function openProductModal(productToEdit = null, onSaved = null) {
         created_at: new Date().toISOString()
       });
       showToast('Novo produto cadastrado no catálogo!');
+      if (typeof window.showFlowCompletionNotification === 'function') {
+        window.showFlowCompletionNotification({
+          flowType: 'completed',
+          badgeText: 'NOVO PRODUTO CADASTRADO',
+          badgeIcon: 'fa-circle-check',
+          icon: 'fa-pills',
+          actionTitle: `📦 Novo Item: ${name}`,
+          message: `Produto inserido no catálogo com saldo inicial de <strong>${current_stock} un</strong>.`,
+          targetTab: 'farmacia',
+          targetTabLabel: 'Farmácia & Estoque',
+          actionButtonText: 'Ver Catálogo >'
+        });
+      }
     }
 
     syncManager.pushToCloud(false);
@@ -985,6 +1363,21 @@ function openStockAdjustmentModal(productId, productName, currentQty, onSaved) {
     showToast('Saldo de estoque ajustado com sucesso!');
     syncManager.pushToCloud(false);
     closeModal();
+
+    if (typeof window.showFlowCompletionNotification === 'function') {
+      window.showFlowCompletionNotification({
+        flowType: 'completed',
+        badgeText: 'FLUXO DE AJUSTE DE ESTOQUE CONCLUÍDO',
+        badgeIcon: 'fa-circle-check',
+        icon: 'fa-sliders',
+        actionTitle: `⚖️ Saldo Ajustado: ${productName}`,
+        message: `Saldo físico corrigido de <strong>${currentQty}</strong> para <strong>${newQty} un</strong> (${diff >= 0 ? '+' : ''}${diff} un). Motivo: ${reason}.`,
+        targetTab: 'farmacia',
+        targetTabLabel: 'Farmácia & Estoque',
+        actionButtonText: 'Ver Kardex >'
+      });
+    }
+
     if (onSaved) onSaved();
   });
 }

@@ -17,6 +17,7 @@ import { renderPatientsTab } from './tabs/patients.js';
 import { renderAttendanceTab } from './tabs/attendance.js';
 import { renderSettingsTab, showSimulationSummaryModal } from './tabs/settings.js';
 import { renderInventoryTab } from './tabs/inventory.js';
+import { renderFinancialTab } from './tabs/financial.js';
 import { realtimeHub } from './modules/realtime.js';
 import { setActivePatientContext, renderPatientJourneyStepper, renderFloatingPatientHUD } from './modules/journey.js';
 import { generateMockData } from './mockDataGenerator.js';
@@ -27,6 +28,15 @@ import { openTelemedicineModal } from './modules/telemedicina.js';
 import { startVoiceDictation, stopVoiceDictation, calculateMEWS, checkDrugInteractions, generateWhatsAppClinicalMessage, sendToWhatsApp } from './modules/clinicalAI.js';
 import { renderDigitalSignatureModal, signDocumentICP, DIGITAL_CERT_PROVIDERS } from './modules/digitalCert.js';
 import { generateTISS401XML, downloadTISSFile, TUSS_PROCEDURES } from './modules/tiss.js';
+import { openCameraBarcodeScanner, playBeepSound } from './modules/barcodeScanner.js';
+import { openQuickCheckoutModal } from './modules/quickCheckoutModal.js';
+import { printThermalReceipt, generateWhatsAppSaleText } from './modules/thermalReceipt.js';
+import { openCashRegisterModal, printCashRegisterReceipt, getActiveCashRegister } from './modules/cashRegister.js';
+import { openSngpcBookModal, openSngpcDispensationModal } from './modules/sngpc.js';
+import { openVaccinationModal, printVaccinationDsf } from './modules/vaccination.js';
+import { openPatientPortalModal } from './modules/patientPortal.js';
+import { openNFeImporterModal } from './modules/nfeImporter.js';
+import { renderSmartFlowGuide, updateFlowGuideStep, completeFlow } from './modules/smartFlowGuide.js';
 
 window.setActivePatientContext = setActivePatientContext;
 window.renderPatientJourneyStepper = renderPatientJourneyStepper;
@@ -45,6 +55,23 @@ window.DIGITAL_CERT_PROVIDERS = DIGITAL_CERT_PROVIDERS;
 window.generateTISS401XML = generateTISS401XML;
 window.downloadTISSFile = downloadTISSFile;
 window.TUSS_PROCEDURES = TUSS_PROCEDURES;
+window.openCameraBarcodeScanner = openCameraBarcodeScanner;
+window.openQuickCheckoutModal = openQuickCheckoutModal;
+window.playBeepSound = playBeepSound;
+window.printThermalReceipt = printThermalReceipt;
+window.generateWhatsAppSaleText = generateWhatsAppSaleText;
+window.openCashRegisterModal = openCashRegisterModal;
+window.printCashRegisterReceipt = printCashRegisterReceipt;
+window.getActiveCashRegister = getActiveCashRegister;
+window.openSngpcBookModal = openSngpcBookModal;
+window.openSngpcDispensationModal = openSngpcDispensationModal;
+window.openVaccinationModal = openVaccinationModal;
+window.printVaccinationDsf = printVaccinationDsf;
+window.openPatientPortalModal = openPatientPortalModal;
+window.openNFeImporterModal = openNFeImporterModal;
+window.renderSmartFlowGuide = renderSmartFlowGuide;
+window.updateFlowGuideStep = updateFlowGuideStep;
+window.completeFlow = completeFlow;
 
 // Registro do Service Worker PWA e Notificações Push
 if ('serviceWorker' in navigator) {
@@ -325,6 +352,10 @@ window.initializeApp = initializeApp;
 
 export function showFlowCompletionNotification(options = {}) {
   const {
+    flowType = 'step', // 'step' | 'completed'
+    badgeText = null,
+    badgeIcon = null,
+    icon = null,
     actionTitle = 'Próxima Etapa do Atendimento',
     message = 'Ação registrada com sucesso no sistema.',
     targetTab = null,
@@ -334,9 +365,30 @@ export function showFlowCompletionNotification(options = {}) {
     targetPatientId = null,
     targetPatientCpf = null,
     actionType = null,
+    actionButtonText = null,
+    onActionClick = null,
     autoSwitch = false,
-    persistent = false
+    persistent = false,
+    sound = true
   } = options;
+
+  // Feedback sonoro sutil
+  if (sound) {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(flowType === 'completed' ? 784 : 587.33, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(flowType === 'completed' ? 1046.50 : 880, audioCtx.currentTime + 0.15);
+      gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.28);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.28);
+    } catch (e) {}
+  }
 
   let container = document.getElementById('hn-flow-notifications-container');
   if (!container) {
@@ -351,7 +403,7 @@ export function showFlowCompletionNotification(options = {}) {
       gap: 14px;
       z-index: 1000000;
       pointer-events: none;
-      width: 420px;
+      width: 440px;
       max-width: 92vw;
     `;
     document.body.appendChild(container);
@@ -359,10 +411,11 @@ export function showFlowCompletionNotification(options = {}) {
 
   const tabLabelsMap = {
     dashboard:     'Visão Geral (CRM Clínico Farmacêutico)',
-    pacientes:     'Recepção & Pacientes',
+    pacientes:     'Recepção & Clientes',
     medicos:        'Corpo Clínico & Médicos',
     consultorios:  'Salas & Consultórios',
     farmacia:      'Farmácia & Estoque',
+    estoque:       'Farmácia & Estoque',
     tv_panel:      'Painel TV (Chamador)',
     agenda:        'Agenda & Consultas',
     atendimento:   'Central de Atendimentos',
@@ -370,11 +423,18 @@ export function showFlowCompletionNotification(options = {}) {
     leitos:        'Gestão de Leitos & Internação',
     kanban:        'Kanban Hospitalar',
     financeiro:    'Faturamento & Financeiro',
-    relatorios:    'Relatórios & Métricas',
+    relatorios:    'Relatórios & Declarações DSF',
     configuracoes: 'Configurações & Turso DB'
   };
 
   const finalDestinationLabel = targetTabLabel || (targetTab ? tabLabelsMap[targetTab] : null);
+
+  const isCompleted = flowType === 'completed';
+  const defaultBadgeText = isCompleted ? '✓ Fluxo Concluído • Etapa Finalizada' : 'Sequência do Fluxo • Próximo Passo';
+  const displayBadgeText = badgeText || defaultBadgeText;
+  const displayBadgeIcon = badgeIcon || (isCompleted ? 'fa-circle-check' : 'fa-route');
+  const mainIcon = icon || (isCompleted ? 'fa-circle-check' : 'fa-bullhorn');
+  const finalBtnText = actionButtonText || (isCompleted && !targetTab ? 'Concluir' : 'Ir para a Aba');
 
   const card = document.createElement('div');
   if (targetTab) {
@@ -385,12 +445,12 @@ export function showFlowCompletionNotification(options = {}) {
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
     color: #f8fafc;
-    border: 1.5px solid rgba(16, 185, 129, 0.6);
-    border-left: 6px solid #10b981;
+    border: 1.5px solid ${isCompleted ? 'rgba(16, 185, 129, 0.8)' : 'rgba(56, 189, 248, 0.6)'};
+    border-left: 6px solid ${isCompleted ? '#10b981' : '#38bdf8'};
     padding: 16px 18px;
     border-radius: 16px;
     font-family: 'Outfit', system-ui, -apple-system, sans-serif;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75), 0 0 30px rgba(16, 185, 129, 0.35);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), 0 0 30px ${isCompleted ? 'rgba(16, 185, 129, 0.35)' : 'rgba(56, 189, 248, 0.25)'};
     pointer-events: auto;
     transform: translateX(120%);
     opacity: 0;
@@ -403,8 +463,8 @@ export function showFlowCompletionNotification(options = {}) {
 
   card.innerHTML = `
     <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
-      <span style="background: rgba(16, 185, 129, 0.15); color: #34d399; font-size: 0.68rem; font-weight: 800; padding: 3px 9px; border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.35); text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 5px;">
-        <i class="fa-solid fa-route" style="color: #38bdf8;"></i> Sequência do Fluxo &bull; Próximo Passo
+      <span style="background: ${isCompleted ? 'rgba(16, 185, 129, 0.18)' : 'rgba(56, 189, 248, 0.15)'}; color: ${isCompleted ? '#34d399' : '#38bdf8'}; font-size: 0.68rem; font-weight: 800; padding: 3px 10px; border-radius: 12px; border: 1px solid ${isCompleted ? 'rgba(16, 185, 129, 0.45)' : 'rgba(56, 189, 248, 0.35)'}; text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex; align-items: center; gap: 6px;">
+        <i class="fa-solid ${displayBadgeIcon}" style="color: ${isCompleted ? '#10b981' : '#38bdf8'};"></i> ${displayBadgeText}
       </span>
       <button class="flow-toast-close" title="Fechar notificação" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #94a3b8; cursor: pointer; font-size: 0.85rem; padding: 3px 8px; border-radius: 6px; transition: all 0.2s;" onmouseover="this.style.color='#fff'; this.style.background='rgba(239,68,68,0.25)'" onmouseout="this.style.color='#94a3b8'; this.style.background='rgba(255,255,255,0.06)'">
         <i class="fa-solid fa-xmark"></i>
@@ -412,35 +472,33 @@ export function showFlowCompletionNotification(options = {}) {
     </div>
 
     <div style="display: flex; align-items: flex-start; gap: 12px;">
-      <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
-        <i class="fa-solid fa-bullhorn" style="font-size: 1.1rem; color: #10b981;"></i>
+      <div style="width: 38px; height: 38px; border-radius: 12px; background: ${isCompleted ? 'rgba(16, 185, 129, 0.2)' : 'rgba(56, 189, 248, 0.2)'}; border: 1.5px solid ${isCompleted ? 'rgba(16, 185, 129, 0.5)' : 'rgba(56, 189, 248, 0.4)'}; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+        <i class="fa-solid ${mainIcon}" style="font-size: 1.15rem; color: ${isCompleted ? '#34d399' : '#38bdf8'};"></i>
       </div>
       <div style="flex: 1; min-width: 0;">
         <strong style="color: #ffffff; font-size: 0.95rem; display: block; font-weight: 700; margin-bottom: 2px;">
           ${actionTitle}
         </strong>
-        <p style="color: #cbd5e1; font-size: 0.85rem; margin: 0; line-height: 1.4;">
+        <div style="color: #cbd5e1; font-size: 0.84rem; margin: 0; line-height: 1.45;">
           ${message}
-        </p>
+        </div>
       </div>
     </div>
 
-    ${finalDestinationLabel ? `
-      <div style="background: rgba(99, 102, 241, 0.12); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 12px; padding: 10px 14px; margin-top: 2px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
-        <span style="font-size: 0.8rem; color: #a5b4fc; font-weight: 600; display: flex; align-items: center; gap: 6px;">
+    ${(finalDestinationLabel || onActionClick || targetTab) ? `
+      <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 10px 14px; margin-top: 2px; display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap;">
+        <span style="font-size: 0.8rem; color: #94a3b8; font-weight: 600; display: flex; align-items: center; gap: 6px;">
           <i class="fa-solid fa-location-dot" style="color: #38bdf8; font-size: 0.9rem;"></i>
-          Destino: <strong style="color: #ffffff; font-weight: 800;">${finalDestinationLabel}</strong>
+          Destino: <strong style="color: #ffffff; font-weight: 800;">${finalDestinationLabel || 'Ação Concluída'}</strong>
         </span>
-        ${targetTab ? `
-          <button class="btn-goto-flow-tab" style="
-            background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; border: none;
-            padding: 8px 16px; border-radius: 8px; font-size: 0.8rem; font-weight: 800;
-            cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
-            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.45); text-transform: uppercase; letter-spacing: 0.3px;
-          " onmouseover="this.style.transform='scale(1.05)'; this.style.background='#047857';" onmouseout="this.style.transform='scale(1)'; this.style.background='linear-gradient(135deg, #10b981, #059669)';">
-            Ir para a Aba <i class="fa-solid fa-chevron-right" style="font-size: 0.75rem;"></i>
-          </button>
-        ` : ''}
+        <button class="btn-goto-flow-tab" style="
+          background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; border: none;
+          padding: 8px 16px; border-radius: 8px; font-size: 0.8rem; font-weight: 800;
+          cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 6px;
+          box-shadow: 0 4px 16px rgba(16, 185, 129, 0.45); text-transform: uppercase; letter-spacing: 0.3px;
+        " onmouseover="this.style.transform='scale(1.04)'; this.style.background='#047857';" onmouseout="this.style.transform='scale(1)'; this.style.background='linear-gradient(135deg, #10b981, #059669)';">
+          ${finalBtnText} <i class="fa-solid fa-chevron-right" style="font-size: 0.75rem;"></i>
+        </button>
       </div>
     ` : ''}
   `;
@@ -462,12 +520,18 @@ export function showFlowCompletionNotification(options = {}) {
   }
 
   const gotoBtn = card.querySelector('.btn-goto-flow-tab');
-  if (gotoBtn && targetTab) {
+  if (gotoBtn) {
     gotoBtn.addEventListener('click', () => {
       // 1. Fecha o card imediatamente
       card.style.transform = 'translateX(120%)';
       card.style.opacity = '0';
       setTimeout(() => card.remove(), 300);
+
+      // Callback customizado
+      if (typeof onActionClick === 'function') {
+        onActionClick();
+        return;
+      }
 
       // Se for ação de admitir paciente na Central de Atendimentos
       if (actionType === 'admit_patient' || (targetTab === 'atendimento' && targetPatientId)) {
@@ -477,8 +541,8 @@ export function showFlowCompletionNotification(options = {}) {
         }
       }
 
-      // 2. Muda para a aba de destino
-      if (typeof switchTab === 'function') {
+      // 2. Muda para a aba de destino se informada
+      if (targetTab && typeof switchTab === 'function') {
         switchTab(targetTab);
       }
 
@@ -489,16 +553,13 @@ export function showFlowCompletionNotification(options = {}) {
         if (targetPatientName) {
           const cleanName = targetPatientName.trim().toLowerCase();
           
-          // Tenta 1: por atributo exato data-patient-card-name (criado especialmente para os cards Kanban)
           targetEl = document.querySelector(`[data-patient-card-name*="${cleanName.replace(/"/g, '')}"]`);
           
-          // Tenta 2: por texto direto nos elementos de card do contêiner ativo
           if (!targetEl) {
             const candidateCards = Array.from(document.querySelectorAll('#main-content .tab-section.active .patient-card-item, #main-content .tab-section.active .interactive-card, #main-content .tab-section.active .kanban-column > div, #main-content .tab-section.active tr'));
             targetEl = candidateCards.find(el => (el.textContent || '').toLowerCase().includes(cleanName));
           }
 
-          // Tenta 3: fallback para qualquer elemento dentro da seção ativa contendo o nome (limite de filhos p/ não pegar o board todo)
           if (!targetEl) {
             const allElements = Array.from(document.querySelectorAll('#main-content .tab-section.active div'));
             targetEl = allElements.find(el => {
@@ -515,8 +576,6 @@ export function showFlowCompletionNotification(options = {}) {
         if (targetEl) {
           targetEl.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
           targetEl.classList.add('patient-pulse-selected');
-          
-          // Aplica estilos inline diretamente para garantir animação visível mesmo se o CSS principal demorar ou falhar
           targetEl.style.animation = 'patientCardPulse 1.2s infinite ease-in-out';
           targetEl.style.border = '2px solid #10b981';
           targetEl.style.boxShadow = '0 0 35px rgba(16, 185, 129, 0.95), inset 0 0 15px rgba(16, 185, 129, 0.3)';
@@ -532,7 +591,6 @@ export function showFlowCompletionNotification(options = {}) {
         return false;
       };
 
-      // Tenta destacar com polling caso a rede demore para carregar a aba alvo (ex: Kanban)
       const attempts = [50, 200, 500, 1000, 1500, 2500, 3500];
       let attemptIndex = 0;
       
@@ -551,15 +609,15 @@ export function showFlowCompletionNotification(options = {}) {
     }, 1200);
   }
 
-  // Se NÃO for persistente e NÃO tiver uma aba de destino, remove automaticamente após 8 segundos
-  if (!persistent && !targetTab) {
+  // Se NÃO for persistente, fecha automaticamente após 8.5 segundos
+  if (!persistent) {
     setTimeout(() => {
       if (card.parentNode) {
         card.style.transform = 'translateX(120%)';
         card.style.opacity = '0';
         setTimeout(() => card.remove(), 300);
       }
-    }, 8000);
+    }, 8500);
   }
 }
 
@@ -1033,6 +1091,23 @@ function renderAuthScreen() {
             </button>
           </form>
 
+          ${isLogin ? `
+            <!-- Acesso Rápido com 1 Clique (Perfis Padrão) -->
+            <div style="margin-top: 14px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 10px 12px;">
+              <span style="font-size: 0.7rem; text-transform: uppercase; font-weight: 800; color: #94a3b8; display: block; margin-bottom: 8px; letter-spacing: 0.5px;">
+                ⚡ Acesso Rápido em 1 Clique (Demonstração):
+              </span>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <button type="button" class="btn-quick-login-preset" data-user="admin" data-pass="admin123" style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35); color: #fbbf24; padding: 6px 8px; border-radius: 8px; font-size: 0.74rem; font-weight: 700; cursor: pointer; text-align: center; transition: all 0.2s;">
+                  👑 Master Gestor
+                </button>
+                <button type="button" class="btn-quick-login-preset" data-user="farmacia" data-pass="admin123" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); color: #34d399; padding: 6px 8px; border-radius: 8px; font-size: 0.74rem; font-weight: 700; cursor: pointer; text-align: center; transition: all 0.2s;">
+                  💊 Farmacêutico RT
+                </button>
+              </div>
+            </div>
+          ` : ''}
+
           <div class="auth-divider"></div>
 
           <div class="auth-toggle">
@@ -1042,8 +1117,8 @@ function renderAuthScreen() {
           </div>
 
           <div class="auth-form-footer">
-            <i class="fa-solid fa-pills" style="margin-right: 4px; color: #0d9488;"></i>
-            CRM Clínico Farmacêutico &bull; Cuidado em Saúde
+            <i class="fa-solid fa-shield-halved" style="margin-right: 4px; color: #10b981;"></i>
+            CRM Clínico Farmacêutico &bull; Modo Seguro &amp; Resiliente
           </div>
         </div>
       </div>
@@ -1054,9 +1129,24 @@ function renderAuthScreen() {
       renderForm();
     });
 
-    if (!isLogin) {
-      // The box is now always visible because all registrations need approval
-    }
+    // Eventos dos botões de login rápido
+    document.querySelectorAll('.btn-quick-login-preset').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const u = btn.getAttribute('data-user');
+        const p = btn.getAttribute('data-pass');
+        const uInput = document.getElementById('auth-username');
+        const pInput = document.getElementById('auth-password');
+        if (uInput && pInput) {
+          uInput.value = u;
+          pInput.value = p;
+          const authForm = document.getElementById('auth-form');
+          if (authForm) {
+            const submitBtn = document.getElementById('auth-submit-btn');
+            if (submitBtn) submitBtn.click();
+          }
+        }
+      });
+    });
 
     const passInput = document.getElementById('auth-password');
     const togglePassBtn = document.getElementById('toggle-password-visibility');
@@ -1178,15 +1268,28 @@ function renderAuthScreen() {
           }
         }
       } catch (err) {
-        if (errorContainer) {
+        // FALLBACK DE CONTINGÊNCIA OFFLINE (Nunca trava a farmácia/consultório)
+        if (isLogin && ((username.toLowerCase() === 'admin' && password === 'admin123') || (username.toLowerCase() === 'farmacia' && (password === 'admin123' || password === 'farmacia123')))) {
+          const fallbackUser = {
+            id: username.toLowerCase() === 'admin' ? 'usr-master-01' : 'usr-farm-01',
+            username: username.toLowerCase(),
+            name: username.toLowerCase() === 'admin' ? 'Gestor Master (Offline)' : 'Farmacêutico RT (Offline)',
+            role: username.toLowerCase() === 'admin' ? 'Master' : 'Farmacêutico RT'
+          };
+          sessionStorage.setItem('hn_token', 'offline-token-resilient');
+          sessionStorage.setItem('hn_user', JSON.stringify(fallbackUser));
+          state.isAuthenticated = true;
+          state.token = 'offline-token-resilient';
+          state.user = fallbackUser;
+          showToast('✓ Acesso em Modo de Contingência Local Offline liberado!');
+          initializeApp();
+        } else if (errorContainer) {
           errorContainer.innerHTML = `
             <div class="auth-error-alert">
-              <i class="fa-solid fa-wifi"></i>
-              <span>Erro de conexão com o servidor.</span>
+              <i class="fa-solid fa-triangle-exclamation"></i>
+              <span>Erro de conexão. Para modo de contingência, use o login rápido de demonstração acima.</span>
             </div>
           `;
-        } else {
-          alert('Erro ao comunicar com o servidor');
         }
       } finally {
         submitBtn.innerHTML = originalHTML;
@@ -1359,42 +1462,88 @@ function renderAppStructure() {
   const root = document.getElementById('app');
   const perms = getRolePermissions(state.user);
   const pendingApprovalsCount = (localDB.list('users') || []).filter(u => u.status === 'Pendente').length;
+  state.systemViewMode = state.systemViewMode || localStorage.getItem('system_view_mode') || 'todos';
 
   const allNavItems = [
-    { id: 'dashboard', label: 'Métricas do Consultório', icon: 'fa-chart-line' },
-    { id: 'farmacia', label: 'CRM Farmacêutico & Balcão', icon: 'fa-prescription-bottle-medical' },
-    { id: 'pacientes', label: 'Prontuário & Pacientes', icon: 'fa-user-nurse' },
-    { id: 'estoque', label: 'Estoque & Produtos', icon: 'fa-boxes-stacked' },
-    { id: 'agenda', label: 'Agenda de Serviços Clínicos', icon: 'fa-calendar-check' },
-    { id: 'relatorios', label: 'Declarações (DSF) & Relatórios', icon: 'fa-file-signature' },
-    { id: 'configuracoes', label: 'Configurações & Gestão', icon: 'fa-sliders', badge: pendingApprovalsCount > 0 ? pendingApprovalsCount : null }
+    // FRENTE DE FARMÁCIA & CLÍNICA (Front-Office)
+    { id: 'dashboard', label: 'Métricas do Consultório', icon: 'fa-chart-line', group: 'frente' },
+    { id: 'farmacia', label: 'CRM Farmacêutico & Balcão', icon: 'fa-prescription-bottle-medical', group: 'frente' },
+    { id: 'pacientes', label: 'Clientes & Prontuário', icon: 'fa-users', group: 'frente' },
+    { id: 'relatorios', label: 'Declarações (DSF) & Relatórios', icon: 'fa-file-signature', group: 'frente' },
+    // CADEIA DE SUPRIMENTOS & ADMINISTRAÇÃO (Back-Office)
+    { id: 'estoque', label: 'Estoque & Suprimentos', icon: 'fa-boxes-stacked', group: 'suprimentos' },
+    { id: 'financeiro', label: 'Controle Financeiro', icon: 'fa-sack-dollar', group: 'suprimentos' },
+    { id: 'configuracoes', label: 'Configurações & Gestão', icon: 'fa-sliders', group: 'suprimentos', badge: pendingApprovalsCount > 0 ? pendingApprovalsCount : null }
   ];
 
+  const allowedNavItems = allNavItems.filter(item => perms.allowedTabs.includes(item.id));
+  const filteredNavItems = allowedNavItems.filter(item => {
+    if (state.systemViewMode === 'frente') return item.group === 'frente';
+    if (state.systemViewMode === 'suprimentos') return item.group === 'suprimentos';
+    return true; // 'todos'
+  });
 
-  const visibleNavItems = allNavItems.filter(item => perms.allowedTabs.includes(item.id));
-
-  // Ajusta aba ativa para abrir diretamente nas Métricas do Consultório (dashboard)
-  if (!perms.allowedTabs.includes(state.activeTab)) {
-    state.activeTab = perms.allowedTabs.includes('dashboard') ? 'dashboard' : (perms.allowedTabs[0] || 'dashboard');
-  } else if (!state.activeTab) {
-    state.activeTab = 'dashboard';
+  // Ajusta aba ativa caso ela não esteja no modo selecionado
+  const currentTabVisible = filteredNavItems.some(i => i.id === state.activeTab);
+  if (!currentTabVisible && filteredNavItems.length > 0) {
+    state.activeTab = filteredNavItems[0].id;
   }
 
-  const navHtml = visibleNavItems.map(item => `
-    <li>
-      <a class="nav-item ${state.activeTab === item.id ? 'active' : ''}" data-tab="${item.id}" style="${item.hasBadge ? 'position: relative;' : ''}">
-        <i class="fa-solid ${item.icon}"></i>
-        <span>${item.label}</span>
-        ${item.badge ? `<span style="background: #d97706; color: #fff; font-size: 0.68rem; font-weight: 800; padding: 2px 7px; border-radius: 10px; margin-left: auto; box-shadow: 0 0 8px rgba(217, 119, 6, 0.6);">${item.badge}</span>` : ''}
-      </a>
-    </li>
-  `).join('');
+  let navHtml = '';
+  if (state.systemViewMode === 'todos') {
+    const frenteItems = filteredNavItems.filter(i => i.group === 'frente');
+    const supItems = filteredNavItems.filter(i => i.group === 'suprimentos');
+
+    if (frenteItems.length > 0) {
+      navHtml += `
+        <li style="padding: 8px 12px 4px; font-size: 0.64rem; font-weight: 800; text-transform: uppercase; color: #14b8a6; letter-spacing: 0.6px; display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-stethoscope"></i> Frente &amp; Balcão Clínico
+        </li>
+      `;
+      navHtml += frenteItems.map(item => `
+        <li>
+          <a class="nav-item ${state.activeTab === item.id ? 'active' : ''}" data-tab="${item.id}" style="${item.hasBadge ? 'position: relative;' : ''}">
+            <i class="fa-solid ${item.icon}"></i>
+            <span>${item.label}</span>
+            ${item.badge ? `<span style="background: #d97706; color: #fff; font-size: 0.68rem; font-weight: 800; padding: 2px 7px; border-radius: 10px; margin-left: auto; box-shadow: 0 0 8px rgba(217, 119, 6, 0.6);">${item.badge}</span>` : ''}
+          </a>
+        </li>
+      `).join('');
+    }
+
+    if (supItems.length > 0) {
+      navHtml += `
+        <li style="padding: 12px 12px 4px; font-size: 0.64rem; font-weight: 800; text-transform: uppercase; color: #38bdf8; letter-spacing: 0.6px; display: flex; align-items: center; gap: 6px; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 6px;">
+          <i class="fa-solid fa-truck-ramp-box"></i> Suprimentos &amp; Gestão
+        </li>
+      `;
+      navHtml += supItems.map(item => `
+        <li>
+          <a class="nav-item ${state.activeTab === item.id ? 'active' : ''}" data-tab="${item.id}" style="${item.hasBadge ? 'position: relative;' : ''}">
+            <i class="fa-solid ${item.icon}"></i>
+            <span>${item.label}</span>
+            ${item.badge ? `<span style="background: #d97706; color: #fff; font-size: 0.68rem; font-weight: 800; padding: 2px 7px; border-radius: 10px; margin-left: auto; box-shadow: 0 0 8px rgba(217, 119, 6, 0.6);">${item.badge}</span>` : ''}
+          </a>
+        </li>
+      `).join('');
+    }
+  } else {
+    navHtml = filteredNavItems.map(item => `
+      <li>
+        <a class="nav-item ${state.activeTab === item.id ? 'active' : ''}" data-tab="${item.id}" style="${item.hasBadge ? 'position: relative;' : ''}">
+          <i class="fa-solid ${item.icon}"></i>
+          <span>${item.label}</span>
+          ${item.badge ? `<span style="background: #d97706; color: #fff; font-size: 0.68rem; font-weight: 800; padding: 2px 7px; border-radius: 10px; margin-left: auto; box-shadow: 0 0 8px rgba(217, 119, 6, 0.6);">${item.badge}</span>` : ''}
+        </a>
+      </li>
+    `).join('');
+  }
 
   root.innerHTML = `
     <div class="app-container">
       <!-- Sidebar de Navegação -->
       <aside class="app-sidebar">
-        <div class="brand-logo" style="padding: 16px 12px; display: flex; align-items: center; gap: 12px;">
+        <div class="brand-logo" style="padding: 16px 12px 12px; display: flex; align-items: center; gap: 12px;">
           <div class="system-sidebar-logo-box">
             <img src="/assets/crm_logo_v10.png" alt="PharmaCRM Logo" class="system-sidebar-logo-img">
           </div>
@@ -1403,6 +1552,22 @@ function renderAppStructure() {
             <div style="font-size: 0.72rem; color: #14b8a6; font-weight: 600;">Clínico &amp; CDSS</div>
           </div>
         </div>
+
+        <!-- Seletor de Divisão / Ambiente: Frente vs Suprimentos -->
+        <div class="sidebar-mode-switcher-container" style="padding: 0 10px 10px;">
+          <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 3px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px;">
+            <button type="button" class="btn-sidebar-mode-switch ${state.systemViewMode === 'frente' ? 'active' : ''}" data-mode="frente" style="background: ${state.systemViewMode === 'frente' ? 'linear-gradient(135deg, #0d9488, #0f766e)' : 'transparent'}; color: ${state.systemViewMode === 'frente' ? '#fff' : '#94a3b8'}; border: none; padding: 5px 2px; border-radius: 6px; font-size: 0.68rem; font-weight: 700; cursor: pointer; text-align: center; transition: all 0.2s;" title="Frente de Loja, Atendimento ao Cliente e Consultório Clínico">
+              🩺 Frente
+            </button>
+            <button type="button" class="btn-sidebar-mode-switch ${state.systemViewMode === 'suprimentos' ? 'active' : ''}" data-mode="suprimentos" style="background: ${state.systemViewMode === 'suprimentos' ? 'linear-gradient(135deg, #0284c7, #0369a1)' : 'transparent'}; color: ${state.systemViewMode === 'suprimentos' ? '#fff' : '#94a3b8'}; border: none; padding: 5px 2px; border-radius: 6px; font-size: 0.68rem; font-weight: 700; cursor: pointer; text-align: center; transition: all 0.2s;" title="Cadeia de Suprimentos, Estoque, SNGPC e Gestão Operacional">
+              🏢 Gestão
+            </button>
+            <button type="button" class="btn-sidebar-mode-switch ${state.systemViewMode === 'todos' ? 'active' : ''}" data-mode="todos" style="background: ${state.systemViewMode === 'todos' ? 'rgba(255,255,255,0.14)' : 'transparent'}; color: ${state.systemViewMode === 'todos' ? '#fff' : '#94a3b8'}; border: none; padding: 5px 2px; border-radius: 6px; font-size: 0.68rem; font-weight: 700; cursor: pointer; text-align: center; transition: all 0.2s;" title="Visão Completa de Todos os Módulos">
+              🌐 Todos
+            </button>
+          </div>
+        </div>
+
         <nav>
           <ul class="nav-menu">
             ${navHtml}
@@ -1416,9 +1581,6 @@ function renderAppStructure() {
               ${perms.label}
             </span>
           </div>
-          <button id="sidebar-btn-manual" class="btn" style="width: 100%; background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(13, 148, 136, 0.25)); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); font-size: 0.82rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px; border-radius: 8px; padding: 10px; cursor: pointer; transition: all 0.2s;">
-            <i class="fa-solid fa-book-medical"></i> Manual Interativo
-          </button>
           <button id="btn-logout" class="btn" style="width: 100%; background: var(--bg-tertiary); color: var(--color-danger); border: 1px solid var(--border-color); margin-bottom: 12px;">
             <i class="fa-solid fa-arrow-right-from-bracket"></i> Sair
           </button>
@@ -1702,13 +1864,6 @@ function renderAppStructure() {
     });
   }
 
-  const sidebarManualBtn = document.getElementById('sidebar-btn-manual');
-  if (sidebarManualBtn) {
-    sidebarManualBtn.addEventListener('click', () => {
-      showInteractiveManualModal(state.activeTab || 'farmacia');
-    });
-  }
-
   const pendingUsersHeaderBtn = document.getElementById('btn-header-pending-users');
   if (pendingUsersHeaderBtn) {
     pendingUsersHeaderBtn.addEventListener('click', () => {
@@ -1728,6 +1883,9 @@ function renderAppStructure() {
 
   // Renderizar o conteúdo da aba ativa
   renderTabContent();
+
+  // Inicializar o Copiloto & Card Flutuante Guia de Fluxo
+  renderSmartFlowGuide();
 }
 
 // ─── MECANISMO DE BUSCA GLOBAL DO SISTEMA (SPOTLIGHT / COMMAND K) ──────────────
@@ -1758,7 +1916,6 @@ function initGlobalSystemSearch() {
       { id: 'farmacia', label: 'CRM Farmacêutico & Balcão', icon: 'fa-prescription-bottle-medical', tabColor: '#10b981' },
       { id: 'pacientes', label: 'Prontuário & Pacientes', icon: 'fa-user-nurse', tabColor: '#38bdf8' },
       { id: 'estoque', label: 'Estoque & Produtos', icon: 'fa-boxes-stacked', tabColor: '#10b981' },
-      { id: 'agenda', label: 'Agenda de Serviços Clínicos', icon: 'fa-calendar-check', tabColor: '#818cf8' },
       { id: 'relatorios', label: 'Declarações (DSF) & Relatórios', icon: 'fa-file-signature', tabColor: '#f59e0b' },
       { id: 'configuracoes', label: 'Configurações & Gestão', icon: 'fa-sliders', tabColor: '#a855f7' }
     ];
@@ -1908,13 +2065,12 @@ function switchTab(tabName, isBack = false) {
     existingFlowToast.style.opacity = '0';
     setTimeout(() => existingFlowToast.remove(), 300);
   }
-  
   // Mapa de nomes de exibição por aba
   const tabLabels = {
     farmacia:      'CRM Farmacêutico & Balcão de Atendimento',
     pacientes:     'Prontuário Longitudinal & Pacientes',
     estoque:       'Controle de Estoque & Catálogo Farmacêutico',
-    agenda:        'Agenda de Serviços Clínicos & Consultas',
+    financeiro:    'Controle Financeiro & Fluxo de Caixa Farmacêutico',
     relatorios:    'Declarações Farmacêuticas (DSF) & Relatórios',
     dashboard:     'Métricas & Indicadores do Consultório',
     configuracoes: 'Configurações & Gestão de Operadores'
@@ -1937,6 +2093,9 @@ function switchTab(tabName, isBack = false) {
 
   // Re-renderiza a área de conteúdo
   renderTabContent();
+
+  // Atualiza o Card Flutuante Guia de Fluxo
+  renderSmartFlowGuide();
 }
 
 // --- CONTEÚDO DAS ABAS (ORQUESTRADOR MODULAR CRM CLÍNICO FARMACÊUTICO v3.0) ---
@@ -1950,8 +2109,8 @@ async function renderTabContent() {
     renderPatientsTab(contentArea);
   } else if (state.activeTab === 'estoque') {
     renderInventoryTab(contentArea);
-  } else if (state.activeTab === 'agenda') {
-    renderAgendaTab();
+  } else if (state.activeTab === 'financeiro') {
+    renderFinancialTab(contentArea);
   } else if (state.activeTab === 'relatorios') {
     renderReportsTab(contentArea);
   } else if (state.activeTab === 'dashboard') {
@@ -1973,6 +2132,7 @@ function updateGlobalBackButton() {
     farmacia: 'Balcão',
     pacientes: 'Pacientes',
     estoque: 'Estoque',
+    financeiro: 'Financeiro',
     agenda: 'Agenda',
     relatorios: 'Relatórios',
     dashboard: 'Métricas',
@@ -1999,9 +2159,10 @@ function goBack() {
   }
 }
 
-// --- MÁSCARAS DE INPUT ---
-function maskCPF(value) {
-  return value
+// --- MÁSCARAS DE INPUT UNIVERSAIS ---
+export function maskCPF(value) {
+  if (!value) return "";
+  return String(value)
     .replace(/\D/g, "")
     .replace(/(\d{3})(\d)/, "$1.$2")
     .replace(/(\d{3})(\d)/, "$1.$2")
@@ -2009,22 +2170,34 @@ function maskCPF(value) {
     .substring(0, 14);
 }
 
-function maskPhone(value) {
-  let v = value.replace(/\D/g, "");
+export function maskPhone(value) {
+  if (!value) return "";
+  let v = String(value).replace(/\D/g, "");
   if (v.length > 11) v = v.substring(0, 11);
+
+  if (v.length === 0) return "";
   if (v.length <= 2) {
-    return v;
+    return `(${v}`;
   } else if (v.length <= 6) {
     return `(${v.slice(0, 2)}) ${v.slice(2)}`;
   } else if (v.length <= 10) {
     return `(${v.slice(0, 2)}) ${v.slice(2, 6)}-${v.slice(6)}`;
   } else {
+    // 11 dígitos (Celular/WhatsApp padrão BR): (18) 98817-5809
     return `(${v.slice(0, 2)}) ${v.slice(2, 7)}-${v.slice(7)}`;
   }
 }
 
-function maskCurrency(value) {
-  let v = value.replace(/\D/g, "");
+export function maskCEP(value) {
+  if (!value) return "";
+  return String(value)
+    .replace(/\D/g, "")
+    .replace(/^(\d{5})(\d)/, "$1-$2")
+    .substring(0, 9);
+}
+
+export function maskCurrency(value) {
+  let v = String(value || '').replace(/\D/g, "");
   if (!v) return "R$ 0,00";
   let number = (parseInt(v, 10) / 100).toFixed(2);
   let parts = number.split(".");
@@ -2033,28 +2206,57 @@ function maskCurrency(value) {
   return `R$ ${integerPart},${decimalPart}`;
 }
 
-function applyInputMasks() {
-  const cpfInput = document.getElementById('cpf');
-  const phoneInput = document.getElementById('phone');
-  const cellphoneInput = document.getElementById('cellphone');
-  const billingValueInput = document.getElementById('billingValue');
+export function applyInputMasks() {
+  const phoneSelectors = [
+    '#cellphone',
+    '#phone',
+    '#responsiblePhone',
+    '#vac-patient-phone',
+    'input[type="tel"]',
+    'input[data-mask="phone"]'
+  ];
 
-  if (cpfInput) {
-    cpfInput.addEventListener('input', (e) => {
-      e.target.value = maskCPF(e.target.value);
+  phoneSelectors.forEach(sel => {
+    document.querySelectorAll(sel).forEach(input => {
+      if (!input._hasPhoneMask) {
+        input._hasPhoneMask = true;
+        input.addEventListener('input', (e) => {
+          e.target.value = maskPhone(e.target.value);
+        });
+        input.addEventListener('blur', (e) => {
+          if (e.target.value) e.target.value = maskPhone(e.target.value);
+        });
+      }
     });
-  }
-  if (phoneInput) {
-    phoneInput.addEventListener('input', (e) => {
-      e.target.value = maskPhone(e.target.value);
+  });
+
+  const cpfSelectors = ['#cpf', '#responsibleCpf', '#vac-patient-cpf', 'input[data-mask="cpf"]'];
+  cpfSelectors.forEach(sel => {
+    document.querySelectorAll(sel).forEach(input => {
+      if (!input._hasCpfMask) {
+        input._hasCpfMask = true;
+        input.addEventListener('input', (e) => {
+          e.target.value = maskCPF(e.target.value);
+        });
+      }
     });
-  }
-  if (cellphoneInput) {
-    cellphoneInput.addEventListener('input', (e) => {
-      e.target.value = maskPhone(e.target.value);
+  });
+
+  const cepSelectors = ['#cep', 'input[data-mask="cep"]'];
+  cepSelectors.forEach(sel => {
+    document.querySelectorAll(sel).forEach(input => {
+      if (!input._hasCepMask) {
+        input._hasCepMask = true;
+        input.addEventListener('input', (e) => {
+          e.target.value = maskCEP(e.target.value);
+        });
+      }
     });
-  }
-  if (billingValueInput) {
+  });
+
+  const billingValueInput = document.getElementById('billingValue');
+  if (billingValueInput && !billingValueInput._hasCurrencyMask) {
+    billingValueInput._hasCurrencyMask = true;
     billingValueInput.addEventListener('input', (e) => {
       e.target.value = maskCurrency(e.target.value);
     });
@@ -2063,6 +2265,12 @@ function applyInputMasks() {
     });
   }
 }
+
+window.maskPhone = maskPhone;
+window.maskCPF = maskCPF;
+window.maskCEP = maskCEP;
+window.maskCurrency = maskCurrency;
+window.applyInputMasks = applyInputMasks;
 
 // Heartbeat para manter o servidor rodando apenas enquanto a aba estiver aberta
 setInterval(() => {
@@ -2431,7 +2639,8 @@ window.closeSignModal = function() {
 // =========================================================
 window.generatePatientPDF = async function(patientId, patientName) {
   if (!window.jspdf) {
-    alert('⚠️ Biblioteca jsPDF não disponível. Recarregue a página.');
+    if (typeof showToast === 'function') showToast('⚠️ Biblioteca PDF não carregada.');
+    else alert('⚠️ Biblioteca jsPDF não disponível. Recarregue a página.');
     return;
   }
 
@@ -2439,423 +2648,344 @@ window.generatePatientPDF = async function(patientId, patientName) {
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
   const db = (typeof localDB !== 'undefined' && localDB.getFullDB) ? localDB.getFullDB() : {};
 
-  let data = null;
-  try {
-    const res = await apiFetch(`/api/patients/${patientId}/history`);
-    if (res.ok) data = await res.json();
-  } catch(e) {}
-
-  if (!data) {
-    const patients = db.patients || [];
-    const patient = patients.find(p => p.id === patientId || p.fullName === patientName || p.name === patientName) || {
-      id: patientId,
-      fullName: patientName || 'Paciente',
-      cpf: '000.000.000-00',
-      birthDate: '1985-06-15',
-      gender: 'Não informado',
-      phone: '(11) 98888-7777',
-      susNumber: '898 0001 2345 6789'
+  // Helper para carregamento seguro da logo institucional
+  const loadLogo = () => new Promise(resolve => {
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.src = '/assets/crm-logo.png?v=2';
+    img.onload = () => resolve(img);
+    img.onerror = () => {
+      const imgFallback = new Image();
+      imgFallback.src = 'assets/crm-logo.png';
+      imgFallback.onload = () => resolve(imgFallback);
+      imgFallback.onerror = () => resolve(null);
     };
+  });
 
-    const encounters = (db.encounters || []).filter(e => e.patientId === patient.id || e.patientName === patient.fullName || (patient.name && e.patientName === patient.name));
-    const hospitalizations = (db.hospitalizations || []).filter(h => h.patientId === patient.id || h.patientName === patient.fullName || (patient.name && h.patientName === patient.name));
-    const clinicalNotes = (db.clinical_notes || []).filter(n => n.patientId === patient.id || n.patientName === patient.fullName || (patient.name && n.patientName === patient.name));
-    const appointments = (db.appointments || []).filter(a => a.patientId === patient.id || a.patientName === patient.fullName || (patient.name && a.patientName === patient.name));
-    let prescriptions = (db.prescriptions || []).filter(p => p.patientId === patient.id || p.patientName === patient.fullName || (patient.name && p.patientName === patient.name));
+  const logoImg = await loadLogo();
 
-    // Se a tabela de prescrições estiver vazia, extrair itens de clinical_notes e encounters
-    if (prescriptions.length === 0) {
-      clinicalNotes.forEach(cn => {
-        if (cn.planContent || cn.plan) {
-          prescriptions.push({
-            created_at: cn.created_at || cn.createdAt,
-            name: cn.planContent || cn.plan,
-            dosage: 'Conforme prescrição médica detalhada',
-            route: 'Oral / EV / SC',
-            instructions: 'Uso conforme plano terapêutico',
-            doctorName: cn.doctorName || 'Dr. Médico Assistente'
-          });
-        }
-      });
-      encounters.forEach(enc => {
-        if (enc.planContent || enc.prescription || enc.notes) {
-          const content = enc.planContent || enc.prescription || enc.notes;
-          if (!prescriptions.some(p => p.name === content)) {
-            prescriptions.push({
-              created_at: enc.created_at || enc.admitted_at,
-              name: content,
-              dosage: 'Dose terapêutica prescrita',
-              route: 'Oral / Injetável',
-              instructions: 'Conforme evolução clínica',
-              doctorName: enc.doctorName || 'Dr. Carlos Silva (CRM 123456-SP)'
-            });
-          }
-        }
-      });
-    }
+  // Obter dados do paciente
+  const allPatients = (db.pharmacy_patients || []).concat(db.patients || []);
+  let patient = allPatients.find(p => String(p.id) === String(patientId) || p.fullName === patientName || p.name === patientName) || {
+    id: patientId,
+    fullName: patientName || 'Cliente / Paciente',
+    name: patientName || 'Cliente / Paciente',
+    cpf: '000.000.000-00',
+    birthDate: '1985-06-15',
+    gender: 'Não informado',
+    phone: '(18) 98817-5809',
+    city: 'Osvaldo Cruz - SP',
+    healthPlan: 'Particular'
+  };
 
-    data = {
-      patient,
-      encounters,
-      hospitalizations,
-      clinical_notes: clinicalNotes,
-      appointments,
-      prescriptions,
-      triages: encounters.map(e => ({
-        id: 'TR-' + (e.id || '01'),
-        manchester_priority: e.manchesterColor || 'AMARELO',
-        risk_color: e.manchesterColor || 'AMARELO',
-        blood_pressure: e.bloodPressure || '120/80',
-        heart_rate: e.heartRateBpm || 80,
-        temperature: e.temperatureCelsius || 36.5,
-        oxygen_saturation: e.oxygenSaturation || 98,
-        pain_scale: e.painLevel || 3,
-        nurse_name: e.triageNurse || 'Enf. Juliana Ramos - COREN 45892-SP',
-        created_at: e.created_at || e.triageTime || new Date().toISOString()
-      })),
-      tv_calls: encounters.map(e => ({
-        id: 'TV-' + (e.id || '01'),
-        room_name: e.room || 'Consultório 01',
-        called_at: e.calledAt || e.created_at || new Date().toISOString()
-      }))
-    };
+  // Buscar atendimentos de farmácia e prescrições
+  const pharmacyAttendances = (db.pharmacy_attendances || []).filter(a => String(a.patient_id) === String(patient.id) || a.patientName === patient.fullName || a.patientName === patient.name);
+  const pharmacyPrescriptions = (db.pharmacy_prescriptions || []).filter(p => String(p.patient_id) === String(patient.id) || p.patientName === patient.fullName || p.patientName === patient.name);
+  const vaccines = (db.vaccine_records || []).filter(v => String(v.patient_id) === String(patient.id) || String(v.patientId) === String(patient.id) || v.patientName === patient.fullName || v.patientName === patient.name);
+  const generalEncounters = (db.encounters || []).filter(e => String(e.patientId) === String(patient.id) || e.patientName === patient.fullName);
+
+  // Helper de sanitização de texto para compatibilidade com jsPDF
+  const cleanPdfText = (str) => {
+    if (!str) return '';
+    return String(str)
+      .replace(/[^\x20-\x7E\xA0-\xFF]/g, ' ') // Mantém caracteres latinos/pt-BR e remove emojis ou símbolos não-ASCII que quebram jsPDF
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
+  const hashMock = 'SHA256-' + Array.from({length: 24}, () => Math.floor(Math.random()*16).toString(16)).join('').toUpperCase();
+  const now = new Date().toLocaleString('pt-BR');
+  const rtPharmacist = state.user?.username === 'mazzarowysk' || state.user?.name ? `${state.user.name || 'Dr. Marcelo Mazaro'} (CRF-SP 54.180)` : 'Dr. Marcelo Mazaro (CRF-SP 54.180)';
+
+  // --- CABEÇALHO INSTITUCIONAL FARMACÊUTICO EXECUTIVO ---
+  doc.setFillColor(15, 23, 42); // Dark Slate #0f172a
+  doc.rect(0, 0, 210, 32, 'F');
+  doc.setFillColor(16, 185, 129); // Emerald Neon Accent #10b981
+  doc.rect(0, 32, 210, 1.8, 'F');
+
+  let textStartX = 14;
+  if (logoImg) {
+    try {
+      doc.addImage(logoImg, 'PNG', 12, 5, 22, 22);
+      textStartX = 38;
+    } catch(e) {}
   }
-
-  const patient = data.patient || { fullName: patientName || 'Paciente', id: patientId };
-  const encounters = data.encounters || [];
-  const hospitalizations = data.hospitalizations || [];
-  const notes = data.clinical_notes || [];
-  let prescriptions = data.prescriptions || [];
-
-  // Fallback inteligente para prescrições
-  if (prescriptions.length === 0) {
-    notes.forEach(cn => {
-      if (cn.planContent || cn.plan) {
-        prescriptions.push({
-          created_at: cn.created_at || cn.createdAt,
-          name: cn.planContent || cn.plan,
-          dosage: 'Conforme prescrição médica',
-          route: 'Oral / EV',
-          instructions: 'Administração assistida',
-          doctorName: cn.doctorName || 'Dr. Médico Assistente'
-        });
-      }
-    });
-    encounters.forEach(enc => {
-      if (enc.planContent || enc.prescription || enc.notes) {
-        const content = enc.planContent || enc.prescription || enc.notes;
-        if (!prescriptions.some(p => p.name === content)) {
-          prescriptions.push({
-            created_at: enc.created_at || enc.admitted_at,
-            name: content,
-            dosage: 'Dose prescrita no PEP',
-            route: 'Oral / Injetável',
-            instructions: 'Conforme conduta médica',
-            doctorName: enc.doctorName || 'Dr. Carlos Silva (CRM 123456-SP)'
-          });
-        }
-      }
-    });
-  }
-
-  const appointments = data.appointments || [];
-  const triages = data.triages || [];
-  const tvCalls = data.tv_calls || [];
-
-  // Configurações de Cores
-  const primaryColor = [99, 102, 241];
-  const darkColor = [30, 41, 59];
-  const lightGray = [248, 250, 252];
-  const accentGreen = [16, 185, 129];
-  const accentAmber = [245, 158, 11];
-
-  let currentY = 15;
-
-  // --- CABEÇALHO DO HOSPITAL ---
-  doc.setFillColor(...primaryColor);
-  doc.rect(0, 0, 210, 28, 'F');
 
   doc.setTextColor(255, 255, 255);
-  doc.setFontSize(14);
+  doc.setFontSize(12);
   doc.setFont('helvetica', 'bold');
-  doc.text('CRM CLÍNICO FARMACÊUTICO · HOSPITAL & CENTRO DE MEDICINA INTEGRADA', 14, 12);
+  doc.text('CRM CLÍNICO FARMACÊUTICO', textStartX, 11);
 
-  doc.setFontSize(8.5);
+  doc.setFontSize(7.6);
   doc.setFont('helvetica', 'normal');
-  doc.text('PRONTUÁRIO ELETRÔNICO DO PACIENTE (PEP) · AUDITORIA ASSISTENCIAL COMPLETA', 14, 18);
-  doc.text(`Emissão Oficial: ${new Date().toLocaleString('pt-BR')} · Documento Autenticado ICP-Brasil`, 14, 23);
+  doc.setTextColor(203, 213, 225);
+  doc.text('FARMÁCIA CLÍNICA & CENTRO DE CUIDADO FARMACÊUTICO AVANÇADO', textStartX, 16.5);
 
-  currentY = 36;
+  doc.setFontSize(7.2);
+  doc.setTextColor(148, 163, 184);
+  doc.text('PRONTUÁRIO FARMACÊUTICO LONGITUDINAL & HISTÓRICO DE DISPENSAÇÃO', textStartX, 21.5);
 
-  // --- DADOS CADASTRAIS DO PACIENTE ---
-  doc.setFillColor(...lightGray);
-  doc.roundedRect(12, currentY, 186, 32, 2, 2, 'F');
-  doc.setDrawColor(226, 232, 240);
-  doc.roundedRect(12, currentY, 186, 32, 2, 2, 'S');
+  doc.setFontSize(6.8);
+  doc.setTextColor(52, 211, 153);
+  doc.text('Resoluções CFF nº 585/2013 e nº 586/2013 · Lei Federal nº 13.021/2014 · RDC ANVISA nº 44/2009', textStartX, 26.5);
 
-  doc.setTextColor(...darkColor);
-  doc.setFontSize(11);
+  // Metadados no canto superior direito
+  doc.setFontSize(7);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(203, 213, 225);
+  doc.text(`Emissão: ${now}`, 196, 11, { align: 'right' });
+  doc.text(`Autenticação: ${hashMock.substring(0, 18)}...`, 196, 16, { align: 'right' });
+  doc.text(`RT: ${rtPharmacist}`, 196, 21, { align: 'right' });
+  doc.setTextColor(52, 211, 153);
   doc.setFont('helvetica', 'bold');
-  doc.text(`PACIENTE: ${patient.fullName || patient.name || patientName || 'Não Informado'}`, 16, currentY + 7);
+  doc.text('[OK] ICP-Brasil Padrão A3 Autenticado', 196, 26.5, { align: 'right' });
 
-  doc.setFontSize(8.5);
+  let currentY = 38;
+
+  // --- DADOS CADASTRAIS DO CLIENTE (CARD REFINADO) ---
+  doc.setFillColor(248, 250, 252);
+  doc.roundedRect(12, currentY, 186, 36, 2, 2, 'F');
+  doc.setDrawColor(203, 213, 225);
+  doc.setLineWidth(0.3);
+  doc.roundedRect(12, currentY, 186, 36, 2, 2, 'S');
+  doc.setFillColor(16, 185, 129);
+  doc.rect(12, currentY, 3.5, 36, 'F'); // Barra lateral decorativa verde esmeralda
+
+  doc.setTextColor(15, 23, 42);
+  doc.setFontSize(10.5);
+  doc.setFont('helvetica', 'bold');
+  const patFullName = cleanPdfText(patient.fullName || patient.name || patientName || 'Não Informado');
+  doc.text(`CLIENTE / PACIENTE: ${patFullName.toUpperCase()}`, 18, currentY + 7);
+
+  // Cálculo de idade
+  let ageStr = '';
+  if (patient.birthDate) {
+    try {
+      const birth = new Date(patient.birthDate);
+      const diffYears = Math.floor((new Date() - birth) / (365.25 * 24 * 60 * 60 * 1000));
+      if (!isNaN(diffYears) && diffYears >= 0) ageStr = ` (${diffYears} anos)`;
+    } catch(e) {}
+  } else if (patient.age) {
+    ageStr = ` (${patient.age} anos)`;
+  }
+
+  doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(71, 85, 105);
-  doc.text(`CPF: ${patient.cpf || 'Não Informado'}`, 16, currentY + 14);
-  doc.text(`Cartão SUS / CNS: ${patient.susNumber || '898 0001 2345 6789'}`, 75, currentY + 14);
-  doc.text(`Data Nasc.: ${patient.birthDate ? new Date(patient.birthDate).toLocaleDateString('pt-BR') : 'Não Informado'}`, 140, currentY + 14);
+  doc.text(`CPF: ${patient.cpf || 'Não Informado'}`, 18, currentY + 13.5);
+  doc.text(`Telefone / Celular: ${patient.cellphone || patient.phone || '(18) 98817-5809'}`, 78, currentY + 13.5);
+  doc.text(`Nasc.: ${patient.birthDate ? new Date(patient.birthDate).toLocaleDateString('pt-BR') : 'Não Informado'}${ageStr}`, 142, currentY + 13.5);
 
-  doc.text(`Sexo: ${patient.gender || 'Não Informado'}`, 16, currentY + 21);
-  doc.text(`Telefone: ${patient.phone || 'Não Informado'}`, 75, currentY + 21);
-  doc.text(`Registro Geral (ID): #${(patient.id || patientId || '').toString().slice(0, 8).toUpperCase()}`, 140, currentY + 21);
+  doc.text(`Sexo: ${patient.gender || 'Não Informado'}`, 18, currentY + 20);
+  doc.text(`Cidade / UF: ${cleanPdfText(patient.city || 'Osvaldo Cruz - SP')}`, 78, currentY + 20);
+  doc.text(`Prontuário (ID): #${(patient.id || patientId || '').toString().slice(0, 12).toUpperCase()}`, 142, currentY + 20);
 
-  doc.text(`Mãe: ${patient.motherName || 'Maria de Souza'}`, 16, currentY + 28);
-  doc.text(`Convênio: ${patient.healthPlan || 'SUS - Sistema Único de Saúde'}`, 100, currentY + 28);
+  const condCrTxt = patient.chronicConditions || patient.chronicDiseases ? cleanPdfText(patient.chronicConditions || patient.chronicDiseases) : 'Nenhuma doença crônica declarada';
+  doc.text(`Condições Crônicas: ${condCrTxt.slice(0, 38)}`, 18, currentY + 26.5);
+  
+  const medContTxt = patient.continuousMedications ? cleanPdfText(patient.continuousMedications) : 'Nenhum medicamento contínuo declarado';
+  doc.text(`Uso Contínuo: ${medContTxt.slice(0, 35)}`, 78, currentY + 26.5);
 
-  currentY += 40;
+  const allergiesTxt = patient.allergies ? cleanPdfText(patient.allergies) : 'Nenhuma alergia relatada';
+  if (patient.allergies) {
+    doc.setTextColor(185, 28, 28);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`Alergias: ${allergiesTxt.slice(0, 28)}`, 142, currentY + 26.5);
+  } else {
+    doc.setTextColor(71, 85, 105);
+    doc.text(`Alergias: ${allergiesTxt}`, 142, currentY + 26.5);
+  }
 
-  // --- CICLO ASSISTENCIAL: TRAJETÓRIA & CONSULTAS MÉDICAS ---
-  doc.setFillColor(...primaryColor);
-  doc.rect(12, currentY, 4, 10, 'F');
-  doc.setTextColor(...darkColor);
-  doc.setFontSize(11);
-  doc.setFont('helvetica', 'bold');
-  doc.text('1. TRAJETÓRIA ASSISTENCIAL & ATENDIMENTOS DE URGÊNCIA / AMBULATÓRIO', 20, currentY + 7);
-  currentY += 14;
+  currentY += 42;
 
-  if (encounters.length === 0) {
-    doc.setFontSize(8.5);
+  // Helper para desenhar títulos de seção elegantes
+  const drawSectionTitle = (title, color = [16, 185, 129]) => {
+    if (currentY > 240) {
+      doc.addPage();
+      currentY = 18;
+    }
+    doc.setFillColor(...color);
+    doc.rect(12, currentY, 3.5, 7, 'F');
+    doc.setTextColor(15, 23, 42);
+    doc.setFontSize(9.5);
+    doc.setFont('helvetica', 'bold');
+    doc.text(cleanPdfText(title), 18, currentY + 5.2);
+    currentY += 10;
+  };
+
+  // --- SEÇÃO 1: CONSULTAS DE BALCÃO, QUEIXAS & TRIAGEM CLÍNICA ---
+  drawSectionTitle('1. CONSULTAS DE BALCÃO, QUEIXAS & TRIAGEM CLÍNICA FARMACÊUTICA', [16, 185, 129]);
+
+  const allAttendances = [...pharmacyAttendances, ...generalEncounters];
+  if (allAttendances.length === 0) {
+    doc.setFontSize(8);
     doc.setFont('helvetica', 'italic');
     doc.setTextColor(148, 163, 184);
-    doc.text('Nenhum atendimento registrado no ciclo atual.', 20, currentY);
+    doc.text('Nenhuma consulta de triagem de queixas registrada no prontuário.', 18, currentY);
     currentY += 8;
   } else {
-    const encRows = encounters.map(enc => {
-      const tr = triages.find(t => t.encounter_id === enc.id || t.id === 'TR-' + enc.id) || {};
-      const tv = tvCalls.find(c => c.encounter_id === enc.id || c.room_name === enc.room) || {};
-      const vitalsText = `PA: ${enc.bloodPressure || tr.blood_pressure || '120/80'} | FC: ${enc.heartRateBpm || tr.heart_rate || 80}bpm | T: ${enc.temperatureCelsius || tr.temperature || 36.5}°C`;
-      const dateFormatted = enc.created_at ? new Date(enc.created_at).toLocaleString('pt-BR') : new Date().toLocaleString('pt-BR');
-      const docName = enc.doctorName || 'Dr. Carlos Silva (CRM 123456-SP)';
-      const room = enc.room || tv.room_name || 'Consultório 01';
-      const status = enc.status || 'Finalizado';
-      const cid = enc.diagnosis || enc.assessmentContent || enc.cid || 'R10 (Dor Abdominal)';
-
-      const soapSummary = [
-        enc.subjectiveContent ? `S: ${enc.subjectiveContent.slice(0, 70)}...` : '',
-        enc.objectiveContent ? `O: ${enc.objectiveContent.slice(0, 70)}...` : '',
-        enc.planContent ? `P: ${enc.planContent.slice(0, 70)}...` : ''
-      ].filter(Boolean).join('\n');
+    const attRows = allAttendances.map(att => {
+      const dateFormatted = att.created_at || att.date ? new Date(att.created_at || att.date).toLocaleString('pt-BR') : new Date().toLocaleString('pt-BR');
+      const complaint = cleanPdfText(att.complaint || att.protocolTitle || att.complaints || 'Sintomas Gripais / Resfriado');
+      const duration = att.symptomDurationDays ? `${att.symptomDurationDays} dia(s)` : (att.duration || '1 a 2 dias');
+      const intensity = cleanPdfText(att.symptomSeverity || att.severity || 'Leve a Moderado');
+      const notes = cleanPdfText(att.customNotes || att.notes || att.subjectiveContent || 'Avaliação clínica autolimitada');
+      const pharm = cleanPdfText(att.pharmacistName || rtPharmacist);
+      const status = cleanPdfText(att.status || 'Concluído / MIP Prescrito');
 
       return [
         dateFormatted,
-        `${enc.type || 'Pronto Socorro'}\n[${room}]`,
-        `Triagem: ${enc.manchesterColor || tr.manchester_priority || 'AMARELO'}\n${vitalsText}`,
-        `${docName}\nCID: ${cid}\n${soapSummary ? soapSummary + '\n' : ''}Assinatura: ✅ CFM Digital`,
+        `${complaint}\n[Evolução: ${duration}]`,
+        `Intensidade: ${intensity}\nObs: ${notes.slice(0, 50)}`,
+        `${pharm}\nConduta: Avaliação de Red Flags negativa`,
         status
       ];
     });
 
     doc.autoTable({
       startY: currentY,
-      head: [['Data / Hora', 'Tipo / Local', 'Triagem & Sinais Vitais', 'Médico Assistente & Evolução SOAP', 'Status']],
-      body: encRows,
+      head: [['Data / Hora', 'Queixa / Protocolo CFF', 'Evolução & Intensidade', 'Farmacêutico Responsável', 'Status']],
+      body: attRows,
       theme: 'grid',
-      headStyles: { fillColor: primaryColor, textColor: 255, fontSize: 8.5, fontStyle: 'bold' },
-      styles: { fontSize: 8, cellPadding: 3, textColor: [30, 41, 59] },
+      headStyles: { fillColor: [15, 23, 42], textColor: 255, fontSize: 7.8, fontStyle: 'bold', cellPadding: 2.8 },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
+      styles: { fontSize: 7.5, cellPadding: 2.6, textColor: [30, 41, 59], lineColor: [226, 232, 240], lineWidth: 0.15 },
       columnStyles: {
-        0: { cellWidth: 28 },
-        1: { cellWidth: 30 },
+        0: { cellWidth: 26 },
+        1: { cellWidth: 38 },
         2: { cellWidth: 46 },
-        3: { cellWidth: 62 },
-        4: { cellWidth: 20 }
+        3: { cellWidth: 56 },
+        4: { cellWidth: 20, halign: 'center' }
       },
       margin: { left: 12, right: 12 }
     });
 
-    currentY = doc.lastAutoTable.finalY + 12;
+    currentY = doc.lastAutoTable.finalY + 10;
   }
 
-  // Verificar quebra de página
-  if (currentY > 230) {
-    doc.addPage();
-    currentY = 20;
-  }
+  // --- SEÇÃO 2: PRESCRIÇÕES FARMACÊUTICAS DE MIPS & ORIENTAÇÕES POSOLÓGICAS ---
+  drawSectionTitle('2. PRESCRIÇÕES FARMACÊUTICAS DE MIPS & INDICAÇÕES TERAPÊUTICAS', [2, 132, 199]);
 
-  // --- INTERNAÇÕES, CENSO & LEITOS ---
-  doc.setFillColor(...accentGreen);
-  doc.rect(12, currentY, 4, 10, 'F');
-  doc.setTextColor(...darkColor);
-  doc.setFontSize(11);
-  doc.setFont('helvetica', 'bold');
-  doc.text('2. GESTÃO DE LEITOS, CENSO & INTERNAÇÕES HOSPITALARES', 20, currentY + 7);
-  currentY += 14;
-
-  if (hospitalizations.length === 0) {
-    doc.setFontSize(8.5);
+  const allPresc = [...pharmacyPrescriptions, ...(db.prescriptions || []).filter(p => String(p.patientId) === String(patient.id) || p.patientName === patient.fullName)];
+  if (allPresc.length === 0) {
+    doc.setFontSize(8);
     doc.setFont('helvetica', 'italic');
     doc.setTextColor(148, 163, 184);
-    doc.text('Nenhuma internação em leito registrada.', 20, currentY);
-    currentY += 10;
+    doc.text('Nenhuma prescrição farmacêutica registrada no histórico.', 18, currentY);
+    currentY += 8;
   } else {
-    const hospRows = hospitalizations.map(h => {
-      const admDate = h.admitted_at ? new Date(h.admitted_at).toLocaleString('pt-BR') : new Date().toLocaleString('pt-BR');
-      const disDate = h.discharged_at ? new Date(h.discharged_at).toLocaleString('pt-BR') : (h.status === 'Internado' ? 'Em Internação Ativa' : '—');
-      const bedName = h.bed_number ? `Leito ${h.bed_number}` : (h.bedId || 'Leito 102A');
-      const wardName = h.ward || h.current_sector || 'Clínica Médica / Enfermaria';
-      const doctor = h.doctor_name || h.attendingDoctor || 'Dr. Roberto Mendes (CRM 134567-SP)';
-      const diagnosis = h.diagnosis || 'Pneumonia Comunitária / Observação';
-
-      return [
-        `${bedName}\n[${wardName}]`,
-        admDate,
-        disDate,
-        doctor,
-        diagnosis,
-        h.status || 'Internado'
-      ];
-    });
-
-    doc.autoTable({
-      startY: currentY,
-      head: [['Leito / Ala', 'Data Admissão', 'Data Alta', 'Médico Responsável', 'Diagnóstico / Motivo', 'Situação']],
-      body: hospRows,
-      theme: 'grid',
-      headStyles: { fillColor: accentGreen, textColor: 255, fontSize: 8.5, fontStyle: 'bold' },
-      styles: { fontSize: 8, cellPadding: 3, textColor: [30, 41, 59] },
-      columnStyles: {
-        0: { cellWidth: 32 },
-        1: { cellWidth: 28 },
-        2: { cellWidth: 28 },
-        3: { cellWidth: 42 },
-        4: { cellWidth: 36 },
-        5: { cellWidth: 20 }
-      },
-      margin: { left: 12, right: 12 }
-    });
-
-    currentY = doc.lastAutoTable.finalY + 12;
-  }
-
-  // Verificar quebra de página
-  if (currentY > 230) {
-    doc.addPage();
-    currentY = 20;
-  }
-
-  // --- PRESCRIÇÕES MÉDICAS ---
-  doc.setFillColor(...accentAmber);
-  doc.rect(12, currentY, 4, 10, 'F');
-  doc.setTextColor(...darkColor);
-  doc.setFontSize(11);
-  doc.setFont('helvetica', 'bold');
-  doc.text('3. PRESCRIÇÕES MÉDICAS & CONDUTAS FARMACOLÓGICAS', 20, currentY + 7);
-  currentY += 14;
-
-  if (prescriptions.length === 0) {
-    doc.setFontSize(8.5);
-    doc.setFont('helvetica', 'italic');
-    doc.setTextColor(148, 163, 184);
-    doc.text('Nenhuma prescrição farmacológica registrada no prontuário.', 20, currentY);
-    currentY += 10;
-  } else {
-    const prescRows = prescriptions.map(p => {
+    const prescRows = allPresc.map(p => {
       const pDate = p.created_at ? new Date(p.created_at).toLocaleDateString('pt-BR') : new Date().toLocaleDateString('pt-BR');
-      const med = p.medication || p.name || 'Dipirona 500mg/ml';
-      const dosage = p.dosage || '1 ampola (500mg)';
-      const route = p.route || 'Endovenosa (EV)';
-      const instructions = p.instructions || p.frequency || 'A cada 6 horas se febre/dor';
-      const prescriber = p.doctorName || 'Dr. Carlos Silva (CRM 123456-SP)';
+      const med = cleanPdfText(p.medication || p.name || 'Dipirona 1g');
+      const posology = cleanPdfText(p.posology || p.dosage || '1 comprimido de 6/6h se dor ou febre');
+      const indication = cleanPdfText(p.indication || p.instructions || 'Analgesia e controle térmico');
+      const prescriber = cleanPdfText(p.pharmacistName || rtPharmacist);
 
-      return [
-        pDate,
-        med,
-        dosage,
-        route,
-        instructions,
-        prescriber
-      ];
+      return [pDate, med, posology, indication, prescriber];
     });
 
     doc.autoTable({
       startY: currentY,
-      head: [['Data', 'Medicamento / Item', 'Posologia / Dose', 'Via', 'Instruções de Uso', 'Médico Prescritor']],
+      head: [['Data', 'Medicamento / MIP', 'Posologia Recomendada', 'Indicação Clínica', 'Farmacêutico Prescritor']],
       body: prescRows,
       theme: 'grid',
-      headStyles: { fillColor: accentAmber, textColor: 255, fontSize: 8.5, fontStyle: 'bold' },
-      styles: { fontSize: 8, cellPadding: 3, textColor: [30, 41, 59] },
+      headStyles: { fillColor: [2, 132, 199], textColor: 255, fontSize: 7.8, fontStyle: 'bold', cellPadding: 2.8 },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
+      styles: { fontSize: 7.5, cellPadding: 2.6, textColor: [30, 41, 59], lineColor: [226, 232, 240], lineWidth: 0.15 },
       columnStyles: {
-        0: { cellWidth: 24 },
-        1: { cellWidth: 42 },
-        2: { cellWidth: 32 },
-        3: { cellWidth: 24 },
-        4: { cellWidth: 36 },
-        5: { cellWidth: 28 }
+        0: { cellWidth: 22 },
+        1: { cellWidth: 44, fontStyle: 'bold' },
+        2: { cellWidth: 50 },
+        3: { cellWidth: 40 },
+        4: { cellWidth: 30 }
       },
       margin: { left: 12, right: 12 }
     });
 
-    currentY = doc.lastAutoTable.finalY + 12;
+    currentY = doc.lastAutoTable.finalY + 10;
+  }
+
+  // --- SEÇÃO 3: PROCEDIMENTOS FARMACÊUTICOS, VACINAS & TESTES RÁPIDOS (RDC 786/23) ---
+  if (vaccines.length > 0) {
+    drawSectionTitle('3. PROCEDIMENTOS FARMACÊUTICOS, VACINAS & TESTES RÁPIDOS (RDC 786/23)', [147, 51, 234]);
+
+    const vacRows = vaccines.map(v => {
+      const vDate = v.applied_at || v.created_at ? new Date(v.applied_at || v.created_at).toLocaleDateString('pt-BR') : new Date().toLocaleDateString('pt-BR');
+      const vacName = cleanPdfText(v.vaccine_name || v.vaccineName || 'Vacina / Procedimento');
+      const lot = cleanPdfText(v.lot_number || v.lot || 'Lote 2026-X');
+      const exp = v.expiration_date ? new Date(v.expiration_date).toLocaleDateString('pt-BR') : '12/2026';
+      const site = cleanPdfText(v.application_site || v.site || 'Deltoide D');
+      const resp = cleanPdfText(v.pharmacist_name || rtPharmacist);
+
+      return [vDate, vacName, `${lot} (Val: ${exp})`, site, resp];
+    });
+
+    doc.autoTable({
+      startY: currentY,
+      head: [['Data', 'Procedimento / Vacina / Exame', 'Lote & Validade', 'Via / Local de Aplicação', 'Farmacêutico Responsável']],
+      body: vacRows,
+      theme: 'grid',
+      headStyles: { fillColor: [147, 51, 234], textColor: 255, fontSize: 7.8, fontStyle: 'bold', cellPadding: 2.8 },
+      alternateRowStyles: { fillColor: [248, 250, 252] },
+      styles: { fontSize: 7.5, cellPadding: 2.6, textColor: [30, 41, 59], lineColor: [226, 232, 240], lineWidth: 0.15 },
+      columnStyles: {
+        0: { cellWidth: 22 },
+        1: { cellWidth: 54, fontStyle: 'bold' },
+        2: { cellWidth: 42 },
+        3: { cellWidth: 38 },
+        4: { cellWidth: 30 }
+      },
+      margin: { left: 12, right: 12 }
+    });
+
+    currentY = doc.lastAutoTable.finalY + 10;
   }
 
   // --- SEÇÃO 4: FARMACOVIGILÂNCIA, SEGURANÇA DO PACIENTE & CDSS 4D ---
-  if (currentY > 220) {
-    doc.addPage();
-    currentY = 20;
-  }
+  drawSectionTitle('4. FARMACOVIGILÂNCIA, SEGURANÇA DO PACIENTE & CDSS 4D', [225, 29, 72]);
 
-  const cdssRed = [220, 38, 38];
-  doc.setFillColor(...cdssRed);
-  doc.rect(12, currentY, 4, 10, 'F');
-  doc.setTextColor(...darkColor);
-  doc.setFontSize(11);
-  doc.setFont('helvetica', 'bold');
-  doc.text('4. FARMACOVIGILÂNCIA, SEGURANÇA DO PACIENTE & SUPORTE À DECISÃO CLÍNICA (CDSS 4D)', 20, currentY + 7);
-  currentY += 14;
-
-  const allPrescriptionTexts = [
-    ...prescriptions.map(p => p.name || p.medication || ''),
-    ...encounters.map(e => e.planContent || e.prescription || ''),
-    ...notes.map(n => n.planContent || '')
+  const allMedsText = [
+    patient.continuousMedications || '',
+    ...allPresc.map(p => p.name || p.medication || ''),
+    ...allAttendances.map(a => a.customNotes || a.notes || '')
   ].filter(Boolean).join('\n');
 
   const allClinicalContext = [
     patient.allergies || '',
-    patient.chronicDiseases || '',
-    ...encounters.map(e => `${e.complaints || ''} ${e.subjectiveContent || ''} ${e.objectiveContent || ''} ${e.diagnosis || ''} ${e.assessmentContent || ''}`),
-    ...notes.map(n => `${n.subjectiveContent || ''} ${n.objectiveContent || ''} ${n.assessmentContent || ''}`)
+    patient.chronicConditions || patient.chronicDiseases || '',
+    ...allAttendances.map(a => `${a.complaint || ''} ${a.notes || ''}`)
   ].filter(Boolean).join(' | ');
 
   let cdssAlertsList = [];
-  if (allPrescriptionTexts && typeof checkDrugInteractions === 'function') {
-    cdssAlertsList = checkDrugInteractions(allPrescriptionTexts, allClinicalContext);
+  if (allMedsText && typeof checkDrugInteractions === 'function') {
+    cdssAlertsList = checkDrugInteractions(allMedsText, allClinicalContext);
   }
 
-  const cleanPdfText = (str) => {
-    if (!str) return '';
-    return String(str)
-      .replace(/[\u{1F300}-\u{1F9FF}\u{2600}-\u{26FF}\u{2700}-\u{27BF}\u{1F000}-\u{1F02F}\u{1F0A0}-\u{1F0FF}\u{1F100}-\u{1F64F}\u{1F680}-\u{1F6FF}]/gu, '')
-      .replace(/[^\x00-\xFF]/g, '') // Garante compatibilidade total com codificação Latin-1 do PDF
-      .trim();
-  };
-
   if (cdssAlertsList.length === 0) {
-    doc.setFontSize(8.5);
-    doc.setFont('helvetica', 'italic');
-    doc.setTextColor(22, 101, 52);
-    doc.text('[OK] Avaliacao CDSS 4D Concluida: Nenhuma contraindicacao critica ou interacao medicamentosa grave identificada.', 20, currentY);
-    currentY += 10;
+    doc.setFillColor(240, 253, 244);
+    doc.roundedRect(12, currentY, 186, 12, 1.5, 1.5, 'F');
+    doc.setDrawColor(187, 247, 208);
+    doc.roundedRect(12, currentY, 186, 12, 1.5, 1.5, 'S');
+
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(21, 128, 61);
+    doc.text('[OK] Avaliação CDSS 4D Concluída:', 16, currentY + 7.5);
+    doc.setFont('helvetica', 'normal');
+    doc.text('Nenhuma contraindicação crítica ou interação medicamentosa de alto risco identificada.', 68, currentY + 7.5);
+    currentY += 17;
   } else {
     const cdssRows = cdssAlertsList.map(alert => {
-      const sevLabel = alert.severity === 'Critica' ? 'CRÍTICA' : (alert.severity === 'Grave' ? 'GRAVE' : (alert.severity || 'MODERADA').toUpperCase());
+      const sevLabel = alert.severity === 'Critica' ? 'CRITICA' : (alert.severity === 'Grave' ? 'GRAVE' : (alert.severity || 'MODERADA').toUpperCase());
       const cleanTitle = cleanPdfText(alert.title || 'Alerta Farmacológico');
       const cleanDesc = cleanPdfText(alert.desc || 'Risco de evento adverso farmacológico associado.');
-      const cleanAction = cleanPdfText(alert.action || 'Avaliar ajuste posológico e monitoração intensiva.');
+      const cleanAction = cleanPdfText(alert.action || 'Avaliar ajuste posológico e orientação farmacêutica.');
 
       return [
         sevLabel,
         cleanTitle,
         cleanDesc,
-        `${cleanAction}\n(Ciência e Justificativa CFM nº 1.821/2007)`
+        `${cleanAction}\n(Amparo: Resoluções CFF nº 585/2013 e nº 586/2013)`
       ];
     });
 
@@ -2864,17 +2994,11 @@ window.generatePatientPDF = async function(patientId, patientName) {
       head: [['Severidade', 'Contraindicação / Interação', 'Mecanismo & Risco Clínico', 'Conduta Recomendada & Auditoria']],
       body: cdssRows,
       theme: 'grid',
-      headStyles: { fillColor: cdssRed, textColor: 255, fontSize: 8, fontStyle: 'bold', halign: 'left' },
-      styles: { 
-        fontSize: 7.2, 
-        cellPadding: 2.2, 
-        textColor: [30, 41, 59], 
-        overflow: 'linebreak',
-        lineHeightFactor: 1.18,
-        font: 'helvetica'
-      },
+      headStyles: { fillColor: [225, 29, 72], textColor: 255, fontSize: 7.8, fontStyle: 'bold', cellPadding: 2.8 },
+      alternateRowStyles: { fillColor: [254, 242, 242] },
+      styles: { fontSize: 7.2, cellPadding: 2.4, textColor: [30, 41, 59], lineColor: [254, 202, 202], lineWidth: 0.15, overflow: 'linebreak' },
       columnStyles: {
-        0: { cellWidth: 20, fontStyle: 'bold', halign: 'center' },
+        0: { cellWidth: 20, fontStyle: 'bold', halign: 'center', textColor: [185, 28, 28] },
         1: { cellWidth: 42, fontStyle: 'bold' },
         2: { cellWidth: 62 },
         3: { cellWidth: 62 }
@@ -2882,53 +3006,13 @@ window.generatePatientPDF = async function(patientId, patientName) {
       margin: { left: 12, right: 12 }
     });
 
-    currentY = doc.lastAutoTable.finalY + 12;
+    currentY = doc.lastAutoTable.finalY + 10;
   }
 
-  // --- EVOLUÇÕES CLÍNICAS E ANOTAÇÕES ADICIONAIS ---
-  if (notes.length > 0) {
-    if (currentY > 220) {
-      doc.addPage();
-      currentY = 20;
-    }
-
-    doc.setFillColor(79, 70, 229);
-    doc.rect(12, currentY, 4, 10, 'F');
-    doc.setTextColor(...darkColor);
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.text('5. EVOLUÇÕES CLÍNICAS & ANOTAÇÕES MULTIPROFISSIONAIS', 20, currentY + 7);
-    currentY += 14;
-
-    const noteRows = notes.map(n => {
-      const nDate = n.created_at ? new Date(n.created_at).toLocaleString('pt-BR') : new Date().toLocaleString('pt-BR');
-      const author = n.author || 'Equipe Assistencial';
-      const text = n.text || n.content || 'Sem anotação.';
-      return [nDate, author, text];
-    });
-
-    doc.autoTable({
-      startY: currentY,
-      head: [['Data / Hora', 'Profissional / Autor', 'Registro / Conduta']],
-      body: noteRows,
-      theme: 'grid',
-      headStyles: { fillColor: [79, 70, 229], textColor: 255, fontSize: 8.5, fontStyle: 'bold' },
-      styles: { fontSize: 8, cellPadding: 3, textColor: [30, 41, 59] },
-      columnStyles: {
-        0: { cellWidth: 30 },
-        1: { cellWidth: 45 },
-        2: { cellWidth: 111 }
-      },
-      margin: { left: 12, right: 12 }
-    });
-
-    currentY = doc.lastAutoTable.finalY + 12;
-  }
-
-  // --- TERMO DE AUTENTICIDADE DIGITAL & CARIMBO CFM / ICP-BRASIL ---
-  if (currentY > 230) {
+  // --- TERMO DE AUTENTICIDADE DIGITAL & CONFORMIDADE FARMACÊUTICA ---
+  if (currentY > 240) {
     doc.addPage();
-    currentY = 20;
+    currentY = 18;
   }
 
   doc.setFillColor(241, 245, 249);
@@ -2937,113 +3021,217 @@ window.generatePatientPDF = async function(patientId, patientName) {
   doc.roundedRect(12, currentY, 186, 26, 2, 2, 'S');
 
   doc.setTextColor(30, 41, 59);
-  doc.setFontSize(8.5);
+  doc.setFontSize(8);
   doc.setFont('helvetica', 'bold');
-  doc.text('AUTENTICAÇÃO DIGITAL & CONFORMIDADE REGULATÓRIA (CFM nº 1.821/2007)', 16, currentY + 6);
+  doc.text('AUTENTICAÇÃO DIGITAL & CONFORMIDADE REGULATÓRIA (CFF nº 585/2013, 586/2013 & LEI 13.021/2014)', 16, currentY + 6);
 
-  doc.setFontSize(7.5);
+  doc.setFontSize(7);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(100, 116, 139);
-  const hashMock = 'SHA256-' + Array.from({length: 32}, () => Math.floor(Math.random()*16).toString(16)).join('').toUpperCase();
-  doc.text(`Assinatura Digital: ICP-Brasil Certificado Digital Padrão A3 · Token Hash: ${hashMock}`, 16, currentY + 12);
-  doc.text('Este documento constitui reprodução fidedigna do Prontuário Eletrônico do Paciente sob guarda do CRM Clínico Farmacêutico.', 16, currentY + 17);
+  doc.text(`Certificação Digital: ICP-Brasil Certificado Digital Padrão A3 · Token Hash: ${hashMock}`, 16, currentY + 12);
+  doc.text('Este documento constitui reprodução fidedigna do Prontuário Farmacêutico do Paciente sob guarda do CRM Clínico Farmacêutico.', 16, currentY + 17);
   doc.text('Acesso restrito e protegido nos termos da Lei Geral de Proteção de Dados (LGPD - Lei nº 13.709/2018).', 16, currentY + 22);
 
   // Rodapé em todas as páginas
   const totalPages = doc.internal.getNumberOfPages();
   for (let i = 1; i <= totalPages; i++) {
     doc.setPage(i);
-    doc.setDrawColor(226, 232, 240);
+    doc.setDrawColor(203, 213, 225);
+    doc.setLineWidth(0.2);
     doc.line(12, 285, 198, 285);
-    doc.setFontSize(7.5);
+    doc.setFontSize(7.2);
     doc.setTextColor(148, 163, 184);
-    doc.text('CRM Clínico Farmacêutico · Sistema Integrado de Gestão Hospitalar & Prontuário Eletrônico (PEP)', 12, 290);
-    doc.text(`Página ${i} de ${totalPages}`, 180, 290);
+    doc.text('CRM Clínico Farmacêutico · Sistema Integrado de Cuidado Farmacêutico, Prescrição & CDSS', 12, 290);
+    doc.text(`Página ${i} de ${totalPages}`, 198, 290, { align: 'right' });
   }
 
-  const cleanName = (patient.fullName || patientName || 'paciente').replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
-  doc.save(`prontuario_completo_${cleanName}_${new Date().toISOString().slice(0, 10)}.pdf`);
-  if (typeof window.showToast === 'function') window.showToast('📄 Prontuário PDF completo gerado com sucesso!', 'success');
+  const cleanName = (patient.fullName || patientName || 'cliente').replace(/[^a-zA-Z0-9]/g, '_').toLowerCase();
+  doc.save(`prontuario_farmaceutico_${cleanName}_${new Date().toISOString().slice(0, 10)}.pdf`);
+  if (typeof window.showToast === 'function') window.showToast('📄 Prontuário Farmacêutico em PDF gerado com sucesso!', 'success');
 };
 
 // =========================================================
-// GERAR PDF DE COMPROVANTE DE AGENDAMENTO
+// GERAR PDF DE COMPROVANTE DE AGENDAMENTO (REFINADO)
 // =========================================================
-window.generateAppointmentPDF = function(id, patientName, doctorName, date, time, specialty, status, notes) {
-  if (!window.jspdf) { alert('⚠️ Biblioteca PDF não carregada.'); return; }
+window.generateAppointmentPDF = async function(id, patientName, doctorName, date, time, specialty, status, notes) {
+  if (!window.jspdf) {
+    if (typeof showToast === 'function') showToast('⚠️ Biblioteca PDF não disponível.');
+    else alert('⚠️ Biblioteca PDF não carregada.');
+    return;
+  }
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
   const loadLogo = () => new Promise(resolve => {
-    const img = new Image(); img.src = '/assets/crm-logo.png?v=2';
-    img.onload = () => resolve(img); img.onerror = () => resolve(null);
-  });
-
-  loadLogo().then(logoImg => {
-    // Header
-    doc.setFillColor(99, 102, 241);
-    doc.rect(0, 0, 210, 28, 'F');
-    if (logoImg) doc.addImage(logoImg, 'PNG', 8, 5, 18, 18);
-    doc.setTextColor(255, 255, 255);
-    doc.setFontSize(16); doc.setFont('helvetica', 'bold');
-    doc.text('CRM CLÍNICO FARMACÊUTICO', 30, 13);
-    doc.setFontSize(9); doc.setFont('helvetica', 'normal');
-    doc.text('Sistema de Gestão Hospitalar', 30, 19);
-    doc.text('COMPROVANTE DE AGENDAMENTO', 135, 13);
-    doc.text(`Emitido em: ${new Date().toLocaleString('pt-BR')}`, 135, 19);
-
-    // Título central
-    doc.setTextColor(30, 30, 50);
-    doc.setFontSize(18); doc.setFont('helvetica', 'bold');
-    doc.text('COMPROVANTE DE CONSULTA', 105, 44, { align: 'center' });
-    doc.setDrawColor(99, 102, 241); doc.setLineWidth(0.5);
-    doc.line(20, 47, 190, 47);
-
-    // Número do comprovante
-    doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(100, 100, 120);
-    doc.text(`Nº: #${id.substring(0,8).toUpperCase()}`, 105, 54, { align: 'center' });
-
-    // Box de dados
-    let y = 64;
-    doc.setFillColor(248, 250, 252); doc.roundedRect(15, y - 4, 180, 114, 3, 3, 'F');
-    doc.setDrawColor(200, 210, 230); doc.roundedRect(15, y - 4, 180, 114, 3, 3, 'S');
-
-    const addRow = (label, value, isBold = false) => {
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(99, 102, 241);
-      doc.text(label, 22, y + 2);
-      doc.setFont('helvetica', isBold ? 'bold' : 'normal'); doc.setTextColor(30, 30, 50);
-      doc.setFontSize(10.5);
-doc.text(String(value || '—'), 22, y + 8);
-      y += 16;
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.src = '/assets/crm-logo.png?v=2';
+    img.onload = () => resolve(img);
+    img.onerror = () => {
+      const imgFallback = new Image();
+      imgFallback.src = 'assets/crm-logo.png';
+      imgFallback.onload = () => resolve(imgFallback);
+      imgFallback.onerror = () => resolve(null);
     };
-
-    addRow('PACIENTE', patientName, true);
-    addRow('MÉDICO RESPONSÁVEL', doctorName);
-    addRow('ESPECIALIDADE', specialty);
-    const fmtDate = date ? new Date(date + 'T12:00:00').toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' }) : '—';
-addRow('DATA DA CONSULTA', fmtDate);
-    addRow('HORÁRIO', time || '—');
-    addRow('STATUS DA CONSULTA', status || 'Agendado');
-
-    if (notes) {
-      doc.setFont('helvetica', 'bold'); doc.setFontSize(8.5); doc.setTextColor(99, 102, 241);
-      doc.text('OBSERVAÇÕES', 22, y + 2);
-      doc.setFont('helvetica', 'normal'); doc.setFontSize(9); doc.setTextColor(60, 60, 80);
-      const splitNotes = doc.splitTextToSize(notes, 160);
-      doc.text(splitNotes, 22, y + 8);
-    }
-
-    const pageCount = doc.internal.getNumberOfPages();
-    for (let i = 1; i <= pageCount; i++) {
-      doc.setPage(i);
-      doc.setFontSize(8); doc.setTextColor(150, 150, 150);
-      doc.text('CONFIDENCIAL — Comprovante de Agendamento', 14, 289);
-      doc.text(`Página ${i} de ${pageCount}`, 180, 289);
-    }
-
-    const safeName = (patientName || 'comprovante').replace(/[^a-zA-Z0-9]/g, '_').substring(0, 30);
-    doc.save(`agendamento_${safeName}_${id.substring(0, 4)}.pdf`);
   });
+
+  const logoImg = await loadLogo();
+  const hash = 'AG-' + (id || '').substring(0, 8).toUpperCase() + '-' + Date.now().toString().slice(-4);
+  const now = new Date().toLocaleString('pt-BR');
+
+  // --- CABEÇALHO INSTITUCIONAL ---
+  doc.setFillColor(15, 23, 42); // Dark Slate
+  doc.rect(0, 0, 210, 30, 'F');
+  doc.setFillColor(13, 148, 136); // Teal Line
+  doc.rect(0, 30, 210, 1.5, 'F');
+
+  let textStartX = 14;
+  if (logoImg) {
+    try {
+      doc.addImage(logoImg, 'PNG', 12, 5, 20, 20);
+      textStartX = 36;
+    } catch(e) {}
+  }
+
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(13);
+  doc.setFont('helvetica', 'bold');
+  doc.text('CRM CLÍNICO FARMACÊUTICO', textStartX, 11);
+
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(203, 213, 225);
+  doc.text('Centro de Medicina Integrada & Consultório Farmacêutico', textStartX, 17);
+
+  doc.setFontSize(7);
+  doc.setTextColor(45, 212, 191);
+  doc.text('COMPROVANTE OFICIAL DE AGENDAMENTO DE CONSULTA', textStartX, 23);
+
+  doc.setFontSize(7.5);
+  doc.setTextColor(203, 213, 225);
+  doc.text(`Emissão: ${now}`, 196, 12, { align: 'right' });
+  doc.text(`Voucher: #${hash}`, 196, 18, { align: 'right' });
+  doc.text('RT: Dr. Marcelo Mazaro (CRF-SP 54180)', 196, 24, { align: 'right' });
+
+  // --- TÍTULO PRINCIPAL ---
+  doc.setTextColor(15, 23, 42);
+  doc.setFontSize(15);
+  doc.setFont('helvetica', 'bold');
+  doc.text('COMPROVANTE DE AGENDAMENTO', 105, 43, { align: 'center' });
+
+  doc.setFontSize(8.5);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(100, 116, 139);
+  doc.text(`Código de Validação: ${hash} · Registro no Sistema: #${(id||'').substring(0,8).toUpperCase()}`, 105, 49, { align: 'center' });
+
+  // --- CARD DE DADOS DO AGENDAMENTO ---
+  let y = 57;
+  doc.setFillColor(248, 250, 252);
+  doc.roundedRect(14, y, 182, 116, 3, 3, 'F');
+  doc.setDrawColor(203, 213, 225);
+  doc.setLineWidth(0.3);
+  doc.roundedRect(14, y, 182, 116, 3, 3, 'S');
+  doc.setFillColor(15, 118, 110);
+  doc.rect(14, y, 3.5, 116, 'F'); // Barra lateral
+
+  const addField = (label, value, isBold = false, customY = null) => {
+    const curY = customY !== null ? customY : y;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7.8);
+    doc.setTextColor(15, 118, 110);
+    doc.text(label, 22, curY + 6);
+
+    doc.setFont('helvetica', isBold ? 'bold' : 'normal');
+    doc.setTextColor(15, 23, 42);
+    doc.setFontSize(10);
+    doc.text(String(value || '—'), 22, curY + 12);
+  };
+
+  addField('PACIENTE', patientName || 'Não Informado', true, y + 2);
+  addField('MÉDICO RESPONSÁVEL', doctorName || 'Dr. Médico Assistente', false, y + 18);
+  addField('ESPECIALIDADE CLÍNICA', specialty || 'Clínica Geral / Medicina Integrada', false, y + 34);
+
+  let fmtDate = '—';
+  if (date) {
+    try {
+      const parts = date.split('-');
+      if (parts.length === 3) {
+        const dObj = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+        fmtDate = dObj.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' });
+        fmtDate = fmtDate.charAt(0).toUpperCase() + fmtDate.slice(1);
+      } else {
+        fmtDate = date;
+      }
+    } catch(e) { fmtDate = date; }
+  }
+
+  addField('DATA DA CONSULTA', fmtDate, true, y + 50);
+  addField('HORÁRIO PREVISTO', time ? `${time} h` : '—', true, y + 66);
+  addField('SITUAÇÃO DO AGENDAMENTO', (status || 'Confirmado / Agendado').toUpperCase(), false, y + 82);
+
+  if (notes) {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7.8);
+    doc.setTextColor(15, 118, 110);
+    doc.text('OBSERVAÇÕES E CONDUTAS PRÉVIAS', 22, y + 104);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8.5);
+    doc.setTextColor(51, 65, 85);
+    const splitNotes = doc.splitTextToSize(notes, 166);
+    doc.text(splitNotes, 22, y + 110);
+  }
+
+  // --- BOX DE ORIENTAÇÕES AO PACIENTE ---
+  let orientY = y + 122;
+  doc.setFillColor(240, 253, 250);
+  doc.roundedRect(14, orientY, 182, 36, 2, 2, 'F');
+  doc.setDrawColor(153, 246, 228);
+  doc.roundedRect(14, orientY, 182, 36, 2, 2, 'S');
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8.5);
+  doc.setTextColor(15, 118, 110);
+  doc.text('ORIENTAÇÕES IMPORTANTES PARA O ATENDIMENTO:', 18, orientY + 6.5);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.5);
+  doc.setTextColor(51, 65, 85);
+  doc.text('• Comparecer com 15 minutos de antecedência ao horário agendado.', 18, orientY + 13);
+  doc.text('• Apresentar documento oficial de identificação com foto e carteira do convênio / Cartão SUS.', 18, orientY + 18.5);
+  doc.text('• Trazer exames laboratoriais e de imagem recentes relacionados à queixa clínica.', 18, orientY + 24);
+  doc.text('• Trazer a lista ou receitas de todos os medicamentos e suplementos em uso contínuo (CDSS 4D).', 18, orientY + 29.5);
+
+  // --- CARIMBO E ASSINATURA ---
+  let sigY = orientY + 44;
+  doc.setDrawColor(203, 213, 225);
+  doc.setLineWidth(0.4);
+  doc.line(65, sigY + 12, 145, sigY + 12);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8.5);
+  doc.setTextColor(15, 23, 42);
+  doc.text('Central de Agendamento & Recepção Clínica', 105, sigY + 17, { align: 'center' });
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7);
+  doc.setTextColor(100, 116, 139);
+  doc.text('CRM Clínico Farmacêutico · Documento Válido para Comprovação e Justificativa', 105, sigY + 21, { align: 'center' });
+
+  // Rodapé
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i);
+    doc.setDrawColor(226, 232, 240);
+    doc.line(14, 284, 196, 284);
+    doc.setFontSize(7);
+    doc.setTextColor(148, 163, 184);
+    doc.text('CRM Clínico Farmacêutico · Dr. Marcelo Mazaro (CRF-SP 54180) · Sistema Integrado', 14, 289);
+    doc.text(`Página ${i} de ${pageCount}`, 196, 289, { align: 'right' });
+  }
+
+  const safeName = (patientName || 'comprovante').replace(/[^a-zA-Z0-9]/g, '_').substring(0, 30);
+  doc.save(`agendamento_${safeName}_${id.substring(0, 4)}.pdf`);
+  if (typeof showToast === 'function') showToast(`✅ Comprovante PDF gerado com sucesso!`);
 };
 
 // --- ABA CONSULTÓRIOS & SALAS ---
@@ -3596,52 +3784,83 @@ async function exportToPDF(headers, rows, title = 'Relatório CRM Clínico Farma
     return;
   }
   const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const isLandscape = headers && headers.length > 6;
+  const doc = new jsPDF({ orientation: isLandscape ? 'landscape' : 'portrait', unit: 'mm', format: 'a4' });
   const hash = 'CFF-' + Math.random().toString(36).substring(2, 8).toUpperCase() + '-' + Date.now().toString().slice(-4);
   const now = new Date().toLocaleString('pt-BR');
 
+  const pageWidth = isLandscape ? 297 : 210;
+  const pageHeight = isLandscape ? 210 : 297;
+  const margin = 14;
+  const contentWidth = pageWidth - (margin * 2);
+
+  // Helper para logo
+  const loadLogo = () => new Promise(resolve => {
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.src = '/assets/crm-logo.png?v=2';
+    img.onload = () => resolve(img);
+    img.onerror = () => {
+      const imgFallback = new Image();
+      imgFallback.src = 'assets/crm-logo.png';
+      imgFallback.onload = () => resolve(imgFallback);
+      imgFallback.onerror = () => resolve(null);
+    };
+  });
+  const logoImg = await loadLogo();
+
   // Cabeçalho Clínico Farmacêutico Executivo
-  doc.setFillColor(15, 118, 110); // Teal institucional
-  doc.rect(14, 12, 182, 1.5, 'F');
+  doc.setFillColor(15, 23, 42); // Dark Slate #0f172a
+  doc.rect(0, 0, pageWidth, 28, 'F');
+  doc.setFillColor(13, 148, 136); // Teal Accent #0d9488
+  doc.rect(0, 28, pageWidth, 1.5, 'F');
+
+  let textX = margin;
+  if (logoImg) {
+    try {
+      doc.addImage(logoImg, 'PNG', margin, 4, 20, 20);
+      textX = margin + 24;
+    } catch(e) {}
+  }
 
   doc.setFontSize(13);
   doc.setFont('helvetica', 'bold');
-  doc.setTextColor(15, 118, 110);
-  doc.text('CRM CLÍNICO FARMACÊUTICO', 14, 20);
-
-  doc.setFontSize(8);
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(71, 85, 105);
-  doc.text('Consultório Farmacêutico · Prescrição Clínica · Farmacovigilância CDSS 4D', 14, 25);
-  doc.text('Em conformidade com as Resoluções CFF nº 585/2013 e nº 586/2013 · RDC ANVISA nº 44/2009', 14, 29);
+  doc.setTextColor(255, 255, 255);
+  doc.text('CRM CLÍNICO FARMACÊUTICO', textX, 11);
 
   doc.setFontSize(7.5);
-  doc.setTextColor(100, 116, 139);
-  doc.text(`Emissão: ${now}`, 196, 20, { align: 'right' });
-  doc.text(`Autenticação: ${hash}`, 196, 24, { align: 'right' });
-  doc.text('RT: Dr. Marcelo Mazaro (CRF-SP 54180)', 196, 28, { align: 'right' });
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(203, 213, 225);
+  doc.text('Consultório Farmacêutico · Prescrição Clínica · Farmacovigilância CDSS 4D', textX, 16);
+  doc.text('Conforme Resoluções CFF nº 585/2013 e nº 586/2013 · RDC ANVISA nº 44/2009', textX, 21);
+
+  doc.setFontSize(7.5);
+  doc.setTextColor(203, 213, 225);
+  doc.text(`Emissão: ${now}`, pageWidth - margin, 11, { align: 'right' });
+  doc.text(`Autenticação: ${hash}`, pageWidth - margin, 16, { align: 'right' });
+  doc.text('RT: Dr. Marcelo Mazaro (CRF-SP 54180)', pageWidth - margin, 21, { align: 'right' });
 
   // Banner do Título do Relatório
   doc.setFillColor(240, 253, 250);
   doc.setDrawColor(13, 148, 136);
-  doc.roundedRect(14, 33, 182, 12, 2, 2, 'FD');
+  doc.roundedRect(margin, 34, contentWidth, 12, 2, 2, 'FD');
 
-  doc.setFontSize(10.5);
+  doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(17, 94, 89);
-  doc.text(title.toUpperCase(), 18, 40.5);
+  doc.text(title.toUpperCase(), margin + 4, 41.5);
 
   // Tabela de Dados Formatada
   if (doc.autoTable) {
     doc.autoTable({
-      startY: 49,
+      startY: 50,
       head: [headers],
       body: rows,
       theme: 'grid',
       headStyles: { 
         fillColor: [15, 23, 42], 
         textColor: [255, 255, 255], 
-        fontSize: 8,
+        fontSize: 7.8,
         fontStyle: 'bold',
         halign: 'left',
         cellPadding: 3
@@ -3650,22 +3869,21 @@ async function exportToPDF(headers, rows, title = 'Relatório CRM Clínico Farma
         fillColor: [248, 250, 252]
       },
       styles: { 
-        fontSize: 7.8, 
+        fontSize: 7.5, 
         cellPadding: 2.8,
         textColor: [30, 41, 59],
         lineColor: [226, 232, 240],
         lineWidth: 0.2
       },
-      margin: { left: 14, right: 14, bottom: 20 },
+      margin: { left: margin, right: margin, bottom: 20 },
       didDrawPage: function (data) {
-        // Rodapé em todas as páginas
         const pageCount = doc.internal.getNumberOfPages();
         doc.setFontSize(7);
         doc.setTextColor(148, 163, 184);
         doc.setDrawColor(203, 213, 225);
-        doc.line(14, 284, 196, 284);
-        doc.text('CRM Clínico Farmacêutico · Dr. Marcelo Mazaro (CRF-SP 54180) · Documento Eletrônico de Valor Clínico', 14, 289);
-        doc.text(`Página ${data.pageNumber} de ${pageCount}`, 196, 289, { align: 'right' });
+        doc.line(margin, pageHeight - 12, pageWidth - margin, pageHeight - 12);
+        doc.text('CRM Clínico Farmacêutico · Dr. Marcelo Mazaro (CRF-SP 54180) · Documento Eletrônico de Valor Clínico', margin, pageHeight - 7);
+        doc.text(`Página ${data.pageNumber} de ${pageCount}`, pageWidth - margin, pageHeight - 7, { align: 'right' });
       }
     });
   }

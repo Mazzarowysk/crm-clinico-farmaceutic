@@ -5077,28 +5077,42 @@ body.compact-mode .modal-content {
   opacity: 0.4;
 }
 
-/* Floating Patient HUD */
+/* Cockpit Clínico Farmacêutico Flutuante (Floating HUD) */
 .floating-patient-hud {
   position: fixed;
   bottom: 24px;
   right: 24px;
-  background: rgba(18, 14, 34, 0.88);
-  border: 1px solid rgba(129, 140, 248, 0.35);
-  border-radius: 16px;
-  padding: 12px 18px;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.94), rgba(30, 41, 59, 0.9));
+  border: 1.5px solid rgba(20, 184, 166, 0.45);
+  border-radius: 18px;
+  padding: 8px 14px;
   display: flex;
   align-items: center;
-  gap: 16px;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  gap: 12px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.6), 0 0 20px rgba(20, 184, 166, 0.15);
   backdrop-filter: blur(16px);
-  z-index: 1000;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: slideInUp 0.35s ease-out;
+  -webkit-backdrop-filter: blur(16px);
+  z-index: 9999;
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
+  animation: slideInUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .floating-patient-hud:hover {
-  border-color: rgba(0, 242, 254, 0.6);
-  box-shadow: 0 16px 45px rgba(0, 242, 254, 0.15);
+  border-color: #2dd4bf;
+  box-shadow: 0 16px 45px rgba(0, 0, 0, 0.7), 0 0 25px rgba(45, 212, 191, 0.25);
+}
+
+.floating-patient-minipill {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  animation: slideInUp 0.3s ease;
+  transition: transform 0.2s ease;
+}
+
+.floating-patient-minipill:hover {
+  transform: translateY(-2px);
 }
 
 .hud-patient-info {
@@ -5110,7 +5124,7 @@ body.compact-mode .modal-content {
 .hud-actions-group {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 /* Smart Clinical Hand-off Modal */
@@ -5598,39 +5612,39 @@ body.compact-mode .modal-content {
    ========================================================================== */
 
 .auth-brand-logo-box {
-  width: 120px;
-  height: 120px;
-  border-radius: 24px;
+  width: 90px;
+  height: 90px;
+  border-radius: 20px;
   background: #ffffff;
-  border: 2px solid rgba(20, 184, 166, 0.5);
+  border: 2px solid rgba(20, 184, 166, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), 0 0 25px rgba(13, 148, 136, 0.4);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 0 25px rgba(13, 148, 136, 0.35);
   overflow: hidden;
-  padding: 8px;
+  padding: 6px;
+  flex-shrink: 0;
 }
 
 .auth-brand-logo-img {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  border-radius: 16px;
-  transform: scale(1.08);
+  border-radius: 14px;
 }
 
 .system-sidebar-logo-box {
-  width: 54px;
-  height: 54px;
-  border-radius: 14px;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
   background: #ffffff;
-  border: 1.5px solid rgba(20, 184, 166, 0.45);
+  border: 1.5px solid rgba(20, 184, 166, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4), 0 0 14px rgba(13, 148, 136, 0.3);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35), 0 0 12px rgba(13, 148, 136, 0.3);
   overflow: hidden;
-  padding: 4px;
+  padding: 3px;
   flex-shrink: 0;
 }
 
@@ -5638,7 +5652,7 @@ body.compact-mode .modal-content {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  border-radius: 10px;
+  border-radius: 8px;
 }
 
 .header-brand-logo-img {
@@ -5672,6 +5686,187 @@ body.compact-mode .modal-content {
 }
 .cfg-accordion-body {
   animation: fadeIn 0.25s ease-out;
+}
+
+/* ==========================================================================
+   SISTEMA DE ABAS & SUB-ABAS NEON GLASSMORPHIC (FARMÁCIA & MÓDULOS CLÍNICOS)
+   ========================================================================== */
+
+.pharmacy-subnav-container {
+  display: flex;
+  gap: 12px;
+  background: rgba(15, 23, 42, 0.75);
+  padding: 8px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 22px;
+  flex-wrap: wrap;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(12px);
+}
+
+.pharmacy-subnav-btn {
+  flex: 1;
+  min-width: 210px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(255, 255, 255, 0.12);
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.65), rgba(15, 23, 42, 0.85));
+  color: #cbd5e1;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.pharmacy-subnav-btn i {
+  font-size: 1.05rem;
+  transition: transform 0.25s ease, color 0.25s ease;
+}
+
+/* Identidade visual das abas no estado padrão e hover */
+#subnav-btn-balcao i { color: #34d399; }
+#subnav-btn-prontuario i { color: #38bdf8; }
+#subnav-btn-simulador i { color: #fbbf24; }
+#subnav-btn-estoque i { color: #c084fc; }
+
+.pharmacy-subnav-btn:hover {
+  transform: translateY(-2px);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.2);
+}
+
+.pharmacy-subnav-btn:hover i {
+  transform: scale(1.15);
+}
+
+/* --- ESTADOS ATIVOS (NEON GLOW PERSONALIZADO POR ABA) --- */
+#subnav-btn-balcao.active {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.35), rgba(5, 150, 105, 0.55));
+  border-color: #34d399;
+  color: #ffffff;
+  box-shadow: 0 0 24px rgba(16, 185, 129, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+#subnav-btn-balcao.active i {
+  color: #6ee7b7;
+  text-shadow: 0 0 12px #34d399;
+}
+
+#subnav-btn-prontuario.active {
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.35), rgba(2, 132, 199, 0.55));
+  border-color: #38bdf8;
+  color: #ffffff;
+  box-shadow: 0 0 24px rgba(56, 189, 248, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+#subnav-btn-prontuario.active i {
+  color: #7dd3fc;
+  text-shadow: 0 0 12px #38bdf8;
+}
+
+#subnav-btn-simulador.active {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.35), rgba(217, 119, 6, 0.55));
+  border-color: #fbbf24;
+  color: #ffffff;
+  box-shadow: 0 0 24px rgba(245, 158, 11, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+#subnav-btn-simulador.active i {
+  color: #fde68a;
+  text-shadow: 0 0 12px #fbbf24;
+}
+
+#subnav-btn-estoque.active {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.35), rgba(124, 58, 237, 0.55));
+  border-color: #c084fc;
+  color: #ffffff;
+  box-shadow: 0 0 24px rgba(168, 85, 247, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.5);
+}
+#subnav-btn-estoque.active i {
+  color: #e9d5ff;
+  text-shadow: 0 0 12px #c084fc;
+}
+
+/* --- STEPPER CLINICO EM 5 ETAPAS (NEON PILLS) --- */
+.pharmacy-stepper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 12px 18px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.4), 0 8px 20px rgba(0, 0, 0, 0.25);
+}
+
+.pharmacy-step-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: #64748b;
+  background: rgba(30, 41, 59, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  white-space: nowrap;
+  transition: all 0.25s ease;
+}
+
+.pharmacy-step-badge {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.pharmacy-step-item.active {
+  background: linear-gradient(135deg, rgba(20, 184, 166, 0.25), rgba(13, 148, 136, 0.4));
+  border: 1.5px solid #2dd4bf;
+  color: #ffffff;
+  box-shadow: 0 0 16px rgba(20, 184, 166, 0.45);
+}
+
+.pharmacy-step-item.active .pharmacy-step-badge {
+  background: #2dd4bf;
+  color: #0f172a;
+  box-shadow: 0 0 10px #2dd4bf;
+}
+
+.pharmacy-step-item.completed {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #34d399;
+}
+
+.pharmacy-step-item.completed .pharmacy-step-badge {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.pharmacy-glass-panel {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(12px);
 }
 
 

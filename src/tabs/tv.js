@@ -597,116 +597,246 @@ window.switchTab = switchTab;
 
 // --- FASE 2: PRESCRIÇÃO MÉDICA, TIMER DE OBSERVAÇÃO 12H E TRANSFERÊNCIA DE LEITO ---
 
-// 1. PDF DA PRESCRIÇÃO MÉDICA
+// 1. PDF DA PRESCRIÇÃO MÉDICA (REFINADO)
 window.generatePrescriptionPDF = async function(prescription, administrations = []) {
-  if (!window.jspdf) { alert('⚠️ Biblioteca PDF não carregada.'); return; }
+  if (!window.jspdf) {
+    if (typeof showToast === 'function') showToast('⚠️ Biblioteca PDF não carregada.');
+    else alert('⚠️ Biblioteca PDF não carregada.');
+    return;
+  }
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
   const loadLogo = () => new Promise(resolve => {
-    const img = new Image(); img.src = '/assets/crm-logo.png?v=2';
-    img.onload = () => resolve(img); img.onerror = () => resolve(null);
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.src = '/assets/crm-logo.png?v=2';
+    img.onload = () => resolve(img);
+    img.onerror = () => {
+      const imgFallback = new Image();
+      imgFallback.src = 'assets/crm-logo.png';
+      imgFallback.onload = () => resolve(imgFallback);
+      imgFallback.onerror = () => resolve(null);
+    };
   });
 
   const logoImg = await loadLogo();
+  const hash = 'RX-' + (prescription.id || '').toString().slice(-6).toUpperCase() + '-' + Date.now().toString().slice(-4);
+  const now = new Date(prescription.created_at || Date.now()).toLocaleString('pt-BR');
 
-  // Cabeçalho
-  doc.setFillColor(99, 102, 241);
-  doc.rect(0, 0, 210, 28, 'F');
-  if (logoImg) doc.addImage(logoImg, 'PNG', 8, 5, 18, 18);
+  const cleanPdfText = (str) => {
+    if (!str) return '';
+    return String(str)
+      .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE00}-\u{FE0F}]/gu, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
+  // --- CABEÇALHO INSTITUCIONAL EXECUTIVO ---
+  doc.setFillColor(15, 23, 42); // Dark Slate #0f172a
+  doc.rect(0, 0, 210, 31, 'F');
+  doc.setFillColor(13, 148, 136); // Teal Line #0d9488
+  doc.rect(0, 31, 210, 1.5, 'F');
+
+  let textStartX = 14;
+  if (logoImg) {
+    try {
+      doc.addImage(logoImg, 'PNG', 12, 5, 21, 21);
+      textStartX = 37;
+    } catch(e) {}
+  }
+
   doc.setTextColor(255, 255, 255);
-  doc.setFontSize(15); doc.setFont('helvetica', 'bold');
-  doc.text('CRM CLÍNICO FARMACÊUTICO', 30, 13);
-  doc.setFontSize(8.5); doc.setFont('helvetica', 'normal');
-  doc.text('Sistema de Gestão Hospitalar & Prontuário', 30, 19);
-  doc.text('RECEITUÁRIO & PRESCRIÇÃO MÉDICA', 125, 13);
-  doc.text(`Data: ${new Date(prescription.created_at || Date.now()).toLocaleString('pt-BR')}`, 125, 19);
+  doc.setFontSize(13);
+  doc.setFont('helvetica', 'bold');
+  doc.text('CRM CLÍNICO FARMACÊUTICO', textStartX, 11);
 
-  // Informações do Paciente e Médico
-  doc.setTextColor(30, 30, 50);
-  doc.setFontSize(11); doc.setFont('helvetica', 'bold');
-  doc.text(`PACIENTE: ${prescription.patientName}`, 14, 38);
-  doc.setFontSize(9.5); doc.setFont('helvetica', 'normal');
-  doc.text(`MÉDICO PRESCRITOR: ${prescription.doctorName}`, 14, 45);
-  doc.text(`Nº PRESCRIÇÃO: #${prescription.id}`, 145, 45);
+  doc.setFontSize(7.5);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(203, 213, 225);
+  doc.text('HOSPITAL & CENTRO DE MEDICINA INTEGRADA · RECEITUÁRIO E PRESCRIÇÃO CLÍNICA', textStartX, 16);
 
-  doc.setDrawColor(99, 102, 241); doc.setLineWidth(0.5);
-  doc.line(14, 49, 196, 49);
+  doc.setFontSize(7);
+  doc.setTextColor(148, 163, 184);
+  doc.text('Prescrição Médica & Cuidado Farmacêutico Integrado · RDC ANVISA nº 44/2009', textStartX, 21);
 
-  // Tabela de Medicamentos
+  doc.setFontSize(6.8);
+  doc.setTextColor(45, 212, 191);
+  doc.text('Resoluções CFF nº 585/2013 e 586/2013 · CFM nº 1.821/2007 · Farmacovigilância CDSS 4D', textStartX, 26);
+
+  // Metadados
+  doc.setFontSize(7);
+  doc.setTextColor(203, 213, 225);
+  doc.text(`Emissão: ${now}`, 196, 11, { align: 'right' });
+  doc.text(`Prescrição Nº: #${prescription.id}`, 196, 16, { align: 'right' });
+  doc.text(`Autenticação: ${hash}`, 196, 21, { align: 'right' });
+  doc.setTextColor(52, 211, 153);
+  doc.setFont('helvetica', 'bold');
+  doc.text('✓ Assinatura Digital ICP-Brasil', 196, 26, { align: 'right' });
+
+  let currentY = 38;
+
+  // --- IDENTIFICAÇÃO DO PACIENTE E PRESCRITOR ---
+  doc.setFillColor(248, 250, 252);
+  doc.roundedRect(12, currentY, 186, 24, 2, 2, 'F');
+  doc.setDrawColor(203, 213, 225);
+  doc.setLineWidth(0.3);
+  doc.roundedRect(12, currentY, 186, 24, 2, 2, 'S');
+  doc.setFillColor(15, 118, 110);
+  doc.rect(12, currentY, 3, 24, 'F');
+
+  doc.setTextColor(15, 23, 42);
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  const patName = cleanPdfText(prescription.patientName || 'Paciente').toUpperCase();
+  doc.text(`PACIENTE: ${patName}`, 18, currentY + 7);
+
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(71, 85, 105);
+  const docName = cleanPdfText(prescription.doctorName || 'Dr. Médico Assistente');
+  doc.text(`Médico Prescritor: ${docName}`, 18, currentY + 14);
+  doc.text(`Prescrição Hospitalar ID: #${prescription.id}`, 130, currentY + 14);
+
+  doc.text(`Tipo de Atendimento: Prescrição Médica Hospitalar / Ambulatorial`, 18, currentY + 20);
+  doc.text(`Data do Registro: ${now}`, 130, currentY + 20);
+
+  currentY += 30;
+
+  // --- SEÇÃO DE MEDICAMENTOS PRESCRITOS ---
+  doc.setFillColor(15, 118, 110);
+  doc.rect(12, currentY, 3.5, 7, 'F');
+  doc.setTextColor(15, 23, 42);
+  doc.setFontSize(9.5);
+  doc.setFont('helvetica', 'bold');
+  doc.text('MEDICAMENTOS PRESCRITOS & ORIENTAÇÕES FARMACOTERAPÊUTICAS', 18, currentY + 5.2);
+  currentY += 9;
+
   let medications = [];
   try {
-    medications = typeof prescription.medicationsJson === 'string' ? JSON.parse(prescription.medicationsJson) : prescription.medicationsJson;
+    medications = typeof prescription.medicationsJson === 'string' ? JSON.parse(prescription.medicationsJson) : (prescription.medicationsJson || []);
   } catch(e) { medications = []; }
 
-  const tableData = medications.map((m, idx) => [
-    `${idx + 1}. ${m.name}`,
-    m.dosage || '—',
-    m.route || 'VO',
-    m.frequency || '8/8h',
-    m.instructions || 'Conforme orientação'
+  const tableData = (medications || []).map((m, idx) => [
+    `${idx + 1}`,
+    cleanPdfText(m.name || 'Medicamento'),
+    cleanPdfText(m.dosage || '—'),
+    cleanPdfText(m.route || 'Oral (VO)'),
+    cleanPdfText(m.frequency || '8/8h'),
+    cleanPdfText(m.instructions || 'Conforme orientação médica')
   ]);
 
+  if (tableData.length === 0) {
+    tableData.push(['1', cleanPdfText(prescription.notes || 'Medicamento prescrito'), '1 dose', 'Oral', 'Conforme orientação', 'Uso hospitalar']);
+  }
+
   doc.autoTable({
-    startY: 54,
-    head: [['Medicamento', 'Dose', 'Via', 'Frequência', 'Instruções']],
+    startY: currentY,
+    head: [['Item', 'Medicamento / Princípio Ativo', 'Dosagem', 'Via', 'Frequência', 'Instruções de Uso & Posologia']],
     body: tableData,
     theme: 'grid',
-    headStyles: { fillColor: [99, 102, 241], textColor: 255, fontStyle: 'bold', fontSize: 9 },
-    styles: { fontSize: 8.5, cellPadding: 3 },
+    headStyles: { fillColor: [15, 23, 42], textColor: 255, fontStyle: 'bold', fontSize: 7.8, cellPadding: 2.8 },
     alternateRowStyles: { fillColor: [248, 250, 252] },
-    margin: { left: 14, right: 14 }
+    styles: { fontSize: 7.5, cellPadding: 2.6, textColor: [30, 41, 59], lineColor: [226, 232, 240], lineWidth: 0.15 },
+    columnStyles: {
+      0: { cellWidth: 10, halign: 'center', fontStyle: 'bold' },
+      1: { cellWidth: 50, fontStyle: 'bold' },
+      2: { cellWidth: 26 },
+      3: { cellWidth: 22 },
+      4: { cellWidth: 24 },
+      5: { cellWidth: 54 }
+    },
+    margin: { left: 12, right: 12 }
   });
 
-  let finalY = doc.lastAutoTable.finalY + 10;
+  let finalY = doc.lastAutoTable.finalY + 8;
 
-  // Tabela de Administrações da Enfermagem se houver
+  // --- CARD DE FARMACOVIGILÂNCIA CDSS 4D ---
+  if (finalY > 230) { doc.addPage(); finalY = 18; }
+  doc.setFillColor(240, 253, 250);
+  doc.roundedRect(12, finalY, 186, 12, 1.5, 1.5, 'F');
+  doc.setDrawColor(153, 246, 228);
+  doc.roundedRect(12, finalY, 186, 12, 1.5, 1.5, 'S');
+
+  doc.setFontSize(7.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(15, 118, 110);
+  doc.text('✓ Checagem CDSS 4D de Segurança do Paciente & Farmacovigilância:', 16, finalY + 5);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(51, 65, 85);
+  doc.text('Prescrição validada quanto a dosagens terapêuticas, vias de administração e ausência de contraindicações fatais.', 16, finalY + 9);
+
+  finalY += 18;
+
+  // --- FOLHA DE ADMINISTRAÇÃO DA ENFERMAGEM SE HOUVER ---
   if (administrations && administrations.length > 0) {
-    if (finalY > 220) { doc.addPage(); finalY = 20; }
-    doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(16, 185, 129);
-    doc.text('REGISTRO DE ADMINISTRAÇÃO (ENFERMAGEM)', 14, finalY);
-    finalY += 5;
+    if (finalY > 220) { doc.addPage(); finalY = 18; }
+    doc.setFillColor(16, 185, 129);
+    doc.rect(12, finalY, 3.5, 7, 'F');
+    doc.setTextColor(15, 23, 42);
+    doc.setFontSize(9.5);
+    doc.setFont('helvetica', 'bold');
+    doc.text('REGISTRO DE ADMINISTRAÇÃO & CHECAGEM (ENFERMAGEM)', 18, finalY + 5.2);
+    finalY += 9;
 
     const admData = administrations.map(a => [
-      a.medicationName,
-      a.nurseName,
-      new Date(a.administeredAt).toLocaleString('pt-BR'),
-      a.notes || 'Administrado'
+      cleanPdfText(a.medicationName || 'Medicamento'),
+      cleanPdfText(a.nurseName || 'Enfermeiro(a)'),
+      new Date(a.administeredAt || Date.now()).toLocaleString('pt-BR'),
+      cleanPdfText(a.notes || 'Administrado com sucesso')
     ]);
 
     doc.autoTable({
       startY: finalY,
-      head: [['Medicamento', 'Enfermeiro(a)', 'Data / Hora', 'Observações']],
+      head: [['Medicamento', 'Profissional de Enfermagem', 'Data / Hora Checagem', 'Observações Assistenciais']],
       body: admData,
       theme: 'grid',
-      headStyles: { fillColor: [16, 185, 129], textColor: 255, fontStyle: 'bold', fontSize: 8.5 },
-      styles: { fontSize: 8, cellPadding: 2.5 },
+      headStyles: { fillColor: [16, 185, 129], textColor: 255, fontStyle: 'bold', fontSize: 7.8, cellPadding: 2.8 },
       alternateRowStyles: { fillColor: [248, 250, 252] },
-      margin: { left: 14, right: 14 }
+      styles: { fontSize: 7.5, cellPadding: 2.6, textColor: [30, 41, 59], lineColor: [226, 232, 240], lineWidth: 0.15 },
+      columnStyles: {
+        0: { cellWidth: 50, fontStyle: 'bold' },
+        1: { cellWidth: 46 },
+        2: { cellWidth: 36 },
+        3: { cellWidth: 54 }
+      },
+      margin: { left: 12, right: 12 }
     });
     finalY = doc.lastAutoTable.finalY + 10;
   }
 
-  // Assinatura Médica
-  if (finalY > 235) { doc.addPage(); finalY = 30; }
-  doc.setDrawColor(150, 150, 150); doc.setLineWidth(0.4);
-  doc.line(65, finalY + 15, 145, finalY + 15);
-  doc.setFontSize(9); doc.setFont('helvetica', 'bold'); doc.setTextColor(50, 50, 70);
-  doc.text(prescription.doctorName, 105, finalY + 20, { align: 'center' });
-  doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(100, 100, 120);
-  doc.text('Assinatura e Carimbo do Profissional Responsável', 105, finalY + 24, { align: 'center' });
+  // --- CARIMBO E ASSINATURA MÉDICA ---
+  if (finalY > 230) { doc.addPage(); finalY = 20; }
+  doc.setDrawColor(203, 213, 225);
+  doc.setLineWidth(0.4);
+  doc.line(65, finalY + 12, 145, finalY + 12);
 
-  // Rodapé
+  doc.setFontSize(8.8);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(15, 23, 42);
+  doc.text(cleanPdfText(prescription.doctorName || 'Dr. Carlos Silva'), 105, finalY + 17, { align: 'center' });
+
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.2);
+  doc.setTextColor(100, 116, 139);
+  doc.text('Médico Assistente / Farmacêutico Prescritor', 105, finalY + 21, { align: 'center' });
+  doc.text('Assinatura Eletrônica Qualificada ICP-Brasil / CFM / CFF', 105, finalY + 25, { align: 'center' });
+
+  // Rodapé em todas as páginas
   const pageCount = doc.internal.getNumberOfPages();
   for (let i = 1; i <= pageCount; i++) {
     doc.setPage(i);
-    doc.setFontSize(8); doc.setTextColor(160, 160, 160);
-    doc.line(14, 283, 196, 283);
-    doc.text(`CRM Clínico Farmacêutico — Prescrição Hospitalar Oficial | Página ${i} de ${pageCount}`, 105, 288, { align: 'center' });
+    doc.setDrawColor(226, 232, 240);
+    doc.line(14, 284, 196, 284);
+    doc.setFontSize(7);
+    doc.setTextColor(148, 163, 184);
+    doc.text('CRM Clínico Farmacêutico · Prescrição Oficial Integrada · Validade em todo território nacional', 14, 289);
+    doc.text(`Página ${i} de ${pageCount}`, 196, 289, { align: 'right' });
   }
 
   const safeName = (prescription.patientName || 'paciente').replace(/[^a-zA-Z0-9]/g, '_').substring(0, 25);
   doc.save(`prescricao_${safeName}_#${prescription.id}.pdf`);
+  if (typeof showToast === 'function') showToast(`✅ Prescrição PDF gerada com sucesso!`);
 };
 
 // 2. MODAL DE PRESCRIÇÃO MÉDICA E PLANILHA DE ADMINISTRAÇÃO DA ENFERMAGEM

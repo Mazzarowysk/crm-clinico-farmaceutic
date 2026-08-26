@@ -1167,6 +1167,7 @@ window.openPatientHistoryModal = async function(patientId, patientName) {
           </div>
         </div>
         <div style="display: flex; gap: 8px; align-items: center;">
+          <button type="button" onclick="window.startNewPharmacyConsultationForClient('${patientId}', '${(patientName || '').replace(/'/g, "\\'")}')" style="background: linear-gradient(135deg, #0d9488, #0f766e); border: 1px solid #14b8a6; color: #fff; padding: 6px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 10px rgba(13,148,136,0.4);" title="Atender / Registrar Queixa no Balcão"><i class="fa-solid fa-stethoscope"></i> + Nova Visita / Queixa</button>
           <button type="button" onclick="window.generateHistoryReport('${patientId}', '${patientName || ''}')" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'" title="Exportar Histórico Completo">
             <i class="fa-solid fa-file-pdf"></i> Gerar PDF
           </button>
@@ -1387,6 +1388,98 @@ window.openPatientHistoryModal = async function(patientId, patientName) {
             <i class="fa-solid fa-save"></i> Salvar Evolução
           </button>
         </div>
+      </div>
+
+      <!-- SEÇÃO FARMA: HISTÓRICO LONGITUDINAL DE VISITAS & QUEIXAS NA FARMÁCIA -->
+      <div style="margin-bottom: 24px; background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(13, 148, 136, 0.12)); border: 1.5px solid rgba(20, 184, 166, 0.4); border-radius: 16px; padding: 22px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid rgba(20, 184, 166, 0.25); padding-bottom: 14px;">
+          <div>
+            <div style="font-size: 1.15rem; font-weight: 800; color: #f8fafc; font-family: 'Outfit', sans-serif; display: flex; align-items: center; gap: 10px;">
+              <div style="width: 34px; height: 34px; border-radius: 8px; background: #0d9488; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.1rem;">
+                <i class="fa-solid fa-prescription-bottle-medical"></i>
+              </div>
+              Histórico de Visitas à Farmácia &amp; Queixas Clínicas
+            </div>
+            <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px;">
+              Acompanhamento longitudinal de sintomas, receituários farmacêuticos e checagem de interações CDSS 4D
+            </div>
+          </div>
+          <button type="button" onclick="window.startNewPharmacyConsultationForClient('${patientId}', '${(patient.fullName || patientName || '').replace(/'/g, "\\'")}')" style="background: linear-gradient(135deg, #0d9488, #0f766e); border: 1px solid #2dd4bf; color: #fff; padding: 8px 18px; border-radius: 10px; font-size: 0.86rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(13, 148, 136, 0.4);">
+            <i class="fa-solid fa-plus"></i> Registrar Nova Visita / Queixa
+          </button>
+        </div>
+
+        ${(() => {
+          const allPharmAtts = (typeof localDB !== 'undefined' && localDB.list ? localDB.list('pharmacy_attendances') : []) || [];
+          const clientAtts = allPharmAtts.filter(a => String(a.patient_id) === String(patientId) || String(a.patientId) === String(patientId) || (patient.fullName && a.patient_name && a.patient_name.toLowerCase().includes(patient.fullName.toLowerCase())));
+          
+          if (clientAtts.length === 0) {
+            return `
+              <div style="background: rgba(0,0,0,0.25); border: 1px dashed rgba(20, 184, 166, 0.3); border-radius: 12px; padding: 24px; text-align: center; color: #94a3b8;">
+                <i class="fa-solid fa-notes-medical" style="font-size: 2rem; color: #14b8a6; margin-bottom: 8px; display: block; opacity: 0.7;"></i>
+                <div style="font-weight: 600; color: #f8fafc; margin-bottom: 4px;">Nenhuma visita farmacêutica registrada anteriormente.</div>
+                <div style="font-size: 0.82rem;">Ao relatar uma queixa no balcão, o sistema salvará a timeline e indicará o receituário com checagem de segurança.</div>
+                <button type="button" onclick="window.startNewPharmacyConsultationForClient('${patientId}', '${(patient.fullName || patientName || '').replace(/'/g, "\\'")}')" style="margin-top: 12px; background: rgba(13,148,136,0.2); border: 1px solid #14b8a6; color: #2dd4bf; padding: 6px 14px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer;">
+                  <i class="fa-solid fa-stethoscope"></i> Iniciar 1º Atendimento Farmacêutico
+                </button>
+              </div>
+            `;
+          }
+
+          return `
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              ${clientAtts.slice().reverse().map((att, idx) => {
+                const dateFmt = att.data_hora ? new Date(att.data_hora).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : 'Data não informada';
+                const hasRedFlags = att.red_flags && att.red_flags.length > 0;
+                return `
+                  <div style="background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(255,255,255,0.08); border-left: 4px solid ${hasRedFlags ? '#ef4444' : '#14b8a6'}; border-radius: 12px; padding: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 0.92rem; font-weight: 800; color: #f8fafc;">Visita #${clientAtts.length - idx}: ${att.tipo_visita || 'Atendimento Clínico & Balcão'}</span>
+                        <span style="background: ${hasRedFlags ? 'rgba(239,68,68,0.2)' : 'rgba(20,184,166,0.2)'}; color: ${hasRedFlags ? '#fca5a5' : '#2dd4bf'}; border: 1px solid currentColor; padding: 2px 8px; border-radius: 12px; font-size: 0.72rem; font-weight: 700;">
+                          ${hasRedFlags ? '🚨 Red Flag Detectado' : '✓ Prescrição Segura (CDSS 4D)'}
+                        </span>
+                      </div>
+                      <span style="font-size: 0.78rem; color: #94a3b8;"><i class="fa-solid fa-clock"></i> ${dateFmt} &bull; Resp: ${att.pharmacist_name || 'Dr. Marcelo Mazaro'}</span>
+                    </div>
+
+                    <!-- Queixa Relatada -->
+                    <div style="background: rgba(0,0,0,0.3); border-radius: 8px; padding: 10px 14px; margin-bottom: 10px; font-size: 0.85rem;">
+                      <div style="color: #38bdf8; font-weight: 700; font-size: 0.76rem; text-transform: uppercase; margin-bottom: 3px;">
+                        <i class="fa-solid fa-comment-medical"></i> Queixa Relatada &amp; Sintomas:
+                      </div>
+                      <div style="color: #e2e8f0;">
+                        ${att.queixa_triagem ? att.queixa_triagem.toUpperCase().replace(/_/g, ' ') : 'Queixa clínica geral'} ${att.observacoes ? ' — ' + att.observacoes : ''}
+                      </div>
+                    </div>
+
+                    <!-- Medicamentos Indicados -->
+                    ${att.prescricao_mips ? `
+                      <div style="background: rgba(20, 184, 166, 0.08); border: 1px solid rgba(20, 184, 166, 0.25); border-radius: 8px; padding: 10px 14px; margin-bottom: 10px; font-size: 0.85rem;">
+                        <div style="color: #2dd4bf; font-weight: 700; font-size: 0.76rem; text-transform: uppercase; margin-bottom: 4px;">
+                          <i class="fa-solid fa-capsules"></i> Medicamentos Indicados / Dispensados:
+                        </div>
+                        <div style="color: #ffffff; font-weight: 600;">
+                          ${att.prescricao_mips}
+                        </div>
+                      </div>
+                    ` : ''}
+
+                    <!-- Desfecho e Ações Rápidas -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.78rem;">
+                      <span style="color: #94a3b8;"><strong>Conduta:</strong> ${att.conduta_final || 'Dispensação e Cuidados Farmacêuticos'}</span>
+                      <div style="display: flex; gap: 8px;">
+                        <button type="button" onclick="window.print()" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #38bdf8; padding: 4px 10px; border-radius: 6px; font-weight: 600; cursor: pointer;">
+                          <i class="fa-solid fa-print"></i> Reemitir DSF
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          `;
+        })()}
       </div>
 
       <!-- SEÇÃO 1: LINHA DO CUIDADO & ATENDIMENTOS -->

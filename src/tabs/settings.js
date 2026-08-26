@@ -9,6 +9,16 @@ import { showToast, showCustomAlert, showCustomConfirm } from '../modules/ui.js'
 import { getRolePermissions, showUserSessionsHistory } from '../modules/auth.js';
 import { syncManager, getSyncStatus, formatSyncDate } from '../modules/sync.js';
 import { showInteractiveManualModal } from '../manualTabbed.js';
+import {
+  generateSimulatedPatients,
+  generateSimulatedConsultations,
+  generateSimulatedStockEntries,
+  generateSimulatedFinancialTransactions,
+  generateFullDemoEcosystem,
+  cleanSimulationData,
+  cleanRealProductionData,
+  hardResetAllCollections
+} from '../modules/simulationManager.js';
 
 export function showSimulationSummaryModal() {
   showToast('Resumo operacional atualizado.');
@@ -44,7 +54,7 @@ export function renderSettingsTab(contentArea) {
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; background: rgba(15, 23, 42, 0.65); border: 1px solid rgba(255,255,255,0.08); padding: 12px 18px; border-radius: 14px; backdrop-filter: blur(12px);">
         <div style="display: flex; align-items: center; gap: 10px; color: #94a3b8; font-size: 0.84rem;">
           <i class="fa-solid fa-layer-group" style="color: #14b8a6; font-size: 1rem;"></i>
-          <span>Módulos de Configuração &bull; <strong>5 Agrupamentos Estruturados (Com Manual &amp; Protocolos)</strong></span>
+          <span>Módulos de Configuração &bull; <strong>6 Agrupamentos Estruturados (Com Simulador &amp; Gestão de Bases)</strong></span>
         </div>
         <div style="display: flex; gap: 8px;">
           <button id="btn-cfg-expand-all" class="btn" style="background: rgba(20, 184, 166, 0.15); border: 1px solid rgba(20, 184, 166, 0.35); color: #2dd4bf; font-size: 0.78rem; font-weight: 700; padding: 7px 14px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
@@ -445,6 +455,179 @@ export function renderSettingsTab(contentArea) {
                 <div>📜 <strong>Resolução CFF nº 585/2013:</strong> Regulamenta as atribuições clínicas do farmacêutico.</div>
                 <div>📜 <strong>Resolução CFF nº 586/2013:</strong> Regulamenta a prescrição farmacêutica.</div>
                 <div>📑 <strong>RDC ANVISA nº 44/2009:</strong> Boas Práticas Farmacêuticas e Serviços de Saúde.</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ==================================================================== -->
+        <!-- AGRUPAMENTO 6: SIMULADOR DE NEGÓCIO, SANDBOX & GESTÃO DE BASES       -->
+        <!-- ==================================================================== -->
+        <div class="cfg-accordion-card open" id="accordion-group-simulation" style="background: rgba(15, 23, 42, 0.75); border: 1.5px solid rgba(236, 72, 153, 0.4); border-radius: 18px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.35); transition: all 0.3s ease;">
+          <div class="cfg-accordion-header" data-target="body-simulation" style="padding: 16px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(90deg, rgba(236, 72, 153, 0.15), rgba(15, 23, 42, 0.6)); border-bottom: 1px solid rgba(236, 72, 153, 0.3); user-select: none;">
+            <div style="display: flex; align-items: center; gap: 16px;">
+              <div style="width: 46px; height: 46px; border-radius: 14px; background: linear-gradient(135deg, rgba(236, 72, 153, 0.25), rgba(190, 24, 93, 0.45)); border: 1.5px solid rgba(244, 114, 182, 0.6); display: flex; align-items: center; justify-content: center; color: #f472b6; font-size: 1.3rem; box-shadow: 0 0 18px rgba(236, 72, 153, 0.25);">
+                <i class="fa-solid fa-flask-vial"></i>
+              </div>
+              <div>
+                <div style="font-family: 'Outfit', sans-serif; font-size: 1.12rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                  Simulador de Negócio, Sandbox &amp; Gestão de Bases
+                  <span style="font-size: 0.72rem; background: rgba(236, 72, 153, 0.2); color: #f472b6; border: 1px solid rgba(236, 72, 153, 0.4); padding: 2px 9px; border-radius: 12px; font-weight: 700;">
+                    Ambiente de Testes &amp; Reset Seguro
+                  </span>
+                </div>
+                <p style="margin: 3px 0 0; font-size: 0.82rem; color: #94a3b8;">
+                  Gere cenários de demonstração em 1 clique (clientes, atendimentos, suprimentos, financeiro) e realize a limpeza seletiva com confirmação por senha.
+                </p>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div class="cfg-chevron-btn" style="width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; color: #f472b6; transition: transform 0.3s ease;">
+                <i class="fa-solid fa-chevron-down cfg-chevron-icon"></i>
+              </div>
+            </div>
+          </div>
+
+          <div id="body-simulation" class="cfg-accordion-body" style="padding: 20px; display: block;">
+            
+            <!-- BLOCO 1: GERADOR DE DADOS DE TESTE / DEMONSTRAÇÃO (SANDBOX) -->
+            <div style="background: linear-gradient(135deg, rgba(236, 72, 153, 0.12), rgba(15, 23, 42, 0.75)); border: 1px solid rgba(236, 72, 153, 0.35); border-radius: 16px; padding: 20px; margin-bottom: 20px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
+                <div>
+                  <h4 style="font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 700; color: #fff; margin: 0 0 4px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-wand-magic-sparkles" style="color: #f472b6;"></i> Geradores de Dados Simulados (Sandbox)
+                  </h4>
+                  <p style="font-size: 0.82rem; color: #cbd5e1; margin: 0;">
+                    Popule o CRM com dados realistas marcados como <code>[SIMULADO]</code> para demonstrações, treinamentos ou testes de estresse clínico.
+                  </p>
+                </div>
+
+                <button id="btn-generate-full-demo" class="btn" style="background: linear-gradient(135deg, #ec4899, #db2777); color: #fff; border: 1px solid #f472b6; padding: 11px 22px; border-radius: 10px; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 16px rgba(236, 72, 153, 0.4);">
+                  <i class="fa-solid fa-rocket"></i> Gerar Ecossistema Completo (1 Clique)
+                </button>
+              </div>
+
+              <!-- Grid com os 4 Geradores Modulares -->
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px;">
+                
+                <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div>
+                    <div style="font-weight: 700; color: #38bdf8; font-size: 0.88rem; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                      <i class="fa-solid fa-users"></i> Clientes &amp; Prontuário
+                    </div>
+                    <p style="font-size: 0.76rem; color: #94a3b8; margin: 0 0 10px;">Gera pacientes com CPFs, idades, alergias a AINEs/dipirona e uso contínuo.</p>
+                  </div>
+                  <button id="btn-sim-gen-patients" class="btn btn-sm" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.35); color: #38bdf8; font-weight: 700; padding: 6px 12px; border-radius: 8px; cursor: pointer;">
+                    + 5 Clientes Clínicos
+                  </button>
+                </div>
+
+                <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div>
+                    <div style="font-weight: 700; color: #2dd4bf; font-size: 0.88rem; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                      <i class="fa-solid fa-prescription-bottle-medical"></i> Atendimentos &amp; MIPs
+                    </div>
+                    <p style="font-size: 0.76rem; color: #94a3b8; margin: 0 0 10px;">Gera consultas de balcão com triagem de queixas (Gripe, Cefaleia, Rinite) e MIPs.</p>
+                  </div>
+                  <button id="btn-sim-gen-consults" class="btn btn-sm" style="background: rgba(45, 212, 191, 0.15); border: 1px solid rgba(45, 212, 191, 0.35); color: #2dd4bf; font-weight: 700; padding: 6px 12px; border-radius: 8px; cursor: pointer;">
+                    + 5 Atendimentos Clínicos
+                  </button>
+                </div>
+
+                <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div>
+                    <div style="font-weight: 700; color: #fbbf24; font-size: 0.88rem; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                      <i class="fa-solid fa-boxes-stacked"></i> Estoque &amp; Distribuidoras
+                    </div>
+                    <p style="font-size: 0.76rem; color: #94a3b8; margin: 0 0 10px;">Gera entradas de medicamentos com Lote, Validade 2028, Custo e Preço de Venda.</p>
+                  </div>
+                  <button id="btn-sim-gen-stock" class="btn btn-sm" style="background: rgba(251, 191, 36, 0.15); border: 1px solid rgba(251, 191, 36, 0.35); color: #fbbf24; font-weight: 700; padding: 6px 12px; border-radius: 8px; cursor: pointer;">
+                    + 5 Itens de Estoque
+                  </button>
+                </div>
+
+                <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div>
+                    <div style="font-weight: 700; color: #34d399; font-size: 0.88rem; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                      <i class="fa-solid fa-sack-dollar"></i> Financeiro &amp; Fluxo de Caixa
+                    </div>
+                    <p style="font-size: 0.76rem; color: #94a3b8; margin: 0 0 10px;">Gera receitas de consultas/MIPs e despesas de distribuidora/aluguel.</p>
+                  </div>
+                  <button id="btn-sim-gen-financial" class="btn btn-sm" style="background: rgba(52, 211, 153, 0.15); border: 1px solid rgba(52, 211, 153, 0.35); color: #34d399; font-weight: 700; padding: 6px 12px; border-radius: 8px; cursor: pointer;">
+                    + 8 Lançamentos Financeiros
+                  </button>
+                </div>
+
+              </div>
+            </div>
+
+            <!-- BLOCO 2: GERENCIAMENTO & LIMPEZA DE BASES PROTEGIDA POR SENHA -->
+            <div style="background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 20px;">
+              <h4 style="font-family: 'Outfit', sans-serif; font-size: 1.05rem; font-weight: 700; color: #fff; margin: 0 0 6px; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-shield-halved" style="color: #fbbf24;"></i> Gerenciamento e Limpeza Seletiva de Bases (Proteção por Senha)
+              </h4>
+              <p style="font-size: 0.82rem; color: #94a3b8; margin: 0 0 16px;">
+                Escolha com precisão qual base deseja purgar. Todas as ações de exclusão exigem autenticação com senha por segurança.
+              </p>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+                
+                <!-- Card 1: Limpar Simulação -->
+                <div style="background: rgba(30, 41, 59, 0.4); border: 1.5px solid rgba(56, 189, 248, 0.35); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                      <span style="font-weight: 700; color: #38bdf8; font-size: 0.95rem;">
+                        <i class="fa-solid fa-broom"></i> Limpar Dados de Simulação
+                      </span>
+                      <span style="font-size: 0.7rem; background: rgba(56, 189, 248, 0.2); color: #38bdf8; padding: 2px 7px; border-radius: 8px;">Sandbox</span>
+                    </div>
+                    <p style="font-size: 0.78rem; color: #cbd5e1; margin: 0 0 14px; line-height: 1.4;">
+                      Remove <strong>exclusivamente</strong> os registros de teste e demonstração (com flag <code>[SIMULADO]</code>). Seus cadastros reais permanecem intactos.
+                    </p>
+                  </div>
+                  <button id="btn-purge-simulation-data" class="btn" style="background: rgba(56, 189, 248, 0.18); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; font-weight: 700; font-size: 0.82rem; padding: 9px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                    <i class="fa-solid fa-trash-can"></i> Limpar Base de Simulação
+                  </button>
+                </div>
+
+                <!-- Card 2: Limpar Produção Real -->
+                <div style="background: rgba(30, 41, 59, 0.4); border: 1.5px solid rgba(245, 158, 11, 0.35); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                      <span style="font-weight: 700; color: #fbbf24; font-size: 0.95rem;">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Limpar Cadastros Reais
+                      </span>
+                      <span style="font-size: 0.7rem; background: rgba(245, 158, 11, 0.2); color: #fbbf24; padding: 2px 7px; border-radius: 8px;">Produção</span>
+                    </div>
+                    <p style="font-size: 0.78rem; color: #cbd5e1; margin: 0 0 14px; line-height: 1.4;">
+                      Remove os cadastros reais inseridos em produção (clientes, atendimentos, estoque), mantendo usuários e configurações do sistema.
+                    </p>
+                  </div>
+                  <button id="btn-purge-real-data" class="btn" style="background: rgba(245, 158, 11, 0.18); border: 1px solid rgba(245, 158, 11, 0.4); color: #fbbf24; font-weight: 700; font-size: 0.82rem; padding: 9px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                    <i class="fa-solid fa-eraser"></i> Limpar Base de Produção
+                  </button>
+                </div>
+
+                <!-- Card 3: Reset Geral de Fábrica -->
+                <div style="background: rgba(30, 41, 59, 0.4); border: 1.5px solid rgba(244, 63, 94, 0.35); border-radius: 14px; padding: 18px; display: flex; flex-direction: column; justify-content: space-between;">
+                  <div>
+                    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                      <span style="font-weight: 700; color: #fb7185; font-size: 0.95rem;">
+                        <i class="fa-solid fa-bomb"></i> Reset Geral de Fábrica
+                      </span>
+                      <span style="font-size: 0.7rem; background: rgba(244, 63, 94, 0.2); color: #fb7185; padding: 2px 7px; border-radius: 8px;">Hard Reset</span>
+                    </div>
+                    <p style="font-size: 0.78rem; color: #cbd5e1; margin: 0 0 14px; line-height: 1.4;">
+                      Limpa todas as coleções do banco local (simulados e reais), restaurando o CRM ao estado original de primeiro acesso.
+                    </p>
+                  </div>
+                  <button id="btn-hard-reset-factory" class="btn" style="background: rgba(244, 63, 94, 0.18); border: 1px solid rgba(244, 63, 94, 0.4); color: #fb7185; font-weight: 700; font-size: 0.82rem; padding: 9px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                    <i class="fa-solid fa-rotate-left"></i> Hard Reset Geral
+                  </button>
+                </div>
+
               </div>
             </div>
 
@@ -925,8 +1108,180 @@ export function renderSettingsTab(contentArea) {
     showToast('📁 Backup exportado com sucesso!');
   });
 
+  // ====================================================================
+  // EVENTOS DO AGRUPAMENTO 6: SIMULADOR & GESTÃO DE BASES COM SENHA
+  // ====================================================================
+
+  // 1. Gerador de Ecossistema Completo em 1 Clique
+  document.getElementById('btn-generate-full-demo')?.addEventListener('click', () => {
+    const res = generateFullDemoEcosystem();
+    showToast(`🚀 Ecossistema gerado! +${res.patients} clientes, +${res.consultations} atendimentos, +${res.products} produtos e +${res.financial} lançamentos.`);
+  });
+
+  // 2. Geradores Modulares
+  document.getElementById('btn-sim-gen-patients')?.addEventListener('click', () => {
+    const c = generateSimulatedPatients(5);
+    showToast(`👥 +${c} clientes clínicos simulados gerados com sucesso!`);
+  });
+
+  document.getElementById('btn-sim-gen-consults')?.addEventListener('click', () => {
+    const c = generateSimulatedConsultations(5);
+    showToast(`🩺 +${c} atendimentos de balcão e prescrições de MIPs gerados!`);
+  });
+
+  document.getElementById('btn-sim-gen-stock')?.addEventListener('click', () => {
+    const c = generateSimulatedStockEntries(5);
+    showToast(`📦 +${c} itens de estoque de distribuidora gerados com lote e validade!`);
+  });
+
+  document.getElementById('btn-sim-gen-financial')?.addEventListener('click', () => {
+    const c = generateSimulatedFinancialTransactions(8);
+    showToast(`💳 +${c} lançamentos financeiros simulados gerados no fluxo de caixa!`);
+  });
+
+  // 3. Limpeza de Simulação (Sandbox) protegida por senha
+  document.getElementById('btn-purge-simulation-data')?.addEventListener('click', () => {
+    openPasswordPromptModal({
+      title: 'Limpar Base de Simulação (Sandbox)',
+      badge: 'Sandbox',
+      message: 'Confirme sua senha para remover <strong>exclusivamente</strong> os dados de teste gerados pelo simulador (clientes, atendimentos, estoque e financeiro com flag <code>[SIMULADO]</code>). Seus cadastros reais permanecerão 100% seguros.',
+      requireConfirmationText: false,
+      isDanger: false,
+      onConfirm: (password) => {
+        const res = cleanSimulationData(password);
+        if (res.success) {
+          showToast(`🧹 Base de simulação limpa com sucesso! ${res.removedCount} registros removidos.`);
+        } else {
+          showCustomAlert({ title: 'Atenção', message: res.message, type: 'warning' });
+        }
+      }
+    });
+  });
+
+  // 4. Limpeza de Cadastros Reais de Produção protegida por senha Master + CONFIRMAR
+  document.getElementById('btn-purge-real-data')?.addEventListener('click', () => {
+    openPasswordPromptModal({
+      title: '⚠️ Limpar Cadastros Reais de Produção',
+      badge: 'Produção',
+      message: '<strong>ATENÇÃO:</strong> Esta ação removerá permanentemente todos os cadastros reais inseridos manualmente (clientes, atendimentos, produtos e financeiro). Usuários e configurações do sistema serão preservados.',
+      requireConfirmationText: true,
+      isDanger: true,
+      onConfirm: (password, confirmText) => {
+        const res = cleanRealProductionData(password, confirmText);
+        if (res.success) {
+          showToast(`⚠️ Base de produção limpa com sucesso! ${res.removedCount} registros reais removidos.`);
+        } else {
+          showCustomAlert({ title: 'Erro de Autenticação', message: res.message, type: 'danger' });
+        }
+      }
+    });
+  });
+
+  // 5. Hard Reset Geral de Fábrica
+  document.getElementById('btn-hard-reset-factory')?.addEventListener('click', () => {
+    openPasswordPromptModal({
+      title: '💥 Hard Reset Geral de Fábrica',
+      badge: 'Reset Crítico',
+      message: '<strong>PERIGO MÁXIMO:</strong> Esta ação redefinirá todas as bases locais para o estado zero (tanto dados simulados quanto reais).',
+      requireConfirmationText: true,
+      isDanger: true,
+      onConfirm: (password, confirmText) => {
+        const res = hardResetAllCollections(password, confirmText);
+        if (res.success) {
+          showToast('💥 Reset de fábrica concluído com sucesso!');
+          setTimeout(() => location.reload(), 1200);
+        } else {
+          showCustomAlert({ title: 'Erro de Autenticação', message: res.message, type: 'danger' });
+        }
+      }
+    });
+  });
+
   // Carregar lista de usuários na inicialização
   loadUsersList();
+}
+
+// ─── MODAL DE CONFIRMAÇÃO DE SEGURANÇA COM SENHA ───
+function openPasswordPromptModal({ title, badge, message, requireConfirmationText = false, isDanger = false, onConfirm }) {
+  const existing = document.getElementById('modal-security-password-prompt');
+  if (existing) existing.remove();
+
+  const primaryColor = isDanger ? '#f43f5e' : '#38bdf8';
+  const glowColor = isDanger ? 'rgba(244, 63, 94, 0.35)' : 'rgba(56, 189, 248, 0.35)';
+
+  const modalHtml = `
+    <div id="modal-security-password-prompt" style="position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 100050; padding: 20px; animation: fadeIn 0.2s ease;">
+      <div style="background: linear-gradient(145deg, #1e293b, #0f172a); border: 1.5px solid ${primaryColor}; border-radius: 18px; max-width: 480px; width: 100%; box-shadow: 0 0 35px ${glowColor}; overflow: hidden;">
+        
+        <div style="padding: 18px 22px; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.25);">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="width: 36px; height: 36px; border-radius: 10px; background: rgba(255,255,255,0.08); display: flex; align-items: center; justify-content: center; color: ${primaryColor}; font-size: 1.1rem;">
+              <i class="fa-solid ${isDanger ? 'fa-triangle-exclamation' : 'fa-lock'}"></i>
+            </div>
+            <div>
+              <h3 style="color: #f8fafc; font-family: 'Outfit', sans-serif; font-size: 1.1rem; margin: 0;">${title}</h3>
+              ${badge ? `<span style="font-size: 0.68rem; color: ${primaryColor}; font-weight: 700; text-transform: uppercase;">${badge}</span>` : ''}
+            </div>
+          </div>
+          <button type="button" id="btn-close-pwd-modal" style="background: transparent; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer;">✕</button>
+        </div>
+
+        <form id="form-security-pwd-confirm" style="padding: 22px; display: flex; flex-direction: column; gap: 16px;">
+          <div style="font-size: 0.86rem; color: #cbd5e1; line-height: 1.5;">
+            ${message}
+          </div>
+
+          <div>
+            <label style="display: block; font-size: 0.82rem; color: #cbd5e1; margin-bottom: 6px; font-weight: 600;">
+              * Digite sua Senha de Operador / Master:
+            </label>
+            <input type="password" id="input-security-password" class="form-input" placeholder="••••••••" required style="width: 100%; height: 42px; background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(255,255,255,0.15); color: #fff; font-size: 1rem; padding: 0 12px; border-radius: 8px;">
+          </div>
+
+          ${requireConfirmationText ? `
+            <div>
+              <label style="display: block; font-size: 0.82rem; color: #fca5a5; margin-bottom: 6px; font-weight: 600;">
+                * Digite a palavra <strong style="color: #fff; text-decoration: underline;">CONFIRMAR</strong> para prosseguir:
+              </label>
+              <input type="text" id="input-security-confirm-text" class="form-input" placeholder="CONFIRMAR" required style="width: 100%; height: 42px; background: rgba(15, 23, 42, 0.9); border: 1px solid #f43f5e; color: #fb7185; font-size: 0.95rem; font-weight: 800; text-transform: uppercase; padding: 0 12px; border-radius: 8px;">
+            </div>
+          ` : ''}
+
+          <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 6px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08);">
+            <button type="button" id="btn-cancel-pwd-modal" class="btn" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; padding: 9px 18px; border-radius: 8px; font-weight: 600; font-size: 0.85rem; cursor: pointer;">
+              Cancelar
+            </button>
+            <button type="submit" class="btn" style="background: ${isDanger ? 'linear-gradient(135deg, #f43f5e, #e11d48)' : 'linear-gradient(135deg, #0284c7, #0369a1)'}; border: none; color: #fff; font-weight: 700; padding: 9px 22px; border-radius: 8px; font-size: 0.85rem; cursor: pointer; box-shadow: 0 4px 14px ${glowColor};">
+              <i class="fa-solid fa-check"></i> Confirmar Exclusão
+            </button>
+          </div>
+        </form>
+
+      </div>
+    </div>
+  `;
+
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+
+  const overlay = document.getElementById('modal-security-password-prompt');
+  const close = () => overlay?.remove();
+
+  document.getElementById('btn-close-pwd-modal')?.addEventListener('click', close);
+  document.getElementById('btn-cancel-pwd-modal')?.addEventListener('click', close);
+
+  document.getElementById('form-security-pwd-confirm')?.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const pwd = document.getElementById('input-security-password')?.value || '';
+    const txt = document.getElementById('input-security-confirm-text')?.value || '';
+    close();
+    if (typeof onConfirm === 'function') {
+      onConfirm(pwd, txt);
+    }
+  });
+
+  setTimeout(() => {
+    document.getElementById('input-security-password')?.focus();
+  }, 100);
 }
 
 // Modal de Criação e Edição de Usuário

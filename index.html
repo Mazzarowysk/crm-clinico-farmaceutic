@@ -6,6 +6,7 @@
   <title>CRM Clínico Farmacêutico — Suporte à Decisão &amp; Prescrição Segura (CDSS 4D)</title>
   <meta name="theme-color" content="#0d9488">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="manifest" href="/manifest.webmanifest">
   
@@ -57,64 +58,109 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;
+      min-height: 100vh;
       width: 100vw;
       background: radial-gradient(circle at center, #0f172a 0%, #080c14 100%);
+      gap: 20px;
+    }
+    .loader-card {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 41, 59, 0.95));
+      border: 1.5px solid rgba(20, 184, 166, 0.45);
+      border-radius: 24px;
+      padding: 32px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       gap: 16px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.85), 0 0 35px rgba(13, 148, 136, 0.25);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      animation: pulseLogo 3s infinite ease-in-out;
+      text-align: center;
+      max-width: 90vw;
     }
     .loader-logo-box {
-      width: 220px;
-      height: 220px;
-      border-radius: 28px;
+      width: 105px;
+      height: 105px;
+      border-radius: 22px;
       background: #ffffff;
       border: 2px solid rgba(20, 184, 166, 0.6);
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.75), 0 0 35px rgba(13, 148, 136, 0.45);
-      padding: 16px;
-      animation: pulseLogo 2.5s infinite ease-in-out;
+      padding: 6px;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7), 0 0 25px rgba(13, 148, 136, 0.4);
+      flex-shrink: 0;
     }
-    .loader-logo {
+    .loader-logo-img {
       width: 100%;
       height: 100%;
       object-fit: contain;
-      border-radius: 18px;
-      transform: scale(1.06);
+      border-radius: 16px;
+    }
+    .loader-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 1.35rem;
+      font-weight: 800;
+      margin: 0;
+      background: linear-gradient(135deg, #ffffff, #2dd4bf);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      letter-spacing: -0.3px;
+    }
+    .loader-badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #38bdf8;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      padding: 4px 12px;
+      border-radius: 20px;
+      display: inline-block;
+      margin-top: 6px;
     }
     .loader-spinner {
-      width: 32px;
-      height: 32px;
-      border: 3px solid rgba(20, 184, 166, 0.2);
+      width: 28px;
+      height: 28px;
+      border: 2.5px solid rgba(20, 184, 166, 0.2);
       border-top-color: #14b8a6;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
+      margin-top: 4px;
     }
     .loader-text {
-      font-family: 'Outfit', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 600;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.82rem;
+      font-weight: 500;
       color: #94a3b8;
-      letter-spacing: 0.5px;
+      margin: 0;
     }
     @keyframes spin {
       to { transform: rotate(360deg); }
     }
     @keyframes pulseLogo {
       0%, 100% { transform: scale(1); }
-      50% { transform: scale(1.04); }
+      50% { transform: scale(1.02); }
     }
   </style>
 </head>
 <body>
   <div id="app">
-    <!-- Tela de Inicialização / Carregamento com Logomarca -->
+    <!-- Tela de Inicialização / Carregamento com a Logomarca Oficial FarmaLogic -->
     <div class="initial-loader">
-      <div class="loader-logo-box">
-        <img src="/assets/crm_logo_v10.png" alt="CRM Clínico Farmacêutico" class="loader-logo">
+      <div class="loader-card">
+        <div class="loader-logo-box">
+          <img src="/assets/crm_logo_v10.png" alt="FarmaLogic CRM Clínico Farmacêutico" class="loader-logo-img" onerror="this.onerror=null; this.src='/logo.png';">
+        </div>
+        <div>
+          <h1 class="loader-title">CRM Clínico Farmacêutico</h1>
+          <span class="loader-badge">Decisão Clínica &bull; CDSS 4D</span>
+        </div>
+        <div class="loader-spinner"></div>
+        <p class="loader-text">Inicializando módulos e banco de dados...</p>
       </div>
-      <div class="loader-spinner"></div>
-      <p class="loader-text">Inicializando CRM Clínico Farmacêutico...</p>
     </div>
   </div>
   <!-- Script de Entrada SPA -->

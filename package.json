@@ -18,6 +18,7 @@
     "bcrypt": "^6.0.0",
     "better-sqlite3": "^13.0.2",
     "br-cid10-csv": "^1.0.1",
+    "chart.js": "^4.5.1",
     "cid10-br-mcp": "^1.1.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",

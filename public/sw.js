@@ -39,32 +39,31 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Ignora requisições de API e banco de dados externo
-  if (event.request.url.includes('/api/') || event.request.url.includes('turso.io')) {
+  // Ignora requisições não-GET, APIs e banco externo
+  if (event.request.method !== 'GET' || event.request.url.includes('/api/') || event.request.url.includes('turso.io')) {
     return;
   }
 
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request).then((networkResponse) => {
-        if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-          return networkResponse;
+    fetch(event.request)
+      .then((networkResponse) => {
+        if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache).catch(() => {});
+          });
         }
-        const responseToCache = networkResponse.clone();
-        caches.open(CACHE_NAME).then((cache) => {
-          cache.put(event.request, responseToCache);
-        });
         return networkResponse;
-      }).catch(() => {
-        // Fallback offline para navegação principal
+      })
+      .catch(async () => {
+        const cached = await caches.match(event.request);
+        if (cached) return cached;
         if (event.request.mode === 'navigate') {
-          return caches.match('/index.html');
+          const indexCached = await caches.match('/index.html');
+          if (indexCached) return indexCached;
         }
-      });
-    })
+        return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
+      })
   );
 });
 

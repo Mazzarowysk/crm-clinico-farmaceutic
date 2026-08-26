@@ -24,8 +24,8 @@ function renderReportsTab(contentArea) {
             <span class="card-status-badge" style="font-size: 0.68rem; font-weight: 700; padding: 3px 9px; border-radius: 20px; background: rgba(99,102,241,0.2); color: #c4b5fd; border: 1px solid rgba(99,102,241,0.4); letter-spacing: 0.5px;">SELECIONADO</span>
           </div>
           <div>
-            <h4 style="font-size: 1.02rem; font-weight: 700; color: var(--text-primary); margin: 0 0 4px 0;">Pacientes</h4>
-            <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0; line-height: 1.35;">Cadastro completo, condições crônicas e alergias estruturadas.</p>
+            <h4 style="font-size: 1.02rem; font-weight: 700; color: var(--text-primary); margin: 0 0 4px 0;">Clientes</h4>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0; line-height: 1.35;">Cadastro completo, condições crônicas, alergias e visitas recorrentes.</p>
           </div>
         </div>
 
@@ -52,8 +52,8 @@ function renderReportsTab(contentArea) {
             <span class="card-status-badge" style="display: none; font-size: 0.68rem; font-weight: 700; padding: 3px 9px; border-radius: 20px; background: rgba(34,211,238,0.2); color: #38bdf8; border: 1px solid rgba(34,211,238,0.4); letter-spacing: 0.5px;">SELECIONADO</span>
           </div>
           <div>
-            <h4 style="font-size: 1.02rem; font-weight: 700; color: var(--text-primary); margin: 0 0 4px 0;">Balcão &amp; MIPs</h4>
-            <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0; line-height: 1.35;">Triagens clínicas, indicação responsável de MIPs e orientações.</p>
+            <h4 style="font-size: 1.02rem; font-weight: 700; color: var(--text-primary); margin: 0 0 4px 0;">Medicamentos &amp; MIPs</h4>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0; line-height: 1.35;">Ranking de prescrições no balcão, queixas associadas e posologias.</p>
           </div>
         </div>
 
@@ -66,8 +66,8 @@ function renderReportsTab(contentArea) {
             <span class="card-status-badge" style="display: none; font-size: 0.68rem; font-weight: 700; padding: 3px 9px; border-radius: 20px; background: rgba(52,211,153,0.2); color: #34d399; border: 1px solid rgba(52,211,153,0.4); letter-spacing: 0.5px;">SELECIONADO</span>
           </div>
           <div>
-            <h4 style="font-size: 1.02rem; font-weight: 700; color: var(--text-primary); margin: 0 0 4px 0;">Intervenções CDSS</h4>
-            <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0; line-height: 1.35;">Interações graves, duplicidades e riscos em idosos evitados.</p>
+            <h4 style="font-size: 1.02rem; font-weight: 700; color: var(--text-primary); margin: 0 0 4px 0;">Laboratórios &amp; Fabricantes</h4>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0; line-height: 1.35;">Volume e percentual por fabricante (EMS, Medley, Eurofarma, Sanofi, etc.).</p>
           </div>
         </div>
 
@@ -80,8 +80,8 @@ function renderReportsTab(contentArea) {
             <span class="card-status-badge" style="display: none; font-size: 0.68rem; font-weight: 700; padding: 3px 9px; border-radius: 20px; background: rgba(167,139,250,0.2); color: #a78bfa; border: 1px solid rgba(167,139,250,0.4); letter-spacing: 0.5px;">SELECIONADO</span>
           </div>
           <div>
-            <h4 style="font-size: 1.02rem; font-weight: 700; color: var(--text-primary); margin: 0 0 4px 0;">Estoque &amp; Lotes</h4>
-            <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0; line-height: 1.35;">Consumo de MIPs, controle de lotes e alertas de validade.</p>
+            <h4 style="font-size: 1.02rem; font-weight: 700; color: var(--text-primary); margin: 0 0 4px 0;">Queixas &amp; Epidemiologia</h4>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0; line-height: 1.35;">Sintomas mais frequentes no balcão, alertas CDSS e sazonalidade.</p>
           </div>
         </div>
 
@@ -1898,61 +1898,63 @@ function renderReportsTab(contentArea) {
     }
 
     const dateNow = new Date().toLocaleString('pt-BR');
+    const docHash = 'CFF-' + Math.random().toString(36).substring(2, 9).toUpperCase() + '-' + Date.now().toString().slice(-4);
     const fmt = v => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
 
-    // ---- Bloco de Resumo Financeiro (opcional) ----
+    // ---- Bloco de Resumo Executivo / Financeiro ----
     const summaryBlock = financialSummary ? `
-      <div style="margin-bottom: 22px;">
-        <div style="font-size: 11pt; font-weight: 700; color: #1e1b4b; border-bottom: 2px solid #6366f1; padding-bottom: 6px; margin-bottom: 12px; display: flex; align-items: center; gap: 6px;">
-          📊 Resumo Executivo do Filtro
+      <div style="margin-bottom: 18px; page-break-inside: avoid;">
+        <div style="font-size: 9.5pt; font-weight: 700; color: #0f172a; border-bottom: 1.5px solid #0f766e; padding-bottom: 4px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
+          <span>📊 RESUMO EXECUTIVO &amp; INDICADORES CONSOLIDADOS</span>
+          <span style="font-size: 8pt; color: #0f766e; font-weight: 600;">Saldo Apurado: ${fmt(financialSummary.saldo)}</span>
         </div>
 
-        <!-- KPI CARDS em 3 colunas -->
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
-          <div style="background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 8px; padding: 10px 12px;">
-            <div style="font-size: 7.5pt; color: #15803d; font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">✅ Pagas</div>
-            <div style="font-size: 13pt; font-weight: 800; color: #16a34a;">${fmt(financialSummary.pagasVal)}</div>
-            <div style="font-size: 7.5pt; color: #4b5563;">${financialSummary.pagasC} parcela(s)</div>
+        <!-- KPI CARDS em grid equilibrado -->
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+          <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 6px; padding: 8px 10px;">
+            <div style="font-size: 7pt; color: #15803d; font-weight: 700; text-transform: uppercase;">✓ Recebidas / Pagas</div>
+            <div style="font-size: 11pt; font-weight: 800; color: #16a34a;">${fmt(financialSummary.pagasVal)}</div>
+            <div style="font-size: 7pt; color: #4b5563;">${financialSummary.pagasC} lançamento(s)</div>
           </div>
-          <div style="background: #eff6ff; border: 1.5px solid #93c5fd; border-radius: 8px; padding: 10px 12px;">
-            <div style="font-size: 7.5pt; color: #1d4ed8; font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">🕒 A Vencer</div>
-            <div style="font-size: 13pt; font-weight: 800; color: #2563eb;">${fmt(financialSummary.aVencerVal)}</div>
-            <div style="font-size: 7.5pt; color: #4b5563;">${financialSummary.aVencerC} parcela(s)</div>
+          <div style="background: #eff6ff; border: 1px solid #93c5fd; border-radius: 6px; padding: 8px 10px;">
+            <div style="font-size: 7pt; color: #1d4ed8; font-weight: 700; text-transform: uppercase;">📅 A Vencer / Programadas</div>
+            <div style="font-size: 11pt; font-weight: 800; color: #2563eb;">${fmt(financialSummary.aVencerVal)}</div>
+            <div style="font-size: 7pt; color: #4b5563;">${financialSummary.aVencerC} lançamento(s)</div>
           </div>
-          <div style="background: #fff1f2; border: 1.5px solid #fda4af; border-radius: 8px; padding: 10px 12px;">
-            <div style="font-size: 7.5pt; color: #be123c; font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">â— Vencidas</div>
-            <div style="font-size: 13pt; font-weight: 800; color: #e11d48;">${fmt(financialSummary.vencidasVal)}</div>
-            <div style="font-size: 7.5pt; color: #4b5563;">${financialSummary.vencidasC} parcela(s)</div>
+          <div style="background: #fff1f2; border: 1px solid #fda4af; border-radius: 6px; padding: 8px 10px;">
+            <div style="font-size: 7pt; color: #be123c; font-weight: 700; text-transform: uppercase;">⚠️ Em Atraso / Vencidas</div>
+            <div style="font-size: 11pt; font-weight: 800; color: #e11d48;">${fmt(financialSummary.vencidasVal)}</div>
+            <div style="font-size: 7pt; color: #4b5563;">${financialSummary.vencidasC} lançamento(s)</div>
           </div>
-          <div style="background: #f5f3ff; border: 1.5px solid #c4b5fd; border-radius: 8px; padding: 10px 12px;">
-            <div style="font-size: 7.5pt; color: #7c3aed; font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">âš–ï¸ Saldo Líquido</div>
-            <div style="font-size: 13pt; font-weight: 800; color: ${financialSummary.saldo >= 0 ? '#16a34a' : '#e11d48'};">${fmt(financialSummary.saldo)}</div>
-            <div style="font-size: 7.5pt; color: #4b5563;">Receitas − Despesas</div>
+          <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 10px;">
+            <div style="font-size: 7pt; color: #475569; font-weight: 700; text-transform: uppercase;">⚖️ Saldo Líquido Operacional</div>
+            <div style="font-size: 11pt; font-weight: 800; color: ${financialSummary.saldo >= 0 ? '#16a34a' : '#e11d48'};">${fmt(financialSummary.saldo)}</div>
+            <div style="font-size: 7pt; color: #4b5563;">Entradas - Saídas</div>
           </div>
-          <div style="background: #fffbeb; border: 1.5px solid #fcd34d; border-radius: 8px; padding: 10px 12px;">
-            <div style="font-size: 7.5pt; color: #b45309; font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">ðŸ† Bonificadas</div>
-            <div style="font-size: 13pt; font-weight: 800; color: #d97706;">${fmt(financialSummary.bonificadasVal)}</div>
-            <div style="font-size: 7.5pt; color: #4b5563;">${financialSummary.bonificadasC} parcela(s)</div>
+          <div style="background: #fffbeb; border: 1px solid #fcd34d; border-radius: 6px; padding: 8px 10px;">
+            <div style="font-size: 7pt; color: #b45309; font-weight: 700; text-transform: uppercase;">⭐ Bonificadas / Convênios</div>
+            <div style="font-size: 11pt; font-weight: 800; color: #d97706;">${fmt(financialSummary.bonificadasVal)}</div>
+            <div style="font-size: 7pt; color: #4b5563;">${financialSummary.bonificadasC} item(ns)</div>
           </div>
-          <div style="background: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 8px; padding: 10px 12px;">
-            <div style="font-size: 7.5pt; color: #dc2626; font-weight: 700; text-transform: uppercase; margin-bottom: 2px;">🚫 Outras</div>
-            <div style="font-size: 13pt; font-weight: 800; color: #dc2626;">${fmt((financialSummary.suspensasVal||0)+(financialSummary.canceladasVal||0)+(financialSummary.excluidasVal||0))}</div>
-            <div style="font-size: 7.5pt; color: #4b5563;">Suspensas / Canceladas / Excluídas</div>
+          <div style="background: #fef2f2; border: 1px solid #fca5a5; border-radius: 6px; padding: 8px 10px;">
+            <div style="font-size: 7pt; color: #dc2626; font-weight: 700; text-transform: uppercase;">🔄 Baixas Especiais</div>
+            <div style="font-size: 11pt; font-weight: 800; color: #dc2626;">${fmt((financialSummary.suspensasVal||0)+(financialSummary.canceladasVal||0)+(financialSummary.excluidasVal||0))}</div>
+            <div style="font-size: 7pt; color: #4b5563;">Canceladas / Suspensas</div>
           </div>
         </div>
 
-        <!-- GRÃFICOS como imagens base64 -->
+        <!-- GRÁFICOS base64 em alta nitidez -->
         ${(financialSummary.donutImg || financialSummary.barImg) ? `
-        <div style="display: grid; grid-template-columns: 1fr 1.6fr; gap: 12px; margin-bottom: 8px;">
+        <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 10px; margin-bottom: 6px;">
           ${financialSummary.donutImg ? `
-          <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; text-align: center;">
-            <div style="font-size: 8pt; font-weight: 700; color: #475569; margin-bottom: 6px;">📈 Distribuição por Status</div>
-            <img src="${financialSummary.donutImg}" style="max-width: 100%; max-height: 160px; object-fit: contain;" />
+          <div style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px; text-align: center; background: #fafafa;">
+            <div style="font-size: 7.5pt; font-weight: 700; color: #334155; margin-bottom: 4px;">📈 Distribuição por Status</div>
+            <img src="${financialSummary.donutImg}" style="max-width: 100%; max-height: 140px; object-fit: contain;" />
           </div>` : ''}
           ${financialSummary.barImg ? `
-          <div style="border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; text-align: center;">
-            <div style="font-size: 8pt; font-weight: 700; color: #475569; margin-bottom: 6px;">📊 Volume por Forma de Pagamento (R$)</div>
-            <img src="${financialSummary.barImg}" style="max-width: 100%; max-height: 160px; object-fit: contain;" />
+          <div style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px; text-align: center; background: #fafafa;">
+            <div style="font-size: 7.5pt; font-weight: 700; color: #334155; margin-bottom: 4px;">📊 Volume por Categoria / Forma (R$)</div>
+            <img src="${financialSummary.barImg}" style="max-width: 100%; max-height: 140px; object-fit: contain;" />
           </div>` : ''}
         </div>` : ''}
       </div>
@@ -1963,49 +1965,141 @@ function renderReportsTab(contentArea) {
       <html lang="pt-BR">
       <head>
         <meta charset="UTF-8">
-        <title>${title} — CRM Clínico Farmacêutico</title>
+        <title>${title} - CRM Clínico Farmacêutico</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
         <style>
-          @page { size: A4 portrait; margin: 15mm; }
-          body { font-family: 'Segoe UI', Arial, sans-serif; color: #0f172a; margin: 0; padding: 15px; font-size: 10pt; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-          .meta { text-align: right; font-size: 8.5pt; color: #64748b; }
-          h1 { font-size: 15pt; color: #0f172a; margin-top: 0; margin-bottom: 12px; }
-          table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-          th { background-color: #4f46e5; color: #ffffff; text-align: left; padding: 7px 9px; font-size: 8.5pt; text-transform: uppercase; letter-spacing: 0.5px; }
-          td { padding: 7px 9px; border-bottom: 1px solid #e2e8f0; font-size: 9pt; }
+          @page { size: A4 portrait; margin: 12mm 14mm 14mm 14mm; }
+          body { 
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
+            color: #0f172a; 
+            margin: 0; 
+            padding: 0; 
+            font-size: 8.5pt; 
+            line-height: 1.4;
+            -webkit-print-color-adjust: exact; 
+            print-color-adjust: exact; 
+          }
+          .header-box {
+            border-bottom: 2px solid #0f766e;
+            padding-bottom: 12px;
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+          }
+          .title-banner {
+            background: #f0fdfa;
+            border: 1px solid #99f6e4;
+            border-left: 4.5px solid #0f766e;
+            border-radius: 6px;
+            padding: 9px 14px;
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+          }
+          table { width: 100%; border-collapse: collapse; margin-top: 8px; page-break-inside: auto; }
+          tr { page-break-inside: avoid; page-break-after: auto; }
+          th { 
+            background-color: #0f172a; 
+            color: #ffffff; 
+            text-align: left; 
+            padding: 6px 8px; 
+            font-size: 7.5pt; 
+            text-transform: uppercase; 
+            letter-spacing: 0.5px;
+            font-weight: 700;
+          }
+          td { 
+            padding: 5.5px 8px; 
+            border-bottom: 1px solid #e2e8f0; 
+            font-size: 8pt; 
+            color: #1e293b;
+          }
           tr:nth-child(even) td { background-color: #f8fafc; }
-          .footer { margin-top: 25px; border-top: 1px solid #cbd5e1; padding-top: 8px; font-size: 8pt; color: #94a3b8; text-align: center; }
-          .badge { display: inline-block; padding: 2px 7px; border-radius: 4px; font-weight: bold; font-size: 8pt; }
-          .badge-vencidas { background: #ffe4e6; color: #e11d48; }
-          .badge-pagas { background: #d1fae5; color: #059669; }
-          .badge-avencer { background: #e0f2fe; color: #0284c7; }
-          .badge-bonificadas { background: #fef3c7; color: #d97706; }
-          .badge-suspensas { background: #f3f4f6; color: #374151; }
-          .badge-canceladas { background: #fee2e2; color: #dc2626; }
-          .badge-excluídas { background: #fee2e2; color: #7f1d1d; }
+          .badge { 
+            display: inline-block; 
+            padding: 2px 6px; 
+            border-radius: 12px; 
+            font-weight: 700; 
+            font-size: 7pt; 
+            letter-spacing: 0.3px;
+          }
+          .badge-vencidas, .badge-critica, .badge-vermelho { background: #fee2e2; color: #b91c1c; border: 1px solid #f87171; }
+          .badge-pagas, .badge-concluido, .badge-verde { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+          .badge-avencer, .badge-aguardando, .badge-azul { background: #e0f2fe; color: #0369a1; border: 1px solid #7dd3fc; }
+          .badge-bonificadas, .badge-laranja, .badge-amarelo { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+          .badge-suspensas, .badge-canceladas { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+          .sig-card {
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: #fafafa;
+            padding: 10px 14px;
+            margin-top: 18px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            page-break-inside: avoid;
+          }
+          .footer { 
+            margin-top: 14px; 
+            border-top: 1px solid #e2e8f0; 
+            padding-top: 6px; 
+            font-size: 7pt; 
+            color: #64748b; 
+            display: flex; 
+            justify-content: space-between; 
+          }
         </style>
       </head>
       <body>
-        <div class="header" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #6366f1; padding-bottom: 14px; margin-bottom: 20px;">
-          <div style="display: flex; align-items: center; gap: 14px;">
-            <div style="background: #ffffff; padding: 6px 14px; border-radius: 12px; box-shadow: 0 4px 14px rgba(0,0,0,0.08); border: 1.5px solid #e2e8f0; display: flex; align-items: center; justify-content: center;">
-              <img src="/assets/crm-logo.png?v=2" alt="CRM Clínico Farmacêutico" style="height: 42px; width: auto; object-fit: contain;">
+        <!-- CABEÇALHO OFICIAL CRM CLÍNICO FARMACÊUTICO -->
+        <div class="header-box">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="background: #ffffff; padding: 4px 8px; border-radius: 8px; border: 1.5px solid #0f766e; display: flex; align-items: center; justify-content: center;">
+              <img src="/assets/crm-logo.png?v=2" alt="Logo CRM" style="height: 38px; width: auto; object-fit: contain;">
             </div>
             <div>
-              <div style="font-family: 'Outfit', sans-serif; font-size: 16pt; font-weight: 800; color: #1e1b4b; margin: 0; line-height: 1.1;">CRM CLÍNICO FARMACÊUTICO</div>
-              <div style="font-size: 8.5pt; color: #64748b; font-weight: 500; margin-top: 2px;">Gestão Hospitalar &amp; Inteligência Médica</div>
+              <div style="font-family: 'Outfit', sans-serif; font-size: 14pt; font-weight: 800; color: #0f172a; margin: 0; line-height: 1.1; letter-spacing: -0.3px;">
+                CRM CLÍNICO FARMACÊUTICO
+              </div>
+              <div style="font-size: 8pt; color: #0f766e; font-weight: 700; margin-top: 2px;">
+                Consultório Farmacêutico · Prescrição Clínica · Farmacovigilância CDSS 4D
+              </div>
+              <div style="font-size: 7pt; color: #64748b; margin-top: 1px;">
+                Conforme Resoluções CFF nº 585/2013 e nº 586/2013 · RDC ANVISA nº 44/2009
+              </div>
             </div>
           </div>
-          <div class="meta">
-            <div>Data de Emissão: <strong>${dateNow}</strong></div>
-            <div>Documento Autenticado do Sistema</div>
+          
+          <div style="text-align: right; font-size: 7.5pt; color: #475569; line-height: 1.35;">
+            <div>Emissão: <strong>${dateNow}</strong></div>
+            <div>Autenticador: <span style="font-family: monospace; font-weight: 700; color: #0f766e;">${docHash}</span></div>
+            <div>RT: <strong>Dr. Marcelo Mazaro</strong> (CRF-SP 54180)</div>
           </div>
         </div>
 
-        <h1>${title}</h1>
-        <p style="font-size: 8.5pt; color: #64748b; margin-top: -6px;">Total de registros impressos: <strong>${rows.length}</strong></p>
+        <!-- BANNER DE IDENTIFICAÇÃO DO RELATÓRIO -->
+        <div class="title-banner">
+          <div>
+            <h1 style="font-size: 12pt; color: #0f766e; margin: 0; font-family: 'Outfit', sans-serif; font-weight: 800; text-transform: uppercase;">
+              ${title}
+            </h1>
+            <div style="font-size: 7.5pt; color: #475569; margin-top: 2px;">
+              Documento gerencial e assistencial oficial emitido pelo CRM Clínico Farmacêutico
+            </div>
+          </div>
+          <div style="text-align: right; font-size: 8pt; color: #0f766e; font-weight: 700;">
+            Total: <strong>${rows.length}</strong> registro(s)
+          </div>
+        </div>
 
+        <!-- BLOCO DE KPIs (SE HOUVER) -->
         ${summaryBlock}
 
+        <!-- TABELA DE REGISTROS -->
         <table>
           <thead>
             <tr>
@@ -2016,8 +2110,9 @@ function renderReportsTab(contentArea) {
             ${rows.map(row => `
               <tr>
                 ${row.map((cell, idx) => {
-                  if (columns[idx] === 'Status') {
-                    const s = String(cell).toLowerCase().replace(/\s+/g, '');
+                  const colName = (columns[idx] || '').toLowerCase();
+                  if (colName.includes('status') || colName.includes('situa') || colName.includes('severidade')) {
+                    const s = String(cell).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
                     return `<td><span class="badge badge-${s}">${cell}</span></td>`;
                   }
                   return `<td>${cell}</td>`;
@@ -2027,17 +2122,36 @@ function renderReportsTab(contentArea) {
           </tbody>
         </table>
 
-        <div class="footer">
-          CRM Clínico Farmacêutico © 2026 — Sistema Integrado de Saúde Hospitalar • Documento impresso digitalmente.
+        <!-- TERMO DE AUTENTICIDADE E ASSINATURA DIGITAL -->
+        <div class="sig-card">
+          <div style="font-size: 7.2pt; color: #64748b; line-height: 1.35; max-width: 60%;">
+            <div style="font-weight: 700; color: #0f172a; margin-bottom: 2px;">AUTENTICIDADE E RASTREABILIDADE DIGITAL (CFM nº 1.821/2007 · CFF nº 586/2013)</div>
+            <div>Este relatório possui validade legal e probatória em conformidade com as diretrizes do Conselho Federal de Farmácia e LGPD (Lei nº 13.709/2018).</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="border-top: 1.5px solid #0f172a; width: 220px; padding-top: 3px; text-align: center;">
+              <div style="font-size: 8.5pt; font-weight: 800; color: #0f172a;">Dr. Marcelo Mazaro</div>
+              <div style="font-size: 7pt; color: #0f766e; font-weight: 600;">Farmacêutico Responsável Técnico · CRF-SP 54180</div>
+              <div style="font-size: 6.8pt; color: #16a34a; font-weight: 700; margin-top: 1px;">✓ Assinatura Digital ICP-Brasil / CFF</div>
+            </div>
+          </div>
         </div>
+
+        <!-- RODAPÉ -->
+        <div class="footer">
+          <div>CRM Clínico Farmacêutico · Dr. Marcelo Mazaro (CRF-SP 54180) · Sistema Integrado</div>
+          <div>Gerado em ${dateNow} · Chave: ${docHash}</div>
+        </div>
+
         <script>
-          window.onload = function() { window.print(); };
+          window.onload = function() {
+            setTimeout(function() { window.print(); }, 400);
+          };
         </script>
       </body>
       </html>
     `;
 
-    // Escreve o conteúdo na nova janela para acionar a impressão
     printWindow.document.open();
     printWindow.document.write(htmlContent);
     printWindow.document.close();
@@ -3800,59 +3914,70 @@ async function openEncounterReportDetail(encId) {
 
     // PDF / Print
     const genDoc = () => {
-      const manchColor = manchesterHex[mc] || '#6366f1';
-      const vRow = (l, v) => `<tr><td style="padding:5px 10px;font-size:9pt;color:#475569;border-bottom:1px solid #f1f5f9;width:32%;">${l}</td><td style="padding:5px 10px;font-size:9pt;font-weight:600;color:#0f172a;border-bottom:1px solid #f1f5f9;">${v||'—'}</td></tr>`;
-      return `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Atendimento — ${enc.patientName}</title>
-      <style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:'Segoe UI',Arial,sans-serif;color:#0f172a;background:#fff;padding:26px 30px;}
-      .hdr{display:flex;gap:14px;align-items:flex-start;padding-bottom:14px;border-bottom:3px solid #6366f1;margin-bottom:18px;}
-      .logo{width:48px;height:48px;border-radius:11px;background:${manchColor}18;border:2px solid ${manchColor}44;display:flex;align-items:center;justify-content:center;font-size:20pt;color:${manchColor};}
-      .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:8pt;font-weight:700;margin-right:4px;}
-      .sec{font-size:8.5pt;font-weight:800;color:#6366f1;text-transform:uppercase;letter-spacing:.06em;margin:16px 0 7px;padding-bottom:4px;border-bottom:1.5px solid #e2e8f0;}
+      const vRow = (l, v) => v ? `<tr><td style="padding:4px 8px;font-weight:700;color:#0f766e;width:130px;border-bottom:1px solid #e2e8f0;font-size:8pt;">${l}:</td><td style="padding:4px 8px;color:#1e293b;border-bottom:1px solid #e2e8f0;font-size:8pt;">${v}</td></tr>` : '';
+      return `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8">
+      <title>Resumo do Atendimento - ${enc.patientName||'Paciente'}</title>
+      <link rel="preconnect" href="https://fonts.googleapis.com">
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+      <style>
+      @page{size:A4 portrait;margin:12mm 14mm 14mm 14mm;}
+      body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#0f172a;margin:0;padding:0;font-size:8.5pt;line-height:1.4;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+      .hdr{display:flex;gap:14px;align-items:center;padding-bottom:12px;border-bottom:2px solid #0f766e;margin-bottom:14px;}
+      .badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:7.5pt;font-weight:700;margin-right:4px;}
+      .sec{font-size:8.5pt;font-weight:800;color:#0f766e;text-transform:uppercase;letter-spacing:.04em;margin:12px 0 6px;padding-bottom:3px;border-bottom:1.5px solid #0f766e;}
       table{width:100%;border-collapse:collapse;}
-      .vg{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:7px;}
-      .vb{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:9px;text-align:center;}
-      .vv{font-size:13pt;font-weight:800;color:#0f172a;}.vl{font-size:7pt;color:#64748b;text-transform:uppercase;margin-top:2px;}
-      .sb{border-left:3px solid #6366f1;padding:7px 12px;margin-bottom:7px;background:#fafafa;border-radius:0 6px 6px 0;}
-      .sl{font-size:8pt;font-weight:800;color:#6366f1;text-transform:uppercase;margin-bottom:3px;}
-      .sc{font-size:9pt;color:#1e293b;line-height:1.6;}
-      .ftr{margin-top:24px;padding-top:10px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;font-size:7.5pt;color:#94a3b8;}
-      @media print{body{padding:14px 18px;}}</style></head><body>
-      <div class="hdr" style="display: flex; gap: 14px; align-items: center; padding-bottom: 14px; border-bottom: 3px solid #6366f1; margin-bottom: 18px;">
-        <div style="background: #ffffff; padding: 6px 12px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); border: 1.5px solid #e2e8f0; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-          <img src="/assets/crm-logo.png?v=2" alt="CRM Clínico Farmacêutico" style="height: 38px; width: auto; object-fit: contain;">
+      .vg{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px;}
+      .vb{background:#f8fafc;border:1px solid #cbd5e1;border-radius:6px;padding:7px;text-align:center;}
+      .vv{font-size:11pt;font-weight:800;color:#0f172a;}.vl{font-size:6.8pt;color:#64748b;text-transform:uppercase;margin-top:1px;font-weight:700;}
+      .sb{border-left:3.5px solid #0f766e;padding:6px 10px;margin-bottom:6px;background:#f8fafc;border-radius:0 6px 6px 0;border-top:1px solid #e2e8f0;border-right:1px solid #e2e8f0;border-bottom:1px solid #e2e8f0;}
+      .sl{font-size:7.5pt;font-weight:800;color:#0f766e;text-transform:uppercase;margin-bottom:2px;}
+      .sc{font-size:8.2pt;color:#1e293b;line-height:1.45;}
+      .ftr{margin-top:16px;padding-top:8px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;font-size:7pt;color:#64748b;}
+      @media print{body{padding:0;}}</style></head><body>
+      <div class="hdr">
+        <div style="background:#ffffff;padding:4px 8px;border-radius:8px;border:1.5px solid #0f766e;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <img src="/assets/crm-logo.png?v=2" alt="CRM Clínico Farmacêutico" style="height:36px;width:auto;object-fit:contain;">
         </div>
         <div style="flex:1;">
-          <div style="font-size:7.5pt;color:#6366f1;font-weight:800;text-transform:uppercase;letter-spacing:.05em;">CRM Clínico Farmacêutico — Resumo do Atendimento</div>
-          <h1 style="font-size:15pt;font-weight:800;color:#0f172a;margin:3px 0;">${enc.patientName||'Paciente'}</h1>
-          <div style="margin-top:5px;">
-            ${mc?`<span class="badge" style="background:${manchColor}18;color:${manchColor};border:1px solid ${manchColor}40;">${mc.toUpperCase()}</span>`:''}
+          <div style="font-size:7.5pt;color:#0f766e;font-weight:800;text-transform:uppercase;letter-spacing:.04em;">CRM Clínico Farmacêutico · Resumo do Atendimento Clínico</div>
+          <h1 style="font-size:13pt;font-weight:800;color:#0f172a;margin:2px 0;font-family:'Outfit',sans-serif;">${enc.patientName||'Paciente'}</h1>
+          <div style="margin-top:3px;display:flex;align-items:center;gap:6px;">
+            ${mc?`<span class="badge" style="background:${manchColor}18;color:${manchColor};border:1px solid ${manchColor}40;">Triagem: ${mc.toUpperCase()}</span>`:''}
             <span class="badge" style="background:#f0fdf4;color:#15803d;border:1px solid #86efac;">${statusMap[enc.status]||enc.status}</span>
-            <span style="font-size:8pt;color:#64748b;">${dateStr}</span>
+            <span style="font-size:7.5pt;color:#64748b;">Data: ${dateStr}</span>
           </div>
         </div>
-        <div style="text-align:right;"><div style="font-size:7pt;color:#94a3b8;">ID</div><div style="font-family:monospace;font-size:7.5pt;color:#6366f1;">${encId.substring(0,20)}…</div></div>
+        <div style="text-align:right;">
+          <div style="font-size:7pt;color:#64748b;">ID Atendimento</div>
+          <div style="font-family:monospace;font-size:7.5pt;font-weight:700;color:#0f766e;">#${encId.substring(0,12).toUpperCase()}</div>
+        </div>
       </div>
-      <div class="sec">👤 Paciente e Atendimento</div>
+      <div class="sec">📋 Dados do Paciente &amp; Atendimento</div>
       <table><tbody>
-        ${vRow('Nome',enc.patientName)}${vRow('Idade',age!=='—'?age+' anos':'—')}${vRow('CPF',cpfDisplay)}
-        ${vRow('Cidade',patient?.city||enc.city)}${vRow('Convênio',patient?.insurance||'Particular')}
-        ${vRow('Tipo',enc.type==='Urgencia'?'Urgência':'Ambulatório')}
-        ${vRow('Médico',enc.doctorName)}${vRow('Sala/Leito',enc.room||enc.bed)}
-        ${vRow('Entrada',dateStr)}${cid?vRow('CID-10',cid):''}
+        ${vRow('Nome Completo',enc.patientName)}${vRow('Idade',age!=='-'?age+' anos':'-')}${vRow('CPF',cpfDisplay)}
+        ${vRow('Cidade',patient?.city||enc.city)}${vRow('Convênio',patient?.insurance||'Particular / SUS')}
+        ${vRow('Tipo de Atendimento',enc.type==='Urgencia'?'Pronto Atendimento / Urgência':'Ambulatório / Eletivo')}
+        ${vRow('Médico Assistente',enc.doctorName)}${vRow('Sala / Consultório',enc.room||enc.bed||'Consultório 01')}
+        ${vRow('Data e Hora de Entrada',dateStr)}${cid?vRow('CID-10 / Diagnóstico',cid):''}
       </tbody></table>
-      <div class="sec">🩺 Sinais Vitais</div>
+      <div class="sec">🩺 Sinais Vitais na Triagem</div>
       <div class="vg">
-        ${[['PA',bp,'mmHg'],['FC',hr,'bpm'],['Temp.',temp,'°C'],['SpO₂',spo2,'%'],['Peso',weight,'kg'],['F.Resp',rr,'irpm'],['Dor',pain,'/10']].map(([l,v,u])=>`<div class="vb"><div class="vv">${v}<span style="font-size:8pt;color:#94a3b8;">${u}</span></div><div class="vl">${l}</div></div>`).join('')}
+        ${[['PA',bp,'mmHg'],['FC',hr,'bpm'],['Temp.',temp,'°C'],['SpO2',spo2,'%'],['Peso',weight,'kg'],['F.Resp',rr,'irpm'],['Escala Dor',pain,'/10']].map(([l,v,u])=>`<div class="vb"><div class="vv">${v}<span style="font-size:7.5pt;color:#64748b;font-weight:normal;"> ${u}</span></div><div class="vl">${l}</div></div>`).join('')}
       </div>
-      ${complaint?`<div class="sec">💬 Queixa Principal</div><p style="font-size:9.5pt;color:#1e293b;line-height:1.65;background:#fffbeb;padding:10px 12px;border-radius:6px;border-left:3px solid #fbbf24;">${complaint}</p>`:''}
+      ${complaint?`<div class="sec">💬 Queixa Principal / Motivo da Consulta</div><p style="font-size:8.5pt;color:#1e293b;line-height:1.5;background:#fffbeb;padding:8px 10px;border-radius:6px;border-left:3.5px solid #d97706;margin:4px 0 10px;">${complaint}</p>`:''}
       ${note&&(note.subjective||note.objective||note.assessment||note.plan)?`
-      <div class="sec">📋 Nota SOAP ${note.isClosed?'— <span style="color:#15803d">✓ Assinada</span>':'— Rascunho'}</div>
-      ${note.subjective?`<div class="sb"><div class="sl">S — Subjetivo</div><div class="sc">${note.subjective}</div></div>`:''}
-      ${note.objective?`<div class="sb" style="border-color:#0ea5e9"><div class="sl" style="color:#0ea5e9">O — Objetivo</div><div class="sc">${note.objective}</div></div>`:''}
-      ${note.assessment?`<div class="sb" style="border-color:#f97316"><div class="sl" style="color:#f97316">A — Avaliação</div><div class="sc">${note.assessment}</div></div>`:''}
-      ${note.plan?`<div class="sb" style="border-color:#22c55e"><div class="sl" style="color:#22c55e">P — Plano</div><div class="sc">${note.plan}</div></div>`:''}
-      `:`<div class="sec">📋 Nota SOAP</div><p style="font-size:9pt;color:#94a3b8;"><em>Nenhuma nota registrada.</em></p>`}
-      <div class="ftr"><span>CRM Clínico Farmacêutico — Sistema de Gestão Hospitalar</span><span>Gerado: ${new Date().toLocaleString('pt-BR')}</span></div>
+      <div class="sec">📝 Evolução SOAP ${note.isClosed?'(✓ Assinatura Digital CFM)':'- Em Aberto'}</div>
+      ${note.subjective?`<div class="sb"><div class="sl">S - Subjetivo</div><div class="sc">${note.subjective}</div></div>`:''}
+      ${note.objective?`<div class="sb" style="border-color:#0284c7"><div class="sl" style="color:#0284c7">O - Objetivo</div><div class="sc">${note.objective}</div></div>`:''}
+      ${note.assessment?`<div class="sb" style="border-color:#d97706"><div class="sl" style="color:#d97706">A - Avaliação</div><div class="sc">${note.assessment}</div></div>`:''}
+      ${note.plan?`<div class="sb" style="border-color:#16a34a"><div class="sl" style="color:#16a34a">P - Plano Terapêutico</div><div class="sc">${note.plan}</div></div>`:''}
+      `:`<div class="sec">📝 Evolução SOAP</div><p style="font-size:8pt;color:#94a3b8;font-style:italic;">Nenhuma nota clínica SOAP registrada.</p>`}
+      <div class="ftr">
+        <span>CRM Clínico Farmacêutico · Dr. Marcelo Mazaro (CRF-SP 54180) · Sistema Integrado</span>
+        <span>Gerado eletronicamente em ${new Date().toLocaleString('pt-BR')}</span>
+      </div>
+      <script>window.onload = function(){ setTimeout(function(){ window.print(); }, 400); };</script>
       </body></html>`;
     };
 

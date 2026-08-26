@@ -114,15 +114,23 @@ function ensureTable(db, table) {
     }
   }
 
-  // Seed para Pacientes e Atendimentos do CRM Clínico Farmacêutico
-  if (table === 'pharmacy_patients' && db[table].length === 0) {
-    db[table] = [
-      {
-        id: 'PHARM-PAT-001',
-        name: 'Dona Maria de Lourdes Santos',
-        cpf: '234.567.890-12',
-        birthDate: '1958-04-12',
-        age: 68,
+  const isInitialized = db.__initialized || localStorage.getItem('crm_initialized') === 'true';
+
+  // Seed inicial apenas na primeira instalação (se não inicializado)
+  if (!isInitialized) {
+    db.__initialized = true;
+    localStorage.setItem('crm_initialized', 'true');
+    modified = true;
+
+    // Seed para Pacientes e Atendimentos do CRM Clínico Farmacêutico
+    if (table === 'pharmacy_patients' && db[table].length === 0) {
+      db[table] = [
+        {
+          id: 'PHARM-PAT-001',
+          name: 'Dona Maria de Lourdes Santos',
+          cpf: '234.567.890-12',
+          birthDate: '1958-04-12',
+          age: 68,
         gender: 'Feminino',
         isPregnantOrLactating: false,
         allergies: 'Dipirona (Edema de Glote e Urticária Severa)',
@@ -469,6 +477,8 @@ function ensureTable(db, table) {
     ];
     modified = true;
   }
+
+  } // Fim de if (!isInitialized)
 
   if (modified) {
     try {

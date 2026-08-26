@@ -196,7 +196,309 @@ export const PHARMACY_TRIAGE_PROTOCOLS = {
         contraindications: ['Pacientes portadores de cateter venoso central', 'Imunossuprimidos graves']
       }
     ]
+  },
+  tosse: {
+    id: 'tosse',
+    title: 'Tosse Aguda (Seca ou Produtiva)',
+    ciap2: 'R05',
+    cid10: 'R05',
+    icon: 'fa-lungs',
+    description: 'Avaliação de tosse irritativa sem expectoração ou tosse cheia com secreção fluida.',
+    redFlags: [
+      { id: 'rf_hemoptise', label: 'Expectoração com sangue vivo ou estrias hemáticas (Hemoptise)' },
+      { id: 'rf_tosse_dispneia', label: 'Falta de ar progressiva ou chiado no peito (Sibilos audíveis)' },
+      { id: 'rf_tosse_cronica', label: 'Tosse persistente há mais de 3 semanas sem melhora' },
+      { id: 'rf_febre_vespertina', label: 'Febre vespertina com sudorese noturna e perda de peso' }
+    ],
+    nonPharmaActions: [
+      'Ingestão hídrica frequente (água morna e chás de camomila ou hortelã com mel)',
+      'Nebulização apenas com Soro Fisiológico 0.9% 2 a 3 vezes ao dia',
+      'Evitar fumaça de cigarro, poeira e odores químicos fortes',
+      'Umidificar o ar do quarto durante a noite'
+    ],
+    recommendedMIPs: [
+      {
+        name: 'Dropropizina 3mg/ml (Xarope Adulto) ou 1.5mg/ml (Infantil)',
+        drugClass: 'ATC_R05DB',
+        indication: 'Sedativo da tosse seca e irritativa de ação periférica',
+        posology: '10ml a cada 8 horas (ou 6 horas) por no máximo 5 dias',
+        contraindications: ['Tosse produtiva com catarro espesso', 'Insuficiência respiratória']
+      },
+      {
+        name: 'Guaifenesina 13.33mg/ml + Mel (Xarope Expectorante)',
+        drugClass: 'ATC_R05CA',
+        indication: 'Fluidificante e expectorante para tosse cheia/produtiva',
+        posology: '15ml a cada 4 a 6 horas por até 5 a 7 dias',
+        contraindications: ['Crianças menores de 2 anos sem orientação médica', 'Úlcera gástrica ativa']
+      },
+      {
+        name: 'Acetilcisteína 600mg (Sachê Efervescente)',
+        drugClass: 'ATC_R05CB',
+        indication: 'Mucolítico potente para fluidificação de secreções densas',
+        posology: '1 sachê dissolvido em meio copo de água 1 vez ao dia (preferencialmente à noite)',
+        contraindications: ['Úlcera péptica ativa', 'Fenilcetonúria (se contiver aspartamo)']
+      }
+    ]
+  },
+  rinite: {
+    id: 'rinite',
+    title: 'Rinite Alérgica & Congestão Nasal',
+    ciap2: 'R97',
+    cid10: 'J30.4',
+    icon: 'fa-spray-can-sparkles',
+    description: 'Espirros em salva, prurido nasal/ocular, coriza hialina e obstrução nasal sazonal.',
+    redFlags: [
+      { id: 'rf_obstrucao_unilateral', label: 'Obstrução nasal estritamente unilateral com sangramento (Epistaxe recorrente)' },
+      { id: 'rf_dor_facial_purulenta', label: 'Dor facial intensa unilateral com secreção amarelada fétida (Sinusite bacteriana)' },
+      { id: 'rf_edema_facial', label: 'Inchaço nos lábios, pálpebras ou sensação de aperto na garganta (Anafilaxia)' }
+    ],
+    nonPharmaActions: [
+      'Lavagem nasal com Soro Fisiológico isotônico ou hipertônico 3% com seringa ou garrafinha',
+      'Higienização de roupas de cama com água quente e uso de capas antiácaro',
+      'Evitar carpetes, cortinas pesadas, bichos de pelúcia e exposição a pelos de animais',
+      'Arejar ambientes e evitar varrer a seco (usar pano úmido)'
+    ],
+    recommendedMIPs: [
+      {
+        name: 'Loratadina 10mg',
+        drugClass: 'ATC_R06AX',
+        indication: 'Anti-histamínico de 2ª geração sem efeito sedativo acentuado',
+        posology: '1 comprimido 1 vez ao dia pela manhã por até 7 a 10 dias',
+        contraindications: ['Hipersensibilidade à loratadina ou desloratadina']
+      },
+      {
+        name: 'Cetirizina 10mg',
+        drugClass: 'ATC_R06AE',
+        indication: 'Controle rápido de coriza, prurido nasal e espirros',
+        posology: '1 comprimido 1 vez ao dia por até 7 dias',
+        contraindications: ['Insuficiência renal terminal (ClCr < 10 ml/min)']
+      },
+      {
+        name: 'Spray Nasal de Cloreto de Sódio 0.9% ou 3%',
+        drugClass: 'ATC_R01AX',
+        indication: 'Descongestionamento mecânico e remoção de alérgenos da mucosa nasal',
+        posology: '1 a 2 jatos em cada narina várias vezes ao dia conforme necessidade',
+        contraindications: ['Nenhuma contraindicação clínica relevante']
+      }
+    ]
+  },
+  garganta: {
+    id: 'garganta',
+    title: 'Dor de Garganta & Inflamação Faríngea',
+    ciap2: 'R72',
+    cid10: 'J02.9',
+    icon: 'fa-viruses',
+    description: 'Irritação, ardência, dor ao engolir e vermelhidão faríngea leve sem placas purulentas.',
+    redFlags: [
+      { id: 'rf_placas_pus', label: 'Exudato purulento extenso visível nas amígdalas com febre alta (Amigdalite Bacteriana)' },
+      { id: 'rf_trismo', label: 'Dificuldade para abrir a boca (Trismo) ou salivação excessiva por dor (Abscesso periamigdaliano)' },
+      { id: 'rf_disfagia_grave', label: 'Incapacidade total de engolir saliva ou líquidos' }
+    ],
+    nonPharmaActions: [
+      'Gargarejos com água morna e sal (1/2 colher de chá de sal em 1 copo de água morna) 3x ao dia',
+      'Ingestão de líquidos mornos ou frios e alimentos pastosos',
+      'Evitar alimentos muito condimentados, ácidos ou muito quentes',
+      'Uso de própolis ou mel com limão para alívio tópico natural'
+    ],
+    recommendedMIPs: [
+      {
+        name: 'Flurbiprofeno 8.75mg (Pastilhas)',
+        drugClass: 'ATC_R02AX',
+        indication: 'Anti-inflamatório tópico de ação local para dor de garganta',
+        posology: 'Dissolver 1 pastilha na boca a cada 3 a 6 horas (máximo 5 pastilhas/dia)',
+        contraindications: ['Úlcera péptica ativa', 'Menores de 12 anos', 'Hipersensibilidade a AINEs']
+      },
+      {
+        name: 'Cloridrato de Benzidamina 1.5mg/ml (Spray Oral)',
+        drugClass: 'ATC_A01AD',
+        indication: 'Anestésico e anti-inflamatório tópico bucofaríngeo',
+        posology: '2 a 4 nebulizações na garganta a cada 4 horas conforme dor',
+        contraindications: ['Hipersensibilidade à benzidamina']
+      },
+      {
+        name: 'Dipirona 500mg - 1g',
+        drugClass: 'ATC_N02BB',
+        indication: 'Analgesia sistêmica para alívio da odinofagia',
+        posology: '1 comprimido a cada 6 horas se dor',
+        contraindications: ['Alergia a pirazolonas']
+      }
+    ]
+  },
+  colica: {
+    id: 'colica',
+    title: 'Cólicas Menstruais & Espasmos Abdominais',
+    ciap2: 'X02',
+    cid10: 'N94.6',
+    icon: 'fa-droplet',
+    description: 'Dismenorreia primária leve a moderada, dores em cólica no baixo ventre associadas ao ciclo.',
+    redFlags: [
+      { id: 'rf_dor_subita_aguda', label: 'Dor abdominal aguda em facada de início súbito (Abdome agudo / Torção de ovário)' },
+      { id: 'rf_sangramento_excessivo', label: 'Hemorragia menstrual volumosa com coágulos grandes e tontura/lipotímia' },
+      { id: 'rf_suspeita_gravidez', label: 'Atraso menstrual recente com teste positivo ou dor pélvica intensa (Gravidez ectópica)' }
+    ],
+    nonPharmaActions: [
+      'Aplicação de bolsa de água morna no baixo ventre por 20 minutos',
+      'Prática de exercícios físicos leves e alongamentos pélvicos',
+      'Ingestão de chás quentes (camomila, erva-doce, gengibre)',
+      'Evitar alimentos inflamatórios e excesso de cafeína nos dias que antecedem o fluxo'
+    ],
+    recommendedMIPs: [
+      {
+        name: 'Butilbrometo de Escopolamina 10mg + Dipirona 250mg (Buscopan Composto)',
+        drugClass: 'ATC_A03DB',
+        indication: 'Antiespasmódico com analgésico de dupla ação para cólicas',
+        posology: '1 a 2 comprimidos a cada 6 a 8 horas se cólica (máximo 6 comprimidos/dia)',
+        contraindications: ['Glaucoma', 'Megacólon', 'Miastenia gravis', 'Alergia a dipirona']
+      },
+      {
+        name: 'Ácido Mefenâmico 500mg (Ponstan)',
+        drugClass: 'ATC_M01AG',
+        indication: 'AINE de 1ª linha para inibição de prostaglandinas endometriais na dismenorreia',
+        posology: '1 comprimido de 8/8h após as refeições no início dos sintomas por até 3 dias',
+        contraindications: ['Úlcera péptica ativa', 'Doença inflamatória intestinal', 'Insuficiência renal']
+      }
+    ]
+  },
+  constipacao: {
+    id: 'constipacao',
+    title: 'Constipação Intestinal / Prisão de Ventre',
+    ciap2: 'D12',
+    cid10: 'K59.0',
+    icon: 'fa-leaf',
+    description: 'Dificuldade para evacuar, fezes ressecadas e frequência evacuatória reduzida.',
+    redFlags: [
+      { id: 'rf_parada_gases_fezes', label: 'Parada total de eliminação de gases e fezes com distensão abdominal dolorosa (Obstrução intestinal)' },
+      { id: 'rf_sangue_escuro', label: 'Sangramento retal vivo ou fezes afiladas com perda de peso (Sinais de alarme colorretal)' },
+      { id: 'rf_dor_abdominal_febre', label: 'Dor abdominal intensa em cólica acompanhada de febre ou vômitos' }
+    ],
+    nonPharmaActions: [
+      'Aumento da ingestão de fibras na dieta (aveia, ameixa preta, mamão, linhaça, chia)',
+      'Ingestão obrigatória de pelo menos 2 a 2.5 litros de água ao dia',
+      'Prática de caminhada e atividades físicas para estímulo do peristaltismo',
+      'Respeitar o reflexo gastrocólico e manter horário regular para evacuar'
+    ],
+    recommendedMIPs: [
+      {
+        name: 'Lactulose 667mg/ml (Xarope)',
+        drugClass: 'ATC_A06AD',
+        indication: 'Laxativo osmótico suave e prebiótico de alta segurança (pode ser usado por gestantes e idosos)',
+        posology: '15ml a 30ml ao dia em dose única matinal ou fracionada com água',
+        contraindications: ['Galactosemia', 'Obstrução intestinal mecânica']
+      },
+      {
+        name: 'Fibras de Plantago ovata / Psyllium 5g (Sachê)',
+        drugClass: 'ATC_A06AC',
+        indication: 'Laxativo formador de massa fecal natural',
+        posology: '1 sachê dissolvido em 250ml de água 1 a 2 vezes ao dia (beber imediatamente + 1 copo de água)',
+        contraindications: ['Estenose esofágica ou intestinal', 'Disfagia']
+      },
+      {
+        name: 'Supositório de Glicerina Adulto',
+        drugClass: 'ATC_A06AX',
+        indication: 'Alívio rápido pontual para esvaziamento da ampola retal',
+        posology: 'Introduzir 1 supositório por via retal quando necessário (age em 15-30 min)',
+        contraindications: ['Crise hemorroidária aguda com fissura sangrante']
+      }
+    ]
+  },
+  alergia_cutanea: {
+    id: 'alergia_cutanea',
+    title: 'Alergias Cutâneas, Prurido & Picadas',
+    ciap2: 'S88',
+    cid10: 'L50.9',
+    icon: 'fa-hand-dots',
+    description: 'Urticária leve, coceira na pele, vermelhidão localizada após contato com substâncias ou picadas.',
+    redFlags: [
+      { id: 'rf_edema_glote', label: 'Edema de lábios, língua ou sensação de garganta fechando (Anafilaxia / Emergência Médica)' },
+      { id: 'rf_lesoes_bolhosas', label: 'Bolhas na pele, descamação generalizada ou acometimento de mucosas (SJS/NET)' },
+      { id: 'rf_infeccao_secundaria', label: 'Lesões com crostas de pus e calor local intenso (Infecção secundária / Celulite)' }
+    ],
+    nonPharmaActions: [
+      'Compressas frias com água filtrada ou chá de camomila gelado para alívio imediato do prurido',
+      'Hidratação abundante da pele com loções sem perfume (ceramidas, aveia coloidal)',
+      'Evitar banhos muito quentes e o uso de buchas abrasivas',
+      'Manter unhas curtas e limpas para evitar escoriações e infecção bacteriana'
+    ],
+    recommendedMIPs: [
+      {
+        name: 'Maleato de Dexclorfeniramina 2mg (Polaramine)',
+        drugClass: 'ATC_R06AB',
+        indication: 'Anti-histamínico clássico para alívio rápido de prurido e erupções alérgicas',
+        posology: '1 comprimido a cada 6 ou 8 horas por até 3 a 5 dias (pode causar sonolência)',
+        contraindications: ['Glaucoma', 'Hipertrofia prostática', 'Atividades que exigem atenção (dirigir)']
+      },
+      {
+        name: 'Pomada de Acetato de Hidrocortisona 1%',
+        drugClass: 'ATC_D07AA',
+        indication: 'Corticosteroide tópico suave para redução de inflamação e coceira localizada',
+        posology: 'Aplicar fina camada sobre a área afetada 2 vezes ao dia por no máximo 5 a 7 dias',
+        contraindications: ['Lesões fúngicas ou bacterianas sem tratamento', 'Uso no rosto por tempo prolongado']
+      }
+    ]
+  },
+  olho_irritado: {
+    id: 'olho_irritado',
+    title: 'Olho Seco & Irritação Ocular Leve',
+    ciap2: 'F02',
+    cid10: 'H04.1',
+    icon: 'fa-eye',
+    description: 'Sensação de areia nos olhos, ardência, vermelhidão leve por uso de telas, vento ou poeira.',
+    redFlags: [
+      { id: 'rf_baixa_acuidade_visual', label: 'Perda súbita ou embaçamento importante da visão' },
+      { id: 'rf_dor_ocular_profunda', label: 'Dor ocular intensa e profunda com fotofobia extrema e vômitos (Glaucoma agudo / Úlcera de córnea)' },
+      { id: 'rf_trauma_quimico', label: 'Acidente com respingo de produtos químicos, cal ou ácidos no olho' },
+      { id: 'rf_secrecao_purulenta_abundante', label: 'Secreção amarelada/esverdeada abundante que cola as pálpebras pela manhã' }
+    ],
+    nonPharmaActions: [
+      'Regra 20-20-20 no uso de telas: a cada 20 minutos, olhar para um objeto a 6 metros por 20 segundos',
+      'Piscamento consciente frequente durante o trabalho em computadores e celulares',
+      'Compressas frias com água filtrada sobre as pálpebras fechadas',
+      'Evitar coçar os olhos e higienizar bem as mãos antes de tocar a face'
+    ],
+    recommendedMIPs: [
+      {
+        name: 'Carmelose Sódica 0.5% (Colírio Lubrificante)',
+        drugClass: 'ATC_S01XA',
+        indication: 'Lágrima artificial de alta retenção para alívio de olho seco e ardência',
+        posology: 'Instilar 1 a 2 gotas no(s) olho(s) afetado(s) 3 a 4 vezes ao dia ou conforme necessidade',
+        contraindications: ['Hipersensibilidade à carmelose']
+      },
+      {
+        name: 'Hialuronato de Sódio 0.15% (Colírio)',
+        drugClass: 'ATC_S01XA',
+        indication: 'Hidratação profunda e regeneração do filme lacrimal ocular',
+        posology: 'Instilar 1 gota em cada olho 3 vezes ao dia',
+        contraindications: ['Hipersensibilidade ao princípio ativo']
+      }
+    ]
   }
+};
+
+// Mapeamento de sinônimos/aliases para resolver identificações automáticas
+export const PROTOCOL_ALIASES = {
+  'gripe': 'gripe_resfriado',
+  'resfriado': 'gripe_resfriado',
+  'gripe_resfriado': 'gripe_resfriado',
+  'cefaleia': 'cefaleia',
+  'dor_de_cabeca': 'cefaleia',
+  'enxaqueca': 'cefaleia',
+  'azia': 'dispepsia_azia',
+  'dispepsia': 'dispepsia_azia',
+  'dispepsia_azia': 'dispepsia_azia',
+  'refluxo': 'dispepsia_azia',
+  'dor_muscular': 'dor_muscular_lombalgia',
+  'dor_muscular_lombalgia': 'dor_muscular_lombalgia',
+  'lombalgia': 'dor_muscular_lombalgia',
+  'diarreia': 'diarreia_aguda',
+  'diarreia_aguda': 'diarreia_aguda',
+  'tosse': 'tosse',
+  'rinite': 'rinite',
+  'garganta': 'garganta',
+  'dor_garganta': 'garganta',
+  'colica': 'colica',
+  'constipacao': 'constipacao',
+  'alergia_cutanea': 'alergia_cutanea',
+  'olho_irritado': 'olho_irritado'
 };
 
 // --- 2. BASE EXPANDIDA DE INTERAÇÕES: ALIMENTOS, HÁBITOS, COMORBIDADES & CRITÉRIOS DE BEERS ---
@@ -597,47 +899,52 @@ export const generatePharmacistDeclarationHTML = ({
   const authCode = generateDeclarationAuthHash({ patientName: patient.name, cpf: patient.cpf, crf: pharmacist.crf, date: date.toISOString() });
 
   return `
-    <div class="pharmacy-declaration-print" style="font-family: 'Inter', sans-serif; color: #1e293b; background: #ffffff; padding: 36px; border-radius: 14px; border: 1px solid #cbd5e1; max-width: 820px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
+    <div class="pharmacy-declaration-print" style="font-family: 'Inter', sans-serif; color: #1e293b; background: #ffffff; padding: 32px; border-radius: 12px; border: 1px solid #cbd5e1; max-width: 820px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.08);">
       
       <!-- Cabeçalho Oficial -->
-      <div style="border-bottom: 2.5px solid #0d9488; padding-bottom: 18px; margin-bottom: 22px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
-        <div>
-          <h2 style="margin: 0; color: #0f766e; font-size: 1.45rem; font-family: 'Outfit', sans-serif; font-weight: 800; letter-spacing: -0.02em;">
-            DECLARAÇÃO DE SERVIÇO FARMACÊUTICO (DSF)
-          </h2>
-          <p style="margin: 4px 0 0 0; font-size: 0.85rem; color: #64748b;">
-            Assistência Farmacêutica Clínica &amp; Prescrição Farmacêutica de MIPs — Resoluções CFF nº 585/2013 e 586/2013
-          </p>
+      <div style="border-bottom: 2.5px solid #0d9488; padding-bottom: 16px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="background: #ffffff; padding: 4px 8px; border-radius: 8px; border: 1.5px solid #0d9488;">
+            <img src="/assets/crm-logo.png?v=2" alt="Logo CRM" style="height: 36px; width: auto; object-fit: contain;">
+          </div>
+          <div>
+            <h2 style="margin: 0; color: #0f766e; font-size: 1.35rem; font-family: 'Outfit', sans-serif; font-weight: 800; letter-spacing: -0.02em;">
+              DECLARAÇÃO DE SERVIÇO FARMACÊUTICO (DSF)
+            </h2>
+            <p style="margin: 3px 0 0 0; font-size: 0.82rem; color: #64748b;">
+              Assistência Farmacêutica Clínica &amp; Prescrição Farmacêutica de MIPs · Resoluções CFF nº 585/2013 e 586/2013
+            </p>
+          </div>
         </div>
-        <div style="text-align: right; font-size: 0.8rem; color: #475569; background: #f8fafc; padding: 6px 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
+        <div style="text-align: right; font-size: 0.78rem; color: #475569; background: #f8fafc; padding: 6px 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
           <div><strong>Data/Hora:</strong> ${dateFormatted}</div>
           <div style="color: #0d9488; font-weight: 700; margin-top: 2px;">Cód. Autenticidade: ${authCode}</div>
         </div>
       </div>
 
       <!-- Dados do Paciente -->
-      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; margin-bottom: 22px; font-size: 0.9rem;">
-        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; margin-bottom: 6px;">
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; margin-bottom: 20px; font-size: 0.88rem;">
+        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 10px; margin-bottom: 4px;">
           <div><strong>Paciente:</strong> ${patient.name || 'Não Informado'}</div>
           <div><strong>CPF:</strong> ${patient.cpf || 'Não Informado'}</div>
           <div><strong>Idade/Sexo:</strong> ${patient.age || '--'} anos / ${patient.gender || '--'}</div>
         </div>
-        ${patient.allergies ? `<div style="margin-top: 6px; color: #be123c; font-size: 0.86rem;"><strong>⚠️ Alergias Informadas:</strong> ${patient.allergies}</div>` : ''}
-        ${patient.chronicConditions ? `<div style="margin-top: 4px; color: #475569; font-size: 0.86rem;"><strong>Comorbidades Crônicas:</strong> ${patient.chronicConditions}</div>` : ''}
+        ${patient.allergies ? `<div style="margin-top: 4px; color: #be123c; font-size: 0.82rem;"><strong>⚠️ Alergias Informadas:</strong> ${patient.allergies}</div>` : ''}
+        ${patient.chronicConditions ? `<div style="margin-top: 3px; color: #475569; font-size: 0.82rem;"><strong>Comorbidades Crônicas:</strong> ${patient.chronicConditions}</div>` : ''}
       </div>
 
       <!-- Queixa Principal e Triagem -->
-      <div style="margin-bottom: 22px;">
-        <h4 style="margin: 0 0 8px 0; color: #0f766e; font-size: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; text-transform: uppercase; font-family: 'Outfit', sans-serif;">
+      <div style="margin-bottom: 20px;">
+        <h4 style="margin: 0 0 6px 0; color: #0f766e; font-size: 0.95rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; text-transform: uppercase; font-family: 'Outfit', sans-serif;">
           1. AVALIAÇÃO CLÍNICA &amp; TRIAGEM DE SINTOMAS
         </h4>
-        <p style="margin: 0; font-size: 0.92rem; color: #334155;">
+        <p style="margin: 0; font-size: 0.88rem; color: #334155;">
           <strong>Queixa Principal / Motivo:</strong> ${triageComplaint || 'Atendimento de rotina e orientação farmacoterapêutica.'}
         </p>
         ${redFlags.length > 0 ? `
-          <div style="margin-top: 10px; background: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 8px; padding: 12px; color: #9f1239; font-size: 0.88rem;">
-            <strong>🚨 SINAIS DE ALERTA (RED FLAGS) DETECTADOS — ENCAMINHAMENTO MÉDICO IMEDIATO:</strong>
-            <ul style="margin: 6px 0 0 18px; padding: 0;">
+          <div style="margin-top: 10px; background: #fff1f2; border: 1.5px solid #fecdd3; border-radius: 8px; padding: 10px 14px; color: #9f1239; font-size: 0.85rem;">
+            <strong>🚨 SINAIS DE ALERTA (RED FLAGS) DETECTADOS - ENCAMINHAMENTO MÉDICO IMEDIATO:</strong>
+            <ul style="margin: 4px 0 0 16px; padding: 0;">
               ${redFlags.map(rf => `<li>${rf}</li>`).join('')}
             </ul>
           </div>
@@ -646,24 +953,24 @@ export const generatePharmacistDeclarationHTML = ({
 
       <!-- Prescrição / Recomendação Farmacêutica -->
       ${recommendedMedications.length > 0 ? `
-        <div style="margin-bottom: 22px;">
-          <h4 style="margin: 0 0 8px 0; color: #0f766e; font-size: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; text-transform: uppercase; font-family: 'Outfit', sans-serif;">
+        <div style="margin-bottom: 20px;">
+          <h4 style="margin: 0 0 6px 0; color: #0f766e; font-size: 0.95rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; text-transform: uppercase; font-family: 'Outfit', sans-serif;">
             2. PRESCRIÇÃO FARMACÊUTICA DE MIPs / ORIENTAÇÃO TERAPÊUTICA
           </h4>
-          <table style="width: 100%; border-collapse: collapse; font-size: 0.88rem; margin-top: 8px;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 6px;">
             <thead>
               <tr style="background: #f1f5f9; text-align: left;">
-                <th style="padding: 9px; border: 1px solid #cbd5e1; color: #334155;">Medicamento / Princípio Ativo</th>
-                <th style="padding: 9px; border: 1px solid #cbd5e1; color: #334155;">Indicação Clínica</th>
-                <th style="padding: 9px; border: 1px solid #cbd5e1; color: #334155;">Posologia &amp; Instruções de Uso</th>
+                <th style="padding: 8px; border: 1px solid #cbd5e1; color: #334155;">Medicamento / Princípio Ativo</th>
+                <th style="padding: 8px; border: 1px solid #cbd5e1; color: #334155;">Indicação Clínica</th>
+                <th style="padding: 8px; border: 1px solid #cbd5e1; color: #334155;">Posologia &amp; Instruções de Uso</th>
               </tr>
             </thead>
             <tbody>
-              ${recommendedMedications.map(m => `
+              ${recommendedMedications.map(med => `
                 <tr>
-                  <td style="padding: 9px; border: 1px solid #cbd5e1; font-weight: 700; color: #0f172a;">${m.name || m}</td>
-                  <td style="padding: 9px; border: 1px solid #cbd5e1; color: #475569;">${m.indication || 'Alívio sintomático'}</td>
-                  <td style="padding: 9px; border: 1px solid #cbd5e1; color: #0f766e; font-weight: 600;">${m.posology || 'Conforme orientação farmacêutica'}</td>
+                  <td style="padding: 8px; border: 1px solid #e2e8f0; font-weight: 700; color: #0f766e;">${med.name}</td>
+                  <td style="padding: 8px; border: 1px solid #e2e8f0; color: #475569;">${med.indication || 'Alívio sintomático'}</td>
+                  <td style="padding: 8px; border: 1px solid #e2e8f0; color: #334155;">${med.posology}</td>
                 </tr>
               `).join('')}
             </tbody>
@@ -671,40 +978,40 @@ export const generatePharmacistDeclarationHTML = ({
         </div>
       ` : ''}
 
-      <!-- Orientações Não Medicamentosas -->
+      <!-- Medidas Não Farmacológicas -->
       ${nonPharmaInstructions.length > 0 ? `
-        <div style="margin-bottom: 22px;">
-          <h4 style="margin: 0 0 8px 0; color: #0f766e; font-size: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; text-transform: uppercase; font-family: 'Outfit', sans-serif;">
-            3. MEDIDAS NÃO FARMACOLÓGICAS &amp; CUIDADOS EM SAÚDE
+        <div style="margin-bottom: 20px;">
+          <h4 style="margin: 0 0 6px 0; color: #0f766e; font-size: 0.95rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; text-transform: uppercase; font-family: 'Outfit', sans-serif;">
+            3. CONDUTAS NÃO FARMACOLÓGICAS &amp; ESTILO DE VIDA
           </h4>
-          <ul style="margin: 6px 0 0 18px; padding: 0; font-size: 0.88rem; color: #334155;">
-            ${nonPharmaInstructions.map(inst => `<li style="margin-bottom: 4px;">${inst}</li>`).join('')}
+          <ul style="margin: 6px 0 0 16px; padding: 0; font-size: 0.85rem; color: #334155; line-height: 1.5;">
+            ${nonPharmaInstructions.map(inst => `<li>${inst}</li>`).join('')}
           </ul>
         </div>
       ` : ''}
 
-      <!-- Parecer e Observações -->
-      ${observations ? `
-        <div style="margin-bottom: 22px;">
-          <h4 style="margin: 0 0 8px 0; color: #0f766e; font-size: 1rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; text-transform: uppercase; font-family: 'Outfit', sans-serif;">
-            4. OBSERVAÇÕES &amp; EVOLUÇÃO FARMACOTERAPÊUTICA
-          </h4>
-          <p style="margin: 0; font-size: 0.88rem; color: #334155; line-height: 1.5; white-space: pre-wrap;">${observations}</p>
-        </div>
-      ` : ''}
+      <!-- Parecer Técnico e Observações -->
+      <div style="margin-bottom: 26px;">
+        <h4 style="margin: 0 0 6px 0; color: #0f766e; font-size: 0.95rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 4px; text-transform: uppercase; font-family: 'Outfit', sans-serif;">
+          4. OBSERVAÇÕES FARMACÊUTICAS &amp; SUPORTE CLÍNICO (CDSS 4D)
+        </h4>
+        <p style="margin: 0; font-size: 0.85rem; color: #475569; background: #f8fafc; padding: 10px; border-radius: 6px; border-left: 3px solid #0d9488;">
+          ${observations || 'Atendimento farmacêutico concluído com checagem de interações e validação de segurança clínica.'}
+        </p>
+      </div>
 
-      <!-- Assinatura do Farmacêutico e Carimbo Digital -->
-      <div style="margin-top: 36px; padding-top: 18px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 20px;">
-        <div>
-          <div style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 4px;">DOCUMENTO ASSINADO DIGITALMENTE</div>
-          <div style="font-family: monospace; font-size: 0.8rem; color: #0d9488; font-weight: 700;">${authCode}</div>
-          <div style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">Válido em todo o território nacional conforme Medida Provisória nº 2.200-2/2001</div>
+      <!-- Assinatura e Carimbo Oficial -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-end; border-top: 1.5px solid #cbd5e1; padding-top: 18px; margin-top: 26px;">
+        <div style="font-size: 0.72rem; color: #94a3b8; max-width: 50%;">
+          Documento emitido eletronicamente pelo CRM Clínico Farmacêutico.<br>
+          Validade e fé pública garantidas pelas Resoluções CFF nº 585/2013 e nº 586/2013.
         </div>
-
-        <div style="text-align: center; min-width: 260px;">
-          <div style="border-bottom: 1.5px solid #0f172a; width: 100%; margin-bottom: 6px;"></div>
-          <div style="font-weight: 700; color: #0f172a; font-size: 0.95rem;">${pharmacist.name || 'Dr. Marcelo Mazaro'}</div>
-          <div style="font-size: 0.82rem; color: #0f766e; font-weight: 600;">Farmacêutico(a) — ${pharmacist.crf || 'CRF-SP 54180'}</div>
+        <div style="text-align: center; min-width: 250px;">
+          <div style="border-top: 1.5px solid #0f172a; padding-top: 4px;">
+            <strong style="color: #0f172a; font-size: 0.9rem; display: block;">${pharmacist.name || 'Dr. Marcelo Mazaro'}</strong>
+            <span style="color: #0f766e; font-size: 0.78rem; font-weight: 600; display: block;">Farmacêutico Responsável Técnico · ${pharmacist.crf || 'CRF-SP 54180'}</span>
+            <span style="color: #10b981; font-size: 0.72rem; font-weight: 700; display: block; margin-top: 2px;">✓ Assinatura Digital ICP-Brasil / CFF</span>
+          </div>
         </div>
       </div>
 
@@ -712,7 +1019,6 @@ export const generatePharmacistDeclarationHTML = ({
   `;
 };
 
-// --- 8. GERADOR DE MENSAGENS ESTRUTURADAS PARA WHATSAPP ---
 export const generateWhatsAppPosologyMessage = ({ patient, medications = [], nonPharma = [] }) => {
   const medText = medications.map(m => `💊 *${m.name || m}*\n   ⏱️ _Como tomar:_ ${m.posology || 'Conforme orientação'}`).join('\n\n');
   const nonPharmaText = nonPharma.length > 0 ? `\n\n🌿 *Cuidados e Orientações:*\n${nonPharma.map(i => `• ${i}`).join('\n')}` : '';

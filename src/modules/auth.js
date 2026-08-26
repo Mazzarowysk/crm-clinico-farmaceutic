@@ -19,14 +19,14 @@ export const getRolePermissions = (user) => {
       role: 'Master',
       label: '👑 Master Gestor (Acesso Total)',
       badgeColor: 'linear-gradient(135deg, #f59e0b, #d97706)',
-      allowedTabs: ['dashboard', 'farmacia', 'pacientes', 'estoque', 'agenda', 'relatorios', 'configuracoes'],
+      allowedTabs: ['dashboard', 'farmacia', 'pacientes', 'estoque', 'financeiro', 'relatorios', 'configuracoes'],
       canApproveUsers: true,
       canManageUsers: true,
       canDeleteRecords: true,
       canSignPEP: true,
       canDoTriage: true,
       canManagePharmacy: true,
-      canManageSchedules: true
+      canManageSchedules: false
     };
   }
 
@@ -36,14 +36,14 @@ export const getRolePermissions = (user) => {
       role: 'Farmacêutico RT',
       label: '💊 Farmacêutico(a) RT',
       badgeColor: 'linear-gradient(135deg, #0d9488, #0f766e)',
-      allowedTabs: ['dashboard', 'farmacia', 'pacientes', 'estoque', 'agenda', 'relatorios', 'configuracoes'],
+      allowedTabs: ['dashboard', 'farmacia', 'pacientes', 'estoque', 'financeiro', 'relatorios', 'configuracoes'],
       canApproveUsers: true,
       canManageUsers: true,
       canDeleteRecords: false,
       canSignPEP: true,
       canDoTriage: true,
       canManagePharmacy: true,
-      canManageSchedules: true
+      canManageSchedules: false
     };
   }
 
@@ -53,14 +53,14 @@ export const getRolePermissions = (user) => {
       role: 'Farmacêutico',
       label: '🩺 Farmacêutico(a) Clínico(a)',
       badgeColor: 'linear-gradient(135deg, #14b8a6, #0d9488)',
-      allowedTabs: ['dashboard', 'farmacia', 'pacientes', 'estoque', 'agenda', 'relatorios'],
+      allowedTabs: ['dashboard', 'farmacia', 'pacientes', 'estoque', 'financeiro', 'relatorios'],
       canApproveUsers: false,
       canManageUsers: false,
       canDeleteRecords: false,
       canSignPEP: true,
       canDoTriage: true,
       canManagePharmacy: true,
-      canManageSchedules: true
+      canManageSchedules: false
     };
   }
 
@@ -70,14 +70,14 @@ export const getRolePermissions = (user) => {
       role: 'Atendente',
       label: '📋 Atendente de Balcão',
       badgeColor: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
-      allowedTabs: ['dashboard', 'farmacia', 'pacientes', 'estoque', 'agenda'],
+      allowedTabs: ['dashboard', 'farmacia', 'pacientes', 'estoque'],
       canApproveUsers: false,
       canManageUsers: false,
       canDeleteRecords: false,
       canSignPEP: false,
       canDoTriage: true,
       canManagePharmacy: false,
-      canManageSchedules: true
+      canManageSchedules: false
     };
   }
 
@@ -87,14 +87,14 @@ export const getRolePermissions = (user) => {
       role: 'Administrador',
       label: '🛠️ Administrador',
       badgeColor: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-      allowedTabs: ['dashboard', 'farmacia', 'pacientes', 'estoque', 'agenda', 'relatorios', 'configuracoes'],
+      allowedTabs: ['dashboard', 'farmacia', 'pacientes', 'estoque', 'financeiro', 'relatorios', 'configuracoes'],
       canApproveUsers: true,
       canManageUsers: true,
       canDeleteRecords: true,
       canSignPEP: true,
       canDoTriage: true,
       canManagePharmacy: true,
-      canManageSchedules: true
+      canManageSchedules: false
     };
   }
 
@@ -104,14 +104,14 @@ export const getRolePermissions = (user) => {
       role: 'Desenvolvedor',
       label: '💻 Desenvolvedor',
       badgeColor: 'linear-gradient(135deg, #a855f7, #7e22ce)',
-      allowedTabs: ['dashboard', 'farmacia', 'pacientes', 'estoque', 'agenda', 'relatorios', 'configuracoes'],
+      allowedTabs: ['dashboard', 'farmacia', 'pacientes', 'estoque', 'financeiro', 'relatorios', 'configuracoes'],
       canApproveUsers: true,
       canManageUsers: true,
       canDeleteRecords: true,
       canSignPEP: true,
       canDoTriage: true,
       canManagePharmacy: true,
-      canManageSchedules: true
+      canManageSchedules: false
     };
   }
 
@@ -120,14 +120,14 @@ export const getRolePermissions = (user) => {
     role: 'Farmacêutico',
     label: '💊 Farmacêutico(a)',
     badgeColor: 'linear-gradient(135deg, #0d9488, #0f766e)',
-    allowedTabs: ['dashboard', 'farmacia', 'pacientes', 'estoque', 'agenda', 'relatorios'],
+    allowedTabs: ['dashboard', 'farmacia', 'pacientes', 'estoque', 'relatorios'],
     canApproveUsers: false,
     canManageUsers: false,
     canDeleteRecords: false,
     canSignPEP: true,
     canDoTriage: true,
     canManagePharmacy: true,
-    canManageSchedules: true
+    canManageSchedules: false
   };
 };
 

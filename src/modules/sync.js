@@ -276,25 +276,19 @@ export class SyncManager {
     try {
       const statusData = await getSyncStatus();
       if (statusData && statusData.cloudConfigured) {
-        const hasNewData = statusData.cloudTimestamps.main_data > statusData.localTimestamps.main_data;
-        
-        if (force) {
-          if (hasNewData || statusData.conflict) {
-            showSyncComparisonModal(statusData);
-          } else if (statusData.local_updates > 0) {
-            showSyncPromptModal(statusData);
-          } else {
-            showToast('Banco local já está atualizado com a nuvem.');
-          }
-        } else {
-          const hasLocalChanges = statusData.local_updates > 0 || (statusData.localTimestamps.main_data > statusData.cloudTimestamps.main_data);
-          if (hasNewData || statusData.conflict) {
-            showSyncComparisonModal(statusData);
-          } else if (hasLocalChanges) {
-            showSyncPromptModal(statusData);
-          }
+        const cloudTime = Number(statusData.cloudTimestamps?.main_data || 0);
+        const localTime = Number(statusData.localTimestamps?.main_data || 0);
+        const hasNewData = cloudTime > localTime && cloudTime > 0;
+        const hasLocalChanges = localTime > cloudTime && localTime > 0;
+
+        if (hasNewData) {
+          showSyncComparisonModal(statusData);
+        } else if (hasLocalChanges) {
+          showSyncPromptModal(statusData);
+        } else if (force) {
+          showToast('Banco local já está atualizado com a nuvem.');
         }
-        return { hasNewData, cloudTimestamp: statusData.cloudTimestamps.main_data };
+        return { hasNewData, cloudTimestamp: cloudTime };
       }
       return { hasNewData: false, cloudTimestamp: 0 };
     } catch (e) {
@@ -548,17 +542,17 @@ export const getSyncStatus = async () => {
       } catch(e) {}
     }
 
-    const local_updates = (localUpdated > cloudUpdated && cloudUpdated > 0) ? 1 : 0;
-    const synchronized = (localUpdated === cloudUpdated) || (local_updates === 0);
+    const local_updates = (localUpdated > cloudUpdated) ? 1 : 0;
+    const synchronized = (localUpdated === cloudUpdated);
 
     state.syncInfo = {
       cloudConfigured: !cloudOffline,
       cloudReachable: !cloudOffline,
       synchronized: synchronized,
       local_updates: local_updates,
-      localTimestamps: { main_data: localUpdated || cloudUpdated },
+      localTimestamps: { main_data: localUpdated },
       cloudTimestamps: { main_data: cloudUpdated },
-      lastLocalBackup: localUpdated || cloudUpdated,
+      lastLocalBackup: localUpdated,
       lastCloudBackup: cloudUpdated,
       isVercel: isVercel,
       conflict: false

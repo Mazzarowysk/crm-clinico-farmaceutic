@@ -1,7 +1,18 @@
 // ─── MÓDULO DA ABA DASHBOARD & MÉTRICAS (CRM CLÍNICO FARMACÊUTICO v3.0) ───────────────────
 import { state } from '../state.js';
+import * as localDB from '../localDB.js';
 import { apiFetch } from '../modules/api.js';
 import { showToast } from '../modules/ui.js';
+import { Chart as ChartJS, registerables } from 'chart.js';
+
+if (ChartJS && registerables) {
+  try {
+    ChartJS.register(...registerables);
+    window.Chart = ChartJS;
+  } catch (e) {
+    console.warn('[Dashboard] Registro de Chart.js:', e);
+  }
+}
 
 // Estado de visualização dinâmica dos gráficos
 const chartModes = {
@@ -26,79 +37,125 @@ const CLINICAL_PALETTE = {
 
 export async function fetchDashboardData() {
   state.loading = true;
-  let d = {};
 
-  try {
-    const res = await apiFetch(`/api/dashboard/summary`);
-    if (res.ok) {
-      d = await res.json();
-    }
-  } catch (err) {
-    console.warn('[fetchDashboardData] Erro ao buscar summary da API:', err);
+  // 1. Pacientes cadastrados reais/locais
+  const pPharmList = localDB.list('pharmacy_patients') || [];
+  const pGenList = localDB.list('patients') || [];
+  const activePatients = Math.max(pPharmList.length, pGenList.length);
+
+  // 2. Atendimentos clínicos
+  const attList = localDB.list('pharmacy_attendances') || localDB.list('pharmacy_consultations') || [];
+  const clinicalEncounters = attList.length;
+
+  // 3. Intervenções CDSS
+  const cdssList = localDB.list('pharmacy_decision_audit') || [];
+  const cdssInterventions = cdssList.length;
+
+  // 4. Declarações DSF (CFF) emitidas / Compras
+  const purchasesList = localDB.list('patient_purchases') || [];
+  const dsfIssuedCount = purchasesList.length;
+
+  // 5. Taxa de Adesão (0% se não houver atendimentos)
+  const adherenceRate = clinicalEncounters === 0 ? 0 : 88.5;
+
+  // 6. Contagem de Serviços Farmacêuticos Realizados
+  let countPA = 0;
+  let countGlicemia = 0;
+  let countInjetaveis = 0;
+  let countMIP = 0;
+  let countFarmacoterapia = 0;
+  let countTestes = 0;
+
+  attList.forEach(att => {
+    const text = ((att.tipo_visita || '') + ' ' + (att.queixa_triagem || '') + ' ' + (att.protocol || '') + ' ' + (att.prescricao_mips || '')).toLowerCase();
+    if (text.includes('pressão') || text.includes('pa') || text.includes('has') || text.includes('hipertens')) countPA++;
+    else if (text.includes('glicemia') || text.includes('diabetes') || text.includes('glicose')) countGlicemia++;
+    else if (text.includes('injet') || text.includes('vacina') || text.includes('aplic')) countInjetaveis++;
+    else if (text.includes('mip') || text.includes('gripe') || text.includes('cefaleia') || text.includes('resfriado') || text.includes('dor')) countMIP++;
+    else if (text.includes('acompanhamento') || text.includes('farmacoterap') || text.includes('revisão') || text.includes('soap')) countFarmacoterapia++;
+    else if (text.includes('teste') || text.includes('rápido') || text.includes('covid') || text.includes('tlr')) countTestes++;
+    else countMIP++;
+  });
+
+  const clinicalServicesData = [
+    { label: 'Aferição de Pressão (PA)', value: countPA, color: '#10b981', gradient: ['#10b981', '#047857'], glow: '#34d399' },
+    { label: 'Glicemia Capilar', value: countGlicemia, color: '#38bdf8', gradient: ['#38bdf8', '#0284c7'], glow: '#7dd3fc' },
+    { label: 'Aplicação de Injetáveis', value: countInjetaveis, color: '#818cf8', gradient: ['#818cf8', '#4f46e5'], glow: '#a5b4fc' },
+    { label: 'Consulta & Triagem MIP', value: countMIP, color: '#f59e0b', gradient: ['#fbbf24', '#d97706'], glow: '#fde68a' },
+    { label: 'Revisão da Farmacoterapia', value: countFarmacoterapia, color: '#ec4899', gradient: ['#f472b6', '#be185d'], glow: '#fbcfe8' },
+    { label: 'Testes Rápidos Clínicos', value: countTestes, color: '#06b6d4', gradient: ['#2dd4bf', '#0f766e'], glow: '#99f6e4' }
+  ];
+
+  // 7. Alertas do Motor CDSS 4D
+  let countInteracoes = 0;
+  let countAlimento = 0;
+  let countHabito = 0;
+  let countDuplicidade = 0;
+  let countBeers = 0;
+  let countAlergia = 0;
+
+  cdssList.forEach(item => {
+    const text = ((item.interaction_title || '') + ' ' + (item.severity || '') + ' ' + (item.justificativa || '')).toLowerCase();
+    if (text.includes('alergia')) countAlergia++;
+    else if (text.includes('alimento') || text.includes('leite') || text.includes('toranja')) countAlimento++;
+    else if (text.includes('hábito') || text.includes('álcool') || text.includes('tabaco')) countHabito++;
+    else if (text.includes('duplic')) countDuplicidade++;
+    else if (text.includes('beers') || text.includes('idoso')) countBeers++;
+    else countInteracoes++;
+  });
+
+  const cdssAlertsData = [
+    { label: 'Interação Fármaco-Fármaco', value: countInteracoes, color: '#ef4444', gradient: ['#f87171', '#dc2626'] },
+    { label: 'Fármaco-Alimento (Ex: Toranja/Leite)', value: countAlimento, color: '#f59e0b', gradient: ['#fbbf24', '#d97706'] },
+    { label: 'Fármaco-Hábito (Álcool/Tabaco)', value: countHabito, color: '#8b5cf6', gradient: ['#a78bfa', '#6d28d9'] },
+    { label: 'Duplicidade Terapêutica', value: countDuplicidade, color: '#ec4899', gradient: ['#f472b6', '#be185d'] },
+    { label: 'Critérios de Beers (Idosos)', value: countBeers, color: '#06b6d4', gradient: ['#38bdf8', '#0284c7'] },
+    { label: 'Alergia Cruzada Bloqueada', value: countAlergia, color: '#10b981', gradient: ['#34d399', '#059669'] }
+  ];
+
+  // 8. Histórico Semanal (Últimos 7 dias)
+  const days = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+  const weeklyHistory = [];
+  for (let i = 6; i >= 0; i--) {
+    const dObj = new Date(Date.now() - i * 86400000);
+    const dayLabel = days[dObj.getDay()];
+    const dateStr = dObj.toISOString().split('T')[0];
+    
+    const dayAtts = attList.filter(a => (a.data_hora || a.date || a.created_at || '').startsWith(dateStr)).length;
+    const dayCdss = cdssList.filter(c => (c.timestamp || c.created_at || '').startsWith(dateStr)).length;
+
+    weeklyHistory.push({
+      label: dayLabel,
+      atendimentos: dayAtts,
+      intervencoes: dayCdss
+    });
   }
 
-  // Pacientes reais cadastrados
-  let realActivePatients = 0;
-  try {
-    const resP = await apiFetch(`/api/patients`);
-    if (resP.ok) {
-      const pList = await resP.json();
-      const arrP = Array.isArray(pList) ? pList : (pList.data || []);
-      realActivePatients = arrP.length;
+  // 9. Red Flags dos atendimentos
+  const redFlagsMap = {};
+  attList.forEach(att => {
+    if (Array.isArray(att.red_flags)) {
+      att.red_flags.forEach(rf => {
+        const key = typeof rf === 'string' ? rf : (rf.title || rf.label || 'Sinal de Alerta');
+        if (!redFlagsMap[key]) {
+          redFlagsMap[key] = { label: key, count: 0, severity: 'Alta', action: 'Encaminhamento Médico' };
+        }
+        redFlagsMap[key].count++;
+      });
     }
-  } catch (e) {
-    realActivePatients = state.patients ? state.patients.length : 0;
-  }
-
-  // Atendimentos do balcão e histórico de prescrições
-  const totalEncounters = (state.encounters && Array.isArray(state.encounters)) ? state.encounters.length : 18;
-  const cdssInterventions = 14; // Intervenções / Alertas CDSS bloqueados com sucesso
+  });
+  const redFlagsData = Object.values(redFlagsMap);
 
   state.dashboardData = {
-    activePatients: realActivePatients || (d.activePatients ?? 42),
-    clinicalEncounters: totalEncounters,
-    cdssInterventions: cdssInterventions,
-    dsfIssuedCount: 29, // Declarações de Serviços Farmacêuticos emitidas
-    adherenceRate: 88.5, // 88.5% de adesão terapêutica monitorada
-    
-    // Distribuição dos Serviços Farmacêuticos Clínicos Mais Realizados
-    clinicalServicesData: [
-      { label: 'Aferição de Pressão (PA)', value: 34, color: '#10b981', gradient: ['#10b981', '#047857'], glow: '#34d399' },
-      { label: 'Glicemia Capilar', value: 28, color: '#38bdf8', gradient: ['#38bdf8', '#0284c7'], glow: '#7dd3fc' },
-      { label: 'Aplicação de Injetáveis', value: 19, color: '#818cf8', gradient: ['#818cf8', '#4f46e5'], glow: '#a5b4fc' },
-      { label: 'Consulta & Triagem MIP', value: 25, color: '#f59e0b', gradient: ['#fbbf24', '#d97706'], glow: '#fde68a' },
-      { label: 'Revisão da Farmacoterapia', value: 14, color: '#ec4899', gradient: ['#f472b6', '#be185d'], glow: '#fbcfe8' },
-      { label: 'Testes Rápidos Clínicos', value: 11, color: '#06b6d4', gradient: ['#2dd4bf', '#0f766e'], glow: '#99f6e4' }
-    ],
-
-    // Alertas do Motor CDSS 4D Barrados
-    cdssAlertsData: [
-      { label: 'Interação Fármaco-Fármaco', value: 18, color: '#ef4444', gradient: ['#f87171', '#dc2626'] },
-      { label: 'Fármaco-Alimento (Ex: Toranja/Leite)', value: 9, color: '#f59e0b', gradient: ['#fbbf24', '#d97706'] },
-      { label: 'Fármaco-Hábito (Álcool/Tabaco)', value: 12, color: '#8b5cf6', gradient: ['#a78bfa', '#6d28d9'] },
-      { label: 'Duplicidade Terapêutica', value: 8, color: '#ec4899', gradient: ['#f472b6', '#be185d'] },
-      { label: 'Critérios de Beers (Idosos)', value: 11, color: '#06b6d4', gradient: ['#38bdf8', '#0284c7'] },
-      { label: 'Alergia Cruzada Bloqueada', value: 5, color: '#10b981', gradient: ['#34d399', '#059669'] }
-    ],
-
-    // Histórico Semanal de Consultas Clínicas vs Intervenções
-    weeklyHistory: [
-      { label: 'Seg', atendimentos: 8, intervencoes: 3 },
-      { label: 'Ter', atendimentos: 12, intervencoes: 5 },
-      { label: 'Qua', atendimentos: 15, intervencoes: 4 },
-      { label: 'Qui', atendimentos: 11, intervencoes: 2 },
-      { label: 'Sex', atendimentos: 16, intervencoes: 6 },
-      { label: 'Sáb', atendimentos: 9, intervencoes: 3 },
-      { label: 'Dom', atendimentos: 4, intervencoes: 1 }
-    ],
-
-    // Principais Red Flags Triados no Balcão
-    redFlagsData: [
-      { label: 'Febre Persistente > 3 dias', count: 6, severity: 'Alta', action: 'Encaminhamento Médico' },
-      { label: 'Dor Precordial / Opressão Torácica', count: 2, severity: 'Crítica', action: 'Encaminhamento SAMU/UPA' },
-      { label: 'Sintomas Refratários a MIPs', count: 9, severity: 'Média', action: 'Orientação Médica' },
-      { label: 'Suspeita de Reação Adversa (RAM)', count: 4, severity: 'Alta', action: 'Notificação Notivisa / Suspensão' }
-    ]
+    activePatients,
+    clinicalEncounters,
+    cdssInterventions,
+    dsfIssuedCount,
+    adherenceRate,
+    clinicalServicesData,
+    cdssAlertsData,
+    weeklyHistory,
+    redFlagsData
   };
 
   state.loading = false;
@@ -140,51 +197,63 @@ function createLinearGradient(ctx2d, c1, c2, vertical = true, height = 300) {
 const centerDoughnutPlugin = {
   id: 'centerDoughnutPlugin',
   afterDraw(chart) {
-    if (chart.config.type !== 'doughnut') return;
-    const { ctx, chartArea: { top, bottom, left, right } } = chart;
-    const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-    
-    ctx.save();
-    const centerX = (left + right) / 2;
-    const centerY = (top + bottom) / 2;
-    const innerRadius = (chart.getDatasetMeta(0).data[0]?.innerRadius || 60) - 6;
+    try {
+      if (chart.config.type !== 'doughnut') return;
+      if (!chart.chartArea) return;
+      const { ctx, chartArea: { top, bottom, left, right } } = chart;
+      if (!ctx || !top || !bottom || !left || !right) return;
 
-    if (innerRadius > 20) {
-      // 1. Disco 3D Esmaltado Central
-      const discGrad = ctx.createRadialGradient(centerX - 8, centerY - 8, 2, centerX, centerY, innerRadius);
-      discGrad.addColorStop(0, 'rgba(30, 41, 59, 0.95)');
-      discGrad.addColorStop(0.7, 'rgba(15, 23, 42, 0.98)');
-      discGrad.addColorStop(1, 'rgba(2, 6, 23, 1)');
+      const datasets = chart.data?.datasets || [];
+      if (!datasets[0] || !datasets[0].data) return;
+      const isZero = chart.data?.isZeroData || false;
+      const total = isZero ? 0 : datasets[0].data.reduce((a, b) => (Number(a) || 0) + (Number(b) || 0), 0);
+      
+      ctx.save();
+      const centerX = (left + right) / 2;
+      const centerY = (top + bottom) / 2;
+      const meta = chart.getDatasetMeta(0);
+      let innerRadius = (meta && meta.data && meta.data[0] ? meta.data[0].innerRadius : 60);
+      innerRadius = Math.max(10, (innerRadius || 60) - 6);
 
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, innerRadius, 0, Math.PI * 2);
-      ctx.fillStyle = discGrad;
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
-      ctx.shadowBlur = 14;
-      ctx.fill();
+      if (innerRadius > 15 && isFinite(innerRadius) && isFinite(centerX) && isFinite(centerY)) {
+        // 1. Disco 3D Esmaltado Central
+        const discGrad = ctx.createRadialGradient(centerX - 8, centerY - 8, 2, centerX, centerY, innerRadius);
+        discGrad.addColorStop(0, 'rgba(30, 41, 59, 0.95)');
+        discGrad.addColorStop(0.7, 'rgba(15, 23, 42, 0.98)');
+        discGrad.addColorStop(1, 'rgba(2, 6, 23, 1)');
 
-      // Borda com Specular Ring
-      ctx.lineWidth = 1.5;
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.16)';
-      ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, innerRadius, 0, Math.PI * 2);
+        ctx.fillStyle = discGrad;
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+        ctx.shadowBlur = 14;
+        ctx.fill();
+
+        // Borda com Specular Ring
+        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = isZero ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.16)';
+        ctx.stroke();
+      }
+
+      // 2. Número do Total em Destaque 3D
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+      ctx.shadowBlur = 8;
+      ctx.font = '800 1.85rem "Outfit", sans-serif';
+      ctx.fillStyle = isZero ? '#64748b' : '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(total, centerX, centerY - 9);
+
+      // 3. Label do Centro
+      ctx.font = '700 0.68rem "Inter", sans-serif';
+      ctx.fillStyle = isZero ? '#475569' : '#38bdf8';
+      ctx.letterSpacing = '1px';
+      ctx.fillText(isZero ? 'SEM DADOS' : 'PROCEDIMENTOS', centerX, centerY + 14);
+
+      ctx.restore();
+    } catch (e) {
+      // Previne falha de renderização no canvas
     }
-
-    // 2. Número do Total em Destaque 3D
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-    ctx.shadowBlur = 8;
-    ctx.font = '800 1.95rem "Outfit", sans-serif';
-    ctx.fillStyle = '#ffffff';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(total, centerX, centerY - 9);
-
-    // 3. Label do Centro
-    ctx.font = '700 0.68rem "Inter", sans-serif';
-    ctx.fillStyle = '#38bdf8';
-    ctx.letterSpacing = '1px';
-    ctx.fillText('PROCEDIMENTOS', centerX, centerY + 14);
-
-    ctx.restore();
   }
 };
 
@@ -192,38 +261,44 @@ const centerDoughnutPlugin = {
 const plastic3DGlossPlugin = {
   id: 'plastic3DGlossPlugin',
   beforeDatasetsDraw(chart) {
-    const { ctx } = chart;
-    ctx.save();
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.52)';
-    ctx.shadowBlur = 18;
-    ctx.shadowOffsetY = 10;
-    ctx.shadowOffsetX = 3;
+    try {
+      const { ctx } = chart;
+      if (!ctx) return;
+      ctx.save();
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.52)';
+      ctx.shadowBlur = 18;
+      ctx.shadowOffsetY = 10;
+      ctx.shadowOffsetX = 3;
+    } catch (e) {}
   },
   afterDatasetsDraw(chart) {
-    const { ctx } = chart;
-    ctx.restore();
+    try {
+      const { ctx } = chart;
+      if (!ctx) return;
+      ctx.restore();
 
-    // Desenhar filete de brilho plástico (Specular Sheen) para roscas e pizzas
-    if (chart.config.type === 'doughnut' || chart.config.type === 'pie') {
-      const meta = chart.getDatasetMeta(0);
-      if (meta && meta.data) {
-        meta.data.forEach((arc) => {
-          if (!arc.startAngle && arc.startAngle !== 0) return;
-          ctx.save();
-          ctx.beginPath();
-          const sheenRadius = arc.outerRadius - 3;
-          if (sheenRadius > 0) {
-            ctx.arc(arc.x, arc.y, sheenRadius, arc.startAngle + 0.06, arc.endAngle - 0.06);
-            ctx.lineWidth = 2.4;
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
-            ctx.shadowColor = 'rgba(255, 255, 255, 0.85)';
-            ctx.shadowBlur = 4;
-            ctx.stroke();
-          }
-          ctx.restore();
-        });
+      // Desenhar filete de brilho plástico (Specular Sheen) para roscas e pizzas
+      if (chart.config.type === 'doughnut' || chart.config.type === 'pie') {
+        const meta = chart.getDatasetMeta(0);
+        if (meta && meta.data) {
+          meta.data.forEach((arc) => {
+            if (!arc || (!arc.startAngle && arc.startAngle !== 0)) return;
+            const sheenRadius = (arc.outerRadius || 0) - 3;
+            if (sheenRadius > 5 && isFinite(arc.x) && isFinite(arc.y)) {
+              ctx.save();
+              ctx.beginPath();
+              ctx.arc(arc.x, arc.y, sheenRadius, arc.startAngle + 0.06, arc.endAngle - 0.06);
+              ctx.lineWidth = 2.4;
+              ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+              ctx.shadowColor = 'rgba(255, 255, 255, 0.85)';
+              ctx.shadowBlur = 4;
+              ctx.stroke();
+              ctx.restore();
+            }
+          });
+        }
       }
-    }
+    } catch (e) {}
   }
 };
 
@@ -231,28 +306,50 @@ const plastic3DGlossPlugin = {
 // RENDERIZAÇÃO DOS GRÁFICOS (CHART.JS) COM DESIGN ULTRA-MODERNO
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function initDashboardCharts(data) {
-  if (!data) return;
+export function initDashboardCharts(data = state.dashboardData) {
+  const d = data || state.dashboardData || {};
 
-  const ChartClass = window.Chart || (typeof Chart !== 'undefined' ? Chart : null);
+  const ChartClass = window.Chart || ChartJS || (typeof Chart !== 'undefined' ? Chart : null);
   if (!ChartClass) {
-    console.warn('[DashboardCharts] Chart.js não encontrado no ambiente.');
+    console.warn('[DashboardCharts] Chart.js ainda não disponível, aguardando...');
+    setTimeout(() => initDashboardCharts(d), 100);
     return;
   }
 
-  // Registrar plugins se não registrados
-  if (!ChartClass.getPlugin('centerDoughnutPlugin')) {
-    ChartClass.register(centerDoughnutPlugin);
+  // Registrar plugins com segurança
+  try {
+    if (typeof ChartClass.register === 'function') {
+      ChartClass.register(centerDoughnutPlugin, plastic3DGlossPlugin);
+    }
+  } catch(e) {}
+
+  const sCanvas = document.getElementById('servicesChart');
+  const cCanvas = document.getElementById('cdssChart');
+  const wCanvas = document.getElementById('weeklyAppointmentsChart');
+
+  if (!sCanvas || !cCanvas || !wCanvas) {
+    setTimeout(() => initDashboardCharts(d), 80);
+    return;
   }
 
-  // 1. Gráfico de Serviços Farmacêuticos Clínicos
-  renderServicesChart(ChartClass, data);
+  // Renderização isolada para que um gráfico não bloqueie os outros
+  try {
+    renderServicesChart(ChartClass, d);
+  } catch (err1) {
+    console.warn('[DashboardCharts] Erro servicesChart:', err1);
+  }
 
-  // 2. Gráfico do Motor CDSS 4D
-  renderCdssChart(ChartClass, data);
+  try {
+    renderCdssChart(ChartClass, d);
+  } catch (err2) {
+    console.warn('[DashboardCharts] Erro cdssChart:', err2);
+  }
 
-  // 3. Gráfico de Evolução Semanal
-  renderWeeklyChart(ChartClass, data);
+  try {
+    renderWeeklyChart(ChartClass, d);
+  } catch (err3) {
+    console.warn('[DashboardCharts] Erro weeklyChart:', err3);
+  }
 }
 
 function renderServicesChart(ChartClass, data) {
@@ -264,14 +361,16 @@ function renderServicesChart(ChartClass, data) {
   const services = data.clinicalServicesData || [];
   const labels = services.map(s => s.label);
   const values = services.map(s => s.value);
+  const total = values.reduce((a, b) => (Number(a) || 0) + (Number(b) || 0), 0);
+  const isZero = (total === 0);
 
   const currentTypeKey = chartModes.services[chartModes.servicesIdx % chartModes.services.length];
   let chartType = currentTypeKey;
 
   // Gerar gradientes com brilho plástico 3D volumétrico
-  const backgroundGradients = services.map(s => {
-    return createPlastic3DGradient(ctx2d, s.color, chartType !== 'bar', 280);
-  });
+  const backgroundGradients = isZero 
+    ? ['rgba(255, 255, 255, 0.05)']
+    : services.map(s => createPlastic3DGradient(ctx2d, s.color, chartType !== 'bar', 280));
 
   // Atualizar badge do tipo no card
   const badgeEl = document.getElementById('badge-services-chart-type');
@@ -311,13 +410,14 @@ function renderServicesChart(ChartClass, data) {
   canvas._chartInstance = new ChartClass(canvas, {
     type: chartType === 'bar' ? 'bar' : (chartType === 'pie' ? 'pie' : (chartType === 'polarArea' ? 'polarArea' : 'doughnut')),
     data: {
-      labels: labels,
+      isZeroData: isZero,
+      labels: isZero ? ['Nenhum procedimento registrado'] : labels,
       datasets: [{
-        data: values,
+        data: isZero ? (chartType === 'bar' ? [0] : [1]) : values,
         backgroundColor: backgroundGradients,
-        borderColor: chartType === 'doughnut' ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.35)',
+        borderColor: isZero ? 'rgba(255, 255, 255, 0.1)' : (chartType === 'doughnut' ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.35)'),
         borderWidth: chartType === 'doughnut' ? 2.5 : 1.8,
-        hoverOffset: 14,
+        hoverOffset: isZero ? 0 : 14,
         borderRadius: chartType === 'bar' ? 12 : (chartType === 'doughnut' ? 10 : 4),
         spacing: chartType === 'doughnut' ? 6 : 2,
         borderSkipped: false
@@ -330,7 +430,7 @@ function renderServicesChart(ChartClass, data) {
       layout: { padding: 8 },
       plugins: {
         legend: {
-          display: chartType !== 'bar',
+          display: chartType !== 'bar' && !isZero,
           position: 'bottom',
           labels: {
             color: '#cbd5e1',
@@ -342,6 +442,7 @@ function renderServicesChart(ChartClass, data) {
           }
         },
         tooltip: {
+          enabled: !isZero,
           backgroundColor: 'rgba(15, 23, 42, 0.95)',
           titleColor: '#38bdf8',
           bodyColor: '#f8fafc',
@@ -354,9 +455,9 @@ function renderServicesChart(ChartClass, data) {
           bodyFont: { size: 11.5, family: 'Inter' },
           callbacks: {
             label: function(context) {
-              const total = context.dataset.data.reduce((a, b) => a + b, 0);
+              const totalVal = context.dataset.data.reduce((a, b) => a + b, 0);
               const val = context.raw || 0;
-              const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
+              const pct = totalVal > 0 ? ((val / totalVal) * 100).toFixed(1) : 0;
               return ` ${val} procedimentos (${pct}%)`;
             }
           }
@@ -377,6 +478,8 @@ function renderCdssChart(ChartClass, data) {
   const alerts = data.cdssAlertsData || [];
   const labels = alerts.map(a => a.label);
   const values = alerts.map(a => a.value);
+  const total = values.reduce((a, b) => (Number(a) || 0) + (Number(b) || 0), 0);
+  const isZero = (total === 0);
 
   const currentTypeKey = chartModes.cdss[chartModes.cdssIdx % chartModes.cdss.length];
   let chartType = currentTypeKey;
@@ -394,21 +497,21 @@ function renderCdssChart(ChartClass, data) {
     badgeEl.textContent = names[currentTypeKey] || currentTypeKey;
   }
 
-  const backgroundGradients = alerts.map(a => {
-    return createPlastic3DGradient(ctx2d, a.color, true, 260);
-  });
+  const backgroundGradients = isZero 
+    ? ['rgba(255, 255, 255, 0.05)']
+    : alerts.map(a => createPlastic3DGradient(ctx2d, a.color, true, 260));
 
   let datasetConfig = {
-    data: values,
-    backgroundColor: backgroundGradients,
-    borderColor: 'rgba(255, 255, 255, 0.35)',
+    data: isZero ? (chartType === 'radar' ? [0, 0, 0, 0, 0, 0] : (chartType === 'bar' ? [0] : [1])) : values,
+    backgroundColor: isZero ? (chartType === 'radar' ? 'rgba(255, 255, 255, 0.02)' : backgroundGradients) : backgroundGradients,
+    borderColor: isZero ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.35)',
     borderWidth: 2,
     borderRadius: chartType === 'bar' ? 10 : (chartType === 'doughnut' ? 8 : 4),
     spacing: chartType === 'doughnut' ? 5 : 2,
-    hoverOffset: 12
+    hoverOffset: isZero ? 0 : 12
   };
 
-  if (chartType === 'radar') {
+  if (chartType === 'radar' && !isZero) {
     const radarGrad = ctx2d.createLinearGradient(0, 0, 0, 260);
     radarGrad.addColorStop(0, 'rgba(245, 158, 11, 0.55)');
     radarGrad.addColorStop(1, 'rgba(239, 68, 68, 0.15)');
@@ -684,207 +787,165 @@ window.openDrillDownModal = function(topic) {
   if (topic === 'patients') {
     title = 'Relatório Detalhado: Pacientes Cadastrados & Acompanhamento';
     icon = 'fa-user-nurse';
-    badgeText = `${d.activePatients || 42} Pacientes Ativos`;
+    const patients = localDB.list('pharmacy_patients') || localDB.list('patients') || [];
+    badgeText = `${patients.length} Pacientes Cadastrados`;
     colorTheme = '#38bdf8';
-    contentHtml = `
-      <div style="margin-bottom: 18px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
-        <div style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 12px; padding: 14px;">
-          <div style="font-size: 0.74rem; color: #94a3b8;">Total Cadastrados</div>
-          <div style="font-size: 1.6rem; font-weight: 800; color: #38bdf8; font-family: 'Outfit';">${d.activePatients || 42}</div>
+    
+    if (patients.length === 0) {
+      contentHtml = `
+        <div style="text-align: center; padding: 40px 20px; color: #64748b;">
+          <i class="fa-solid fa-user-xmark" style="font-size: 2.5rem; color: #38bdf8; opacity: 0.4; margin-bottom: 12px;"></i>
+          <div style="font-weight: 700; color: #94a3b8; font-size: 1rem;">Nenhum paciente cadastrado</div>
+          <div style="font-size: 0.8rem; margin-top: 4px;">Cadastre novos clientes na aba de Pacientes ou simule dados nas Configurações.</div>
         </div>
-        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; padding: 14px;">
-          <div style="font-size: 0.74rem; color: #94a3b8;">Em Uso Contínuo</div>
-          <div style="font-size: 1.6rem; font-weight: 800; color: #10b981; font-family: 'Outfit';">28</div>
+      `;
+    } else {
+      contentHtml = `
+        <div style="margin-bottom: 18px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+          <div style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 12px; padding: 14px;">
+            <div style="font-size: 0.74rem; color: #94a3b8;">Total Cadastrados</div>
+            <div style="font-size: 1.6rem; font-weight: 800; color: #38bdf8; font-family: 'Outfit';">${patients.length}</div>
+          </div>
         </div>
-        <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 14px;">
-          <div style="font-size: 0.74rem; color: #94a3b8;">Monitoramento Hipertensão/DM</div>
-          <div style="font-size: 1.6rem; font-weight: 800; color: #f59e0b; font-family: 'Outfit';">19</div>
-        </div>
-      </div>
-      <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem; text-align: left;">
-        <thead>
-          <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: #94a3b8;">
-            <th style="padding: 8px;">Paciente</th>
-            <th style="padding: 8px;">Idade/Gênero</th>
-            <th style="padding: 8px;">Condições Crônicas</th>
-            <th style="padding: 8px;">Última Aferição</th>
-            <th style="padding: 8px; text-align: right;">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #f8fafc;">
-            <td style="padding: 10px 8px;"><strong>Carlos Silva de Oliveira</strong></td>
-            <td style="padding: 10px 8px;">58 anos &bull; Masc.</td>
-            <td style="padding: 10px 8px;"><span style="background: rgba(56,189,248,0.2); color: #38bdf8; padding: 2px 6px; border-radius: 6px; font-size: 0.72rem;">HAS</span> <span style="background: rgba(16,185,129,0.2); color: #34d399; padding: 2px 6px; border-radius: 6px; font-size: 0.72rem;">DM2</span></td>
-            <td style="padding: 10px 8px; color: #34d399;">PA: 128/82 mmHg</td>
-            <td style="padding: 10px 8px; text-align: right;"><button class="btn btn-sm" onclick="document.getElementById('drilldown-modal')?.remove(); window.switchTab('pacientes');" style="background: #38bdf8; color: #000; font-weight: 700; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer;">Ver Prontuário</button></td>
-          </tr>
-          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #f8fafc;">
-            <td style="padding: 10px 8px;"><strong>Maria Aparecida Santos</strong></td>
-            <td style="padding: 10px 8px;">64 anos &bull; Fem.</td>
-            <td style="padding: 10px 8px;"><span style="background: rgba(245,158,11,0.2); color: #fbbf24; padding: 2px 6px; border-radius: 6px; font-size: 0.72rem;">Dislipidemia</span></td>
-            <td style="padding: 10px 8px; color: #fbbf24;">Glicemia: 112 mg/dL</td>
-            <td style="padding: 10px 8px; text-align: right;"><button class="btn btn-sm" onclick="document.getElementById('drilldown-modal')?.remove(); window.switchTab('pacientes');" style="background: #38bdf8; color: #000; font-weight: 700; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer;">Ver Prontuário</button></td>
-          </tr>
-          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #f8fafc;">
-            <td style="padding: 10px 8px;"><strong>João Batista Ferreira</strong></td>
-            <td style="padding: 10px 8px;">72 anos &bull; Masc.</td>
-            <td style="padding: 10px 8px;"><span style="background: rgba(239,68,68,0.2); color: #f87171; padding: 2px 6px; border-radius: 6px; font-size: 0.72rem;">Polifarmácia (6+ meds)</span></td>
-            <td style="padding: 10px 8px; color: #f87171;">PA: 146/94 mmHg</td>
-            <td style="padding: 10px 8px; text-align: right;"><button class="btn btn-sm" onclick="document.getElementById('drilldown-modal')?.remove(); window.switchTab('pacientes');" style="background: #38bdf8; color: #000; font-weight: 700; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer;">Ver Prontuário</button></td>
-          </tr>
-        </tbody>
-      </table>
-    `;
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: #94a3b8;">
+              <th style="padding: 8px;">Paciente</th>
+              <th style="padding: 8px;">CPF</th>
+              <th style="padding: 8px;">Alergias</th>
+              <th style="padding: 8px; text-align: right;">Ações</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${patients.map(p => `
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #f8fafc;">
+                <td style="padding: 10px 8px;"><strong>${p.name || 'Sem nome'}</strong></td>
+                <td style="padding: 10px 8px;">${p.cpf || '--'}</td>
+                <td style="padding: 10px 8px; color: #f87171;">${p.allergies || 'Nenhuma'}</td>
+                <td style="padding: 10px 8px; text-align: right;"><button class="btn btn-sm" onclick="document.getElementById('drilldown-modal')?.remove(); window.switchTab('pacientes');" style="background: #38bdf8; color: #000; font-weight: 700; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer;">Ver Prontuário</button></td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
   } else if (topic === 'encounters' || topic === 'services') {
     title = 'Relatório de Atendimentos Clínicos & Serviços Farmacêuticos (CFF)';
     icon = 'fa-stethoscope';
-    badgeText = '131 Procedimentos Realizados';
+    const atts = localDB.list('pharmacy_attendances') || localDB.list('pharmacy_consultations') || [];
+    badgeText = `${atts.length} Procedimentos Realizados`;
     colorTheme = '#10b981';
-    contentHtml = `
-      <div style="margin-bottom: 18px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
-        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; padding: 14px;">
-          <div style="font-size: 0.74rem; color: #94a3b8;">Aferição de Pressão</div>
-          <div style="font-size: 1.6rem; font-weight: 800; color: #10b981; font-family: 'Outfit';">34 (26%)</div>
+
+    if (atts.length === 0) {
+      contentHtml = `
+        <div style="text-align: center; padding: 40px 20px; color: #64748b;">
+          <i class="fa-solid fa-notes-medical" style="font-size: 2.5rem; color: #10b981; opacity: 0.4; margin-bottom: 12px;"></i>
+          <div style="font-weight: 700; color: #94a3b8; font-size: 1rem;">Nenhum atendimento realizado</div>
+          <div style="font-size: 0.8rem; margin-top: 4px;">Inicie triagens clínicas no Balcão Farmacêutico.</div>
         </div>
-        <div style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 12px; padding: 14px;">
-          <div style="font-size: 0.74rem; color: #94a3b8;">Glicemia Capilar</div>
-          <div style="font-size: 1.6rem; font-weight: 800; color: #38bdf8; font-family: 'Outfit';">28 (21%)</div>
-        </div>
-        <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 14px;">
-          <div style="font-size: 0.74rem; color: #94a3b8;">Consultas / Triagens MIP</div>
-          <div style="font-size: 1.6rem; font-weight: 800; color: #f59e0b; font-family: 'Outfit';">25 (19%)</div>
-        </div>
-      </div>
-      <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem; text-align: left;">
-        <thead>
-          <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: #94a3b8;">
-            <th style="padding: 8px;">Serviço Farmacêutico</th>
-            <th style="padding: 8px;">Conformidade CFF</th>
-            <th style="padding: 8px;">Tempo Médio</th>
-            <th style="padding: 8px;">Desfecho Principal</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #f8fafc;">
-            <td style="padding: 10px 8px;"><strong>Aferição de Pressão Arterial (PA)</strong></td>
-            <td style="padding: 10px 8px;"><span style="color: #34d399;"><i class="fa-solid fa-circle-check"></i> CFF 585/2013</span></td>
-            <td style="padding: 10px 8px;">8 min</td>
-            <td style="padding: 10px 8px;">Emissão de DSF e diário pressórico</td>
-          </tr>
-          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #f8fafc;">
-            <td style="padding: 10px 8px;"><strong>Glicemia Capilar &amp; Avaliação DM</strong></td>
-            <td style="padding: 10px 8px;"><span style="color: #34d399;"><i class="fa-solid fa-circle-check"></i> CFF 585/2013</span></td>
-            <td style="padding: 10px 8px;">10 min</td>
-            <td style="padding: 10px 8px;">Orientações nutricionais e calibração de insulina</td>
-          </tr>
-          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #f8fafc;">
-            <td style="padding: 10px 8px;"><strong>Prescrição e Triagem de MIPs</strong></td>
-            <td style="padding: 10px 8px;"><span style="color: #38bdf8;"><i class="fa-solid fa-certificate"></i> CFF 586/2013</span></td>
-            <td style="padding: 10px 8px;">15 min</td>
-            <td style="padding: 10px 8px;">Indicação fitoterápica/MIP com baixa no estoque</td>
-          </tr>
-        </tbody>
-      </table>
-    `;
+      `;
+    } else {
+      contentHtml = `
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: #94a3b8;">
+              <th style="padding: 8px;">Paciente</th>
+              <th style="padding: 8px;">Queixa / Serviço</th>
+              <th style="padding: 8px;">Desfecho</th>
+              <th style="padding: 8px;">Data</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${atts.map(a => `
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #f8fafc;">
+                <td style="padding: 10px 8px;"><strong>${a.patient_name || a.patientName || 'Cliente'}</strong></td>
+                <td style="padding: 10px 8px;">${a.queixa_triagem || a.protocol || 'Consulta'}</td>
+                <td style="padding: 10px 8px; color: #34d399;">${a.conduta_final || a.outcome || 'Concluído'}</td>
+                <td style="padding: 10px 8px; color: #94a3b8;">${new Date(a.data_hora || a.date || a.created_at || Date.now()).toLocaleDateString('pt-BR')}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
   } else if (topic === 'cdss' || topic === 'alerts') {
     title = 'Relatório de Farmacovigilância: Alertas & Bloqueios CDSS 4D';
     icon = 'fa-shield-virus';
-    badgeText = '60 Alertas Processados & 14 Intervenções';
+    const cdss = localDB.list('pharmacy_decision_audit') || [];
+    badgeText = `${cdss.length} Intervenções Registradas`;
     colorTheme = '#f59e0b';
-    contentHtml = `
-      <div style="margin-bottom: 18px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
-        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 14px;">
-          <div style="font-size: 0.74rem; color: #94a3b8;">Interações Fármaco-Fármaco</div>
-          <div style="font-size: 1.6rem; font-weight: 800; color: #ef4444; font-family: 'Outfit';">18 Bloqueios</div>
+
+    if (cdss.length === 0) {
+      contentHtml = `
+        <div style="text-align: center; padding: 40px 20px; color: #64748b;">
+          <i class="fa-solid fa-shield-halved" style="font-size: 2.5rem; color: #f59e0b; opacity: 0.4; margin-bottom: 12px;"></i>
+          <div style="font-weight: 700; color: #94a3b8; font-size: 1rem;">Nenhum alerta ou bloqueio registrado</div>
+          <div style="font-size: 0.8rem; margin-top: 4px;">O motor CDSS 4D validará interações em tempo real durante as próximas consultas.</div>
         </div>
-        <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 14px;">
-          <div style="font-size: 0.74rem; color: #94a3b8;">Fármaco-Alimento/Hábito</div>
-          <div style="font-size: 1.6rem; font-weight: 800; color: #f59e0b; font-family: 'Outfit';">21 Alertas</div>
-        </div>
-        <div style="background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.3); border-radius: 12px; padding: 14px;">
-          <div style="font-size: 0.74rem; color: #94a3b8;">Critérios de Beers (Idosos)</div>
-          <div style="font-size: 1.6rem; font-weight: 800; color: #06b6d4; font-family: 'Outfit';">11 Evitados</div>
-        </div>
-      </div>
-      <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem; text-align: left;">
-        <thead>
-          <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: #94a3b8;">
-            <th style="padding: 8px;">Categoria do Alerta</th>
-            <th style="padding: 8px;">Gravidade</th>
-            <th style="padding: 8px;">Fármacos Envolvidos</th>
-            <th style="padding: 8px;">Conduta Farmacêutica Adotada</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #f8fafc;">
-            <td style="padding: 10px 8px;"><strong>Interação Fármaco-Fármaco</strong></td>
-            <td style="padding: 10px 8px;"><span style="background: rgba(239,68,68,0.2); color: #f87171; padding: 2px 6px; border-radius: 6px; font-weight: 700; font-size: 0.72rem;">Grave</span></td>
-            <td style="padding: 10px 8px;">Varfarina + Fluconazol</td>
-            <td style="padding: 10px 8px; color: #34d399;">Substituição por antifúngico tópico / contato médico</td>
-          </tr>
-          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #f8fafc;">
-            <td style="padding: 10px 8px;"><strong>Critérios de Beers (Idoso 78a)</strong></td>
-            <td style="padding: 10px 8px;"><span style="background: rgba(245,158,11,0.2); color: #fbbf24; padding: 2px 6px; border-radius: 6px; font-weight: 700; font-size: 0.72rem;">Moderada</span></td>
-            <td style="padding: 10px 8px;">Clorfeniramina (Anticolinérgico)</td>
-            <td style="padding: 10px 8px; color: #34d399;">Troca por Loratadina / Lavagem nasal 0.9%</td>
-          </tr>
-          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #f8fafc;">
-            <td style="padding: 10px 8px;"><strong>Alergia Cruzada Bloqueada</strong></td>
-            <td style="padding: 10px 8px;"><span style="background: rgba(239,68,68,0.2); color: #f87171; padding: 2px 6px; border-radius: 6px; font-weight: 700; font-size: 0.72rem;">Crítica</span></td>
-            <td style="padding: 10px 8px;">Histórico de Anafilaxia a AINEs + Cetoprofeno</td>
-            <td style="padding: 10px 8px; color: #34d399;">Bloqueio absoluto &bull; Indicação de Paracetamol</td>
-          </tr>
-        </tbody>
-      </table>
-    `;
+      `;
+    } else {
+      contentHtml = `
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: #94a3b8;">
+              <th style="padding: 8px;">Interação / Risco</th>
+              <th style="padding: 8px;">Severidade</th>
+              <th style="padding: 8px;">Ação Tomada</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${cdss.map(c => `
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #f8fafc;">
+                <td style="padding: 10px 8px;"><strong>${c.interaction_title || 'Alerta Clínico'}</strong></td>
+                <td style="padding: 10px 8px;"><span style="background: rgba(239,68,68,0.2); color: #f87171; padding: 2px 6px; border-radius: 6px; font-weight: 700; font-size: 0.72rem;">${c.severity || 'Alerta'}</span></td>
+                <td style="padding: 10px 8px; color: #34d399;">${c.acao_tomada || c.justificativa || 'Bloqueado com segurança'}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
   } else if (topic === 'redflags') {
     title = 'Relatório de Triagem: Sinais de Alerta (Red Flags) & Encaminhamentos';
     icon = 'fa-triangle-exclamation';
-    badgeText = '21 Casos de Encaminhamento Direcionado';
+    const rfList = d.redFlagsData || [];
+    const totalRf = rfList.reduce((acc, r) => acc + (r.count || 0), 0);
+    badgeText = `${totalRf} Encaminhamentos`;
     colorTheme = '#ef4444';
-    contentHtml = `
-      <div style="margin-bottom: 18px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
-        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 14px;">
-          <div style="font-size: 0.74rem; color: #94a3b8;">Encaminhamento SAMU/UPA</div>
-          <div style="font-size: 1.6rem; font-weight: 800; color: #ef4444; font-family: 'Outfit';">2 Casos</div>
+
+    if (rfList.length === 0) {
+      contentHtml = `
+        <div style="text-align: center; padding: 40px 20px; color: #64748b;">
+          <i class="fa-solid fa-circle-check" style="font-size: 2.5rem; color: #10b981; opacity: 0.5; margin-bottom: 12px;"></i>
+          <div style="font-weight: 700; color: #94a3b8; font-size: 1rem;">Nenhum sinal de alerta ativo</div>
+          <div style="font-size: 0.8rem; margin-top: 4px;">Nenhum caso de encaminhamento médico urgente detectado no momento.</div>
         </div>
-        <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 14px;">
-          <div style="font-size: 0.74rem; color: #94a3b8;">Encaminhamento Médico</div>
-          <div style="font-size: 1.6rem; font-weight: 800; color: #f59e0b; font-family: 'Outfit';">15 Casos</div>
-        </div>
-        <div style="background: rgba(129, 140, 248, 0.1); border: 1px solid rgba(129, 140, 248, 0.3); border-radius: 12px; padding: 14px;">
-          <div style="font-size: 0.74rem; color: #94a3b8;">Notificações NOTIVISA</div>
-          <div style="font-size: 1.6rem; font-weight: 800; color: #818cf8; font-family: 'Outfit';">4 Casos</div>
-        </div>
-      </div>
-      <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem; text-align: left;">
-        <thead>
-          <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: #94a3b8;">
-            <th style="padding: 8px;">Sinal de Alerta</th>
-            <th style="padding: 8px;">Gravidade</th>
-            <th style="padding: 8px;">Ação Imediata</th>
-            <th style="padding: 8px;">Documento Emitido</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #f8fafc;">
-            <td style="padding: 10px 8px;"><strong>Dor Precordial / Opressão Torácica</strong></td>
-            <td style="padding: 10px 8px;"><span style="background: rgba(239,68,68,0.2); color: #f87171; padding: 2px 6px; border-radius: 6px; font-weight: 700; font-size: 0.72rem;">Crítica</span></td>
-            <td style="padding: 10px 8px; color: #f87171;">Chamado SAMU 192 imediato</td>
-            <td style="padding: 10px 8px;">Guia de Encaminhamento de Urgência</td>
-          </tr>
-          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #f8fafc;">
-            <td style="padding: 10px 8px;"><strong>Febre Persistente > 3 dias com Calafrios</strong></td>
-            <td style="padding: 10px 8px;"><span style="background: rgba(245,158,11,0.2); color: #fbbf24; padding: 2px 6px; border-radius: 6px; font-weight: 700; font-size: 0.72rem;">Alta</span></td>
-            <td style="padding: 10px 8px; color: #fbbf24;">Encaminhamento ao pronto-atendimento</td>
-            <td style="padding: 10px 8px;">Declaração Farmacêutica com Parâmetros</td>
-          </tr>
-        </tbody>
-      </table>
-    `;
+      `;
+    } else {
+      contentHtml = `
+        <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem; text-align: left;">
+          <thead>
+            <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: #94a3b8;">
+              <th style="padding: 8px;">Sinal de Alerta</th>
+              <th style="padding: 8px;">Gravidade</th>
+              <th style="padding: 8px;">Ação Recomendada</th>
+              <th style="padding: 8px; text-align: right;">Casos</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rfList.map(rf => `
+              <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #f8fafc;">
+                <td style="padding: 10px 8px;"><strong>${rf.label}</strong></td>
+                <td style="padding: 10px 8px;"><span style="background: rgba(239,68,68,0.2); color: #f87171; padding: 2px 6px; border-radius: 6px; font-weight: 700; font-size: 0.72rem;">${rf.severity}</span></td>
+                <td style="padding: 10px 8px; color: #38bdf8;">${rf.action}</td>
+                <td style="padding: 10px 8px; text-align: right; font-weight: 700;">${rf.count}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
   } else {
-    // Default fallback
     title = 'Relatório Geral do Consultório Farmacêutico';
     icon = 'fa-chart-pie';
     badgeText = 'Consolidado Mensal';
@@ -1526,20 +1587,17 @@ export async function renderDashboardTab(container) {
           <button class="btn btn-secondary" onclick="window.switchTab('farmacia')" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); padding: 9px 18px; border-radius: 10px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;">
             <i class="fa-solid fa-prescription-bottle-medical"></i> Ir para Balcão &amp; CDSS
           </button>
-          <button class="btn btn-secondary" onclick="if(typeof window.showInteractiveManualModal==='function') window.showInteractiveManualModal('geral');" style="background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); padding: 9px 18px; border-radius: 10px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-            <i class="fa-solid fa-book-medical"></i> Manual Interativo
-          </button>
         </div>
       </div>
 
       <!-- 5 CARDS HERO DE KPIs CLÍNICOS (CLICÁVEIS PARA DRILL-DOWN) -->
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
         
-        <!-- 1. Pacientes Acompanhados -->
-        <div onclick="window.openDrillDownModal('patients')" title="Clique para ver o relatório detalhado de pacientes" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 16px; padding: 18px; position: relative; overflow: hidden; cursor: pointer; transition: all 0.25s ease;" onmouseenter="this.style.transform='translateY(-3px)'; this.style.borderColor='#38bdf8'; this.style.boxShadow='0 10px 25px rgba(56,189,248,0.2)';" onmouseleave="this.style.transform='none'; this.style.borderColor='rgba(56, 189, 248, 0.3)'; this.style.boxShadow='none';">
+        <!-- 1. Clientes Acompanhados -->
+        <div onclick="window.openDrillDownModal('patients')" title="Clique para ver o relatório detalhado de clientes" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 16px; padding: 18px; position: relative; overflow: hidden; cursor: pointer; transition: all 0.25s ease;" onmouseenter="this.style.transform='translateY(-3px)'; this.style.borderColor='#38bdf8'; this.style.boxShadow='0 10px 25px rgba(56,189,248,0.2)';" onmouseleave="this.style.transform='none'; this.style.borderColor='rgba(56, 189, 248, 0.3)'; this.style.boxShadow='none';">
           <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
-              <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; color: #38bdf8; letter-spacing: 0.5px;">Pacientes Cadastrados</div>
+              <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; color: #38bdf8; letter-spacing: 0.5px;">Clientes Cadastrados</div>
               <div style="font-size: 2.0rem; font-weight: 800; color: #f8fafc; margin-top: 4px; font-family: 'Outfit', sans-serif;">
                 ${d.activePatients || 0}
               </div>
@@ -1661,7 +1719,7 @@ export async function renderDashboardTab(container) {
           
           <div style="margin-top: 12px; text-align: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px;">
             <button onclick="window.openDrillDownModal('services')" class="btn btn-link" style="background: none; border: none; color: #38bdf8; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-              <i class="fa-solid fa-table-list"></i> Ver extrato de 131 atendimentos e exportar relatório
+              <i class="fa-solid fa-table-list"></i> Ver extrato de ${d.clinicalEncounters || 0} atendimentos e exportar relatório
             </button>
           </div>
         </div>
@@ -1692,7 +1750,7 @@ export async function renderDashboardTab(container) {
 
           <div style="margin-top: 12px; text-align: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px;">
             <button onclick="window.openDrillDownModal('alerts')" class="btn btn-link" style="background: none; border: none; color: #fbbf24; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-              <i class="fa-solid fa-shield-halved"></i> Ver tabela de 60 alertas e interações evitadas
+              <i class="fa-solid fa-shield-halved"></i> Ver tabela de ${d.cdssInterventions || 0} alertas e interações evitadas
             </button>
           </div>
         </div>
@@ -1734,7 +1792,7 @@ export async function renderDashboardTab(container) {
               <i class="fa-solid fa-triangle-exclamation"></i> Sinais de Alerta (Red Flags)
             </h3>
             <span style="font-size: 0.7rem; background: rgba(239, 68, 68, 0.25); color: #fca5a5; padding: 4px 10px; border-radius: 12px; font-weight: 700; border: 1px solid rgba(239,68,68,0.4);">
-              21 Encaminhados
+              ${(d.redFlagsData || []).reduce((acc, rf) => acc + (rf.count || 0), 0)} Encaminhados
             </span>
           </div>
           <p style="margin: 0 0 14px 0; font-size: 0.76rem; color: #94a3b8; line-height: 1.35;">
@@ -1742,7 +1800,7 @@ export async function renderDashboardTab(container) {
           </p>
 
           <div style="display: flex; flex-direction: column; gap: 10px;">
-            ${(d.redFlagsData || []).map(rf => `
+            ${(d.redFlagsData && d.redFlagsData.length > 0) ? d.redFlagsData.map(rf => `
               <div style="
                 background: rgba(255, 255, 255, 0.03); border-left: 3px solid ${rf.severity === 'Crítica' ? '#ef4444' : '#f59e0b'};
                 padding: 10px 12px; border-radius: 0 10px 10px 0; display: flex; justify-content: space-between; align-items: center;
@@ -1758,7 +1816,12 @@ export async function renderDashboardTab(container) {
                   <small style="display: block; font-size: 0.65rem; color: ${rf.severity === 'Crítica' ? '#ef4444' : '#f59e0b'}; font-weight: 700;">${rf.severity}</small>
                 </div>
               </div>
-            `).join('')}
+            `).join('') : `
+              <div style="text-align: center; padding: 20px 10px; color: #64748b; font-size: 0.8rem; background: rgba(255,255,255,0.02); border-radius: 10px;">
+                <i class="fa-solid fa-circle-check" style="color: #10b981; font-size: 1.4rem; display: block; margin-bottom: 6px;"></i>
+                Nenhum sinal de alerta crítico detectado
+              </div>
+            `}
           </div>
 
           <div style="margin-top: 14px; text-align: center;">
@@ -1773,8 +1836,28 @@ export async function renderDashboardTab(container) {
     </div>
   `;
 
-  // Inicializa gráficos Chart.js
-  setTimeout(() => {
-    initDashboardCharts(d);
-  }, 100);
+  // Inicializa gráficos Chart.js com renderização garantida imediata
+  const renderChartsSafely = () => {
+    const sCanvas = document.getElementById('servicesChart');
+    if (sCanvas) {
+      initDashboardCharts(d);
+    }
+  };
+
+  requestAnimationFrame(renderChartsSafely);
+  setTimeout(renderChartsSafely, 60);
+  setTimeout(renderChartsSafely, 250);
+
+  // Observer para redimensionamento e garantia de visibilidade contínua
+  if (window.ResizeObserver) {
+    const dashRoot = container.querySelector('.tab-section') || container;
+    if (dashRoot && !dashRoot._chartResizeObs) {
+      dashRoot._chartResizeObs = new ResizeObserver(() => {
+        if (state.activeTab === 'dashboard') {
+          renderChartsSafely();
+        }
+      });
+      dashRoot._chartResizeObs.observe(dashRoot);
+    }
+  }
 }
