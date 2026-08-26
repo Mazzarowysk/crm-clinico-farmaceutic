@@ -56,7 +56,7 @@ export const manualData = [
         name: '📊 Gráficos de Serviços Farmacêuticos',
         type: 'Inteligência Clínica',
         color: '#10b981',
-        description: 'Visualiza a distribuição percentual de procedimentos clínicos mais demandados (PA, Glicemia, Injetáveis, Revisão).',
+        description: 'Visualiza a distribuição percentual de procedimentos clínicos mais demandados (PA, Glicemia, Injetáveis, Revisão de Farmacoterapia).',
         shortcut: 'Painel Superior do Dashboard',
         rules: 'Atualizado em tempo real a cada novo atendimento concluído.',
         keywords: ['graficos', 'servicos mais realizados', 'procedimentos', 'distribuicao', 'kpi']
@@ -66,10 +66,20 @@ export const manualData = [
         name: '🛡️ Painel de Intervenções CDSS 4D',
         type: 'Segurança do Paciente',
         color: '#f59e0b',
-        description: 'Mede quantas interações graves, duplicidades e riscos em idosos (Beers) foram prevenidos pelo sistema.',
+        description: 'Mede quantas interações graves, duplicidades e riscos em idosos (Critérios de Beers) foram prevenidos pelo sistema.',
         shortcut: 'Painel Central do Dashboard',
         rules: 'Evidencia o valor clínico e preventivo da atuação farmacêutica.',
         keywords: ['intervencoes evitadas', 'cdss metricas', 'alertas barrados', 'iatrogenia']
+      },
+      {
+        icon: 'fa-sack-dollar',
+        name: '💰 Faturamento & Lucratividade Clínica',
+        type: 'Gestão Financeira',
+        color: '#38bdf8',
+        description: 'Acompanha o faturamento total gerado por consultas, serviços farmacêuticos (TLR/RDC 786) e venda de MIPs.',
+        shortcut: 'Card de Receitas no Dashboard',
+        rules: 'Integrado diretamente com o fluxo de caixa do módulo financeiro.',
+        keywords: ['faturamento', 'lucratividade', 'receitas clinicas', 'servicos pagos', 'dre']
       }
     ],
     workflow: [
@@ -91,10 +101,10 @@ export const manualData = [
     buttons: [
       {
         icon: 'fa-user-check',
-        name: '🩺 Anamnese Farmacêutica Rápida',
+        name: '🩺 Anamnese Farmacêutica Rápida (SOAP)',
         type: 'Avaliação Clínica',
         color: '#10b981',
-        description: 'Coleta queixa principal, início dos sintomas, histórico de tratamentos prévios e sinais vitais.',
+        description: 'Coleta queixa principal, início dos sintomas, histórico de tratamentos prévios e sinais vitais (PA, Glicemia, IMC).',
         shortcut: 'Sub-aba 1 no CRM Farmacêutico',
         rules: 'Permite selecionar paciente cadastrado ou atendimento avulso no balcão.',
         keywords: ['anamnese', 'queixa', 'sintomas', 'balcao', 'triagem', 'atendimento', 'avaliacao']
@@ -130,14 +140,14 @@ export const manualData = [
         keywords: ['whatsapp', 'posologia zap', 'mensagem paciente', 'horarios remedio', 'orientacao']
       },
       {
-        icon: 'fa-boxes-stacked',
-        name: '📦 Estoque Clínico & MIPs',
-        type: 'Gestão Farmacêutica',
+        icon: 'fa-syringe',
+        name: '💉 Aplicação de Injetáveis & Vacinas (CFF 654)',
+        type: 'Serviço Clínico',
         color: '#06b6d4',
-        description: 'Consulta saldo, lote, validade e classe terapêutica dos medicamentos disponíveis para indicação clínica no consultório.',
-        shortcut: 'Sub-aba 4 no CRM Farmacêutico',
-        rules: 'Atualiza o saldo a cada atendimento e alerta sobre lotes próximos do vencimento.',
-        keywords: ['estoque', 'mips', 'saldo', 'lote', 'validade', 'medicamentos', 'dispensacao']
+        description: 'Registro de vacinas e injetáveis com lote, validade, via de administração, músculo de aplicação e emissão de comprovante DSF.',
+        shortcut: 'Botão "Aplicar Injetável" no Balcão',
+        rules: 'Gera comprovante com autenticação de acordo com a RDC 44/2009 da ANVISA.',
+        keywords: ['vacina', 'injetavel', 'seringa', 'aplicacao', 'lote vacina', 'dsf vacinacao']
       }
     ],
     workflow: [
@@ -147,7 +157,7 @@ export const manualData = [
       { step: 4, title: 'Emissão DSF & WhatsApp', desc: 'Conclua emitindo a Declaração de Serviço Farmacêutico (DSF) e enviando ao WhatsApp.' }
     ],
     faq: [
-      { q: 'O que fazer quando o CDSS 4D emite um alerta vermelho?', a: 'O alerta vermelho indica contraindicação clínica absoluta (ex: Sinvastatina + Claritromicina ou Varfarina + Cetoprofeno). O sistema bloqueia a prescrição e recomenda substituir o medicamento ou encaminhar ao médico prescritor.' },
+      { q: 'O que fazer quando o CDSS 4D emite um alerta vermelho?', a: 'O alerta vermelho indica contraindicação clínica absoluta. O sistema bloqueia a prescrição e recomenda substituir o medicamento ou encaminhar ao médico prescritor.' },
       { q: 'Como prescrever um MIP com segurança?', a: 'Certifique-se de que o paciente não apresenta Red Flags, confirme ausência de gravidez/lactação e revise as alergias cadastradas no prontuário.' }
     ]
   },
@@ -156,18 +166,28 @@ export const manualData = [
     title: 'Prontuário & Pacientes',
     icon: 'fa-user-nurse',
     color: '#38bdf8',
-    summary: 'Cadastro longitudinal de saúde: dados clínicos, alergias estruturadas, condições crônicas e histórico de todas as consultas e DSF emitidas.',
+    summary: 'Cadastro longitudinal de saúde: dados clínicos, alergias estruturadas, condições crônicas, PBMs e acesso ao Portal do Paciente PWA.',
     roles: ['Master', 'Farmacêutico RT', 'Farmacêutico', 'Atendente', 'Administrador'],
     buttons: [
       {
         icon: 'fa-user-plus',
-        name: '➕ Cadastrar Novo Paciente',
+        name: '➕ Cadastrar Novo Paciente (Com Botão + PBM)',
         type: 'Cadastro Clínico',
         color: '#10b981',
-        description: 'Registra o paciente com validação estrita de CPF, data de nascimento, telefone com WhatsApp e convênio.',
+        description: 'Registra o paciente com validação estrita de CPF, data de nascimento, celular/WhatsApp, endereço via CEP e inclusão rápida de novos PBMs pelo botão +.',
         shortcut: 'Botão no topo de Pacientes',
         rules: 'Valida CPF em tempo real e impede duplicidade de registros.',
-        keywords: ['novo paciente', 'cadastrar', 'adicionar paciente', 'cpf', 'dados cadastrais']
+        keywords: ['novo paciente', 'cadastrar', 'adicionar paciente', 'cpf', 'dados cadastrais', 'pbm']
+      },
+      {
+        icon: 'fa-mobile-screen-button',
+        name: '📱 Portal do Paciente PWA ("Minha Saúde")',
+        type: 'Engajamento Digital',
+        color: '#38bdf8',
+        description: 'Visualização da carteirinha digital do paciente com histórico de DSF, lista de medicamentos em uso e despertador inteligente (+ Alarme).',
+        shortcut: 'Botão "📱 Portal do Paciente PWA" no cabeçalho ou tabela',
+        rules: 'Pode ser compartilhado por link com o paciente para acompanhamento móvel.',
+        keywords: ['portal paciente', 'pwa', 'minha saude', 'carteirinha', 'alarmes', 'despertador remedio']
       },
       {
         icon: 'fa-allergies',
@@ -196,45 +216,104 @@ export const manualData = [
       { step: 3, title: 'Acesso Rápido ao Atendimento', desc: 'Clique em "Iniciar Atendimento" para abrir a tela de balcão já com o paciente selecionado.' }
     ],
     faq: [
-      { q: 'Como cadastrar uma nova alergia?', a: 'Abra a ficha do paciente, clique no campo Alergias Conhecidas, selecione as classes (ex: Dipirona, AINEs) e salve as alterações.' }
+      { q: 'Como cadastrar uma nova alergia?', a: 'Abra a ficha do paciente, clique no campo Alergias Conhecidas, selecione as classes (ex: Dipirona, AINEs) e salve as alterações.' },
+      { q: 'O que o paciente consegue ver no Portal PWA?', a: 'Sua carteirinha digital, dados cadastrais, histórico de atendimentos, orientações do farmacêutico e alarmes configurados para tomar seus medicamentos nos horários certos.' }
     ]
   },
   {
-    id: 'agenda',
-    title: 'Agenda de Serviços Clínicos',
-    icon: 'fa-calendar-check',
-    color: '#818cf8',
-    summary: 'Agendamento e controle de horários de procedimentos: Aferição de Pressão, Glicemia Capilar, Aplicação de Injetáveis e Revisão da Farmacoterapia.',
+    id: 'estoque',
+    title: 'Controle de Estoque & Catálogo',
+    icon: 'fa-boxes-stacked',
+    color: '#fbbf24',
+    summary: 'Gestão completa de insumos e medicamentos: Leitura de código de barras por Câmera/USB, lotes, validade, Curva ABC e ajustes rápidos de balanço.',
     roles: ['Master', 'Farmacêutico RT', 'Farmacêutico', 'Atendente', 'Administrador'],
     buttons: [
       {
-        icon: 'fa-calendar-plus',
-        name: '📅 Novo Agendamento Clínico',
-        type: 'Agendamento',
-        color: '#3b82f6',
-        description: 'Reserva horário na agenda do consultório para o paciente, vinculando o tipo de serviço farmacêutico desejado.',
-        shortcut: 'Botão "Novo Agendamento" na Agenda',
-        rules: 'Impede agendamentos duplicados no mesmo intervalo de tempo.',
-        keywords: ['agendar', 'marcar consulta', 'novo agendamento', 'afericao', 'injetavel', 'revisao']
+        icon: 'fa-barcode',
+        name: '📷 Leitor de Código de Barras (Câmera & USB)',
+        type: 'Automação & Entrada',
+        color: '#10b981',
+        description: 'Permite escanear caixas de medicamentos e produtos diretamente pela câmera do celular/notebook ou leitor óptico USB.',
+        shortcut: 'Botão "Escanear Câmera" nas telas de estoque e PDV',
+        rules: 'Preenche instantaneamente os dados do medicamento e lote correspondente.',
+        keywords: ['leitor barras', 'camera barcode', 'ean', 'scanner', 'bipagem']
       },
       {
-        icon: 'fa-check-double',
-        name: '✅ Check-in & Iniciar Procedimento',
-        type: 'Operacional',
-        color: '#10b981',
-        description: 'Confirma a presença do paciente e direciona diretamente para o registro do procedimento clínico e emissão da DSF.',
-        shortcut: 'Card do agendamento',
-        rules: 'Altera o status para "Em Atendimento" e pré-carrega os dados do paciente.',
-        keywords: ['check-in', 'iniciar procedimento', 'confirmar presenca', 'atender agendado']
+        icon: 'fa-plus',
+        name: '📦 Entrada de Estoque & Novos Lotes',
+        type: 'Movimentação',
+        color: '#38bdf8',
+        description: 'Registra entradas de distribuidoras com quantidade recebida, número de lote, validade 2028, preço de custo e preço de venda sugerido.',
+        shortcut: 'Sub-aba "Entrada de Estoque"',
+        rules: 'Gera movimentação rastreável no Kardex de estoque da farmácia.',
+        keywords: ['entrada estoque', 'novo lote', 'distribuidora', 'validade', 'preco custo']
+      },
+      {
+        icon: 'fa-sliders',
+        name: '⚖️ Ajuste Rápido de Saldo (Inventário / Avaria)',
+        type: 'Controle Físico',
+        color: '#f59e0b',
+        description: 'Permite corrigir saldos físicos com justificativa formal (Inventário periódico, Quebra de frasco, Descarte por vencimento).',
+        shortcut: 'Botão de Ajuste no card do produto',
+        rules: 'Registra a operação com nome do operador e motivo para auditoria.',
+        keywords: ['ajuste estoque', 'inventario', 'balanco', 'avaria', 'quebra']
       }
     ],
     workflow: [
-      { step: 1, title: 'Escolha da Data e Procedimento', desc: 'Selecione a data no calendário e o tipo de serviço (ex: Glicemia, Injetável).' },
-      { step: 2, title: 'Vinculação do Paciente', desc: 'Busque o paciente cadastrado ou registre um novo agendamento rápido.' },
-      { step: 3, title: 'Execução e Registro', desc: 'No momento do atendimento, clique em Check-in e registre os parâmetros na DSF.' }
+      { step: 1, title: 'Bipagem ou Busca do Produto', desc: 'Aponte o leitor de código de barras ou digite o nome do medicamento.' },
+      { step: 2, title: 'Conferência de Lote & Validade', desc: 'Verifique se o lote e a data de validade correspondem à nota fiscal.' },
+      { step: 3, title: 'Confirmação de Saldo', desc: 'Salve a entrada para que o estoque fique disponível imediatamente para dispensação e prescrição.' }
     ],
     faq: [
-      { q: 'Como reagendar ou cancelar um serviço?', a: 'Localize o card do compromisso na Agenda e clique no botão de edição (lápis) para mudar data/horário ou na lixeira para cancelar.' }
+      { q: 'O sistema avisa sobre produtos perto de vencer?', a: 'Sim! O painel de estoque possui badges em amarelo e vermelho para alertar sobre lotes com vencimento inferior a 90 dias.' }
+    ]
+  },
+  {
+    id: 'financeiro',
+    title: 'Controle Financeiro & Fluxo de Caixa',
+    icon: 'fa-sack-dollar',
+    color: '#34d399',
+    summary: 'Controle total de faturamento clínico e operacional: Abas Neon (Todos, Receitas, Despesas), Botões + para cadastro rápido de parâmetros e DRE em tempo real.',
+    roles: ['Master', 'Farmacêutico RT', 'Administrador'],
+    buttons: [
+      {
+        icon: 'fa-plus',
+        name: '➕ Novo Lançamento Financeiro (Com Botão +)',
+        type: 'Movimentação Financeira',
+        color: '#10b981',
+        description: 'Registra receitas (consultas, MIPs, testes rápidos) e despesas (distribuidoras, aluguel, salários) com seleção e criação rápida de categorias pelo botão +.',
+        shortcut: 'Botão "Novo Lançamento" no topo do Financeiro',
+        rules: 'Categorias e formas de pagamento criadas no botão + sincronizam automaticamente com as Configurações.',
+        keywords: ['novo lancamento', 'receita', 'despesa', 'fluxo de caixa', 'categoria +', 'pagamento +']
+      },
+      {
+        icon: 'fa-layer-group',
+        name: '🌈 Abas Neon de Alto Contraste (Filtros Rápidos)',
+        type: 'Visualização Clínica',
+        color: '#38bdf8',
+        description: 'Navegue com clareza entre "Todos os Lançamentos", "⬇️ Receitas & Faturamento" e "⬆️ Despesas & Compras".',
+        shortcut: 'Abas superiores na tabela de extrato',
+        rules: 'Calcula totais consolidados e saldo líquido instantaneamente.',
+        keywords: ['abas neon', 'extrato', 'todas', 'receitas', 'despesas', 'filtro financeiro']
+      },
+      {
+        icon: 'fa-file-invoice-dollar',
+        name: '📄 Exportação de DRE & Demonstrativo Financeiro',
+        type: 'Relatórios Financeiros',
+        color: '#fbbf24',
+        description: 'Gera relatório executivo em PDF com o demonstrativo de receitas por serviço, custos e margem líquida da farmácia.',
+        shortcut: 'Botão "Exportar DRE (PDF)"',
+        rules: 'Formatado com padrão executivo contábil para o gestor e contador.',
+        keywords: ['dre', 'pdf financeiro', 'demonstrativo', 'lucro liquido', 'contabilidade']
+      }
+    ],
+    workflow: [
+      { step: 1, title: 'Escolha do Tipo', desc: 'Selecione se o lançamento é uma Receita (Entrada) ou Despesa (Saída).' },
+      { step: 2, title: 'Categoria e Meio de Pagamento', desc: 'Selecione a categoria ou clique no botão + para criar uma nova no mesmo instante.' },
+      { step: 3, title: 'Gravação & Sincronização', desc: 'Salve o lançamento para atualizar o saldo do caixa e sincronizar com a nuvem Turso.' }
+    ],
+    faq: [
+      { q: 'O que acontece ao clicar no botão + dentro do lançamento?', a: 'O sistema solicita o nome da nova categoria ou forma de pagamento, salva no banco de dados, sincroniza com o Turso Cloud e a exibe no Agrupamento 7 da aba Configurações.' }
     ]
   },
   {
@@ -280,58 +359,90 @@ export const manualData = [
     title: 'Configurações & Gestão',
     icon: 'fa-sliders',
     color: '#a855f7',
-    summary: 'Gestão de usuários e farmacêuticos (CRF), controle de acesso RBAC, sincronização com Turso Cloud DB e backup de segurança.',
+    summary: 'Central de governança com 7 Agrupamentos Estruturados: Operadores RBAC, Turso Cloud, Dados da Farmácia & RT, Backup/Restauração, Protocolos Clínicos, Sandbox Simulador & Gestão de Parâmetros Financeiros.',
     roles: ['Master', 'Farmacêutico RT', 'Administrador'],
     buttons: [
       {
         icon: 'fa-users-gear',
-        name: '👥 Gestão de Operadores & Perfis (RBAC)',
+        name: '👥 1. Gestão de Operadores & Perfis (RBAC)',
         type: 'Controle de Acesso',
         color: '#8b5cf6',
         description: 'Cadastra novos operadores, define papéis (Farmacêutico RT, Farmacêutico, Atendente), vincula número de CRF e reseta senhas.',
-        shortcut: 'Sub-aba "Gestão de Usuários" em Configurações',
+        shortcut: 'Agrupamento 1 em Configurações',
         rules: 'O usuário Master mazzarowysk possui autoridade total para administrar todos os operadores.',
         keywords: ['usuarios', 'operadores', 'novo usuario', 'senha', 'crf', 'rbac', 'permissoes', 'master', 'mazzarowysk']
       },
       {
         icon: 'fa-cloud-arrow-up',
-        name: '☁️ Banco de Dados Turso Cloud (LibSQL)',
+        name: '☁️ 2. Banco Turso Cloud (LibSQL Distribuído)',
         type: 'Infraestrutura & Nuvem',
         color: '#38bdf8',
-        description: 'Monitora e gerencia a conexão com o banco de dados na nuvem da AWS/Turso. Suporta sincronização automática e operação Offline-First.',
-        shortcut: 'Sub-aba "Banco Turso Cloud"',
-        rules: 'Se houver perda de internet, os dados são salvos localmente e sincronizados automaticamente na reconexão.',
+        description: 'Monitora a conexão com o cluster Turso Cloud na AWS. Dispara comparativo de versões (Modais Roxo/Laranja) ao entrar pelo Vercel.',
+        shortcut: 'Agrupamento 2 em Configurações',
+        rules: 'Operação Offline-First contínua com reconciliação automática de timestamps.',
         keywords: ['turso', 'nuvem', 'cloud', 'sincronizacao', 'offline-first', 'libsql', 'banco de dados']
       },
       {
         icon: 'fa-building-circle-check',
-        name: '🏢 Dados da Farmácia & Responsável Técnico (RT)',
+        name: '🏢 3. Dados da Farmácia & Responsável Técnico (RT)',
         type: 'Conformidade Sanitária',
-        color: '#10b981',
+        color: '#fbbf24',
         description: 'Configura Razão Social, CNPJ, Endereço, Nome do Farmacêutico RT e CRF-UF para inclusão automática nos cabeçalhos de DSF e relatórios.',
-        shortcut: 'Sub-aba "Dados da Farmácia / RT"',
-        rules: 'Obrigatório para emissão legal de DSF segundo a Anvisa e CFF.',
+        shortcut: 'Agrupamento 3 em Configurações',
+        rules: 'Obrigatório para emissão legal de DSF segundo a ANVISA (RDC 44/2009) e CFF.',
         keywords: ['dados farmacia', 'razao social', 'cnpj', 'responsavel tecnico', 'rt', 'crf-sp', 'cabecalho dsf']
       },
       {
         icon: 'fa-download',
-        name: '💾 Backup & Restauração JSON',
+        name: '💾 4. Backup & Restauração JSON',
         type: 'Segurança & Recuperação',
-        color: '#ec4899',
+        color: '#c084fc',
         description: 'Gera arquivo de backup completo criptografado em JSON com todos os pacientes, prontuários, atendimentos e estoque, permitindo restauração instantânea.',
-        shortcut: 'Sub-aba "Backup & Restauração"',
+        shortcut: 'Agrupamento 4 em Configurações',
         rules: 'Recomenda-se exportar backups semanais para armazenamento seguro externo.',
         keywords: ['backup', 'restauracao', 'exportar json', 'recuperar dados', 'seguranca']
+      },
+      {
+        icon: 'fa-book-medical',
+        name: '📖 5. Manual Interativo & Protocolos Clínicos',
+        type: 'CDSS & Procedimentos',
+        color: '#34d399',
+        description: 'Acesso aos 6 protocolos clínicos farmacêuticos embutidos (Gripe, Azia, Cefaleia, Rinite, Lombalgia, Diarreia) com árvores de decisão e dosagens.',
+        shortcut: 'Agrupamento 5 em Configurações',
+        rules: 'Totalmente alinhado às Resoluções CFF 585 e 586/2013.',
+        keywords: ['protocolos clinicos', 'mips doses', 'orientacoes farmacologia', 'manual interativo']
+      },
+      {
+        icon: 'fa-wand-magic-sparkles',
+        name: '🧪 6. Simulação de Dados (Sandbox) & Limpeza com Senha',
+        type: 'Testes & Gestão de Bases',
+        color: '#f472b6',
+        description: 'Gere dados simulados para treinamento ou limpe seletivamente simulações ou cadastros reais com autenticação por senha.',
+        shortcut: 'Agrupamento 6 em Configurações',
+        rules: 'Protegido por senha Master para evitar perdas acidentais.',
+        keywords: ['simulador', 'sandbox', 'gerar dados', 'limpar simulacao', 'limpar producao', 'hard reset']
+      },
+      {
+        icon: 'fa-tags',
+        name: '🏷️ 7. Gestão de Parâmetros Financeiros (Receitas, Despesas & Meios)',
+        type: 'Parâmetros & CRUD',
+        color: '#10b981',
+        description: 'Gerencie todas as categorias de receitas, despesas e formas de pagamento. Qualquer item criado via botão + é sincronizado e editável aqui.',
+        shortcut: 'Agrupamento 7 em Configurações',
+        rules: 'Permite editar, renomear e excluir parâmetros de faturamento do sistema.',
+        keywords: ['parametros financeiros', 'categorias receitas', 'categorias despesas', 'formas de pagamento', 'editar categoria']
       }
     ],
     workflow: [
       { step: 1, title: 'Configuração da Farmácia', desc: 'Preencha os dados institucionais e o CRF do Responsável Técnico.' },
       { step: 2, title: 'Cadastro da Equipe', desc: 'Crie os usuários para os farmacêuticos e atendentes com seus respectivos papéis.' },
-      { step: 3, title: 'Sincronização & Backup', desc: 'Verifique o status verde da nuvem Turso e exporte cópias de segurança periódicas.' }
+      { step: 3, title: 'Parâmetros Financeiros', desc: 'Defina suas categorias personalizadas de receitas, despesas e formas de pagamento.' },
+      { step: 4, title: 'Sincronização & Backup', desc: 'Verifique o status verde da nuvem Turso e exporte cópias de segurança periódicas.' }
     ],
     faq: [
       { q: 'Quem pode criar ou resetar senhas de usuários?', a: 'Apenas usuários com perfil Master (ex: mazzarowysk) ou Administrador têm permissão para criar operadores e redefinir credenciais.' },
-      { q: 'O sistema continua funcionando se a internet cair?', a: 'Sim! Graças à arquitetura Offline-First, o CRM Clínico Farmacêutico armazena tudo no banco local e faz a sincronização em segundo plano assim que a conexão retornar.' }
+      { q: 'O sistema continua funcionando se a internet cair?', a: 'Sim! Graças à arquitetura Offline-First, o CRM Clínico Farmacêutico armazena tudo no banco local e faz a sincronização em segundo plano assim que a conexão retornar.' },
+      { q: 'Como limpar dados de simulação sem apagar meus clientes reais?', a: 'No Agrupamento 6, clique em "Limpar Dados de Simulação" e digite sua senha. Somente registros com a tag [SIMULADO] serão removidos.' }
     ]
   }
 ];

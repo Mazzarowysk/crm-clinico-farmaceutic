@@ -1,164 +1,93 @@
-# CRM Clínico Farmacêutico — Módulo 15: Configurações
+# CRM Clínico Farmacêutico — Módulo 15: Configurações & Gestão Central
 
-Este documento detalha os requisitos e especificações para o módulo de **Configurações** do CRM Clínico Farmacêutico.
+Este documento detalha os requisitos e especificações para a aba de **Configurações & Gestão do Sistema** do CRM Clínico Farmacêutico v3.0.
 
 ---
 
 ## 1. Objetivo
-Centralizar a administração global do sistema: gerenciamento de usuários (médicos, enfermeiros, faturistas, recepcionistas), definição de perfis e controle de acesso baseado em papéis (RBAC), parametrização de variáveis gerais da instituição, credenciais de integração com APIs externas, segurança e logs de auditoria técnica.
+Centralizar a administração global do consultório e farmácia através de uma interface moderna em formato de acordeão com **7 Agrupamentos Estruturados**, integrando governança clínica, segurança de dados, nuvem Turso e gestão de parâmetros operacionais.
 
 ---
 
-## 2. Fluxo de Processo (Workflow)
-O fluxo padrão engloba a criação de usuários, atribuição de perfis de acesso, e a definição de políticas gerais de segurança e integrações da instituição.
+## 2. Estrutura dos 7 Agrupamentos Estruturados
 
 ```mermaid
-stateDiagram-v2
-    [*] --> PainelConfiguracoes : Administrador de TI acessa o menu
-    PainelConfiguracoes --> GerenciamentoUsuarios : Adiciona/Edita Usuários do Hospital
-    PainelConfiguracoes --> PerfisPermissoes : Configuração de Perfis (RBAC)
-    PainelConfiguracoes --> ParametrizacaoClinica : Define limites do hospital (Leitos, Turnos)
-    PainelConfiguracoes --> IntegracoesAPIs : Insere chaves de API (WhatsApp, CNES, ViaCEP)
-    GerenciamentoUsuarios --> SalvaConfiguracoes
-    PerfisPermissoes --> SalvaConfiguracoes
-    IntegracoesAPIs --> SalvaConfiguracoes
-    SalvaConfiguracoes --> [*]
+graph TD
+    CFG["⚙️ Central de Configurações"]
+    CFG --> G1["👥 1. Gestão de Operadores & RBAC"]
+    CFG --> G2["☁️ 2. Banco Turso Cloud & Sincronização"]
+    CFG --> G3["🏢 3. Dados do Estabelecimento & RT (CRF-SP)"]
+    CFG --> G4["💾 4. Backup & Restauração JSON"]
+    CFG --> G5["📖 5. Protocolos Clínicos & Manual Interativo"]
+    CFG --> G6["🧪 6. Simulação de Dados (Sandbox) & Reset com Senha"]
+    CFG --> G7["🏷️ 7. Gestão de Parâmetros Financeiros (Receitas, Despesas & Meios)"]
 ```
 
 ---
 
-## 3. Regras de Negócio
-1.  **Princípio do Privilégio Mínimo (Zero Trust)**: Por padrão, todo novo usuário criado possui nível de permissão nulo. As permissões de acesso devem ser adicionadas explicitamente por meio da atribuição de um perfil (RBAC).
-2.  **Segurança de Senhas**: A política de complexidade de senhas deve ser forçada nas configurações globais: mínimo de 8 caracteres, contendo pelo menos uma letra maiúscula, uma letra minúscula, um número e um caractere especial. O histórico de senhas deve impedir o reuso das últimas 3 senhas.
-3.  **Auditoria de Configurações**: Qualquer alteração em chaves de criptografia, parâmetros de faturamento ou níveis de privilégios de perfis no RBAC deve registrar automaticamente uma entrada na tabela de auditoria imutável do sistema contendo o ID do administrador responsável.
-4.  **Assinatura Digital**: Os médicos e profissionais que emitem documentos legais (laudos e receitas) devem realizar o upload de seus dados profissionais (CRM, especialidades) e certificado digital ICP-Brasil válido no seu perfil de usuário.
+## 3. Especificação Detalhada por Agrupamento
+
+### 👥 Agrupamento 1: Gestão de Operadores & Perfis (RBAC)
+- Cadastro de novos operadores com login `@username`, nome, função, registro profissional (ex: `CRF-SP 54180`) e senha.
+- Edição de perfis existentes, visualização de histórico de sessões e exclusão segura.
+- O usuário Master `mazzarowysk` possui privilégios totais e imutáveis.
+
+### ☁️ Agrupamento 2: Banco Turso Cloud & Sincronização Distribuída
+- Monitoramento de latência e status do cluster LibSQL na nuvem.
+- Modo Offline-First com reconciliação automática de timestamps.
+- Gatilho automático dos modais de detecção de versões (Roxo = Baixar nuvem / Laranja = Enviar local).
+
+### 🏢 Agrupamento 3: Dados do Estabelecimento & Farmacêutico RT
+- Parametrização de Razão Social, Nome Fantasia, CNPJ, Endereço e Telefone.
+- Nome do Farmacêutico(a) Responsável Técnico e registro CRF-UF para estampagem automática em Declarações de Serviços Farmacêuticos (DSF) e DRE.
+
+### 💾 Agrupamento 4: Backup & Restauração JSON
+- Exportação com 1 clique de arquivo JSON contendo todas as coleções do banco local.
+- Importação e restauração com validação de esquema de dados.
+
+### 📖 Agrupamento 5: Protocolos Clínicos & Manual Interativo
+- Consulta aos 6 protocolos clínicos de triagem de MIPs (Gripe, Azia, Cefaleia, Rinite, Lombalgia, Diarreia).
+- Acesso ao manual interativo por abas com mecanismo de busca semântica em tempo real.
+
+### 🧪 Agrupamento 6: Simulação de Dados (Sandbox) & Limpeza de Bases
+- **Geradores Rápidos de 1 Clique**:
+  - `👥 Gerar 5 Clientes`: Pacientes com CPF e endereços simulados.
+  - `🩺 Gerar 5 Atendimentos`: Registros SOAP e prescrições de MIPs.
+  - `📦 Gerar 5 Entradas de Estoque`: Insumos com lotes e validades.
+  - `💳 Gerar 8 Lançamentos Financeiros`: Transações simuladas no fluxo de caixa.
+- **Gestão e Limpeza de Bases Segura**:
+  - `🧹 Limpar Base de Simulação`: Remove registros marcados com `[SIMULADO]` (autenticado por senha).
+  - `⚠️ Limpar Cadastros Reais`: Remove cadastros de produção preservando usuários (autenticado por senha Master + palavra de confirmação `"LIMPAR"`).
+  - `💥 Hard Reset de Fábrica`: Redefine o banco para o estado zero inicial (autenticado por senha Master + confirmação `"HARD RESET"`).
+
+### 🏷️ Agrupamento 7: Gestão de Parâmetros Financeiros (Receitas, Despesas & Meios)
+- Painel integrado com 4 KPIs: total de categorias de receita, categorias de despesa, formas de pagamento e total geral.
+- Filtros rápidos (`Todos`, `Receitas`, `Despesas`, `Pagamentos`) e busca instantânea.
+- Botão `+ Novo Parâmetro` para inclusão manual direta.
+- Ações completas para cada item: ✏️ **Editar** (renomear/reclassificar) e 🗑️ **Excluir**.
+- **Sincronização Automática**: Qualquer categoria ou forma de pagamento criada no fluxo financeiro pelo botão `+` é automaticamente sincronizada, persistida e listada neste agrupamento com o selo `⭐ Personalizado (via +)`.
 
 ---
 
-## 4. Banco de Dados (Schema)
-O banco controla usuários, perfis, permissões e chaves de parametrização.
+## 4. Perfis de Permissão (RBAC)
 
-```mermaid
-erDiagram
-    users }|--|| roles : "possui"
-    roles ||--o{ role_permissions : "contem"
-    permissions ||--o{ role_permissions : "define"
+| Perfil | Acesso aos Agrupamentos 1 a 5 | Sandbox / Geradores (G6) | Limpeza / Hard Reset (G6) | Gestão de Parâmetros (G7) |
+| :--- | :---: | :---: | :---: | :---: |
+| **👑 Master (`mazzarowysk`)** | ✅ Total | ✅ Total | ✅ Total (com senha) | ✅ Total (CRUD) |
+| **💊 Farmacêutico RT** | ✅ Total | ✅ Leitura | ❌ Bloqueado | ✅ Total (CRUD) |
+| **🛠️ Administrador** | ✅ Visualização | ✅ Leitura | ❌ Bloqueado | ✅ Consulta |
+| **🩺 Farmacêutico Clínico** | ❌ Restrito | ❌ Bloqueado | ❌ Bloqueado | ❌ Bloqueado |
+| **📋 Atendente** | ❌ Restrito | ❌ Bloqueado | ❌ Bloqueado | ❌ Bloqueado |
 
-    users {
-        uuid id PK
-        string username UK
-        string email UK
-        string passwordHash
-        uuid roleId FK
-        string fullName
-        string professionalRegistry "CRM | COREN | CRBM"
-        boolean isActive
-        timestamp passwordChangedAt
-    }
-    roles {
-        uuid id PK
-        string name "Medico | Recepcionista | TI"
-        string description
-    }
-    permissions {
-        uuid id PK
-        string code UK "EXAMES_LER | PEP_GRAVAR"
-        string description
-    }
-    role_permissions {
-        uuid roleId PK FK
-        uuid permissionId PK FK
-    }
-```
-
----
-
-## 5. APIs
-
-### `POST /api/settings/users`
-Cria um novo usuário na instituição.
-*   **Request Body**:
-```json
-{
-  "username": "dr.joao.silva",
-  "email": "joao.silva@hospital.com",
-  "fullName": "João da Silva",
-  "roleId": "e1f1ad7e-bf91-4d1a-a53c-12b23a54b38d",
-  "professionalRegistry": "CRM-SP12345"
-}
-```
-*   **Response (201 Created)**:
-```json
-{
-  "userId": "c88d8b12-921c-4b5b-ad7d-df99ac2f482d",
-  "status": "Criado_Pendente_Ativacao"
-}
-```
-
-### `PUT /api/settings/security`
-Altera as diretrizes de segurança globais do sistema.
-*   **Request Body**:
-```json
-{
-  "passwordExpirationDays": 90,
-  "mfaRequired": true,
-  "sessionTimeoutMinutes": 15
-}
-```
-*   **Response (200 OK)**:
-```json
-{
-  "message": "Configurações de segurança atualizadas com sucesso."
-}
-```
-
----
-
-## 6. Wireframe (Textual)
-```
-+----------------------------------------------------------------------------------+
-|  [CRM CLÍNICO FARMACÊUTICO]  |  Configurações > Perfis e Permissões (RBAC)                   |
-+----------------------------------------------------------------------------------+
-|  PERFIL: [ Enfermeiro                                                        ]  |
-+----------------------------------------------------------------------------------+
-|  Selecione as permissões para este perfil:                                        |
-|  Módulo              Visualizar    Criar/Editar    Excluir       Assinar         |
-|  Prontuário (PEP)     [X]           [X]             [ ]           [ ]            |
-|  Agenda               [X]           [ ]             [ ]           [ ]            |
-|  Internações          [X]           [X]             [ ]           [ ]            |
-|  Triagem Manchester   [X]           [X]             [ ]           [X]            |
-|  Financeiro           [ ]           [ ]             [ ]           [ ]            |
-|                                                                                  |
-|  [ Cancelar ]                                               [ Salvar Perfil ]    |
-+----------------------------------------------------------------------------------+
-```
-
----
-
-## 7. Casos de Uso
+## 5. Casos de Uso
 
 | ID | Caso de Uso | Ator Principal | Pré-condições | Fluxo Principal |
 | :--- | :--- | :--- | :--- | :--- |
-| **UC-1501** | Revogar Acesso de Usuário | Administrador de TI | Usuário cadastrado no banco. | 1. O Administrador acessa a lista de usuários; 2. Localiza o profissional; 3. Altera a flag `isActive` para `false`; 4. Salva a configuração; 5. O sistema desloga o usuário em tempo real via WebSocket e invalida seu token JWT. |
+| **UC-1501** | Cadastrar e Editar Operadores | Master (`mazzarowysk`) | Aba Configurações aberta | 1. Abre Agrupamento 1; 2. Preenche Nome, @username, Perfil e CRF; 3. Salva e sincroniza na nuvem. |
+| **UC-1502** | Gerar Dados de Simulação (Sandbox) | Master / RT | Agrupamento 6 aberto | 1. Clica no gerador desejado (+5 Clientes, +5 Atendimentos, +5 Estoque ou +8 Financeiro); 2. O sistema gera registros com tag `[SIMULADO]` e atualiza os dashboards. |
+| **UC-1503** | Limpeza Seletiva ou Hard Reset | Master | Agrupamento 6 aberto | 1. Clica no botão de limpeza; 2. Modal de segurança solicita senha (e digitação de `"LIMPAR"` / `"HARD RESET"`); 3. Sistema valida credenciais e executa a limpeza atômica. |
+| **UC-1504** | Gestão de Parâmetros de Receita/Despesa | Master / RT | Agrupamento 7 aberto | 1. Visualiza tabela de categorias e meios de pagamento; 2. Edita ou exclui registros; 3. Atualiza os formulários de lançamento do balcão e financeiro. |
 
 ---
 
-## 8. Perfis e Permissões (RBAC)
-*   **Administrador de TI**: Acesso total a todas as APIs deste módulo.
-*   **Demais Perfis (Médico, Recepcionista, etc.)**: Sem qualquer acesso a este módulo. Possuem apenas permissão para editar seus dados cadastrais básicos no menu "Meu Perfil".
-
----
-
-## 9. Dicionário de Campos
-
-| Campo de Interface | Descrição | Tipo | Validação |
-| :--- | :--- | :--- | :--- |
-| `email` | E-mail corporativo do usuário | String | Deve ser formato válido de e-mail |
-| `isActive` | Situação de ativação do login | Boolean | Padrão `true` para novos cadastros |
-| `sessionTimeoutMinutes`| Tempo de timeout de inatividade | Inteiro | Faixa permitida: 5 a 60 minutos |
-
----
-
-## 10. Validações
-*   **Auto-Exclusão**: O sistema deve bloquear qualquer tentativa de um usuário administrador inativar ou excluir a si mesmo (`userId` logado = `userId` a ser inativado), evitando o travamento (lockout) administrativo do hospital.
-*   **CRM Único**: O registro profissional (`professionalRegistry`) do médico ou enfermeiro deve ser validado para evitar duplicidades no banco de dados.
+*Documentação de Requisitos — CRM Clínico Farmacêutico v3.0 — Agosto/2026*

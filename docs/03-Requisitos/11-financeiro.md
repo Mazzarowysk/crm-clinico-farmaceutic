@@ -1,181 +1,97 @@
-# CRM Clínico Farmacêutico — Módulo 11: Financeiro
+# CRM Clínico Farmacêutico — Módulo 11: Financeiro & Fluxo de Caixa
 
-Este documento detalha os requisitos e especificações para o módulo **Financeiro** do CRM Clínico Farmacêutico.
+Este documento detalha os requisitos e especificações para o módulo **Financeiro & Fluxo de Caixa** do CRM Clínico Farmacêutico v3.0.
 
 ---
 
 ## 1. Objetivo
-Controlar a saúde financeira da instituição de saúde: contas a pagar, contas a receber (particulares, cartões de crédito/débito, boletos, repasses de convênios), fluxo de caixa real e projetado, conciliação bancária de extratos OFX, e geração de relatórios de demonstrativo de resultados de exercício (DRE).
+Gerenciar integralmente a saúde financeira da farmácia/consultório: faturamento de consultas farmacêuticas, testes laboratoriais remotos (TLR / RDC 786), aplicação de injetáveis e vacinas, dispensação de MIPs, controle de custos de aquisição (distribuidoras), despesas operacionais fixas e variáveis, DRE em tempo real e conciliação de meios de pagamento.
 
 ---
 
 ## 2. Fluxo de Processo (Workflow)
-O fluxo padrão gerencia contas a receber originadas do faturamento de consultas ou altas hospitalares, o contas a pagar gerado por compras de suprimentos, e a conciliação final com a conta bancária.
+O fluxo gerencia receitas originadas dos atendimentos clínicos e vendas no PDV, despesas de suprimentos e custos fixos, com sincronização em tempo real com a nuvem Turso e gestão de parâmetros personalizáveis.
 
 ```mermaid
 stateDiagram-v2
-    [*] --> LancamentoFinanceiro : Origem (Consulta Particular / Compra Insumo)
-    LancamentoFinanceiro --> ContasReceber : Entrada de faturamento
-    LancamentoFinanceiro --> ContasPagar : Abertura de fatura/boleto de fornecedor
-    ContasReceber --> RecebimentoEfetivado : Paciente paga ou Convênio faz repasse
-    ContasPagar --> PagamentoEfetuado : Tesouraria liquida título bancário
-    RecebimentoEfetivado --> ConciliacaoBancaria : Importação de Extrato Bancário (OFX)
-    PagamentoEfetuado --> ConciliacaoBancaria
-    ConciliacaoBancaria --> LancamentoConciliado : Conferência matemática batida
-    LancamentoConciliado --> [*] : DRE Atualizado
+    [*] --> LancamentoFinanceiro : Origem (Consulta Clínica / Venda MIP / Despesa Distribuidora)
+    LancamentoFinanceiro --> SelecaoCategoria : Categoria Padrão ou Botão [+] Nova
+    SelecaoCategoria --> FormaPagamento : Meio Padrão ou Botão [+] Novo Meio
+    FormaPagamento --> GravacaoLocalDB : Persistência imediata com status e data
+    GravacaoLocalDB --> ReconciliacaoTurso : Sincronização background com Turso Cloud
+    GravacaoLocalDB --> AtualizacaoDRE : Atualiza Receitas, Despesas, Saldo Líquido e KPIs
+    AtualizacaoDRE --> [*] : Visualização em Abas Neon (Todos, Receitas, Despesas)
 ```
 
 ---
 
-## 3. Regras de Negócio
-1.  **Transações Criptografadas**: Todas as transações financeiras devem conter hashes de integridade no banco de dados para evitar inserções diretas maliciosas por fora da aplicação.
-2.  **Fluxo de Caixa Projetado**: O DRE e fluxo de caixa devem separar lançamentos "Previstos" (compromissos futuros) de lançamentos "Realizados" (títulos liquidados).
-3.  **Conciliação OFX Automática**: O sistema deve efetuar conciliação prévia automática de extratos em formato OFX, identificando lançamentos correspondentes por valor exato e data aproximada (janela de ±3 dias), solicitando intervenção manual apenas em caso de divergência ou múltiplos correspondentes.
-4.  **Integração de PIX Dinâmico**: O sistema na recepção deve ser capaz de gerar QR Codes de PIX dinâmicos (via API do banco) contendo o valor exato da consulta, monitorando a confirmação do pagamento em tempo real via Webhooks bancários para liberação imediata do atendimento.
+## 3. Regras de Negócio e Funcionalidades Principais
+
+1. **Abas Neon de Alto Contraste**: Navegação e filtragem rápida do extrato financeiro em 3 abas visualmente diferenciadas:
+   - `Todos os Lançamentos`: Visão unificada cronológica.
+   - `⬇️ Receitas & Faturamento`: Entradas filtradas com totalizadores de receitas clínicas e vendas.
+   - `⬆️ Despesas & Custos`: Saídas filtradas com totalizadores de compras de estoque, impostos e custos fixos.
+2. **Botões de Cadastro Rápido `+` (Criação Dinâmica de Parâmetros)**:
+   - No modal de novo lançamento, botões `+` ao lado dos seletores de *Categoria* e *Forma de Pagamento* permitem criar instantaneamente novos itens sem sair do formulário.
+   - Todo item cadastrado pelo botão `+` é gravado no banco de dados, sincronizado na nuvem e exibido no **Agrupamento 7 da aba Configurações** com o selo `⭐ Personalizado (via +)`.
+3. **Gestão Centralizada de Parâmetros (`src/modules/financialParams.js`)**:
+   - Painel CRUD na aba Configurações que permite pesquisar, editar (renomear/reclassificar) e excluir qualquer categoria ou meio de pagamento.
+4. **DRE Farmacêutico em Tempo Real**:
+   - Apuração do Demonstrativo de Resultados do Exercício (Receita Bruta - Custos de Mercadorias Vendidas - Despesas Operacionais = Lucro/Prejuízo Líquido).
+   - Exportação em PDF com cabeçalho do estabelecimento farmacêutico e dados do Responsável Técnico.
 
 ---
 
-## 4. Banco de Dados (Schema)
-O banco controla contas, títulos a pagar/receber, transações e formas de pagamento.
+## 4. Banco de Dados (Coleções LocalDB & Turso Cloud)
 
 ```mermaid
 erDiagram
-    bank_accounts ||--o{ financial_transactions : "recebe"
-    payment_methods ||--o{ financial_transactions : "utiliza"
-    billing_accounts ||--o{ bills_receivable : "gera"
-    bills_receivable ||--o{ financial_transactions : "liquida"
-    bills_payable ||--o{ financial_transactions : "liquida"
+    financial_categories ||--o{ financial_transactions : "classifica"
+    financial_payment_methods ||--o{ financial_transactions : "liquida via"
 
-    bank_accounts {
-        uuid id PK
-        string bankName
-        string agencyNumber
-        string accountNumber
-        float currentBalance
+    financial_categories {
+        string id PK
+        string name
+        string type "Receita | Despesa"
+        string is_default "boolean"
+        timestamp created_at
     }
-    bills_receivable {
-        uuid id PK
-        uuid patientId FK
-        uuid billingAccountId FK
-        float value
-        date dueDate
-        date receivedDate
-        float receivedValue
-        string status "Pendente | Pago | Cancelado | Atrasado"
-    }
-    bills_payable {
-        uuid id PK
-        string supplierCNPJ
-        string description
-        float value
-        date dueDate
-        date paidDate
-        float paidValue
-        string status "Pendente | Pago | Cancelado | Atrasado"
+    financial_payment_methods {
+        string id PK
+        string name
+        string type "Dinheiro | PIX | Cartao | PBM | Outro"
+        string is_default "boolean"
+        timestamp created_at
     }
     financial_transactions {
-        uuid id PK
-        uuid bankAccountId FK
-        uuid paymentMethodId FK
+        string id PK
         string type "Receita | Despesa"
-        float transactionValue
-        timestamp transactedAt
+        string category
+        float amount
+        string payment_method
         string description
-        boolean isReconciled
+        string date
+        string status "Pago | Pendente"
+        boolean is_simulated
+        timestamp created_at
     }
 ```
 
----
-
-## 5. APIs
-
-### `POST /api/financial/receivables`
-Cria um título a receber.
-*   **Request Body**:
-```json
-{
-  "patientId": "e1f1ad7e-bf91-4d1a-a53c-12b23a54b38d",
-  "billingAccountId": "9b2c12ab-f7b1-4bb2-ad79-df99ac2f8722",
-  "value": 250.00,
-  "dueDate": "2026-07-25"
-}
-```
-*   **Response (201 Created)**:
-```json
-{
-  "billReceivableId": "c88d8b12-921c-4b5b-ad7d-df99ac2f482d",
-  "status": "Pendente"
-}
-```
-
-### `POST /api/financial/pix/generate`
-Gera QR Code dinâmico para recebimento imediato via PIX.
-*   **Request Body**:
-```json
-{
-  "billReceivableId": "c88d8b12-921c-4b5b-ad7d-df99ac2f482d",
-  "amount": 250.00
-}
-```
-*   **Response (200 OK)**:
-```json
-{
-  "qrCodeString": "00020101021226870014br.gov.bcb.pix...",
-  "qrCodeImageUrl": "https://storage.healthnexus.com/pix/qrcode_12984.png",
-  "paymentToken": "tok_pix_87d9a12bc239"
-}
-```
-
----
-
-## 6. Wireframe (Textual)
-```
-+----------------------------------------------------------------------------------+
-|  [CRM CLÍNICO FARMACÊUTICO]  |  Financeiro > Baixa de Contas a Receber                       |
-+----------------------------------------------------------------------------------+
-|  BUSCAR PACIENTE: [ Maria de Souza Silva                                  ]      |
-+----------------------------------------------------------------------------------+
-|  Títulos Pendentes:                                                              |
-|  ID     Vencimento    Descrição               Valor      Ações                   |
-|  #1082  25/07/2026    Consulta Ambulatorial   R$ 250,00  [ Baixar ] [ Gerar Pix ]|
-|  #1154  10/08/2026    Exame Radiologia        R$ 450,00  [ Baixar ] [ Cancelar ] |
-|                                                                                  |
-|  +-- Registrar Liquidação Manual ----------------------------------------------+ |
-|  |  *Data do Recebimento: [ 18/07/2026 ]  *Conta Destino: [ Itaú C/C principal ]|
-|  |  *Valor Recebido:      [ R$ 250,00  ]  *Forma de Pgto:  [ Cartão Débito     ]|
-|  +-----------------------------------------------------------------------------+ |
-|                                                                                  |
-|  [ Voltar ]                                                    [ Confirmar Baixa ]|
-+----------------------------------------------------------------------------------+
-```
-
----
-
-## 7. Casos de Uso
+## 5. Casos de Uso
 
 | ID | Caso de Uso | Ator Principal | Pré-condições | Fluxo Principal |
 | :--- | :--- | :--- | :--- | :--- |
-| **UC-1101** | Efetuar Conciliação Bancária | Analista Financeiro | Arquivo OFX do banco gerado. Lançamentos pendentes de conciliação no sistema. | 1. O Analista faz o upload do arquivo OFX; 2. O sistema lê as transações bancárias e busca correspondência no Contas a Pagar/Receber; 3. Exibe lançamentos casados; 4. O Analista revisa e clica em "Conciliar"; 5. O sistema atualiza `isReconciled = true` e altera o saldo real da conta. |
+| **UC-1101** | Lançamento Rápido com Criação de Parâmetro `+` | Farmacêutico / Admin | Modal de Lançamento aberto | 1. Informa se é Receita ou Despesa; 2. Clica no `+` para criar nova categoria personalizada; 3. O sistema salva na coleção `financial_categories`, seleciona no campo e sincroniza no Turso Cloud; 4. Preenche valor e data; 5. Confirma gravação. |
+| **UC-1102** | Filtragem Dinâmica por Abas Neon | Farmacêutico / Admin | Aba Financeiro aberta | 1. Clica na aba `⬇️ Receitas` ou `⬆️ Despesas`; 2. O grid recalcula totais e exibe apenas transações do tipo selecionado com destaque visual. |
+| **UC-1103** | Gestão de Parâmetros Financeiros | Master / RT | Agrupamento 7 de Configurações | 1. Pesquisa categoria ou meio de pagamento; 2. Clica em ✏️ Editar para alterar nome/tipo ou 🗑️ Excluir para remover; 3. Atualiza os formulários instantaneamente. |
 
 ---
 
-## 8. Perfis e Permissões (RBAC)
-*   **Diretor Financeiro / Controller**: Permissão de leitura/escrita para todas as áreas, incluindo alteração de contas bancárias da empresa, DRE, plano de contas e conciliações de alto valor.
-*   **Operador de Caixa / Recepcionista**: Permissão para gerar recebimentos, registrar PIX/Cartão e baixar consultas no ato. Não possui permissão para contas a pagar, DRE ou extratos OFX.
-*   **Faturamento**: Permissão de leitura de títulos a receber gerados por convênios.
+## 6. Perfis e Permissões (RBAC)
+* **Master (`mazzarowysk`) / Farmacêutico RT**: Acesso pleno ao fluxo de caixa, DRE, conciliação, criação, edição e exclusão de parâmetros no Agrupamento 7.
+* **Farmacêutico Clínico**: Registro de receitas de procedimentos e consultas realizadas no balcão.
+* **Administrador**: Gestão do contas a pagar/receber, custos operacionais e relatórios gerenciais.
 
 ---
 
-## 9. Dicionário de Campos
-
-| Campo de Interface | Descrição | Tipo | Validação |
-| :--- | :--- | :--- | :--- |
-| `dueDate` | Data máxima para pagamento do título | Date | Deve ser igual ou maior que a data de criação |
-| `transactionValue` | Valor monetário do movimento | Decimal | Deve ser maior que zero |
-| `type` | Tipo de movimentação financeira | String | Enum: `Receita`, `Despesa` |
-
----
-
-## 10. Validações
-*   **Estorno de Título**: Não é permitido estornar/cancelar um lançamento financeiro conciliado (`isReconciled = true`) sem que o usuário tenha o perfil de `Diretor Financeiro` e justifique a ação em campo auditado.
-*   **Transações de Caixa**: O operador não pode fechar o caixa diário se houver diferença matemática entre os recebimentos em dinheiro registrados no sistema e o valor físico de fechamento.
+*CRM Clínico Farmacêutico v3.0 — Módulo 11: Financeiro*
