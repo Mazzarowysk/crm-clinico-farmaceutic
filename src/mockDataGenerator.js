@@ -721,7 +721,7 @@ function generateConsultorios(doctors) {
 export async function generateMockData(baseAmount = 300) {
   // ── 1. Limpar banco (PRESERVAR TODOS OS USUÁRIOS EXISTENTES + SISTEMA + CORPO CLÍNICO) ──
   const currentDB = (() => {
-    try { return JSON.parse(localStorage.getItem('healthNexusDados') || '{}'); } catch { return {}; }
+    try { return JSON.parse(localStorage.getItem('crmFarmaceuticoDados') || localStorage.getItem('healthNexusDados') || '{}'); } catch { return {}; }
   })();
 
   const existingUsers = Array.isArray(currentDB.users) ? currentDB.users : [];
@@ -831,6 +831,8 @@ export async function generateMockData(baseAmount = 300) {
     consultorios,
   };
 
+  localStorage.setItem('crmFarmaceuticoDados', JSON.stringify(db));
+  localStorage.setItem('crmFarmaceuticoUpdatedAt', Date.now().toString());
   localStorage.setItem('healthNexusDados', JSON.stringify(db));
   localStorage.setItem('healthNexusUpdatedAt', Date.now().toString());
   if (typeof window !== 'undefined' && typeof window.clearDataCache === 'function') {

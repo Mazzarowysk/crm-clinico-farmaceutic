@@ -23,18 +23,15 @@ Para manter a consistência metodológica da documentação de engenharia de sof
 
 Abaixo está o índice de especificação dos 15 módulos do CRM Clínico Farmacêutico:
 
-1.  **[Módulo 01: Dashboard](file:///c:/Health%20Nexus/docs/03-Requisitos/01-dashboard.md)**: Painéis de indicadores clínicos, de ocupação e financeiros.
-2.  **[Módulo 02: Atendimento](file:///c:/Health%20Nexus/docs/03-Requisitos/02-atendimento.md)**: Triagem Manchester e recepção de prontos-socorros.
-3.  **[Módulo 03: Pacientes](file:///c:/Health%20Nexus/docs/03-Requisitos/03-pacientes.md)**: Cadastro unificado de pacientes (PEP-Core) e elegibilidade.
-4.  **[Módulo 04: Prontuário](file:///c:/Health%20Nexus/docs/03-Requisitos/04-prontuario.md)**: Prontuário Eletrônico do Paciente (PEP), anamnese, evolução e prescrição.
-5.  **[Módulo 05: Agenda](file:///c:/Health%20Nexus/docs/03-Requisitos/05-agenda.md)**: Marcação de consultas, exames, salas cirúrgicas e escalas médicas.
-6.  **[Módulo 06: Internações](file:///c:/Health%20Nexus/docs/03-Requisitos/06-internacoes.md)**: Gerenciamento de leitos, admissões hospitalares, transferências e altas.
-7.  **[Módulo 07: Centro Cirúrgico](file:///c:/Health%20Nexus/docs/03-Requisitos/07-centro-cirurgico.md)**: Agendamento cirúrgico, boletim anestésico e recuperação pós-anestésica.
-8.  **[Módulo 08: Farmácia](file:///c:/Health%20Nexus/docs/03-Requisitos/08-farmacia.md)**: Dispensação de medicamentos, controle de unitarização e rastreabilidade.
-9.  **[Módulo 09: Laboratório](file:///c:/Health%20Nexus/docs/03-Requisitos/09-laboratorio.md)**: Cadastro de pedidos de exames, coleta, interfaceamento de aparelhos e laudos.
-10. **[Módulo 10: Estoque](file:///c:/Health%20Nexus/docs/03-Requisitos/10-estoque.md)**: Almoxarifado central, compras, lotes, validade e inventários.
-11. **[Módulo 11: Financeiro](file:///c:/Health%20Nexus/docs/03-Requisitos/11-financeiro.md)**: Contas a pagar/receber, fluxo de caixa e conciliação bancária.
-12. **[Módulo 12: Convênios](file:///c:/Health%20Nexus/docs/03-Requisitos/12-convenios.md)**: Faturamento TISS, envio de lotes XML, glosas e tabelas contratuais (TUSS).
-13. **[Módulo 13: Relatórios](file:///c:/Health%20Nexus/docs/03-Requisitos/13-relatorios.md)**: Emissor de relatórios PDF/XLS e ferramentas de auditoria operacional.
-14. **[Módulo 14: Comunicação](file:///c:/Health%20Nexus/docs/03-Requisitos/14-comunicacao.md)**: Integração com WhatsApp, email, painéis de chamada de triagem e telemedicina.
-15. **[Módulo 15: Configurações](file:///c:/Health%20Nexus/docs/03-Requisitos/15-configuracoes.md)**: Configurações gerais, gerenciamento de usuários, parametrização clínica e controle de auditoria.
+1.  **[Módulo 01: Dashboard](./01-dashboard.md)**: Painéis de indicadores clínicos, adesão e faturamento.
+2.  **[Módulo 02: Atendimento](./02-atendimento.md)**: Triagem clínica guiada SOAP e checagem de Red Flags.
+3.  **[Módulo 03: Pacientes](./03-pacientes.md)**: Cadastro unificado de pacientes, comorbidades, alergias e PBMs.
+4.  **[Módulo 04: Prontuário](./04-prontuario.md)**: Prontuário longitudinal farmacoterapêutico e linha do tempo.
+5.  **[Módulo 05: Agenda](./05-agenda.md)**: Agendamento de consultas farmacêuticas, TLR e injetáveis.
+6.  **[Módulo 08: Farmácia & CDSS 4D](./08-farmacia.md)**: Prescrição de MIPs, motor de interações 4D e vacinação.
+7.  **[Módulo 10: Estoque](./10-estoque.md)**: Catálogo com código de barras (Câmera/USB), lotes e validades.
+8.  **[Módulo 11: Financeiro](./11-financeiro.md)**: Fluxo de caixa com Abas Neon, botões + de categorias e DRE.
+9.  **[Módulo 12: Convênios & PBMs](./12-convenios.md)**: Gestão de programas de benefícios em medicamentos e convênios.
+10. **[Módulo 13: Relatórios & DSF](./13-relatorios.md)**: Emissão de Declaração de Serviço Farmacêutico (CFF 585/586) com Hash.
+11. **[Módulo 14: Comunicação](./14-comunicacao.md)**: Envio de posologia via WhatsApp e Portal PWA do paciente.
+12. **[Módulo 15: Configurações](./15-configuracoes.md)**: Central de governança em 7 Agrupamentos Estruturados e Turso Cloud.

@@ -869,7 +869,7 @@ async function uploadBackupToGoogleDrive(snapshotData, customFileName) {
   if (gdriveSync === false) return null;
 
   const nowStr = new Date().toISOString();
-  const fileName = customFileName || `Health_Nexus_Backup_${nowStr.slice(0,10)}_${nowStr.slice(11,19).replace(/:/g,'-')}.json`;
+  const fileName = customFileName || `CRM_Clinico_Farmaceutico_Backup_${nowStr.slice(0,10)}_${nowStr.slice(11,19).replace(/:/g,'-')}.json`;
   const backupJson = JSON.stringify(snapshotData || localDB.getFullDB(), null, 2);
 
   // Se tivermos um Token OAuth ativo, envia diretamente via API REST v3 do Google Drive

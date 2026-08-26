@@ -107,7 +107,7 @@ Consulta o status do processamento da exportação.
 {
   "taskId": "f98c8c22-d7b1-42cb-b1b7-7ff3ad40e21a",
   "status": "Concluido",
-  "storageUrl": "https://storage.healthnexus.com/reports/faturamento_20260718.xlsx",
+  "storageUrl": "https://storage.crmclinico.com.br/reports/faturamento_20260718.xlsx",
   "completedAt": "2026-07-18T14:38:00Z"
 }
 ```

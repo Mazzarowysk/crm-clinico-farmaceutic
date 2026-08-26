@@ -2738,8 +2738,8 @@ function renderReportsTab(contentArea) {
                   <img src="/assets/crm-logo.png?v=2" alt="CRM Clínico Farmacêutico" style="height: 32px; width: auto; object-fit: contain;">
                 </div>
                 <div>
-                  <div style="font-size: 1.15rem; font-weight: 900; color: #1e1b4b; font-family: 'Outfit', sans-serif; line-height: 1; letter-spacing: -0.4px;">HEALTH <span style="color: #4f46e5;">NEXUS</span></div>
-                  <div style="font-size: 0.58rem; font-weight: 800; color: #64748b; letter-spacing: 1.2px; text-transform: uppercase; margin-top: 2px;">BANK • GESTÃO HOSPITALAR</div>
+                  <div style="font-size: 1.15rem; font-weight: 900; color: #042f2e; font-family: 'Outfit', sans-serif; line-height: 1; letter-spacing: -0.4px;">CRM <span style="color: #0d9488;">CLÍNICO</span></div>
+                  <div style="font-size: 0.58rem; font-weight: 800; color: #64748b; letter-spacing: 1.2px; text-transform: uppercase; margin-top: 2px;">CUIDADO &amp; SERVIÇOS FARMACÊUTICOS</div>
                 </div>
               </div>
 
@@ -2752,7 +2752,7 @@ function renderReportsTab(contentArea) {
               <tr>
                 <td style="border: 1px solid #000; padding: 4px 6px; width: 50%;">
                   <span style="color: #475569; display: block; font-size: 6.5pt; text-transform: uppercase;">Beneficiário</span>
-                  <strong style="font-size: 8.5pt;">CRM Clínico Farmacêutico Serviços Médicos Hospitalares Ltda - CNPJ: 42.109.843/0001-90</strong>
+                  <strong style="font-size: 8.5pt;">CRM Clínico Farmacêutico &bull; Consultório e Farmácia - CNPJ: 42.109.843/0001-90</strong>
                 </td>
                 <td style="border: 1px solid #000; padding: 4px 6px; width: 25%;">
                   <span style="color: #475569; display: block; font-size: 6.5pt; text-transform: uppercase;">Agência / Código Beneficiário</span>
@@ -2803,8 +2803,8 @@ function renderReportsTab(contentArea) {
                   <img src="/assets/crm-logo.png?v=2" alt="CRM Clínico Farmacêutico" style="height: 32px; width: auto; object-fit: contain;">
                 </div>
                 <div>
-                  <div style="font-size: 1.15rem; font-weight: 900; color: #1e1b4b; font-family: 'Outfit', sans-serif; line-height: 1; letter-spacing: -0.4px;">HEALTH <span style="color: #4f46e5;">NEXUS</span></div>
-                  <div style="font-size: 0.58rem; font-weight: 800; color: #64748b; letter-spacing: 1.2px; text-transform: uppercase; margin-top: 2px;">BANK • GESTÃO HOSPITALAR</div>
+                  <div style="font-size: 1.15rem; font-weight: 900; color: #042f2e; font-family: 'Outfit', sans-serif; line-height: 1; letter-spacing: -0.4px;">CRM <span style="color: #0d9488;">CLÍNICO</span></div>
+                  <div style="font-size: 0.58rem; font-weight: 800; color: #64748b; letter-spacing: 1.2px; text-transform: uppercase; margin-top: 2px;">CUIDADO &amp; SERVIÇOS FARMACÊUTICOS</div>
                 </div>
               </div>
 

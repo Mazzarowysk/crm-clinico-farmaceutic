@@ -287,7 +287,7 @@ ${guiasXml}
 /**
  * Dispara o download do arquivo XML TISS gerado
  */
-export function downloadTISSFile(xmlContent, filename = 'LOTE_TISS_4_01_HEALTH_NEXUS.xml') {
+export function downloadTISSFile(xmlContent, filename = 'LOTE_TISS_4_01_CRM_FARMACEUTICO.xml') {
   const blob = new Blob([xmlContent], { type: 'application/xml;charset=utf-8;' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);

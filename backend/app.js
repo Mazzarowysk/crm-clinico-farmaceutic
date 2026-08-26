@@ -238,7 +238,7 @@ app.get('/api/anvisa/buscar', async (req, res) => {
         return new Promise((resolve) => {
           import('node:https').then(({ default: https }) => {
             const req = https.get(url, {
-              headers: { 'User-Agent': 'HealthNexus/1.3.0 (hospital-system)' }
+              headers: { 'User-Agent': 'CRMClinicoFarmaceutico/3.0.0 (farmacia-clinica)' }
             }, (r) => {
               let data = '';
               r.on('data', c => data += c);

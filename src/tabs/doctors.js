@@ -183,7 +183,7 @@ async function renderDoctorsTab() {
             </div>
             <div class="form-group">
               <label for="doc-email">E-mail Corporativo</label>
-              <input type="email" id="doc-email" class="form-input" placeholder="medico@healthnexus.com">
+              <input type="email" id="doc-email" class="form-input" placeholder="farmaceutico@crmclinico.com.br">
             </div>
           </div>
           <div class="form-group">
@@ -2748,7 +2748,12 @@ window.saveHistoryEvolution = function(patientId, patientName) {
     author: `${perms.label || 'Equipe Assistencial'} (${state.user?.name || state.user?.username || 'Profissional'})`
   });
   db.clinical_notes = notes;
-  localStorage.setItem('healthNexusDados', JSON.stringify(db));
+  if (typeof localDB !== 'undefined' && localDB.saveFullDB) {
+    localDB.saveFullDB(db);
+  } else {
+    localStorage.setItem('crmFarmaceuticoDados', JSON.stringify(db));
+    localStorage.setItem('healthNexusDados', JSON.stringify(db));
+  }
   
   if (typeof window.showToast === 'function') window.showToast('Evolução clínica salva com sucesso!', 'success');
   else alert('Evolução clínica salva com sucesso!');

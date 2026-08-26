@@ -69,7 +69,7 @@ Para processos assistenciais críticos, o CRM Clínico Farmacêutico utiliza o p
 ### Fluxo de Autenticação no WebSocket
 A conexão WebSocket exige a passagem do token JWT no ato do aperto de mão (handshake):
 ```javascript
-const socket = io('wss://api.healthnexus.com', {
+const socket = io('wss://api.crmclinico.com.br', {
   auth: {
     token: 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
   }

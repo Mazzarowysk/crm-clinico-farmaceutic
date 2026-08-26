@@ -47,14 +47,14 @@ O arquivo `.env` gerencia chaves de criptografia e parâmetros de conexão de ba
 # --- Configurações Gerais do Servidor ---
 NODE_ENV=production
 PORT=3000
-API_URL=https://api.healthnexus.com
+API_URL=https://api.crmclinico.com.br
 
-# --- Banco de Dados PostgreSQL ---
+# --- Banco de Dados Local / Turso LibSQL Cloud ---
 DB_HOST=127.0.0.1
 DB_PORT=5432
-DB_USER=health_nexus_admin
+DB_USER=crm_admin
 DB_PASS=senha_forte_segura_db
-DB_NAME=health_nexus_production
+DB_NAME=crm_farmaceutico_production
 
 # --- Cache & Broker Redis ---
 REDIS_HOST=127.0.0.1

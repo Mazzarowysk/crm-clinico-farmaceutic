@@ -405,6 +405,7 @@ export function hardResetAllCollections(password, confirmationText) {
     'crm_products',
     'crm_inventory_movements',
     'crm_patient_purchases',
+    'crmFarmaceuticoDados_cache',
     'healthNexusDados_cache'
   ];
   keysToRemove.forEach(k => localStorage.removeItem(k));
