@@ -1,6 +1,17 @@
 // ─── MÓDULO DA ABA DASHBOARD & MÉTRICAS (CRM CLÍNICO FARMACÊUTICO v3.0) ───────────────────
 import { state } from '../state.js';
 import { apiFetch } from '../modules/api.js';
+import { showToast } from '../modules/ui.js';
+
+// Estado de visualização dinâmica dos gráficos
+const chartModes = {
+  services: ['doughnut', 'bar', 'pie', 'polarArea'],
+  servicesIdx: 0,
+  cdss: ['polarArea', 'radar', 'doughnut', 'bar', 'pie'],
+  cdssIdx: 0,
+  weekly: ['line-smooth', 'bar', 'line-stepped', 'radar', 'area-stacked'],
+  weeklyIdx: 0
+};
 
 export async function fetchDashboardData() {
   state.loading = true;
@@ -83,6 +94,10 @@ export async function fetchDashboardData() {
   state.loading = false;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// RENDERIZAÇÃO DOS GRÁFICOS (CHART.JS) COM SUPORTE A ALTERNÂNCIA DE TIPOS
+// ─────────────────────────────────────────────────────────────────────────────
+
 export function initDashboardCharts(data) {
   if (!data) return;
 
@@ -92,168 +107,592 @@ export function initDashboardCharts(data) {
     return;
   }
 
-  // 1. Gráfico de Serviços Farmacêuticos Clínicos (Doughnut)
-  const servicesCtx = document.getElementById('servicesChart');
-  if (servicesCtx) {
-    if (servicesCtx._chartInstance) servicesCtx._chartInstance.destroy();
-    
-    const services = data.clinicalServicesData || [];
-    const labels = services.map(s => s.label);
-    const values = services.map(s => s.value);
-    const colors = services.map(s => s.color);
+  // 1. Gráfico de Serviços Farmacêuticos Clínicos
+  renderServicesChart(ChartClass, data);
 
-    servicesCtx._chartInstance = new ChartClass(servicesCtx, {
-      type: 'doughnut',
-      data: {
-        labels: labels,
-        datasets: [{
-          data: values,
-          backgroundColor: colors,
-          borderColor: '#0b0f19',
-          borderWidth: 2,
-          hoverOffset: 6
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: {
-              color: '#cbd5e1',
-              font: { size: 11, family: 'Inter' },
-              padding: 12,
-              usePointStyle: true
-            }
-          },
-          tooltip: {
-            backgroundColor: 'rgba(15, 23, 42, 0.95)',
-            titleColor: '#38bdf8',
-            bodyColor: '#f8fafc',
-            borderColor: 'rgba(56, 189, 248, 0.3)',
-            borderWidth: 1,
-            callbacks: {
-              label: function(context) {
-                const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                const val = context.raw || 0;
-                const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
-                return ` ${context.label}: ${val} procedimentos (${pct}%)`;
-              }
-            }
-          }
-        },
-        cutout: '68%'
-      }
-    });
-  }
+  // 2. Gráfico do Motor CDSS 4D
+  renderCdssChart(ChartClass, data);
 
-  // 2. Gráfico do Motor CDSS 4D (Polar Area / Bar)
-  const cdssCtx = document.getElementById('cdssChart');
-  if (cdssCtx) {
-    if (cdssCtx._chartInstance) cdssCtx._chartInstance.destroy();
-
-    const alerts = data.cdssAlertsData || [];
-    const labels = alerts.map(a => a.label);
-    const values = alerts.map(a => a.value);
-    const colors = alerts.map(a => a.color);
-
-    cdssCtx._chartInstance = new ChartClass(cdssCtx, {
-      type: 'polarArea',
-      data: {
-        labels: labels,
-        datasets: [{
-          data: values,
-          backgroundColor: colors.map(c => c + 'aa'),
-          borderColor: colors,
-          borderWidth: 1.5
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          r: {
-            grid: { color: 'rgba(255, 255, 255, 0.08)' },
-            angleLines: { color: 'rgba(255, 255, 255, 0.08)' },
-            ticks: { display: false }
-          }
-        },
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: {
-              color: '#cbd5e1',
-              font: { size: 10.5, family: 'Inter' },
-              padding: 10,
-              usePointStyle: true
-            }
-          }
-        }
-      }
-    });
-  }
-
-  // 3. Gráfico de Evolução Semanal de Atendimentos (Line / Area)
-  const weeklyCtx = document.getElementById('weeklyAppointmentsChart');
-  if (weeklyCtx) {
-    if (weeklyCtx._chartInstance) weeklyCtx._chartInstance.destroy();
-
-    const history = data.weeklyHistory || [];
-    const labels = history.map(h => h.label);
-    const atendimentos = history.map(h => h.atendimentos);
-    const intervencoes = history.map(h => h.intervencoes);
-
-    weeklyCtx._chartInstance = new ChartClass(weeklyCtx, {
-      type: 'line',
-      data: {
-        labels: labels,
-        datasets: [
-          {
-            label: 'Atendimentos Clínicos',
-            data: atendimentos,
-            borderColor: '#10b981',
-            backgroundColor: 'rgba(16, 185, 129, 0.15)',
-            fill: true,
-            tension: 0.4,
-            pointBackgroundColor: '#10b981',
-            pointRadius: 4
-          },
-          {
-            label: 'Intervenções Farmacêuticas',
-            data: intervencoes,
-            borderColor: '#f59e0b',
-            backgroundColor: 'rgba(245, 158, 11, 0.15)',
-            fill: true,
-            tension: 0.4,
-            pointBackgroundColor: '#f59e0b',
-            pointRadius: 4
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          x: {
-            grid: { color: 'rgba(255, 255, 255, 0.05)' },
-            ticks: { color: '#94a3b8', font: { family: 'Inter' } }
-          },
-          y: {
-            grid: { color: 'rgba(255, 255, 255, 0.05)' },
-            ticks: { color: '#94a3b8', font: { family: 'Inter' }, stepSize: 2 }
-          }
-        },
-        plugins: {
-          legend: {
-            position: 'top',
-            labels: { color: '#cbd5e1', font: { size: 12, family: 'Inter' }, usePointStyle: true }
-          }
-        }
-      }
-    });
-  }
+  // 3. Gráfico de Evolução Semanal
+  renderWeeklyChart(ChartClass, data);
 }
+
+function renderServicesChart(ChartClass, data) {
+  const ctx = document.getElementById('servicesChart');
+  if (!ctx) return;
+  if (ctx._chartInstance) ctx._chartInstance.destroy();
+
+  const services = data.clinicalServicesData || [];
+  const labels = services.map(s => s.label);
+  const values = services.map(s => s.value);
+  const colors = services.map(s => s.color);
+
+  const currentTypeKey = chartModes.services[chartModes.servicesIdx % chartModes.services.length];
+  let chartType = currentTypeKey;
+  let customOptions = {};
+
+  if (currentTypeKey === 'bar') {
+    customOptions = {
+      indexAxis: 'y',
+      scales: {
+        x: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#94a3b8' } },
+        y: { grid: { display: false }, ticks: { color: '#cbd5e1', font: { size: 10.5 } } }
+      },
+      plugins: { legend: { display: false } }
+    };
+  } else if (currentTypeKey === 'polarArea') {
+    customOptions = {
+      scales: {
+        r: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { display: false } }
+      }
+    };
+  }
+
+  // Atualizar badge do tipo no card
+  const badgeEl = document.getElementById('badge-services-chart-type');
+  if (badgeEl) {
+    const names = { 'doughnut': 'Rosca (Donut)', 'bar': 'Barras Horizontais', 'pie': 'Pizza (Pie)', 'polarArea': 'Área Polar' };
+    badgeEl.textContent = names[currentTypeKey] || currentTypeKey;
+  }
+
+  ctx._chartInstance = new ChartClass(ctx, {
+    type: chartType === 'bar' ? 'bar' : (chartType === 'pie' ? 'pie' : (chartType === 'polarArea' ? 'polarArea' : 'doughnut')),
+    data: {
+      labels: labels,
+      datasets: [{
+        data: values,
+        backgroundColor: colors.map(c => c + (chartType === 'bar' ? 'dd' : '')),
+        borderColor: '#0b0f19',
+        borderWidth: 2,
+        hoverOffset: 8,
+        borderRadius: chartType === 'bar' ? 6 : 0
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 550, easing: 'easeOutQuart' },
+      plugins: {
+        legend: {
+          display: chartType !== 'bar',
+          position: 'bottom',
+          labels: {
+            color: '#cbd5e1',
+            font: { size: 11, family: 'Inter' },
+            padding: 10,
+            usePointStyle: true
+          }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(15, 23, 42, 0.95)',
+          titleColor: '#38bdf8',
+          bodyColor: '#f8fafc',
+          borderColor: 'rgba(56, 189, 248, 0.3)',
+          borderWidth: 1,
+          callbacks: {
+            label: function(context) {
+              const total = context.dataset.data.reduce((a, b) => a + b, 0);
+              const val = context.raw || 0;
+              const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
+              return ` ${context.label}: ${val} procedimentos (${pct}%)`;
+            }
+          }
+        }
+      },
+      cutout: chartType === 'doughnut' ? '68%' : '0%',
+      ...customOptions
+    }
+  });
+}
+
+function renderCdssChart(ChartClass, data) {
+  const ctx = document.getElementById('cdssChart');
+  if (!ctx) return;
+  if (ctx._chartInstance) ctx._chartInstance.destroy();
+
+  const alerts = data.cdssAlertsData || [];
+  const labels = alerts.map(a => a.label);
+  const values = alerts.map(a => a.value);
+  const colors = alerts.map(a => a.color);
+
+  const currentTypeKey = chartModes.cdss[chartModes.cdssIdx % chartModes.cdss.length];
+  let chartType = currentTypeKey;
+
+  // Atualizar badge do tipo no card
+  const badgeEl = document.getElementById('badge-cdss-chart-type');
+  if (badgeEl) {
+    const names = { 'polarArea': 'Área Polar', 'radar': 'Radar 4D', 'doughnut': 'Rosca Circular', 'bar': 'Barras Verticais', 'pie': 'Pizza (Pie)' };
+    badgeEl.textContent = names[currentTypeKey] || currentTypeKey;
+  }
+
+  let datasetConfig = {
+    data: values,
+    backgroundColor: colors.map(c => c + 'aa'),
+    borderColor: colors,
+    borderWidth: 1.5
+  };
+
+  let scalesConfig = {};
+  if (chartType === 'radar' || chartType === 'polarArea') {
+    scalesConfig = {
+      r: {
+        grid: { color: 'rgba(255, 255, 255, 0.08)' },
+        angleLines: { color: 'rgba(255, 255, 255, 0.08)' },
+        pointLabels: { color: '#cbd5e1', font: { size: 10 } },
+        ticks: { display: false }
+      }
+    };
+  } else if (chartType === 'bar') {
+    scalesConfig = {
+      x: { grid: { display: false }, ticks: { color: '#cbd5e1', font: { size: 9.5 } } },
+      y: { grid: { color: 'rgba(255,255,255,0.06)' }, ticks: { color: '#94a3b8' } }
+    };
+  }
+
+  ctx._chartInstance = new ChartClass(ctx, {
+    type: chartType,
+    data: {
+      labels: labels,
+      datasets: [datasetConfig]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 550, easing: 'easeOutQuart' },
+      scales: scalesConfig,
+      plugins: {
+        legend: {
+          display: chartType !== 'bar' && chartType !== 'radar',
+          position: 'bottom',
+          labels: {
+            color: '#cbd5e1',
+            font: { size: 10.5, family: 'Inter' },
+            padding: 10,
+            usePointStyle: true
+          }
+        }
+      }
+    }
+  });
+}
+
+function renderWeeklyChart(ChartClass, data) {
+  const ctx = document.getElementById('weeklyAppointmentsChart');
+  if (!ctx) return;
+  if (ctx._chartInstance) ctx._chartInstance.destroy();
+
+  const history = data.weeklyHistory || [];
+  const labels = history.map(h => h.label);
+  const atendimentos = history.map(h => h.atendimentos);
+  const intervencoes = history.map(h => h.intervencoes);
+
+  const currentTypeKey = chartModes.weekly[chartModes.weeklyIdx % chartModes.weekly.length];
+
+  // Atualizar badge do tipo no card
+  const badgeEl = document.getElementById('badge-weekly-chart-type');
+  if (badgeEl) {
+    const names = { 'line-smooth': 'Linha Spline (Suave)', 'bar': 'Barras Agrupadas', 'line-stepped': 'Linha Degrau (Stepped)', 'radar': 'Radar Comparativo', 'area-stacked': 'Área Empilhada' };
+    badgeEl.textContent = names[currentTypeKey] || currentTypeKey;
+  }
+
+  let chartType = 'line';
+  let isStepped = false;
+  let isStacked = false;
+
+  if (currentTypeKey === 'bar') {
+    chartType = 'bar';
+  } else if (currentTypeKey === 'radar') {
+    chartType = 'radar';
+  } else if (currentTypeKey === 'line-stepped') {
+    chartType = 'line';
+    isStepped = true;
+  } else if (currentTypeKey === 'area-stacked') {
+    chartType = 'line';
+    isStacked = true;
+  }
+
+  let scalesConfig = {};
+  if (chartType !== 'radar') {
+    scalesConfig = {
+      x: {
+        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+        ticks: { color: '#94a3b8', font: { family: 'Inter' } }
+      },
+      y: {
+        stacked: isStacked,
+        grid: { color: 'rgba(255, 255, 255, 0.05)' },
+        ticks: { color: '#94a3b8', font: { family: 'Inter' }, stepSize: 2 }
+      }
+    };
+  } else {
+    scalesConfig = {
+      r: {
+        grid: { color: 'rgba(255, 255, 255, 0.08)' },
+        angleLines: { color: 'rgba(255, 255, 255, 0.08)' },
+        ticks: { display: false }
+      }
+    };
+  }
+
+  ctx._chartInstance = new ChartClass(ctx, {
+    type: chartType,
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Atendimentos Clínicos',
+          data: atendimentos,
+          borderColor: '#10b981',
+          backgroundColor: isStacked ? 'rgba(16, 185, 129, 0.45)' : 'rgba(16, 185, 129, 0.15)',
+          fill: true,
+          stepped: isStepped,
+          tension: isStepped ? 0 : 0.4,
+          pointBackgroundColor: '#10b981',
+          pointRadius: 4,
+          borderRadius: chartType === 'bar' ? 4 : 0
+        },
+        {
+          label: 'Intervenções Farmacêuticas',
+          data: intervencoes,
+          borderColor: '#f59e0b',
+          backgroundColor: isStacked ? 'rgba(245, 158, 11, 0.45)' : 'rgba(245, 158, 11, 0.15)',
+          fill: true,
+          stepped: isStepped,
+          tension: isStepped ? 0 : 0.4,
+          pointBackgroundColor: '#f59e0b',
+          pointRadius: 4,
+          borderRadius: chartType === 'bar' ? 4 : 0
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 550, easing: 'easeOutQuart' },
+      scales: scalesConfig,
+      plugins: {
+        legend: {
+          position: 'top',
+          labels: { color: '#cbd5e1', font: { size: 12, family: 'Inter' }, usePointStyle: true }
+        }
+      }
+    }
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// FUNÇÕES GLOBAIS DE ALTERNÂNCIA RANDÔMICA / DINÂMICA
+// ─────────────────────────────────────────────────────────────────────────────
+
+window.toggleServicesChart = function(event) {
+  if (event) event.stopPropagation();
+  chartModes.servicesIdx++;
+  const ChartClass = window.Chart || (typeof Chart !== 'undefined' ? Chart : null);
+  if (ChartClass && state.dashboardData) {
+    renderServicesChart(ChartClass, state.dashboardData);
+    showToast(`Formato do gráfico alterado: ${chartModes.services[chartModes.servicesIdx % chartModes.services.length].toUpperCase()}`);
+  }
+};
+
+window.toggleCdssChart = function(event) {
+  if (event) event.stopPropagation();
+  chartModes.cdssIdx++;
+  const ChartClass = window.Chart || (typeof Chart !== 'undefined' ? Chart : null);
+  if (ChartClass && state.dashboardData) {
+    renderCdssChart(ChartClass, state.dashboardData);
+    showToast(`Formato do gráfico alterado: ${chartModes.cdss[chartModes.cdssIdx % chartModes.cdss.length].toUpperCase()}`);
+  }
+};
+
+window.toggleWeeklyChart = function(event) {
+  if (event) event.stopPropagation();
+  chartModes.weeklyIdx++;
+  const ChartClass = window.Chart || (typeof Chart !== 'undefined' ? Chart : null);
+  if (ChartClass && state.dashboardData) {
+    renderWeeklyChart(ChartClass, state.dashboardData);
+    showToast(`Formato do gráfico alterado: ${chartModes.weekly[chartModes.weeklyIdx % chartModes.weekly.length].toUpperCase()}`);
+  }
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MODAL DE DRILL-DOWN / RELATÓRIO INTERATIVO AO CLICAR NOS CARDS
+// ─────────────────────────────────────────────────────────────────────────────
+
+window.openDrillDownModal = function(topic) {
+  const d = state.dashboardData || {};
+  let title = '';
+  let icon = '';
+  let badgeText = '';
+  let colorTheme = '#10b981';
+  let contentHtml = '';
+
+  if (topic === 'patients') {
+    title = 'Relatório Detalhado: Pacientes Cadastrados & Acompanhamento';
+    icon = 'fa-user-nurse';
+    badgeText = `${d.activePatients || 42} Pacientes Ativos`;
+    colorTheme = '#38bdf8';
+    contentHtml = `
+      <div style="margin-bottom: 18px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+        <div style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 10px; padding: 12px;">
+          <div style="font-size: 0.74rem; color: #94a3b8;">Total Cadastrados</div>
+          <div style="font-size: 1.5rem; font-weight: 800; color: #38bdf8;">${d.activePatients || 42}</div>
+        </div>
+        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; padding: 12px;">
+          <div style="font-size: 0.74rem; color: #94a3b8;">Em Uso Contínuo</div>
+          <div style="font-size: 1.5rem; font-weight: 800; color: #10b981;">28</div>
+        </div>
+        <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 10px; padding: 12px;">
+          <div style="font-size: 0.74rem; color: #94a3b8;">Monitoramento Hipertensão/DM</div>
+          <div style="font-size: 1.5rem; font-weight: 800; color: #f59e0b;">19</div>
+        </div>
+      </div>
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem; text-align: left;">
+        <thead>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: #94a3b8;">
+            <th style="padding: 8px;">Paciente</th>
+            <th style="padding: 8px;">Idade/Gênero</th>
+            <th style="padding: 8px;">Condições Crônicas</th>
+            <th style="padding: 8px;">Última Aferição</th>
+            <th style="padding: 8px; text-align: right;">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #f8fafc;">
+            <td style="padding: 10px 8px;"><strong>Carlos Silva de Oliveira</strong></td>
+            <td style="padding: 10px 8px;">58 anos &bull; Masc.</td>
+            <td style="padding: 10px 8px;"><span style="background: rgba(56,189,248,0.2); color: #38bdf8; padding: 2px 6px; border-radius: 6px; font-size: 0.72rem;">HAS</span> <span style="background: rgba(16,185,129,0.2); color: #34d399; padding: 2px 6px; border-radius: 6px; font-size: 0.72rem;">DM2</span></td>
+            <td style="padding: 10px 8px; color: #34d399;">PA: 128/82 mmHg</td>
+            <td style="padding: 10px 8px; text-align: right;"><button class="btn btn-sm" onclick="document.getElementById('drilldown-modal')?.remove(); window.switchTab('pacientes');" style="background: #38bdf8; color: #000; font-weight: 700; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer;">Ver Prontuário</button></td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #f8fafc;">
+            <td style="padding: 10px 8px;"><strong>Maria Aparecida Santos</strong></td>
+            <td style="padding: 10px 8px;">64 anos &bull; Fem.</td>
+            <td style="padding: 10px 8px;"><span style="background: rgba(245,158,11,0.2); color: #fbbf24; padding: 2px 6px; border-radius: 6px; font-size: 0.72rem;">Dislipidemia</span></td>
+            <td style="padding: 10px 8px; color: #fbbf24;">Glicemia: 112 mg/dL</td>
+            <td style="padding: 10px 8px; text-align: right;"><button class="btn btn-sm" onclick="document.getElementById('drilldown-modal')?.remove(); window.switchTab('pacientes');" style="background: #38bdf8; color: #000; font-weight: 700; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer;">Ver Prontuário</button></td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #f8fafc;">
+            <td style="padding: 10px 8px;"><strong>João Batista Ferreira</strong></td>
+            <td style="padding: 10px 8px;">72 anos &bull; Masc.</td>
+            <td style="padding: 10px 8px;"><span style="background: rgba(239,68,68,0.2); color: #f87171; padding: 2px 6px; border-radius: 6px; font-size: 0.72rem;">Polifarmácia (6+ meds)</span></td>
+            <td style="padding: 10px 8px; color: #f87171;">PA: 146/94 mmHg</td>
+            <td style="padding: 10px 8px; text-align: right;"><button class="btn btn-sm" onclick="document.getElementById('drilldown-modal')?.remove(); window.switchTab('pacientes');" style="background: #38bdf8; color: #000; font-weight: 700; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer;">Ver Prontuário</button></td>
+          </tr>
+        </tbody>
+      </table>
+    `;
+  } else if (topic === 'encounters' || topic === 'services') {
+    title = 'Relatório de Atendimentos Clínicos & Serviços Farmacêuticos (CFF)';
+    icon = 'fa-stethoscope';
+    badgeText = '131 Procedimentos Realizados';
+    colorTheme = '#10b981';
+    contentHtml = `
+      <div style="margin-bottom: 18px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; padding: 12px;">
+          <div style="font-size: 0.74rem; color: #94a3b8;">Aferição de Pressão</div>
+          <div style="font-size: 1.5rem; font-weight: 800; color: #10b981;">34 (26%)</div>
+        </div>
+        <div style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 10px; padding: 12px;">
+          <div style="font-size: 0.74rem; color: #94a3b8;">Glicemia Capilar</div>
+          <div style="font-size: 1.5rem; font-weight: 800; color: #38bdf8;">28 (21%)</div>
+        </div>
+        <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 10px; padding: 12px;">
+          <div style="font-size: 0.74rem; color: #94a3b8;">Consultas / Triagens MIP</div>
+          <div style="font-size: 1.5rem; font-weight: 800; color: #f59e0b;">25 (19%)</div>
+        </div>
+      </div>
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem; text-align: left;">
+        <thead>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: #94a3b8;">
+            <th style="padding: 8px;">Serviço Farmacêutico</th>
+            <th style="padding: 8px;">Conformidade CFF</th>
+            <th style="padding: 8px;">Tempo Médio</th>
+            <th style="padding: 8px;">Desfecho Principal</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #f8fafc;">
+            <td style="padding: 10px 8px;"><strong>Aferição de Pressão Arterial (PA)</strong></td>
+            <td style="padding: 10px 8px;"><span style="color: #34d399;"><i class="fa-solid fa-circle-check"></i> CFF 585/2013</span></td>
+            <td style="padding: 10px 8px;">8 min</td>
+            <td style="padding: 10px 8px;">Emissão de DSF e diário pressórico</td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #f8fafc;">
+            <td style="padding: 10px 8px;"><strong>Glicemia Capilar &amp; Avaliação DM</strong></td>
+            <td style="padding: 10px 8px;"><span style="color: #34d399;"><i class="fa-solid fa-circle-check"></i> CFF 585/2013</span></td>
+            <td style="padding: 10px 8px;">10 min</td>
+            <td style="padding: 10px 8px;">Orientações nutricionais e calibração de insulina</td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #f8fafc;">
+            <td style="padding: 10px 8px;"><strong>Prescrição e Triagem de MIPs</strong></td>
+            <td style="padding: 10px 8px;"><span style="color: #38bdf8;"><i class="fa-solid fa-certificate"></i> CFF 586/2013</span></td>
+            <td style="padding: 10px 8px;">15 min</td>
+            <td style="padding: 10px 8px;">Indicação fitoterápica/MIP com baixa no estoque</td>
+          </tr>
+        </tbody>
+      </table>
+    `;
+  } else if (topic === 'cdss' || topic === 'alerts') {
+    title = 'Relatório de Farmacovigilância: Alertas & Bloqueios CDSS 4D';
+    icon = 'fa-shield-virus';
+    badgeText = '60 Alertas Processados & 14 Intervenções';
+    colorTheme = '#f59e0b';
+    contentHtml = `
+      <div style="margin-bottom: 18px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 10px; padding: 12px;">
+          <div style="font-size: 0.74rem; color: #94a3b8;">Interações Fármaco-Fármaco</div>
+          <div style="font-size: 1.5rem; font-weight: 800; color: #ef4444;">18 Bloqueios</div>
+        </div>
+        <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 10px; padding: 12px;">
+          <div style="font-size: 0.74rem; color: #94a3b8;">Fármaco-Alimento/Hábito</div>
+          <div style="font-size: 1.5rem; font-weight: 800; color: #f59e0b;">21 Alertas</div>
+        </div>
+        <div style="background: rgba(6, 182, 212, 0.1); border: 1px solid rgba(6, 182, 212, 0.3); border-radius: 10px; padding: 12px;">
+          <div style="font-size: 0.74rem; color: #94a3b8;">Critérios de Beers (Idosos)</div>
+          <div style="font-size: 1.5rem; font-weight: 800; color: #06b6d4;">11 Evitados</div>
+        </div>
+      </div>
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem; text-align: left;">
+        <thead>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: #94a3b8;">
+            <th style="padding: 8px;">Categoria do Alerta</th>
+            <th style="padding: 8px;">Gravidade</th>
+            <th style="padding: 8px;">Fármacos Envolvidos</th>
+            <th style="padding: 8px;">Conduta Farmacêutica Adotada</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #f8fafc;">
+            <td style="padding: 10px 8px;"><strong>Interação Fármaco-Fármaco</strong></td>
+            <td style="padding: 10px 8px;"><span style="background: rgba(239,68,68,0.2); color: #f87171; padding: 2px 6px; border-radius: 6px; font-weight: 700; font-size: 0.72rem;">Grave</span></td>
+            <td style="padding: 10px 8px;">Varfarina + Fluconazol</td>
+            <td style="padding: 10px 8px; color: #34d399;">Substituição por antifúngico tópico / contato médico</td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #f8fafc;">
+            <td style="padding: 10px 8px;"><strong>Critérios de Beers (Idoso 78a)</strong></td>
+            <td style="padding: 10px 8px;"><span style="background: rgba(245,158,11,0.2); color: #fbbf24; padding: 2px 6px; border-radius: 6px; font-weight: 700; font-size: 0.72rem;">Moderada</span></td>
+            <td style="padding: 10px 8px;">Clorfeniramina (Anticolinérgico)</td>
+            <td style="padding: 10px 8px; color: #34d399;">Troca por Loratadina / Lavagem nasal 0.9%</td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #f8fafc;">
+            <td style="padding: 10px 8px;"><strong>Alergia Cruzada Bloqueada</strong></td>
+            <td style="padding: 10px 8px;"><span style="background: rgba(239,68,68,0.2); color: #f87171; padding: 2px 6px; border-radius: 6px; font-weight: 700; font-size: 0.72rem;">Crítica</span></td>
+            <td style="padding: 10px 8px;">Histórico de Anafilaxia a AINEs + Cetoprofeno</td>
+            <td style="padding: 10px 8px; color: #34d399;">Bloqueio absoluto &bull; Indicação de Paracetamol</td>
+          </tr>
+        </tbody>
+      </table>
+    `;
+  } else if (topic === 'redflags') {
+    title = 'Relatório de Triagem: Sinais de Alerta (Red Flags) & Encaminhamentos';
+    icon = 'fa-triangle-exclamation';
+    badgeText = '21 Casos de Encaminhamento Direcionado';
+    colorTheme = '#ef4444';
+    contentHtml = `
+      <div style="margin-bottom: 18px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+        <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 10px; padding: 12px;">
+          <div style="font-size: 0.74rem; color: #94a3b8;">Encaminhamento SAMU/UPA</div>
+          <div style="font-size: 1.5rem; font-weight: 800; color: #ef4444;">2 Casos</div>
+        </div>
+        <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 10px; padding: 12px;">
+          <div style="font-size: 0.74rem; color: #94a3b8;">Encaminhamento Médico</div>
+          <div style="font-size: 1.5rem; font-weight: 800; color: #f59e0b;">15 Casos</div>
+        </div>
+        <div style="background: rgba(129, 140, 248, 0.1); border: 1px solid rgba(129, 140, 248, 0.3); border-radius: 10px; padding: 12px;">
+          <div style="font-size: 0.74rem; color: #94a3b8;">Notificações NOTIVISA</div>
+          <div style="font-size: 1.5rem; font-weight: 800; color: #818cf8;">4 Casos</div>
+        </div>
+      </div>
+      <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem; text-align: left;">
+        <thead>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: #94a3b8;">
+            <th style="padding: 8px;">Sinal de Alerta</th>
+            <th style="padding: 8px;">Gravidade</th>
+            <th style="padding: 8px;">Ação Imediata</th>
+            <th style="padding: 8px;">Documento Emitido</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #f8fafc;">
+            <td style="padding: 10px 8px;"><strong>Dor Precordial / Opressão Torácica</strong></td>
+            <td style="padding: 10px 8px;"><span style="background: rgba(239,68,68,0.2); color: #f87171; padding: 2px 6px; border-radius: 6px; font-weight: 700; font-size: 0.72rem;">Crítica</span></td>
+            <td style="padding: 10px 8px; color: #f87171;">Chamado SAMU 192 imediato</td>
+            <td style="padding: 10px 8px;">Guia de Encaminhamento de Urgência</td>
+          </tr>
+          <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); color: #f8fafc;">
+            <td style="padding: 10px 8px;"><strong>Febre Persistente > 3 dias com Calafrios</strong></td>
+            <td style="padding: 10px 8px;"><span style="background: rgba(245,158,11,0.2); color: #fbbf24; padding: 2px 6px; border-radius: 6px; font-weight: 700; font-size: 0.72rem;">Alta</span></td>
+            <td style="padding: 10px 8px; color: #fbbf24;">Encaminhamento ao pronto-atendimento</td>
+            <td style="padding: 10px 8px;">Declaração Farmacêutica com Parâmetros</td>
+          </tr>
+        </tbody>
+      </table>
+    `;
+  } else {
+    // Default fallback
+    title = 'Relatório Geral do Consultório Farmacêutico';
+    icon = 'fa-chart-pie';
+    badgeText = 'Consolidado Mensal';
+    contentHtml = `<p style="color: #94a3b8;">Consulte todos os dados consolidados no módulo de relatórios.</p>`;
+  }
+
+  // Criar elemento do modal
+  const existing = document.getElementById('drilldown-modal');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'drilldown-modal';
+  modal.style.cssText = `
+    position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(14px); z-index: 9999; display: flex;
+    align-items: center; justify-content: center; padding: 20px;
+    animation: fadeIn 0.25s ease-out;
+  `;
+
+  modal.innerHTML = `
+    <div style="
+      background: #0f172a; border: 1.5px solid ${colorTheme}55; border-radius: 20px;
+      max-width: 900px; width: 100%; max-height: 90vh; overflow-y: auto;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.6); padding: 26px; position: relative;
+    ">
+      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 16px;">
+        <div style="display: flex; align-items: center; gap: 14px;">
+          <div style="width: 48px; height: 48px; border-radius: 14px; background: ${colorTheme}22; border: 1.5px solid ${colorTheme}; display: flex; align-items: center; justify-content: center; color: ${colorTheme}; font-size: 1.4rem;">
+            <i class="fa-solid ${icon}"></i>
+          </div>
+          <div>
+            <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.25rem; font-weight: 700; color: #fff; margin: 0 0 4px;">${title}</h3>
+            <span style="font-size: 0.76rem; background: ${colorTheme}22; color: ${colorTheme}; padding: 3px 10px; border-radius: 12px; font-weight: 700; border: 1px solid ${colorTheme}44;">${badgeText}</span>
+          </div>
+        </div>
+        <button onclick="document.getElementById('drilldown-modal')?.remove()" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; width: 34px; height: 34px; border-radius: 50%; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+          &times;
+        </button>
+      </div>
+
+      <div style="margin-bottom: 24px;">
+        ${contentHtml}
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 18px;">
+        <button class="btn btn-secondary" onclick="window.print()" style="background: rgba(255,255,255,0.06); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.12); padding: 9px 18px; border-radius: 10px; font-weight: 600; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-print"></i> Imprimir / Salvar PDF
+        </button>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-primary" onclick="document.getElementById('drilldown-modal')?.remove(); window.switchTab('relatorios');" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; padding: 9px 20px; border-radius: 10px; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);">
+            <i class="fa-solid fa-file-contract"></i> Abrir Central de Relatórios
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RENDERIZAÇÃO DA ABA DASHBOARD COM CARDS INTERATIVOS E BOTÕES DE SHUFFLE
+// ─────────────────────────────────────────────────────────────────────────────
 
 export async function renderDashboardTab(container) {
   if (!container) return;
@@ -298,6 +737,9 @@ export async function renderDashboardTab(container) {
         </div>
 
         <div style="display: flex; align-items: center; gap: 10px;">
+          <button class="btn btn-secondary" onclick="window.switchTab('relatorios')" style="background: rgba(129, 140, 248, 0.15); color: #a5b4fc; border: 1px solid rgba(129, 140, 248, 0.4); padding: 9px 18px; border-radius: 10px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-file-contract"></i> Central de Relatórios
+          </button>
           <button class="btn btn-secondary" onclick="window.switchTab('farmacia')" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); padding: 9px 18px; border-radius: 10px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;">
             <i class="fa-solid fa-prescription-bottle-medical"></i> Ir para Balcão &amp; CDSS
           </button>
@@ -307,11 +749,11 @@ export async function renderDashboardTab(container) {
         </div>
       </div>
 
-      <!-- 5 CARDS HERO DE KPIs CLÍNICOS -->
+      <!-- 5 CARDS HERO DE KPIs CLÍNICOS (CLICÁVEIS PARA DRILL-DOWN) -->
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
         
         <!-- 1. Pacientes Acompanhados -->
-        <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 14px; padding: 18px; position: relative; overflow: hidden;">
+        <div onclick="window.openDrillDownModal('patients')" title="Clique para ver o relatório detalhado de pacientes" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 14px; padding: 18px; position: relative; overflow: hidden; cursor: pointer; transition: all 0.25s ease;" onmouseenter="this.style.transform='translateY(-3px)'; this.style.borderColor='#38bdf8'; this.style.boxShadow='0 10px 25px rgba(56,189,248,0.2)';" onmouseleave="this.style.transform='none'; this.style.borderColor='rgba(56, 189, 248, 0.3)'; this.style.boxShadow='none';">
           <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
               <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; color: #38bdf8; letter-spacing: 0.5px;">Pacientes Cadastrados</div>
@@ -323,14 +765,14 @@ export async function renderDashboardTab(container) {
               <i class="fa-solid fa-user-nurse"></i>
             </div>
           </div>
-          <div style="margin-top: 12px; font-size: 0.76rem; color: #94a3b8; display: flex; align-items: center; gap: 6px;">
-            <i class="fa-solid fa-arrow-trend-up" style="color: #10b981;"></i>
-            <span>Histórico farmacoterapêutico ativo</span>
+          <div style="margin-top: 12px; font-size: 0.76rem; color: #94a3b8; display: flex; align-items: center; justify-content: space-between;">
+            <span><i class="fa-solid fa-arrow-trend-up" style="color: #10b981;"></i> Histórico ativo</span>
+            <span style="font-size: 0.7rem; color: #38bdf8; font-weight: 700;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver detalhes</span>
           </div>
         </div>
 
         <!-- 2. Atendimentos & Prescrições (MIPs) -->
-        <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 14px; padding: 18px; position: relative; overflow: hidden;">
+        <div onclick="window.openDrillDownModal('encounters')" title="Clique para ver o relatório detalhado de atendimentos" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 14px; padding: 18px; position: relative; overflow: hidden; cursor: pointer; transition: all 0.25s ease;" onmouseenter="this.style.transform='translateY(-3px)'; this.style.borderColor='#10b981'; this.style.boxShadow='0 10px 25px rgba(16,185,129,0.2)';" onmouseleave="this.style.transform='none'; this.style.borderColor='rgba(16, 185, 129, 0.3)'; this.style.boxShadow='none';">
           <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
               <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; color: #10b981; letter-spacing: 0.5px;">Atendimentos Clínicos</div>
@@ -342,14 +784,14 @@ export async function renderDashboardTab(container) {
               <i class="fa-solid fa-prescription-bottle-medical"></i>
             </div>
           </div>
-          <div style="margin-top: 12px; font-size: 0.76rem; color: #94a3b8; display: flex; align-items: center; gap: 6px;">
-            <i class="fa-solid fa-check" style="color: #10b981;"></i>
-            <span>Triagens de MIPs e orientações</span>
+          <div style="margin-top: 12px; font-size: 0.76rem; color: #94a3b8; display: flex; align-items: center; justify-content: space-between;">
+            <span><i class="fa-solid fa-check" style="color: #10b981;"></i> MIPs &amp; Orientações</span>
+            <span style="font-size: 0.7rem; color: #10b981; font-weight: 700;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver detalhes</span>
           </div>
         </div>
 
         <!-- 3. Intervenções CDSS & Alertas Barrados -->
-        <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 14px; padding: 18px; position: relative; overflow: hidden;">
+        <div onclick="window.openDrillDownModal('cdss')" title="Clique para ver o relatório detalhado de intervenções CDSS" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 14px; padding: 18px; position: relative; overflow: hidden; cursor: pointer; transition: all 0.25s ease;" onmouseenter="this.style.transform='translateY(-3px)'; this.style.borderColor='#f59e0b'; this.style.boxShadow='0 10px 25px rgba(245,158,11,0.2)';" onmouseleave="this.style.transform='none'; this.style.borderColor='rgba(245, 158, 11, 0.3)'; this.style.boxShadow='none';">
           <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
               <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; color: #f59e0b; letter-spacing: 0.5px;">Intervenções CDSS 4D</div>
@@ -361,14 +803,14 @@ export async function renderDashboardTab(container) {
               <i class="fa-solid fa-shield-virus"></i>
             </div>
           </div>
-          <div style="margin-top: 12px; font-size: 0.76rem; color: #94a3b8; display: flex; align-items: center; gap: 6px;">
-            <i class="fa-solid fa-circle-exclamation" style="color: #f59e0b;"></i>
-            <span>Interações graves evitadas</span>
+          <div style="margin-top: 12px; font-size: 0.76rem; color: #94a3b8; display: flex; align-items: center; justify-content: space-between;">
+            <span><i class="fa-solid fa-circle-exclamation" style="color: #f59e0b;"></i> Riscos evitados</span>
+            <span style="font-size: 0.7rem; color: #f59e0b; font-weight: 700;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver detalhes</span>
           </div>
         </div>
 
         <!-- 4. Declarações DSF Emitidas -->
-        <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(129, 140, 248, 0.3); border-radius: 14px; padding: 18px; position: relative; overflow: hidden;">
+        <div onclick="window.openDrillDownModal('services')" title="Clique para ver o relatório detalhado de declarações DSF" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(129, 140, 248, 0.3); border-radius: 14px; padding: 18px; position: relative; overflow: hidden; cursor: pointer; transition: all 0.25s ease;" onmouseenter="this.style.transform='translateY(-3px)'; this.style.borderColor='#818cf8'; this.style.boxShadow='0 10px 25px rgba(129,140,248,0.2)';" onmouseleave="this.style.transform='none'; this.style.borderColor='rgba(129, 140, 248, 0.3)'; this.style.boxShadow='none';">
           <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
               <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; color: #818cf8; letter-spacing: 0.5px;">Declarações DSF (CFF)</div>
@@ -380,14 +822,14 @@ export async function renderDashboardTab(container) {
               <i class="fa-solid fa-file-signature"></i>
             </div>
           </div>
-          <div style="margin-top: 12px; font-size: 0.76rem; color: #94a3b8; display: flex; align-items: center; gap: 6px;">
-            <i class="fa-solid fa-stamp" style="color: #818cf8;"></i>
-            <span>Com hash e carimbo CFF 585/586</span>
+          <div style="margin-top: 12px; font-size: 0.76rem; color: #94a3b8; display: flex; align-items: center; justify-content: space-between;">
+            <span><i class="fa-solid fa-stamp" style="color: #818cf8;"></i> CFF 585/586</span>
+            <span style="font-size: 0.7rem; color: #818cf8; font-weight: 700;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver detalhes</span>
           </div>
         </div>
 
         <!-- 5. Taxa de Adesão Farmacoterapêutica -->
-        <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(236, 72, 153, 0.3); border-radius: 14px; padding: 18px; position: relative; overflow: hidden;">
+        <div onclick="window.openDrillDownModal('patients')" title="Clique para ver o relatório detalhado de adesão" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(236, 72, 153, 0.3); border-radius: 14px; padding: 18px; position: relative; overflow: hidden; cursor: pointer; transition: all 0.25s ease;" onmouseenter="this.style.transform='translateY(-3px)'; this.style.borderColor='#ec4899'; this.style.boxShadow='0 10px 25px rgba(236,72,153,0.2)';" onmouseleave="this.style.transform='none'; this.style.borderColor='rgba(236, 72, 153, 0.3)'; this.style.boxShadow='none';">
           <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
               <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; color: #ec4899; letter-spacing: 0.5px;">Adesão Terapêutica</div>
@@ -399,50 +841,76 @@ export async function renderDashboardTab(container) {
               <i class="fa-solid fa-heart-pulse"></i>
             </div>
           </div>
-          <div style="margin-top: 12px; font-size: 0.76rem; color: #94a3b8; display: flex; align-items: center; gap: 6px;">
-            <i class="fa-solid fa-clipboard-check" style="color: #ec4899;"></i>
-            <span>Score Morisky &amp; Posologia</span>
+          <div style="margin-top: 12px; font-size: 0.76rem; color: #94a3b8; display: flex; align-items: center; justify-content: space-between;">
+            <span><i class="fa-solid fa-clipboard-check" style="color: #ec4899;"></i> Morisky Score</span>
+            <span style="font-size: 0.7rem; color: #ec4899; font-weight: 700;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver detalhes</span>
           </div>
         </div>
 
       </div>
 
-      <!-- SEÇÃO PRINCIPAL DE GRÁFICOS DO CONSULTÓRIO -->
+      <!-- SEÇÃO PRINCIPAL DE GRÁFICOS DO CONSULTÓRIO (COM BOTÕES RANDÔMICOS) -->
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 20px; margin-bottom: 24px;">
         
         <!-- Gráfico 1: Serviços Farmacêuticos Mais Realizados -->
-        <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); position: relative;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
             <div>
               <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
                 <i class="fa-solid fa-stethoscope" style="color: #10b981;"></i> Serviços Farmacêuticos Realizados
               </h3>
               <p style="margin: 2px 0 0 0; font-size: 0.78rem; color: #94a3b8;">Procedimentos clínicos regulamentados pelo CFF</p>
             </div>
-            <span style="font-size: 0.7rem; background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 4px 10px; border-radius: 20px; font-weight: 700;">
-              Total: 131 atendimentos
-            </span>
+            
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span id="badge-services-chart-type" style="font-size: 0.68rem; background: rgba(16, 185, 129, 0.15); color: #34d399; padding: 3px 8px; border-radius: 12px; font-weight: 700; border: 1px solid rgba(16,185,129,0.3);">
+                Rosca (Donut)
+              </span>
+              <button onclick="window.toggleServicesChart(event)" class="btn btn-sm" title="Alternar formato visual do gráfico (Donut, Barras, Pizza, Polar)" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; font-size: 0.76rem; font-weight: 700; padding: 5px 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
+                <i class="fa-solid fa-shuffle"></i> Alternar
+              </button>
+            </div>
           </div>
-          <div style="height: 280px; position: relative;">
+          
+          <div onclick="window.openDrillDownModal('services')" title="Clique para abrir o relatório completo de serviços clínicos" style="height: 280px; position: relative; cursor: pointer;">
             <canvas id="servicesChart"></canvas>
+          </div>
+          
+          <div style="margin-top: 10px; text-align: center;">
+            <button onclick="window.openDrillDownModal('services')" class="btn btn-link" style="background: none; border: none; color: #38bdf8; font-size: 0.75rem; cursor: pointer; text-decoration: underline;">
+              <i class="fa-solid fa-table-list"></i> Clique para ver tabela e exportar relatório
+            </button>
           </div>
         </div>
 
         <!-- Gráfico 2: Alertas do Motor CDSS 4D por Categoria -->
-        <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); position: relative;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
             <div>
               <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
                 <i class="fa-solid fa-shield-virus" style="color: #f59e0b;"></i> Alertas do Motor CDSS 4D
               </h3>
               <p style="margin: 2px 0 0 0; font-size: 0.78rem; color: #94a3b8;">Prevenção de riscos iatrogênicos e duplicidades</p>
             </div>
-            <span style="font-size: 0.7rem; background: rgba(245, 158, 11, 0.15); color: #fbbf24; padding: 4px 10px; border-radius: 20px; font-weight: 700;">
-              60 Alertas Processados
-            </span>
+            
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span id="badge-cdss-chart-type" style="font-size: 0.68rem; background: rgba(245, 158, 11, 0.15); color: #fbbf24; padding: 3px 8px; border-radius: 12px; font-weight: 700; border: 1px solid rgba(245,158,11,0.3);">
+                Área Polar
+              </span>
+              <button onclick="window.toggleCdssChart(event)" class="btn btn-sm" title="Alternar formato visual do gráfico (Polar, Radar, Donut, Barras)" style="background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.4); color: #fbbf24; font-size: 0.76rem; font-weight: 700; padding: 5px 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
+                <i class="fa-solid fa-shuffle"></i> Alternar
+              </button>
+            </div>
           </div>
-          <div style="height: 280px; position: relative;">
+          
+          <div onclick="window.openDrillDownModal('alerts')" title="Clique para abrir o relatório de farmacovigilância CDSS" style="height: 280px; position: relative; cursor: pointer;">
             <canvas id="cdssChart"></canvas>
+          </div>
+
+          <div style="margin-top: 10px; text-align: center;">
+            <button onclick="window.openDrillDownModal('alerts')" class="btn btn-link" style="background: none; border: none; color: #fbbf24; font-size: 0.75rem; cursor: pointer; text-decoration: underline;">
+              <i class="fa-solid fa-table-list"></i> Clique para ver tabela de interações bloqueadas
+            </button>
           </div>
         </div>
 
@@ -453,22 +921,31 @@ export async function renderDashboardTab(container) {
         
         <!-- Gráfico 3: Evolução Semanal de Atendimentos e Intervenções -->
         <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
             <div>
               <h3 style="margin: 0; font-size: 1.05rem; font-weight: 700; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
                 <i class="fa-solid fa-chart-area" style="color: #818cf8;"></i> Tendência de Consultas &amp; Intervenções Farmacêuticas
               </h3>
               <p style="margin: 2px 0 0 0; font-size: 0.78rem; color: #94a3b8;">Volume diário de triagens e intervenções clínicas</p>
             </div>
-            <span style="font-size: 0.72rem; color: #94a3b8;">Últimos 7 dias</span>
+            
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span id="badge-weekly-chart-type" style="font-size: 0.68rem; background: rgba(129, 140, 248, 0.15); color: #a5b4fc; padding: 3px 8px; border-radius: 12px; font-weight: 700; border: 1px solid rgba(129,140,248,0.3);">
+                Linha Spline
+              </span>
+              <button onclick="window.toggleWeeklyChart(event)" class="btn btn-sm" title="Alternar formato visual (Linha, Barras, Degrau, Radar, Área)" style="background: rgba(129, 140, 248, 0.2); border: 1px solid rgba(129, 140, 248, 0.4); color: #a5b4fc; font-size: 0.76rem; font-weight: 700; padding: 5px 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;">
+                <i class="fa-solid fa-shuffle"></i> Alternar
+              </button>
+            </div>
           </div>
-          <div style="height: 240px; position: relative;">
+          
+          <div onclick="window.openDrillDownModal('encounters')" title="Clique para ver extrato detalhado de atendimentos" style="height: 240px; position: relative; cursor: pointer;">
             <canvas id="weeklyAppointmentsChart"></canvas>
           </div>
         </div>
 
         <!-- Painel de Red Flags e Encaminhamentos -->
-        <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
+        <div onclick="window.openDrillDownModal('redflags')" title="Clique para ver o relatório completo de Red Flags" style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); cursor: pointer; transition: all 0.2s ease;" onmouseenter="this.style.borderColor='#ef4444'; this.style.boxShadow='0 8px 25px rgba(239,68,68,0.15)';" onmouseleave="this.style.borderColor='rgba(239, 68, 68, 0.3)'; this.style.boxShadow='0 4px 20px rgba(0,0,0,0.2)';">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
             <h3 style="margin: 0; font-size: 1.0rem; font-weight: 700; color: #f87171; display: flex; align-items: center; gap: 8px;">
               <i class="fa-solid fa-triangle-exclamation"></i> Sinais de Alerta (Red Flags)
@@ -499,6 +976,12 @@ export async function renderDashboardTab(container) {
                 </div>
               </div>
             `).join('')}
+          </div>
+
+          <div style="margin-top: 14px; text-align: center;">
+            <span style="font-size: 0.74rem; color: #f87171; font-weight: 700;">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i> Ver protocolo detalhado de encaminhamento
+            </span>
           </div>
         </div>
 
