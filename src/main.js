@@ -12,14 +12,14 @@ import './tabs/pharmacy.js';
 import './tabs/tv.js';
 import './tabs/kanban.js';
 import { renderSchedulesTab } from './tabs/escalas.js';
-import { renderDashboardTab, fetchDashboardData, initDashboardCharts, initInteractiveFunnel } from './tabs/dashboard.js';
+import { renderDashboardTab, fetchDashboardData, initDashboardCharts } from './tabs/dashboard.js';
 import { renderPatientsTab } from './tabs/patients.js';
 import { renderAttendanceTab } from './tabs/attendance.js';
 import { renderSettingsTab, showSimulationSummaryModal } from './tabs/settings.js';
 import { realtimeHub } from './modules/realtime.js';
 import { setActivePatientContext, renderPatientJourneyStepper, renderFloatingPatientHUD } from './modules/journey.js';
 import { generateMockData } from './mockDataGenerator.js';
-import { renderEmbeddedTabbedManual, showInteractiveManualModal, manualData, showCardDetailModal, searchManualEngine, showManualReturnBeacon } from './manualTabbed.js';
+import { showInteractiveManualModal, manualData, searchManualEngine } from './manualTabbed.js';
 import { getNexusAICopilotResponse } from './aiCopilot.js';
 import { inject } from '@vercel/analytics';
 import { openTelemedicineModal } from './modules/telemedicina.js';
@@ -1412,6 +1412,9 @@ function renderAppStructure() {
               ${perms.label}
             </span>
           </div>
+          <button id="sidebar-btn-manual" class="btn" style="width: 100%; background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(13, 148, 136, 0.25)); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); font-size: 0.82rem; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 10px; border-radius: 8px; padding: 10px; cursor: pointer; transition: all 0.2s;">
+            <i class="fa-solid fa-book-medical"></i> Manual Interativo
+          </button>
           <button id="btn-logout" class="btn" style="width: 100%; background: var(--bg-tertiary); color: var(--color-danger); border: 1px solid var(--border-color); margin-bottom: 12px;">
             <i class="fa-solid fa-arrow-right-from-bracket"></i> Sair
           </button>
@@ -1461,6 +1464,9 @@ function renderAppStructure() {
         </div>
 
         <div id="sync-status-container" style="display: flex; align-items: center; gap: 10px;">
+          <button id="btn-header-manual" class="btn" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.22), rgba(13, 148, 136, 0.32)); border: 1px solid rgba(16, 185, 129, 0.5); color: #34d399; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0 14px; height: 40px; border-radius: 20px; font-size: 0.82rem; font-weight: 700; gap: 6px; transition: all 0.2s ease; box-shadow: 0 2px 10px rgba(16, 185, 129, 0.2);" title="Abrir Manual Interativo do CRM Farmacêutico (Protocolos e Guia Rápido)">
+            <i class="fa-solid fa-book-medical"></i> <span>Manual Interativo</span>
+          </button>
           <span id="sync-status-badge" style="font-size: 0.82rem; padding: 8px 12px; border-radius: 999px; border: 1px solid var(--border-color); background: rgba(59,130,246,0.08); color: var(--text-primary);">
             Verificando Turso...
           </span>
@@ -1677,6 +1683,21 @@ function renderAppStructure() {
   const backBtn = document.getElementById('global-back-btn');
   if (backBtn) {
     backBtn.addEventListener('click', goBack);
+  }
+
+  // Botões do Manual Interativo
+  const headerManualBtn = document.getElementById('btn-header-manual');
+  if (headerManualBtn) {
+    headerManualBtn.addEventListener('click', () => {
+      showInteractiveManualModal(state.activeTab || 'farmacia');
+    });
+  }
+
+  const sidebarManualBtn = document.getElementById('sidebar-btn-manual');
+  if (sidebarManualBtn) {
+    sidebarManualBtn.addEventListener('click', () => {
+      showInteractiveManualModal(state.activeTab || 'farmacia');
+    });
   }
 
   document.addEventListener('keydown', (e) => {

@@ -25,63 +25,63 @@ function renderReportsTab(contentArea) {
           </div>
           <div>
             <h4 style="font-size: 1.02rem; font-weight: 700; color: var(--text-primary); margin: 0 0 4px 0;">Pacientes</h4>
-            <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0; line-height: 1.35;">Cadastro completo, demografia e faturamento acumulado.</p>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0; line-height: 1.35;">Cadastro completo, condições crônicas e alergias estruturadas.</p>
           </div>
         </div>
 
-        <!-- CARD 2: ATENDIMENTOS -->
+        <!-- CARD 2: DECLARAÇÕES DSF (CFF) -->
         <div id="tab-btn-encounters" class="report-tab-card" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 14px; padding: 18px 20px; cursor: pointer; transition: all 0.2s ease; position: relative; display: flex; flex-direction: column; justify-content: space-between; height: 100%;" onmouseenter="if(!this.classList.contains('active')) { this.style.transform='translateY(-2px)'; this.style.borderColor='rgba(236,72,153,0.4)'; }" onmouseleave="if(!this.classList.contains('active')) { this.style.transform='none'; this.style.borderColor='var(--border-color)'; }">
           <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px;">
             <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(236,72,153,0.15); border: 1px solid rgba(236,72,153,0.3); display: flex; align-items: center; justify-content: center; color: #f472b6; font-size: 1.25rem;">
-              <i class="fa-solid fa-notes-medical"></i>
+              <i class="fa-solid fa-file-signature"></i>
             </div>
             <span class="card-status-badge" style="display: none; font-size: 0.68rem; font-weight: 700; padding: 3px 9px; border-radius: 20px; background: rgba(236,72,153,0.2); color: #f472b6; border: 1px solid rgba(236,72,153,0.4); letter-spacing: 0.5px;">SELECIONADO</span>
           </div>
           <div>
-            <h4 style="font-size: 1.02rem; font-weight: 700; color: var(--text-primary); margin: 0 0 4px 0;">Atendimentos &amp; PEP</h4>
-            <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0; line-height: 1.35;">Triagem Manchester, situação clínica e médico responsável.</p>
+            <h4 style="font-size: 1.02rem; font-weight: 700; color: var(--text-primary); margin: 0 0 4px 0;">Declarações (DSF)</h4>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0; line-height: 1.35;">Emissões conforme CFF 585/586, parâmetros e hashes de autenticidade.</p>
           </div>
         </div>
 
-        <!-- CARD 3: FINANCEIRO -->
+        <!-- CARD 3: ATENDIMENTOS & BALCÃO -->
         <div id="tab-btn-financial" class="report-tab-card" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 14px; padding: 18px 20px; cursor: pointer; transition: all 0.2s ease; position: relative; display: flex; flex-direction: column; justify-content: space-between; height: 100%;" onmouseenter="if(!this.classList.contains('active')) { this.style.transform='translateY(-2px)'; this.style.borderColor='rgba(34,211,238,0.4)'; }" onmouseleave="if(!this.classList.contains('active')) { this.style.transform='none'; this.style.borderColor='var(--border-color)'; }">
           <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px;">
             <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(34,211,238,0.15); border: 1px solid rgba(34,211,238,0.3); display: flex; align-items: center; justify-content: center; color: #38bdf8; font-size: 1.25rem;">
-              <i class="fa-solid fa-chart-pie"></i>
+              <i class="fa-solid fa-prescription-bottle-medical"></i>
             </div>
             <span class="card-status-badge" style="display: none; font-size: 0.68rem; font-weight: 700; padding: 3px 9px; border-radius: 20px; background: rgba(34,211,238,0.2); color: #38bdf8; border: 1px solid rgba(34,211,238,0.4); letter-spacing: 0.5px;">SELECIONADO</span>
           </div>
           <div>
-            <h4 style="font-size: 1.02rem; font-weight: 700; color: var(--text-primary); margin: 0 0 4px 0;">Financeiro</h4>
-            <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0; line-height: 1.35;">Títulos a vencer, parcelas pagas e balanço de faturamento.</p>
+            <h4 style="font-size: 1.02rem; font-weight: 700; color: var(--text-primary); margin: 0 0 4px 0;">Balcão &amp; MIPs</h4>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0; line-height: 1.35;">Triagens clínicas, indicação responsável de MIPs e orientações.</p>
           </div>
         </div>
 
-        <!-- CARD 4: POR MÉDICO -->
+        <!-- CARD 4: INTERVENÇÕES CDSS 4D -->
         <div id="tab-btn-doctors" class="report-tab-card" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 14px; padding: 18px 20px; cursor: pointer; transition: all 0.2s ease; position: relative; display: flex; flex-direction: column; justify-content: space-between; height: 100%;" onmouseenter="if(!this.classList.contains('active')) { this.style.transform='translateY(-2px)'; this.style.borderColor='rgba(52,211,153,0.4)'; }" onmouseleave="if(!this.classList.contains('active')) { this.style.transform='none'; this.style.borderColor='var(--border-color)'; }">
           <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px;">
             <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(52,211,153,0.15); border: 1px solid rgba(52,211,153,0.3); display: flex; align-items: center; justify-content: center; color: #34d399; font-size: 1.25rem;">
-              <i class="fa-solid fa-user-doctor"></i>
+              <i class="fa-solid fa-shield-halved"></i>
             </div>
             <span class="card-status-badge" style="display: none; font-size: 0.68rem; font-weight: 700; padding: 3px 9px; border-radius: 20px; background: rgba(52,211,153,0.2); color: #34d399; border: 1px solid rgba(52,211,153,0.4); letter-spacing: 0.5px;">SELECIONADO</span>
           </div>
           <div>
-            <h4 style="font-size: 1.02rem; font-weight: 700; color: var(--text-primary); margin: 0 0 4px 0;">Por Médico</h4>
-            <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0; line-height: 1.35;">Produtividade do corpo clínico e gráficos analíticos.</p>
+            <h4 style="font-size: 1.02rem; font-weight: 700; color: var(--text-primary); margin: 0 0 4px 0;">Intervenções CDSS</h4>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0; line-height: 1.35;">Interações graves, duplicidades e riscos em idosos evitados.</p>
           </div>
         </div>
 
-        <!-- CARD 5: ESCALAS & PLANTÕES -->
+        <!-- CARD 5: ESTOQUE CLÍNICO -->
         <div id="tab-btn-schedules" class="report-tab-card" style="background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 14px; padding: 18px 20px; cursor: pointer; transition: all 0.2s ease; position: relative; display: flex; flex-direction: column; justify-content: space-between; height: 100%;" onmouseenter="if(!this.classList.contains('active')) { this.style.transform='translateY(-2px)'; this.style.borderColor='rgba(167,139,250,0.4)'; }" onmouseleave="if(!this.classList.contains('active')) { this.style.transform='none'; this.style.borderColor='var(--border-color)'; }">
           <div style="display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 14px;">
             <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(167,139,250,0.15); border: 1px solid rgba(167,139,250,0.3); display: flex; align-items: center; justify-content: center; color: #a78bfa; font-size: 1.25rem;">
-              <i class="fa-solid fa-user-clock"></i>
+              <i class="fa-solid fa-boxes-stacked"></i>
             </div>
             <span class="card-status-badge" style="display: none; font-size: 0.68rem; font-weight: 700; padding: 3px 9px; border-radius: 20px; background: rgba(167,139,250,0.2); color: #a78bfa; border: 1px solid rgba(167,139,250,0.4); letter-spacing: 0.5px;">SELECIONADO</span>
           </div>
           <div>
-            <h4 style="font-size: 1.02rem; font-weight: 700; color: var(--text-primary); margin: 0 0 4px 0;">Escalas &amp; Plantões</h4>
-            <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0; line-height: 1.35;">Alocação de Médicos e Enfermeiros por turno e setor.</p>
+            <h4 style="font-size: 1.02rem; font-weight: 700; color: var(--text-primary); margin: 0 0 4px 0;">Estoque &amp; Lotes</h4>
+            <p style="font-size: 0.78rem; color: var(--text-muted); margin: 0; line-height: 1.35;">Consumo de MIPs, controle de lotes e alertas de validade.</p>
           </div>
         </div>
 
@@ -164,7 +164,7 @@ function renderReportsTab(contentArea) {
           registroANS: '359012',
           cnpjPrestador: '12345678000199',
           cnesHospital: '7654321',
-          nomeHospital: 'Hospital & Maternidade CRM Clínico Farmacêutico',
+          nomeHospital: 'CRM Clínico Farmacêutico',
           atendimentos: listToExport.map(item => ({
             paciente_nome: item.patientName || item.fullName || item.name || 'Paciente Beneficiário',
             carteirinha: (item.susNumber || item.cpf ? item.cpf.replace(/\D/g, '') : '3254980001234567'),
