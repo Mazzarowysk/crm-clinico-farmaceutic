@@ -8,6 +8,7 @@ import { apiFetch } from '../modules/api.js';
 import { showToast, showCustomAlert, showCustomConfirm } from '../modules/ui.js';
 import { getRolePermissions, showUserSessionsHistory } from '../modules/auth.js';
 import { syncManager, getSyncStatus, formatSyncDate } from '../modules/sync.js';
+import { showInteractiveManualModal } from '../manualTabbed.js';
 
 export function showSimulationSummaryModal() {
   showToast('Resumo operacional atualizado.');
@@ -43,7 +44,7 @@ export function renderSettingsTab(contentArea) {
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 12px; background: rgba(15, 23, 42, 0.65); border: 1px solid rgba(255,255,255,0.08); padding: 12px 18px; border-radius: 14px; backdrop-filter: blur(12px);">
         <div style="display: flex; align-items: center; gap: 10px; color: #94a3b8; font-size: 0.84rem;">
           <i class="fa-solid fa-layer-group" style="color: #14b8a6; font-size: 1rem;"></i>
-          <span>Módulos de Configuração &bull; <strong>4 Agrupamentos Estruturados</strong></span>
+          <span>Módulos de Configuração &bull; <strong>5 Agrupamentos Estruturados (Com Manual &amp; Protocolos)</strong></span>
         </div>
         <div style="display: flex; gap: 8px;">
           <button id="btn-cfg-expand-all" class="btn" style="background: rgba(20, 184, 166, 0.15); border: 1px solid rgba(20, 184, 166, 0.35); color: #2dd4bf; font-size: 0.78rem; font-weight: 700; padding: 7px 14px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
@@ -359,6 +360,97 @@ export function renderSettingsTab(contentArea) {
           </div>
         </div>
 
+        <!-- ==================================================================== -->
+        <!-- AGRUPAMENTO 5: MANUAL INTERATIVO & PROTOCOLOS CLÍNICOS (CFF 585/586)  -->
+        <!-- ==================================================================== -->
+        <div class="cfg-accordion-card" id="accordion-group-manual" style="background: rgba(15, 23, 42, 0.75); border: 1.5px solid rgba(16, 185, 129, 0.35); border-radius: 18px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.35); transition: all 0.3s ease;">
+          <div class="cfg-accordion-header" data-target="body-manual" style="padding: 16px 20px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(90deg, rgba(16, 185, 129, 0.15), rgba(15, 23, 42, 0.6)); border-bottom: 1px solid rgba(16, 185, 129, 0.25); user-select: none;">
+            <div style="display: flex; align-items: center; gap: 16px;">
+              <div style="width: 46px; height: 46px; border-radius: 14px; background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.45)); border: 1.5px solid rgba(52, 211, 153, 0.6); display: flex; align-items: center; justify-content: center; color: #34d399; font-size: 1.3rem; box-shadow: 0 0 18px rgba(16, 185, 129, 0.25);">
+                <i class="fa-solid fa-book-medical"></i>
+              </div>
+              <div>
+                <div style="font-family: 'Outfit', sans-serif; font-size: 1.12rem; font-weight: 700; color: #fff; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                  Manual Interativo &amp; Protocolos Clínicos (CFF 585/586)
+                  <span style="font-size: 0.72rem; background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); padding: 2px 9px; border-radius: 12px; font-weight: 700;">
+                    Guia Operacional &amp; CDSS 4D
+                  </span>
+                </div>
+                <p style="margin: 3px 0 0; font-size: 0.82rem; color: #94a3b8;">
+                  Acesso completo aos protocolos clínicos, árvores de decisão, anamnese SOAP, validação de Red Flags e conformidade regulatória.
+                </p>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div class="cfg-chevron-btn" style="width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; color: #34d399; transition: transform 0.3s ease;">
+                <i class="fa-solid fa-chevron-down cfg-chevron-icon"></i>
+              </div>
+            </div>
+          </div>
+
+          <div id="body-manual" class="cfg-accordion-body" style="padding: 20px; display: none;">
+            <!-- Destaque para abrir o Manual -->
+            <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(13, 148, 136, 0.25)); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: 16px; padding: 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+              <div>
+                <h4 style="font-family: 'Outfit', sans-serif; font-size: 1.15rem; font-weight: 700; color: #fff; margin: 0 0 6px; display: flex; align-items: center; gap: 8px;">
+                  <i class="fa-solid fa-book-open-reader" style="color: #34d399;"></i> Guia Completo e Interativo do Sistema
+                </h4>
+                <p style="font-size: 0.85rem; color: #cbd5e1; margin: 0; max-width: 650px;">
+                  Abra a central com guias passo a passo, busca de termos médicos, fluxogramas interativos e orientações de segurança para a consulta farmacêutica.
+                </p>
+              </div>
+              <button id="btn-open-manual-from-settings" class="btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; padding: 11px 22px; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);">
+                <i class="fa-solid fa-book-medical"></i> Abrir Manual Interativo em Tela Cheia
+              </button>
+            </div>
+
+            <!-- Grade com os 6 Protocolos Clínicos Embutidos -->
+            <h5 style="font-size: 0.9rem; font-weight: 700; color: #cbd5e1; margin: 0 0 12px; text-transform: uppercase; letter-spacing: 0.5px;">
+              <i class="fa-solid fa-clipboard-check" style="color: #10b981; margin-right: 6px;"></i> Protocolos Farmacêuticos Ativos (CDSS)
+            </h5>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; margin-bottom: 20px;">
+              <div style="background: rgba(30, 41, 59, 0.45); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 14px;">
+                <div style="font-weight: 700; color: #fff; font-size: 0.92rem; margin-bottom: 4px;">🌡️ Gripe &amp; Resfriado Comum</div>
+                <p style="font-size: 0.78rem; color: #94a3b8; margin: 0;">MIPs: Paracetamol, Dipirona, Clorfeniramina, Lavagem Nasal com Solução Fisiológica 0.9%.</p>
+              </div>
+              <div style="background: rgba(30, 41, 59, 0.45); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 14px;">
+                <div style="font-weight: 700; color: #fff; font-size: 0.92rem; margin-bottom: 4px;">🧪 Dispepsia &amp; Pirose (Azia/Gastrite)</div>
+                <p style="font-size: 0.78rem; color: #94a3b8; margin: 0;">MIPs: Hidróxido de Alumínio, Carbonato de Cálcio, Simeticona, Omeprazol (uso curto prazo).</p>
+              </div>
+              <div style="background: rgba(30, 41, 59, 0.45); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 14px;">
+                <div style="font-weight: 700; color: #fff; font-size: 0.92rem; margin-bottom: 4px;">🧠 Cefaleia Tensional Leve</div>
+                <p style="font-size: 0.78rem; color: #94a3b8; margin: 0;">MIPs: Paracetamol 750mg, Ibuprofeno 400mg, Dipirona 500mg. Triagem de cefaleia súbita.</p>
+              </div>
+              <div style="background: rgba(30, 41, 59, 0.45); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 14px;">
+                <div style="font-weight: 700; color: #fff; font-size: 0.92rem; margin-bottom: 4px;">🤧 Rinite Alérgica &amp; Coriza</div>
+                <p style="font-size: 0.78rem; color: #94a3b8; margin: 0;">MIPs: Loratadina 10mg, Desloratadina 5mg, Cetirizina 10mg, Higienização nasal salina contínua.</p>
+              </div>
+              <div style="background: rgba(30, 41, 59, 0.45); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 14px;">
+                <div style="font-weight: 700; color: #fff; font-size: 0.92rem; margin-bottom: 4px;">⚡ Dor Lombar &amp; Muscular</div>
+                <p style="font-size: 0.78rem; color: #94a3b8; margin: 0;">MIPs: Cetoprofeno tópico/oral, Ibuprofeno, Paracetamol, Orientação postural e calor local.</p>
+              </div>
+              <div style="background: rgba(30, 41, 59, 0.45); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 14px;">
+                <div style="font-weight: 700; color: #fff; font-size: 0.92rem; margin-bottom: 4px;">💧 Diarreia Aguda &amp; Reidratação</div>
+                <p style="font-size: 0.78rem; color: #94a3b8; margin: 0;">MIPs: Sais de Reidratação Oral (OMS), Probióticos (Saccharomyces boulardii), Racecadotrila.</p>
+              </div>
+            </div>
+
+            <!-- Referências Regulatórias Oficiais -->
+            <div style="background: rgba(30, 41, 59, 0.3); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 16px;">
+              <h6 style="font-size: 0.82rem; font-weight: 700; color: #94a3b8; margin: 0 0 8px; text-transform: uppercase;">
+                <i class="fa-solid fa-scale-balanced" style="color: #fbbf24; margin-right: 6px;"></i> Base Legal &amp; Regulamentação Farmacêutica
+              </h6>
+              <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.8rem; color: #cbd5e1;">
+                <div>📜 <strong>Resolução CFF nº 585/2013:</strong> Regulamenta as atribuições clínicas do farmacêutico.</div>
+                <div>📜 <strong>Resolução CFF nº 586/2013:</strong> Regulamenta a prescrição farmacêutica.</div>
+                <div>📑 <strong>RDC ANVISA nº 44/2009:</strong> Boas Práticas Farmacêuticas e Serviços de Saúde.</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
       </div>
 
     </div>
@@ -415,6 +507,15 @@ export function renderSettingsTab(contentArea) {
       if (chevron) chevron.style.transform = 'rotate(-90deg)';
     });
     showToast('Todos os agrupamentos foram recolhidos.');
+  });
+
+  // Botão para Abrir Manual Interativo a partir das Configurações
+  document.getElementById('btn-open-manual-from-settings')?.addEventListener('click', () => {
+    if (typeof showInteractiveManualModal === 'function') {
+      showInteractiveManualModal();
+    } else if (typeof window.showInteractiveManualModal === 'function') {
+      window.showInteractiveManualModal();
+    }
   });
 
   // --- RENDERIZAR TABELA DE USUÁRIOS ---
