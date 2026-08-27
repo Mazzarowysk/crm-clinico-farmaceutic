@@ -49,13 +49,20 @@ flowchart TD
 
 ---
 
-### 4. 👤 Prontuário Longitudinal & Portal do Paciente PWA ("Minha Saúde")
+### 4. 👤 Prontuário Longitudinal, Compras & Portal do Paciente PWA ("Minha Saúde")
 - **Prontuário Completo**: Timeline cronológica de aferições vitais (PA, Glicemia, IMC), exames TLR e histórico de prescrições.
-- **PWA do Paciente**: Carteirinha digital com foto, histórico de Declarações de Serviços Farmacêuticos (DSF) e despertador inteligente com alarmes de medicamentos contínuos.
+- **Histórico de Compras & Adesão (`🛒`)**: Acompanhamento de compras realizadas, medicamentos dispensados, previsão de término de uso contínuo (*Refill*) e lembrete direto via WhatsApp.
+- **PWA do Paciente (`📱`)**: Simulador do smartphone do paciente com carteirinha digital de vacinação, histórico de Declarações de Serviços Farmacêuticos (DSF) e despertador inteligente de remédios.
 
 ---
 
-### 5. ⚙️ Central de Configurações em 7 Agrupamentos Estruturados
+### 5. 📚 Manuais & Documentações Oficiais em PDF
+- 📘 **[Manual do Usuário — Guia Passo a Passo (PDF)](file:///c:/CRM%20Cl%C3%ADnico%20Farmac%C3%AAutico/Manual_do_Usuario_CRM_Clinico_Farmaceutico.pdf)**: Cobertura completa de 12 situações operacionais do balcão, caixa, estoque e configurações (`npm run build:manual`).
+- 📄 **[Relatório Executivo & Ficha Técnica (PDF)](file:///c:/CRM%20Cl%C3%ADnico%20Farmac%C3%AAutico/Relatorio_Executivo_CRM_Clinico_Farmaceutico.pdf)**: Resumo estratégico para diretoria e auditoria sanitária com os 7 pilares (`npm run build:pdf`).
+
+---
+
+### 6. ⚙️ Central de Configurações em 7 Agrupamentos Estruturados
 1. **👥 Gestão de Operadores & RBAC**: Controle de acesso por perfis (Master, Farmacêutico RT, Farmacêutico Clínico, Administrador, Atendente) e reset de senhas.
 2. **☁️ Banco Turso Cloud (LibSQL Distribuído)**: Monitoramento do cluster na nuvem com detecção inteligente de atualizações (Modais Roxo/Laranja no Vercel).
 3. **🏢 Dados da Farmácia & RT**: Razão social, CNPJ e registro CRF-SP para chancela de documentos.

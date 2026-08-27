@@ -28,8 +28,10 @@ stateDiagram-v2
 1.  **Chave Única e Antiduplicidade**: Tanto o CPF quanto o Nome Completo *(case-insensitive)* devem ser únicos no sistema. Tentar cadastrar ou editar um paciente com nome ou CPF já existente resulta em bloqueio com retorno `HTTP 409 Conflict`.
 2.  **Responsável Legal**: Caso o paciente seja menor de idade e não possua CPF próprio, é obrigatório registrar o CPF e nome do Responsável Legal.
 3.  **Integração ViaCEP**: O preenchimento do campo CEP deve acionar um gatilho para preencher automaticamente os campos: Logradouro, Bairro, Cidade e Estado.
-4.  **Identificação do SUS**: O número do Cartão Nacional de Saúde (CNS) deve ser validado pelo algoritmo oficial do Ministério da Saúde.
-5.  **Reutilização na Admissão**: Rotas de admissão e prontuário buscam automaticamente o paciente pré-existente por nome/CPF em vez de gerar registros duplicados.
+4.  **Identificação do SUS e PBMs**: O número do Cartão Nacional de Saúde (CNS) e os Convênios PBMs (com suporte a criação instantânea via botão `+`) são vinculados diretamente ao perfil.
+5.  **Módulo de Compras & Adesão (`🛒`)**: Acesso instantâneo ao histórico de dispensações, valor acumulado, status de tratamentos contínuos e previsão de término (*Refill*) com notificação WhatsApp.
+6.  **Portal do Paciente PWA (`📱`)**: Simulador móvel nativo com Despertador de Remédios, Aferições Clínicas, Carteira de Vacinas e Laudos DSF em PDF.
+7.  **Reutilização na Admissão**: Rotas de atendimento e balcão buscam automaticamente o paciente pré-existente por nome/CPF em vez de gerar registros duplicados.
 
 ---
 

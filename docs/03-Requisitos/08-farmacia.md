@@ -37,11 +37,11 @@ sequenceDiagram
 
 ---
 
-## 3. Regras de Negócio
-1.  **Validação Farmacêutica Obrigatória**: Medicamentos classificados como de *Alta Vigilância* (ex: Quimioterápicos, Insulina, Anticoagulantes, Opiáceos) ou psicotrópicos exigem a validação expressa e assinatura digital de um Farmacêutico no sistema antes de serem liberados para separação física.
-2.  **Rastreabilidade Total por Lote**: Nenhuma movimentação de saída de medicamento pode ocorrer sem a identificação do número do lote (`batchNumber`) e data de validade correspondente.
-3.  **Regra de Inventário FEFO (First Expired, First Out)**: O sistema deve sugerir automaticamente a saída dos lotes com data de validade mais próxima do vencimento para evitar perdas financeiras.
-4.  **Alerta de Estoque Mínimo**: Ao atingir o nível crítico de segurança configurado para o item, o sistema deve disparar um alerta interno no módulo de Compras/Estoque.
+1.  **Validação Farmacêutica Obrigatória**: Medicamentos classificados como de *Alta Vigilância* ou psicotrópicos exigem a validação expressa e assinatura digital de um Farmacêutico no sistema antes de serem liberados.
+2.  **Motor CDSS 4D Integrado**: Triagem em 5 etapas no Balcão com checagem em tempo real de *Fármaco x Fármaco*, *Alergias*, *Comorbidades* e *Faixa Etária*.
+3.  **Trava Regulatória de Red Flags**: Sinais de alarme bloqueiam imediatamente a prescrição de MIPs e acionam a emissão da Guia de Encaminhamento Médico.
+4.  **Finalização de Venda no Caixa (Etapa 5)**: Atalho direto para abertura da Frente de Caixa (PDV Rápido) com produtos pré-carregados, abatimento automático de estoque e geração de DSF oficial com carimbo de CRF.
+5.  **Rastreabilidade Total por Lote & FEFO**: Movimentações atreladas ao número do lote e data de validade mais próxima do vencimento.
 
 ---
 
