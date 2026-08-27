@@ -50,145 +50,145 @@ export function renderPatientsTab(contentArea) {
     </div>
 
     <!-- Modal de Cadastro, Queixas e Indicação Medicamentosa do Cliente -->
-    <div id="patient-modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.65); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(6px);">
-      <div class="patients-form-container" style="background: var(--bg-secondary); width: 96%; max-width: 1100px; max-height: 94vh; display: flex; flex-direction: column; overflow: hidden; border-radius: 14px; padding: 22px 24px; box-shadow: 0 16px 40px rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.08); position: relative; animation: fadeIn 0.3s ease-out;">
-        <button type="button" id="btn-close-patient-modal" style="position: absolute; top: 16px; right: 16px; background: transparent; border: none; font-size: 1.3rem; cursor: pointer; color: var(--text-secondary);"><i class="fa-solid fa-xmark"></i></button>
+    <div id="patient-modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 8, 20, 0.82); z-index: 1000; justify-content: center; align-items: center; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 16px; box-sizing: border-box;">
+      <div class="patients-form-container" style="background: #0f172a; width: 98%; max-width: 1220px; max-height: 94vh; display: flex; flex-direction: column; overflow: hidden; border-radius: 18px; padding: 24px 28px; box-shadow: 0 25px 60px rgba(0,0,0,0.8), 0 0 30px rgba(16, 185, 129, 0.12); border: 1.5px solid rgba(255,255,255,0.1); position: relative; animation: fadeIn 0.3s ease-out;">
+        <button type="button" id="btn-close-patient-modal" style="position: absolute; top: 18px; right: 18px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); width: 34px; height: 34px; border-radius: 50%; font-size: 1.1rem; cursor: pointer; color: #94a3b8; display: flex; align-items: center; justify-content: center; transition: 0.2s;"><i class="fa-solid fa-xmark"></i></button>
         
-        <div style="margin-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px;">
-          <h3 id="form-title" style="margin: 0 0 4px 0; font-family: 'Outfit'; font-weight: 700; display: flex; align-items: center; gap: 10px; color: #f8fafc; font-size: 1.22rem;">
+        <div style="margin-bottom: 18px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 14px;">
+          <h3 id="form-title" style="margin: 0 0 6px 0; font-family: 'Outfit'; font-weight: 700; display: flex; align-items: center; gap: 10px; color: #f8fafc; font-size: 1.25rem;">
             <i class="fa-solid fa-user-plus" style="color: #10b981;"></i> Cadastro do Cliente &amp; Registro da Queixa para Indicação Medicamentosa
           </h3>
-          <p style="margin: 0; font-size: 0.78rem; color: #94a3b8;">
+          <p style="margin: 0; font-size: 0.82rem; color: #94a3b8; line-height: 1.4;">
             Cadastre os dados do cliente, relate a queixa clínica da visita atual e obtenha imediatamente as opções de receituário farmacêutico com suporte CDSS 4D.
           </p>
         </div>
         
         <form id="patient-form" novalidate style="display: flex; flex-direction: column; flex: 1; min-height: 0;">
           <input type="hidden" id="editId">
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(460px, 1fr)); gap: 16px; flex: 1; overflow: hidden; align-items: start;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 20px; flex: 1; overflow: hidden; align-items: start;">
             
             <!-- COLUNA 1: DADOS PESSOAIS & ENDEREÇO -->
-            <div style="display: flex; flex-direction: column; gap: 12px; overflow-y: auto; padding-right: 8px; max-height: 68vh;" class="custom-scrollbar patient-modal-col-1">
+            <div style="display: flex; flex-direction: column; gap: 16px; overflow-y: auto; padding-right: 10px; max-height: 68vh;" class="custom-scrollbar patient-modal-col-1">
               
               <!-- 1. IDENTIFICAÇÃO DO CLIENTE -->
-              <div style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px;">
-                <div style="font-size: 0.8rem; font-weight: 800; color: #38bdf8; text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+              <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 18px 20px;">
+                <div style="font-size: 0.82rem; font-weight: 800; color: #38bdf8; text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
                   <i class="fa-solid fa-id-card"></i> 1. Identificação do Cliente
                 </div>
 
-                <div class="form-group" style="margin-bottom: 10px;">
-                  <label class="form-label" for="fullName">* Nome Completo do Cliente:</label>
-                  <input type="text" id="fullName" class="form-input" placeholder="Nome completo do cliente">
+                <div class="form-group" style="margin-bottom: 12px;">
+                  <label class="form-label" for="fullName" style="font-size: 0.82rem; font-weight: 600; margin-bottom: 5px; display: block;">* Nome Completo do Cliente:</label>
+                  <input type="text" id="fullName" class="form-input" placeholder="Nome completo do cliente" style="padding: 10px 14px;">
                 </div>
                 
-                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                <div class="form-row" style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 12px; margin-bottom: 12px;">
                   <div class="form-group">
-                    <label class="form-label" for="cpf">* CPF:</label>
-                    <input type="text" id="cpf" class="form-input" placeholder="000.000.000-00" inputmode="numeric">
+                    <label class="form-label" for="cpf" style="font-size: 0.82rem; font-weight: 600; margin-bottom: 5px; display: block;">* CPF:</label>
+                    <input type="text" id="cpf" class="form-input" placeholder="000.000.000-00" inputmode="numeric" style="padding: 10px 14px;">
                   </div>
                   <div class="form-group">
-                    <label class="form-label" for="birthDate">* Data de Nascimento:</label>
-                    <input type="date" id="birthDate" class="form-input">
+                    <label class="form-label" for="birthDate" style="font-size: 0.82rem; font-weight: 600; margin-bottom: 5px; display: block;">* Data de Nascimento:</label>
+                    <input type="date" id="birthDate" class="form-input" style="padding: 9px 12px; min-width: 140px;">
                   </div>
                 </div>
 
-                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 12px; margin-bottom: 12px;">
                   <div class="form-group">
-                    <label class="form-label" for="gender">Sexo / Gênero:</label>
-                    <select id="gender" class="form-input">
+                    <label class="form-label" for="gender" style="font-size: 0.82rem; font-weight: 600; margin-bottom: 5px; display: block;">Sexo / Gênero:</label>
+                    <select id="gender" class="form-input" style="padding: 10px 12px;">
                       <option value="Feminino">Feminino</option>
                       <option value="Masculino">Masculino</option>
                       <option value="Não Informado">Não Informado</option>
                     </select>
                   </div>
                   <div class="form-group">
-                    <label class="form-label" for="cellphone" style="display: flex; align-items: center; gap: 6px;">
+                    <label class="form-label" for="cellphone" style="font-size: 0.82rem; font-weight: 600; margin-bottom: 5px; display: flex; align-items: center; gap: 6px;">
                       <i class="fa-brands fa-whatsapp" style="color: #22c55e;"></i> * Celular / WhatsApp:
                     </label>
-                    <input type="text" id="cellphone" class="form-input" placeholder="(18) 98888-7777">
+                    <input type="text" id="cellphone" class="form-input" placeholder="(18) 98888-7777" style="padding: 10px 14px;">
                   </div>
                 </div>
 
-                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1.2fr; gap: 12px;">
                   <div class="form-group">
-                    <label class="form-label" for="phone">Telefone Fixo / Recado:</label>
-                    <input type="text" id="phone" class="form-input" placeholder="(11) 3333-4444">
+                    <label class="form-label" for="phone" style="font-size: 0.82rem; font-weight: 600; margin-bottom: 5px; display: block;">Telefone Fixo / Recado:</label>
+                    <input type="text" id="phone" class="form-input" placeholder="(11) 3333-4444" style="padding: 10px 14px;">
                   </div>
                   <div class="form-group">
-                    <label class="form-label" for="email">E-mail (DSF Digital):</label>
-                    <input type="text" id="email" class="form-input" placeholder="cliente@email.com">
+                    <label class="form-label" for="email" style="font-size: 0.82rem; font-weight: 600; margin-bottom: 5px; display: block;">E-mail (DSF Digital):</label>
+                    <input type="text" id="email" class="form-input" placeholder="cliente@email.com" style="padding: 10px 14px;">
                   </div>
                 </div>
               </div>
 
               <!-- 2. ENDEREÇO & ENTREGA (DELIVERY) -->
-              <div style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px;">
-                <div style="font-size: 0.8rem; font-weight: 800; color: #a78bfa; text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+              <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 18px 20px;">
+                <div style="font-size: 0.82rem; font-weight: 800; color: #a78bfa; text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
                   <i class="fa-solid fa-truck-fast"></i> 2. Endereço &amp; Delivery / Entrega
                 </div>
 
-                <div class="form-row" style="display: grid; grid-template-columns: 130px 1fr; gap: 10px; margin-bottom: 10px;">
+                <div class="form-row" style="display: grid; grid-template-columns: 150px 1fr; gap: 12px; margin-bottom: 12px;">
                   <div class="form-group">
-                    <label class="form-label" for="cep">CEP (Auto):</label>
+                    <label class="form-label" for="cep" style="font-size: 0.82rem; font-weight: 600; margin-bottom: 5px; display: block;">CEP (Auto):</label>
                     <div style="position: relative; display: flex; align-items: center;">
-                      <input type="text" id="cep" class="form-input" placeholder="00000-000" inputmode="numeric" maxlength="9" style="padding-right: 32px;">
-                      <button type="button" id="btn-search-cep" title="Buscar Endereço pelo CEP" style="position: absolute; right: 6px; background: transparent; border: none; color: #818cf8; cursor: pointer; font-size: 0.9rem; padding: 4px;">
+                      <input type="text" id="cep" class="form-input" placeholder="00000-000" inputmode="numeric" maxlength="9" style="padding: 10px 34px 10px 12px;">
+                      <button type="button" id="btn-search-cep" title="Buscar Endereço pelo CEP" style="position: absolute; right: 8px; background: transparent; border: none; color: #818cf8; cursor: pointer; font-size: 0.95rem; padding: 4px;">
                         <i class="fa-solid fa-magnifying-glass" id="cep-search-icon"></i>
                         <i class="fa-solid fa-spinner fa-spin" id="cep-loading-icon" style="display: none;"></i>
                       </button>
                     </div>
                   </div>
                   <div class="form-group">
-                    <label class="form-label" for="address">Logradouro (Rua / Av):</label>
-                    <input type="text" id="address" class="form-input" placeholder="Ex: Av. Paulista">
+                    <label class="form-label" for="address" style="font-size: 0.82rem; font-weight: 600; margin-bottom: 5px; display: block;">Logradouro (Rua / Av):</label>
+                    <input type="text" id="address" class="form-input" placeholder="Ex: Av. Paulista" style="padding: 10px 14px;">
                   </div>
                 </div>
                 
-                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
                   <div class="form-group">
-                    <label class="form-label" for="number">Número / Compl.:</label>
-                    <input type="text" id="number" class="form-input" placeholder="Ex: 1000 / Ap 42">
+                    <label class="form-label" for="number" style="font-size: 0.82rem; font-weight: 600; margin-bottom: 5px; display: block;">Número / Compl.:</label>
+                    <input type="text" id="number" class="form-input" placeholder="Ex: 1000 / Ap 42" style="padding: 10px 12px;">
                   </div>
                   <div class="form-group">
-                    <label class="form-label" for="neighborhood">Bairro:</label>
-                    <input type="text" id="neighborhood" class="form-input" placeholder="Ex: Bela Vista">
+                    <label class="form-label" for="neighborhood" style="font-size: 0.82rem; font-weight: 600; margin-bottom: 5px; display: block;">Bairro:</label>
+                    <input type="text" id="neighborhood" class="form-input" placeholder="Ex: Bela Vista" style="padding: 10px 12px;">
                   </div>
                   <div class="form-group">
-                    <label class="form-label" for="city">Cidade / UF:</label>
-                    <input type="text" id="city" class="form-input" placeholder="Ex: São Paulo - SP">
+                    <label class="form-label" for="city" style="font-size: 0.82rem; font-weight: 600; margin-bottom: 5px; display: block;">Cidade / UF:</label>
+                    <input type="text" id="city" class="form-input" placeholder="Ex: São Paulo - SP" style="padding: 10px 12px;">
                   </div>
                 </div>
               </div>
 
               <!-- 3. RESPONSÁVEL LEGAL / CUIDADOR -->
-              <div style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px;">
-                <div style="font-size: 0.8rem; font-weight: 800; color: #f59e0b; text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+              <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 18px 20px;">
+                <div style="font-size: 0.82rem; font-weight: 800; color: #f59e0b; text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
                   <i class="fa-solid fa-users"></i> 3. Responsável Legal / Cuidador
                 </div>
 
-                <div id="responsible-alert-badge" style="display: none; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); color: #fbbf24; border-radius: 8px; padding: 6px 10px; font-size: 0.76rem; margin-bottom: 10px;">
+                <div id="responsible-alert-badge" style="display: none; background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.35); color: #fbbf24; border-radius: 8px; padding: 8px 12px; font-size: 0.78rem; margin-bottom: 12px;">
                   <i class="fa-solid fa-circle-info"></i> Obrigatório para clientes menores de 18 anos ou dependentes.
                 </div>
 
-                <div class="form-row" style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 10px;">
+                <div class="form-row" style="display: grid; grid-template-columns: 1.8fr 1fr; gap: 12px; margin-bottom: 12px;">
                   <div class="form-group">
-                    <label class="form-label" for="responsibleName" id="lbl-responsibleName">Nome do Responsável / Cuidador:</label>
-                    <input type="text" id="responsibleName" class="form-input" placeholder="Nome completo do responsável">
+                    <label class="form-label" for="responsibleName" id="lbl-responsibleName" style="font-size: 0.82rem; font-weight: 600; margin-bottom: 5px; display: block;">Nome do Responsável / Cuidador:</label>
+                    <input type="text" id="responsibleName" class="form-input" placeholder="Nome completo do responsável" style="padding: 10px 14px;">
                   </div>
                   <div class="form-group">
-                    <label class="form-label" for="responsibleCpf" id="lbl-responsibleCpf">CPF:</label>
-                    <input type="text" id="responsibleCpf" class="form-input" placeholder="000.000.000-00" inputmode="numeric">
+                    <label class="form-label" for="responsibleCpf" id="lbl-responsibleCpf" style="font-size: 0.82rem; font-weight: 600; margin-bottom: 5px; display: block;">CPF:</label>
+                    <input type="text" id="responsibleCpf" class="form-input" placeholder="000.000.000-00" inputmode="numeric" style="padding: 10px 14px;">
                   </div>
                 </div>
 
-                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <div class="form-row" style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 12px;">
                   <div class="form-group">
-                    <label class="form-label" for="responsiblePhone">Telefone / WhatsApp:</label>
-                    <input type="text" id="responsiblePhone" class="form-input" placeholder="(11) 99999-0000">
+                    <label class="form-label" for="responsiblePhone" style="font-size: 0.82rem; font-weight: 600; margin-bottom: 5px; display: block;">Telefone / WhatsApp:</label>
+                    <input type="text" id="responsiblePhone" class="form-input" placeholder="(11) 99999-0000" style="padding: 10px 14px;">
                   </div>
                   <div class="form-group">
-                    <label class="form-label" for="responsibleRelationship">Grau de Parentesco:</label>
-                    <select id="responsibleRelationship" class="form-input">
+                    <label class="form-label" for="responsibleRelationship" style="font-size: 0.82rem; font-weight: 600; margin-bottom: 5px; display: block;">Grau de Parentesco:</label>
+                    <select id="responsibleRelationship" class="form-input" style="padding: 10px 12px;">
                       <option value="Pai/Mãe">Pai / Mãe</option>
                       <option value="Cônjuge">Cônjuge / Esposo(a)</option>
                       <option value="Filho(a)">Filho(a) / Cuidador(a)</option>
@@ -202,27 +202,28 @@ export function renderPatientsTab(contentArea) {
             </div> <!-- Fim Coluna 1 -->
             
             <!-- COLUNA 2: QUEIXA CLÍNICA (NOVA VISITA) & HISTÓRICO FARMACOTERAPÊUTICO -->
-            <div style="display: flex; flex-direction: column; gap: 12px; overflow-y: auto; padding-right: 8px; max-height: 68vh;" class="custom-scrollbar">
+            <div style="display: flex; flex-direction: column; gap: 16px; overflow-y: auto; padding-right: 10px; max-height: 68vh;" class="custom-scrollbar">
               
               <!-- 4. QUEIXA RELATADA PELO CLIENTE NA VISITA & SINTOMAS (PARA INDICAÇÃO DE RECEITUÁRIO) -->
-              <div style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.18), rgba(15, 23, 42, 0.95)); border: 1.5px solid rgba(20, 184, 166, 0.5); border-radius: 12px; padding: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
-                <div style="font-size: 0.84rem; font-weight: 800; color: #2dd4bf; text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+              <div style="background: linear-gradient(135deg, rgba(13, 148, 136, 0.22), rgba(15, 23, 42, 0.96)); border: 1.5px solid rgba(20, 184, 166, 0.55); border-radius: 14px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
+                <div style="font-size: 0.84rem; font-weight: 800; color: #2dd4bf; text-transform: uppercase; margin-bottom: 16px; display: flex; align-items: center; justify-content: space-between;">
                   <span style="display: flex; align-items: center; gap: 8px;">
                     <i class="fa-solid fa-notes-medical"></i> 4. Queixa da Visita &amp; Indicação Medicamentosa
                   </span>
-                  <span style="background: rgba(20, 184, 166, 0.2); color: #2dd4bf; border: 1px solid #14b8a6; padding: 2px 8px; border-radius: 10px; font-size: 0.68rem; font-weight: 700;">
+                  <span style="background: rgba(20, 184, 166, 0.2); color: #2dd4bf; border: 1px solid #14b8a6; padding: 3px 10px; border-radius: 10px; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.5px;">
                     CRM BALCÃO
                   </span>
                 </div>
 
-                <div class="form-row" style="display: grid; grid-template-columns: 130px 1fr; gap: 10px; margin-bottom: 10px;">
+                <!-- LINHA DA DATA E PROTOCOLO COM ESPAÇO ADEQUADO PARA O SELETOR DE DATA -->
+                <div class="form-row" style="display: grid; grid-template-columns: 165px 1fr; gap: 14px; margin-bottom: 14px; align-items: start;">
                   <div class="form-group">
-                    <label class="form-label" for="visitDate">Data da Ida à Farmácia:</label>
-                    <input type="date" id="visitDate" class="form-input" value="${new Date().toISOString().split('T')[0]}">
+                    <label class="form-label" for="visitDate" style="font-size: 0.82rem; font-weight: 600; margin-bottom: 5px; display: block; white-space: nowrap;">Data da Ida à Farmácia:</label>
+                    <input type="date" id="visitDate" class="form-input" value="${new Date().toISOString().split('T')[0]}" style="padding: 9px 12px; width: 100%; box-sizing: border-box; font-size: 0.88rem; font-weight: 600;">
                   </div>
                   <div class="form-group">
-                    <label class="form-label" for="complaintProtocol">* Queixa Principal / Protocolo:</label>
-                    <select id="complaintProtocol" class="form-input" style="font-weight: 600; color: #f8fafc; border-color: #14b8a6;">
+                    <label class="form-label" for="complaintProtocol" style="font-size: 0.82rem; font-weight: 600; margin-bottom: 5px; display: block;">* Queixa Principal / Protocolo:</label>
+                    <select id="complaintProtocol" class="form-input" style="font-weight: 600; color: #f8fafc; border-color: #14b8a6; padding: 10px 12px; width: 100%;">
                       <option value="auto" selected>✨ Identificar Automaticamente pelo Relato do Cliente</option>
                       <option value="gripe_resfriado">🤧 Gripe, Resfriado &amp; Coriza</option>
                       <option value="tosse">🗣️ Tosse (Seca ou com Catarro / Produtiva)</option>
@@ -240,36 +241,36 @@ export function renderPatientsTab(contentArea) {
                   </div>
                 </div>
 
-                <div class="form-group" style="margin-bottom: 10px;">
-                  <label class="form-label" for="customComplaintNotes" style="color: #f8fafc; font-weight: 700; display: flex; align-items: center; justify-content: space-between;">
-                    <span style="display: flex; align-items: center; gap: 6px;">
+                <div class="form-group" style="margin-bottom: 14px;">
+                  <label class="form-label" for="customComplaintNotes" style="color: #f8fafc; font-weight: 700; display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+                    <span style="display: flex; align-items: center; gap: 6px; font-size: 0.84rem;">
                       <i class="fa-solid fa-comment-dots" style="color: #38bdf8;"></i> Relato do Cliente sobre o que está sentindo:
                     </span>
-                    <span style="font-size: 0.72rem; color: #2dd4bf; font-weight: normal;">
+                    <span style="font-size: 0.74rem; color: #2dd4bf; font-weight: 600;">
                       <i class="fa-solid fa-wand-magic-sparkles"></i> O sistema detecta o sintoma ao digitar
                     </span>
                   </label>
-                  <textarea id="customComplaintNotes" class="form-input" rows="3" placeholder="Ex: Cliente relata que está com dor de cabeça forte há 2 dias, piora com claridade..." style="resize: vertical; font-size: 0.84rem; width: 100%; border-color: rgba(56, 189, 248, 0.4);"></textarea>
+                  <textarea id="customComplaintNotes" class="form-input" rows="3" placeholder="Ex: Cliente relata que está com dor de cabeça forte há 2 dias, piora com claridade..." style="resize: vertical; font-size: 0.86rem; line-height: 1.45; width: 100%; border-color: rgba(56, 189, 248, 0.4); padding: 10px 14px; min-height: 80px;"></textarea>
                   
-                  <div id="symptom-detection-badge" style="display: none; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 8px; padding: 6px 12px; margin-top: 6px; font-size: 0.78rem; color: #38bdf8; align-items: center; justify-content: space-between;">
+                  <div id="symptom-detection-badge" style="display: none; background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.4); border-radius: 8px; padding: 8px 14px; margin-top: 8px; font-size: 0.8rem; color: #38bdf8; align-items: center; justify-content: space-between;">
                     <span><i class="fa-solid fa-wand-magic-sparkles"></i> <strong>Sintoma Detectado:</strong> <span id="detected-symptom-label" style="font-weight: 700; color: #fff;"></span></span>
-                    <span style="font-size: 0.72rem; color: #34d399; font-weight: 700;">✓ Indicação farmacêutica sincronizada</span>
+                    <span style="font-size: 0.74rem; color: #34d399; font-weight: 700;">✓ Indicação farmacêutica sincronizada</span>
                   </div>
 
                   <!-- CAIXA DE PRÉVIA DE MEDICAMENTOS SUGERIDOS PARA A QUEIXA -->
-                  <div id="live-med-suggestions-box" style="display: none; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(20, 184, 166, 0.35); border-radius: 10px; padding: 10px 12px; margin-top: 8px; animation: fadeIn 0.2s ease;">
-                    <div style="font-size: 0.74rem; font-weight: 800; color: #2dd4bf; text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
+                  <div id="live-med-suggestions-box" style="display: none; background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(20, 184, 166, 0.35); border-radius: 10px; padding: 12px 14px; margin-top: 10px; animation: fadeIn 0.2s ease;">
+                    <div style="font-size: 0.76rem; font-weight: 800; color: #2dd4bf; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;">
                       <span><i class="fa-solid fa-capsules"></i> Sugestões Medicamentosas Imediatas (MIPs):</span>
-                      <span style="font-size: 0.68rem; color: #94a3b8; font-weight: normal;">CDSS 4D Ativo</span>
+                      <span style="font-size: 0.7rem; color: #94a3b8; font-weight: normal;">CDSS 4D Ativo</span>
                     </div>
-                    <div id="live-med-suggestions-list" style="display: flex; flex-wrap: wrap; gap: 6px; font-size: 0.76rem;"></div>
+                    <div id="live-med-suggestions-list" style="display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.78rem;"></div>
                   </div>
                 </div>
 
-                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.82rem;">
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; font-size: 0.84rem;">
                   <div class="form-group">
-                    <label class="form-label" for="symptomDuration">Tempo de Início:</label>
-                    <select id="symptomDuration" class="form-input">
+                    <label class="form-label" for="symptomDuration" style="font-size: 0.82rem; font-weight: 600; margin-bottom: 5px; display: block;">Tempo de Início:</label>
+                    <select id="symptomDuration" class="form-input" style="padding: 10px 12px;">
                       <option value="1">Começou hoje (menos de 24h)</option>
                       <option value="2" selected>Há 1 a 2 dias</option>
                       <option value="4">Há 3 a 5 dias</option>
@@ -277,8 +278,8 @@ export function renderPatientsTab(contentArea) {
                     </select>
                   </div>
                   <div class="form-group">
-                    <label class="form-label" for="symptomSeverity">Gravidade:</label>
-                    <select id="symptomSeverity" class="form-input">
+                    <label class="form-label" for="symptomSeverity" style="font-size: 0.82rem; font-weight: 600; margin-bottom: 5px; display: block;">Gravidade:</label>
+                    <select id="symptomSeverity" class="form-input" style="padding: 10px 12px;">
                       <option value="Leve">Leve</option>
                       <option value="Leve a Moderado" selected>Moderada</option>
                       <option value="Intensa">Intensa</option>
@@ -288,21 +289,21 @@ export function renderPatientsTab(contentArea) {
               </div>
 
               <!-- 5. PERFIL FARMACOTERAPÊUTICO & SEGURANÇA (CDSS 4D) -->
-              <div style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px;">
-                <div style="font-size: 0.8rem; font-weight: 800; color: #10b981; text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+              <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 18px 20px;">
+                <div style="font-size: 0.82rem; font-weight: 800; color: #10b981; text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
                   <i class="fa-solid fa-shield-halved"></i> 5. Histórico Clínico &amp; Convênio PBM (CDSS 4D)
                 </div>
 
-                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                <div class="form-row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px;">
                   <div class="form-group">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
-                      <label class="form-label" for="healthPlan" style="margin-bottom: 0;">Programa / Convênio PBM:</label>
-                      <button type="button" id="btn-quick-plus-pbm" title="Adicionar Novo Convênio/PBM" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; font-size: 0.72rem; font-weight: 700; padding: 2px 7px; border-radius: 5px; cursor: pointer; display: inline-flex; align-items: center; gap: 3px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                      <label class="form-label" for="healthPlan" style="margin-bottom: 0; font-size: 0.82rem; font-weight: 600;">Programa / Convênio PBM:</label>
+                      <button type="button" id="btn-quick-plus-pbm" title="Adicionar Novo Convênio/PBM" style="background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; font-size: 0.74rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
                         <i class="fa-solid fa-plus"></i> Novo
                       </button>
                     </div>
-                    <div style="display: flex; gap: 6px;">
-                      <select id="healthPlan" class="form-input" style="flex: 1;">
+                    <div style="display: flex; gap: 8px;">
+                      <select id="healthPlan" class="form-input" style="flex: 1; padding: 10px 12px;">
                         <option value="Particular">Particular (Sem Convênio)</option>
                         <option value="Farmácia Popular">Farmácia Popular do Brasil</option>
                         <option value="Funcional Card">Funcional Card (PBM)</option>
@@ -313,36 +314,36 @@ export function renderPatientsTab(contentArea) {
                         ${(JSON.parse(localStorage.getItem('crm_custom_pbms') || '[]')).map(p => `<option value="${p}">${p}</option>`).join('')}
                         <option value="Outro PBM">Outro Convênio</option>
                       </select>
-                      <button type="button" id="btn-plus-icon-pbm" title="Adicionar Convênio/PBM" style="width: 38px; height: 38px; border-radius: 6px; background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                      <button type="button" id="btn-plus-icon-pbm" title="Adicionar Convênio/PBM" style="width: 42px; height: 42px; border-radius: 8px; background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
                         <i class="fa-solid fa-plus"></i>
                       </button>
                     </div>
                   </div>
                   <div class="form-group">
-                    <label class="form-label" for="cardNumber">Nº Cartão / Matrícula PBM:</label>
-                    <input type="text" id="cardNumber" class="form-input" placeholder="0000 0000 0000">
+                    <label class="form-label" for="cardNumber" style="font-size: 0.82rem; font-weight: 600; margin-bottom: 6px; display: block;">Nº Cartão / Matrícula PBM:</label>
+                    <input type="text" id="cardNumber" class="form-input" placeholder="0000 0000 0000" style="padding: 10px 14px;">
                   </div>
                 </div>
 
-                <div class="form-group" style="margin-bottom: 10px;">
-                  <label class="form-label" for="allergies" style="color: #f87171; font-weight: 700;">
+                <div class="form-group" style="margin-bottom: 14px;">
+                  <label class="form-label" for="allergies" style="color: #f87171; font-weight: 700; font-size: 0.82rem; margin-bottom: 5px; display: block;">
                     <i class="fa-solid fa-triangle-exclamation"></i> Alergias Medicamentosas Conhecidas:
                   </label>
-                  <input type="text" id="allergies" class="form-input" placeholder="Ex: Dipirona, Penicilina, AAS, Anti-inflamatórios (AINEs), Sulfa..." style="border-color: rgba(239, 68, 68, 0.4);">
+                  <input type="text" id="allergies" class="form-input" placeholder="Ex: Dipirona, Penicilina, AAS, Anti-inflamatórios (AINEs), Sulfa..." style="border-color: rgba(239, 68, 68, 0.4); padding: 10px 14px;">
                 </div>
 
-                <div class="form-group" style="margin-bottom: 10px;">
-                  <label class="form-label" for="chronicConditions">
+                <div class="form-group" style="margin-bottom: 14px;">
+                  <label class="form-label" for="chronicConditions" style="font-size: 0.82rem; font-weight: 600; margin-bottom: 5px; display: block;">
                     <i class="fa-solid fa-heart-pulse" style="color: #38bdf8;"></i> Condições Crônicas / Comorbidades:
                   </label>
-                  <input type="text" id="chronicConditions" class="form-input" placeholder="Ex: Hipertensão, Diabetes Tipo 2, Gastrite/Úlcera, Asma, Doença Renal, Gestante...">
+                  <input type="text" id="chronicConditions" class="form-input" placeholder="Ex: Hipertensão, Diabetes Tipo 2, Gastrite/Úlcera, Asma, Doença Renal, Gestante..." style="padding: 10px 14px;">
                 </div>
 
                 <div class="form-group">
-                  <label class="form-label" for="continuousMedications">
+                  <label class="form-label" for="continuousMedications" style="font-size: 0.82rem; font-weight: 600; margin-bottom: 5px; display: block;">
                     <i class="fa-solid fa-pills" style="color: #a78bfa;"></i> Medicamentos de Uso Contínuo:
                   </label>
-                  <input type="text" id="continuousMedications" class="form-input" placeholder="Ex: Losartana 50mg, Metformina 850mg, AAS 100mg...">
+                  <input type="text" id="continuousMedications" class="form-input" placeholder="Ex: Losartana 50mg, Metformina 850mg, AAS 100mg..." style="padding: 10px 14px;">
                 </div>
               </div>
 
@@ -350,14 +351,14 @@ export function renderPatientsTab(contentArea) {
           </div> <!-- Fim grid duas colunas -->
 
           <!-- RODAPÉ DE AÇÕES DO MODAL -->
-          <div style="display: flex; gap: 12px; margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08); flex-wrap: wrap;">
-            <button type="button" id="submit-and-start-consultation-btn" onclick="window.savePatientForm && window.savePatientForm(true)" class="btn" style="flex: 1.5; min-width: 260px; background: linear-gradient(135deg, #0d9488, #0f766e); color: #ffffff; border: 1px solid #2dd4bf; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(13, 148, 136, 0.4); border-radius: 8px; padding: 10px 18px; display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <div style="display: flex; gap: 14px; margin-top: 20px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.08); flex-wrap: wrap;">
+            <button type="button" id="submit-and-start-consultation-btn" onclick="window.savePatientForm && window.savePatientForm(true)" class="btn" style="flex: 1.5; min-width: 260px; background: linear-gradient(135deg, #0d9488, #0f766e); color: #ffffff; border: 1px solid #2dd4bf; font-weight: 700; cursor: pointer; box-shadow: 0 4px 14px rgba(13, 148, 136, 0.4); border-radius: 10px; padding: 12px 20px; font-size: 0.88rem; display: flex; align-items: center; justify-content: center; gap: 8px;">
               <i class="fa-solid fa-prescription-bottle-medical"></i> Salvar e Indicar Medicamentos (Receituário)
             </button>
-            <button type="button" id="submit-btn" onclick="window.savePatientForm && window.savePatientForm(false)" class="btn btn-primary" style="flex: 1; min-width: 140px; padding: 10px 18px; font-weight: 700; border-radius: 8px;">
+            <button type="button" id="submit-btn" onclick="window.savePatientForm && window.savePatientForm(false)" class="btn btn-primary" style="flex: 1; min-width: 150px; padding: 12px 20px; font-weight: 700; border-radius: 10px; font-size: 0.88rem;">
               <i class="fa-solid fa-floppy-disk"></i> Salvar Apenas Cadastro
             </button>
-            <button type="button" id="cancel-edit-btn" class="btn" style="background-color: var(--bg-tertiary); color: var(--text-primary); flex: 0.5; min-width: 90px; border-radius: 8px;">Cancelar</button>
+            <button type="button" id="cancel-edit-btn" class="btn" style="background-color: var(--bg-tertiary); color: var(--text-primary); flex: 0.5; min-width: 100px; border-radius: 10px; padding: 12px 18px; font-size: 0.88rem;">Cancelar</button>
           </div>
         </form>
       </div>
