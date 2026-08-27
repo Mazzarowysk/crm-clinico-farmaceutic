@@ -483,51 +483,23 @@ async function generateCompleteUserManualPDF() {
     <div class="steps-list">
       <div class="step-item">
         <div class="step-num">1</div>
-        <div class="step-text"><strong>Etapa 1 (Identificação):</strong> Localize o cliente por Nome ou CPF, ou cadastre na hora.</div>
+        <div class="step-text"><strong>Etapa 1 (Identificação Unificada):</strong> Localize o cliente por Nome ou CPF, ou cadastre na hora. Ao clicar no card do paciente, o sistema bipa e avança automaticamente para a triagem.</div>
       </div>
       <div class="step-item">
         <div class="step-num">2</div>
-        <div class="step-text"><strong>Etapa 2 (Queixa &amp; Sintomas):</strong> Clique no protocolo clínico (ex: Gripe, Cefaleia), informe dias de evolução e intensidade.</div>
+        <div class="step-text"><strong>Etapa 2 (Queixas &amp; Sintomas):</strong> Clique no protocolo clínico (ex: Gripe, Cefaleia, Sintomas Sistêmicos), informe dias de evolução e intensidade.</div>
       </div>
       <div class="step-item">
         <div class="step-num">3</div>
-        <div class="step-text"><strong>Etapa 3 (Sinais de Alerta):</strong> O sistema avalia sinais graves. Se houver Red Flags, bloqueia MIPs e emite Guia Médica.</div>
+        <div class="step-text"><strong>Etapa 3 (Validação Red Flags - Semáforo Sanitário):</strong> O sistema avalia sinais de alarme. Se não houver sintomas de gravidade, mantém-se desmarcado e aprova a prescrição.</div>
       </div>
       <div class="step-item">
         <div class="step-num">4</div>
-        <div class="step-text"><strong>Etapa 4 (Prescrição Segura CDSS 4D):</strong> Selecione os MIPs recomendados. O motor valida interações em tempo real.</div>
+        <div class="step-text"><strong>Etapa 4 (Prescrição Segura CDSS 4D &amp; PLN):</strong> Prescreva os MIPs sugeridos e use a busca inteligente por fórmulas DCB, xaropes e queixas leigas. O motor valida interações em tempo real.</div>
       </div>
       <div class="step-item">
         <div class="step-num">5</div>
-        <div class="step-text"><strong>Etapa 5 (Conclusão, DSF &amp; Venda):</strong> Emita a DSF em PDF, envie no WhatsApp e clique em <strong>"🛒 Finalizar Venda no Caixa"</strong>.</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- EXEMPLO 1 -->
-  <div class="example-box">
-    <div class="example-badge"><i class="fa-solid fa-circle-check"></i> Exemplo Prático 1: Atendimento Clínico com Venda Direta</div>
-    <div class="example-title">Cenário: Cliente "Dona Carmem" com Sintomas Gripais e Alergia a Dipirona</div>
-    <div class="steps-list">
-      <div class="step-item">
-        <div class="step-num">1</div>
-        <div class="step-text">Na <strong>Etapa 1</strong>, busque "Carmem" e selecione seu cadastro. O sistema alerta imediatamente: <span style="color:#ef4444; font-weight:700;">⚠️ Alergia a Dipirona</span>.</div>
-      </div>
-      <div class="step-item">
-        <div class="step-num">2</div>
-        <div class="step-text">Na <strong>Etapa 2</strong>, clique no card <em>"Gripe, Resfriado e Congestão"</em>, coloque <em>2 dias</em> e intensidade <em>Moderada</em>.</div>
-      </div>
-      <div class="step-item">
-        <div class="step-num">3</div>
-        <div class="step-text">Na <strong>Etapa 3</strong>, confirme a ausência de febre alta persistente ou falta de ar (Sem Red Flags).</div>
-      </div>
-      <div class="step-item">
-        <div class="step-num">4</div>
-        <div class="step-text">Na <strong>Etapa 4</strong>, selecione <em>Paracetamol 750mg</em> + <em>Soro Fisiológico 0.9% para Lavagem Nasal</em>. O motor CDSS aprova a segurança da fórmula.</div>
-      </div>
-      <div class="step-item">
-        <div class="step-num">5</div>
-        <div class="step-text">Na <strong>Etapa 5</strong>, clique no botão verde <strong>"🛒 Finalizar Venda no Caixa"</strong>. O sistema abre o PDV com os medicamentos, calcula o total (R$ 23,40), recebe via PIX e dá baixa no estoque.</div>
+        <div class="step-text"><strong>Etapa 5 (Conclusão, DSF &amp; Venda Direta):</strong> Emita a Declaração de Serviço Farmacêutico (DSF) com QR Code, envie pelo WhatsApp e clique em <strong>"🛒 Finalizar Venda no Caixa"</strong> para faturar no PDV.</div>
       </div>
     </div>
   </div>
@@ -535,6 +507,80 @@ async function generateCompleteUserManualPDF() {
   <div class="footer-page">
     <div>CRM Clínico Farmacêutico &bull; Manual do Usuário v3.0</div>
     <div>Página 3</div>
+  </div>
+
+  <div class="page-break"></div>
+
+  <!-- PÁGINA 4: CAPÍTULO DEDICADO À SIMULAÇÃO CLÍNICA PASSO A PASSO -->
+  <div class="tab-header" style="background: linear-gradient(135deg, #042f2e, #0f172a); border-left: 4px solid #14b8a6;">
+    <h2 class="tab-title" style="color: #2dd4bf;"><i class="fa-solid fa-graduation-cap"></i> Guia Prático de Simulação Clínica Real</h2>
+    <span class="tab-tag" style="background: #0d9488; color: #fff;">Caso Prático Balcão</span>
+  </div>
+
+  <div class="example-box" style="margin-top: 4px; border: 2px solid #0d9488; background: #f0fdfa;">
+    <div class="example-badge" style="background: #0d9488; color: #fff; font-size: 11.5px;">
+      <i class="fa-solid fa-notes-medical"></i> Caso Clínico: Paciente com Cefaleia, Astenia (Moleza no Corpo) e Inapetência há 2 Dias
+    </div>
+    <div class="example-title" style="color: #0f766e; margin-top: 6px;">
+      Simulação Completa da Chegada ao Caixa com Registro no Prontuário e Baixa de Estoque
+    </div>
+
+    <div class="steps-list" style="margin-top: 8px;">
+      <div class="step-item">
+        <div class="step-num" style="background: #0d9488;">1</div>
+        <div class="step-text">
+          <strong>Etapa 1 — Seleção e Identificação Imediata:</strong>
+          Na tela inicial do balcão, localize a paciente (ex: <em>Dona Carmem Silva Silveira</em>) e dê 1 clique no card. O sistema emite um <em>bip de confirmação</em>, carrega o histórico e avança instantaneamente para a Etapa 2.
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-num" style="background: #0d9488;">2</div>
+        <div class="step-text">
+          <strong>Etapa 2 — Registro Estruturado SOAP:</strong>
+          Clique no protocolo <em>"Gripe, Resfriado e Sintomas Sistêmicos"</em> (ou <em>Cefaleia Tensional</em>). Ajuste o tempo de evolução para <strong>2 dias</strong> e a intensidade para <strong>🟡 Leve a Moderado</strong>. Clique em <em>[Checar Sinais de Alerta ➔]</em>.
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-num" style="background: #0d9488;">3</div>
+        <div class="step-text">
+          <strong>Etapa 3 — Checagem de Red Flags (Segurança CFF):</strong>
+          O farmacêutico confere se a paciente tem falta de ar, dor torácica ou febre > 39°C persistente. Como a paciente está estável, <strong>deixe as caixas desmarcadas</strong> (sinal verde ativo) e clique em <em>[Avançar para Prescrição &amp; Cruzamento ➔]</em>.
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-num" style="background: #0d9488;">4</div>
+        <div class="step-text">
+          <strong>Etapa 4 — Prescrição Segura &amp; Busca Inteligente por PLN:</strong>
+          <ul>
+            <li>Clique em <strong>[+ Prescrever]</strong> ao lado de <em>Paracetamol 750mg</em> (analgésico seguro para a dor e febre).</li>
+            <li>No campo de <strong>Busca Dinâmica PLN</strong>, digite <code>soro</code> e prescreva <em>Sais para Reidratação Oral</em> para repor eletrólitos e combater a fraqueza.</li>
+            <li>Se o paciente pedir um expectorante, digite <code>xarope</code> para listar <em>Dropropizina, Acebrofilina, Guaifenesina e Hedera Helix</em>.</li>
+            <li>O painel CDSS 4D à direita atesta: <strong style="color:#059669;">✓ Nenhuma Incompatibilidade Crítica Detectada</strong>.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="step-item">
+        <div class="step-num" style="background: #0d9488;">5</div>
+        <div class="step-text">
+          <strong>Etapa 5 — Conclusão, Emissão da DSF Oficial &amp; Venda no PDV:</strong>
+          <ul>
+            <li>Clique em <strong>[Concluir &amp; Gerar Declaração Farmacêutica ➔]</strong>.</li>
+            <li>O sistema gera a <strong>Declaração de Serviço Farmacêutico (DSF)</strong> oficial com as condutas não-medicamentosas (repouso, hidratação de 2 a 3L de água/dia) e QR Code.</li>
+            <li>Dispare a receita para o WhatsApp da paciente com 1 clique no botão <strong>📲 WhatsApp</strong>.</li>
+            <li>Clique no botão verde <strong>[🛒 Finalizar Venda no Caixa]</strong>: a Frente de Caixa (PDV Rápido) abre com o Paracetamol e os Sais já no carrinho (Total: R$ 17,90), dá baixa no lote e registra no DRE financeiro!</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-page">
+    <div>CRM Clínico Farmacêutico &bull; Manual do Usuário v3.0</div>
+    <div>Página 4</div>
   </div>
 
   <div class="page-break"></div>
@@ -611,12 +657,12 @@ async function generateCompleteUserManualPDF() {
 
   <div class="footer-page">
     <div>CRM Clínico Farmacêutico &bull; Manual do Usuário v3.0</div>
-    <div>Página 4</div>
+    <div>Página 5</div>
   </div>
 
   <div class="page-break"></div>
 
-  <!-- PÁGINA 5: ABA ESTOQUE (LANÇAMENTO DE MEDICAMENTOS, BARCODE E NF-E) -->
+  <!-- PÁGINA 6: ABA ESTOQUE (LANÇAMENTO DE MEDICAMENTOS, BARCODE E NF-E) -->
   <div class="tab-header">
     <h2 class="tab-title"><i class="fa-solid fa-boxes-stacked"></i> Aba 4: Estoque Central &amp; Entrada de Mercadorias</h2>
     <span class="tab-tag">Logística &amp; Lotes</span>
@@ -670,12 +716,12 @@ async function generateCompleteUserManualPDF() {
 
   <div class="footer-page">
     <div>CRM Clínico Farmacêutico &bull; Manual do Usuário v3.0</div>
-    <div>Página 5</div>
+    <div>Página 6</div>
   </div>
 
   <div class="page-break"></div>
 
-  <!-- PÁGINA 6: ABA FINANCEIRO (ABAS NEON, BOTÕES [+] E DRE) -->
+  <!-- PÁGINA 7: ABA FINANCEIRO (ABAS NEON, BOTÕES [+] E DRE) -->
   <div class="tab-header">
     <h2 class="tab-title"><i class="fa-solid fa-sack-dollar"></i> Aba 5: Gestão Financeira com Abas Neon &amp; DRE</h2>
     <span class="tab-tag">Controladoria &amp; Caixa</span>
@@ -733,12 +779,12 @@ async function generateCompleteUserManualPDF() {
 
   <div class="footer-page">
     <div>CRM Clínico Farmacêutico &bull; Manual do Usuário v3.0</div>
-    <div>Página 6</div>
+    <div>Página 7</div>
   </div>
 
   <div class="page-break"></div>
 
-  <!-- PÁGINA 7: ABA CONFIGURAÇÕES (7 AGRUPAMENTOS E HARD RESET SEGURO) -->
+  <!-- PÁGINA 8: ABA CONFIGURAÇÕES (7 AGRUPAMENTOS E HARD RESET SEGURO) -->
   <div class="tab-header">
     <h2 class="tab-title"><i class="fa-solid fa-sliders"></i> Aba 7: Central de Configurações em 7 Agrupamentos</h2>
     <span class="tab-tag">Administração &amp; Nuvem</span>
@@ -820,7 +866,7 @@ async function generateCompleteUserManualPDF() {
 
   <div class="footer-page">
     <div>CRM Clínico Farmacêutico &bull; Manual do Usuário v3.0</div>
-    <div>Página 7</div>
+    <div>Página 8</div>
   </div>
 
 </body>
