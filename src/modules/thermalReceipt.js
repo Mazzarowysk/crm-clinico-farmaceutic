@@ -273,6 +273,159 @@ function openReceiptPreviewModal(receiptHtml, saleData, widthPx) {
   });
 }
 
+// MODAL DE DETALHES COMPLETOS DA VENDA & REEMISSÃO DE CUPOM
+export function openSaleDetailsModal(saleOrTransaction) {
+  if (!saleOrTransaction) return;
+
+  let sale = saleOrTransaction;
+  const allSales = localDB.list('sales') || [];
+
+  if (typeof saleOrTransaction === 'string') {
+    const fin = (localDB.list('financial_transactions') || []).find(t => t.id === saleOrTransaction);
+    if (fin) {
+      const protoMatch = fin.description?.match(/#VD-\d+/)?.[0]?.replace('#', '');
+      sale = allSales.find(s => s.protocol === protoMatch || s.id === protoMatch) || {
+        protocol: protoMatch || fin.id,
+        clientName: fin.clientOrSupplier || 'Consumidor',
+        totalSale: fin.amount,
+        paymentMethod: fin.paymentMethod || 'Dinheiro',
+        description: fin.description,
+        items: [{ product: { name: fin.description.replace(/Venda #VD-\d+ — /, '') }, quantity: 1, unitPrice: fin.amount, subtotal: fin.amount }],
+        created_at: fin.date || new Date().toISOString()
+      };
+    }
+  }
+
+  if (sale.protocol) {
+    const matchedSale = allSales.find(s => s.protocol === sale.protocol || s.id === sale.protocol);
+    if (matchedSale) sale = matchedSale;
+  }
+
+  const existing = document.getElementById('sale-details-modal');
+  if (existing) existing.remove();
+
+  const totalFormatted = (parseFloat(sale.totalSale || sale.amount || 0)).toFixed(2).replace('.', ',');
+  const items = sale.items || [];
+
+  const modal = document.createElement('div');
+  modal.id = 'sale-details-modal';
+  modal.className = 'pep-modal';
+  modal.style.cssText = `
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(10, 15, 29, 0.92); backdrop-filter: blur(16px);
+    display: flex; justify-content: center; align-items: center; z-index: 10006; padding: 16px;
+  `;
+
+  modal.innerHTML = `
+    <div style="width: 100%; max-width: 560px; max-height: 92vh; display: flex; flex-direction: column; background: #0f172a; border: 1.5px solid rgba(56, 189, 248, 0.5); border-radius: 20px; padding: 22px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); overflow: hidden;">
+      
+      <!-- Cabeçalho -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(56, 189, 248, 0.2); border: 1px solid rgba(56, 189, 248, 0.4); display: flex; align-items: center; justify-content: center; color: #38bdf8; font-size: 1.2rem;">
+            <i class="fa-solid fa-receipt"></i>
+          </div>
+          <div>
+            <h3 style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.2rem; color: #fff; font-weight: 700;">
+              Detalhes da Venda &amp; Reemissão
+            </h3>
+            <div style="font-size: 0.78rem; color: #94a3b8;">
+              Protocolo <strong style="color: #38bdf8;">#${sale.protocol || sale.id || 'VD'}</strong> &bull; ${new Date(sale.created_at || sale.date || Date.now()).toLocaleString('pt-BR')}
+            </div>
+          </div>
+        </div>
+        <button id="btn-close-sale-details" style="background: none; border: none; color: #94a3b8; font-size: 1.3rem; cursor: pointer; padding: 4px;">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Informações Principais -->
+      <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px; margin-bottom: 14px; font-size: 0.84rem; color: #cbd5e1;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+          <span>Cliente:</span>
+          <strong style="color: #fff;">${sale.clientName || sale.clientOrSupplier || 'Consumidor Balcão'}</strong>
+        </div>
+        ${sale.clientCpf ? `<div style="display: flex; justify-content: space-between; margin-bottom: 6px;"><span>CPF:</span><span>${sale.clientCpf}</span></div>` : ''}
+        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+          <span>Forma de Pagamento:</span>
+          <strong style="color: #34d399;">${sale.paymentMethod || 'Dinheiro'}</strong>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span>Operador:</span>
+          <span>${sale.operatorName || 'Farmacêutico Responsável'}</span>
+        </div>
+      </div>
+
+      <!-- Itens Dispensados -->
+      <div style="flex: 1; overflow-y: auto; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 12px; margin-bottom: 14px;">
+        <div style="font-size: 0.76rem; color: #94a3b8; text-transform: uppercase; font-weight: 700; margin-bottom: 8px;">Itens Adquiridos (${items.length}):</div>
+        ${items.length === 0 ? `
+          <div style="color: #cbd5e1; font-size: 0.82rem;">${sale.description || 'Medicamentos e produtos de balcão'}</div>
+        ` : items.map((it, idx) => `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px dashed rgba(255,255,255,0.08); font-size: 0.82rem;">
+            <div>
+              <strong style="color: #f8fafc;">${idx + 1}. ${it.product?.name || it.name || 'Produto'}</strong>
+              <div style="font-size: 0.72rem; color: #94a3b8;">${it.quantity || 1} un x R$ ${(parseFloat(it.unitPrice || it.total_price || 0)).toFixed(2).replace('.', ',')}</div>
+            </div>
+            <strong style="color: #34d399;">R$ ${(parseFloat(it.subtotal || it.total_price || it.unitPrice || 0)).toFixed(2).replace('.', ',')}</strong>
+          </div>
+        `).join('')}
+      </div>
+
+      <!-- Total -->
+      <div style="display: flex; justify-content: space-between; align-items: baseline; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; padding: 10px 14px; margin-bottom: 16px;">
+        <span style="color: #f8fafc; font-weight: 700; font-size: 0.95rem;">TOTAL DA VENDA:</span>
+        <span style="font-size: 1.45rem; font-weight: 800; color: #34d399; font-family: 'Outfit';">R$ ${totalFormatted}</span>
+      </div>
+
+      <!-- Ações de Reemissão -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+        <button type="button" id="btn-reemit-receipt-80mm" class="btn" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 0.84rem; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer;">
+          <i class="fa-solid fa-print"></i> Reemitir Cupom (80mm)
+        </button>
+        <button type="button" id="btn-reemit-receipt-58mm" class="btn" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; padding: 10px; border-radius: 8px; font-weight: 600; font-size: 0.84rem; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer;">
+          <i class="fa-solid fa-receipt"></i> Mini Cupom (58mm)
+        </button>
+      </div>
+
+      <button type="button" id="btn-reemit-whatsapp" class="btn" style="margin-top: 8px; background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 0.86rem; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer;">
+        <i class="fa-brands fa-whatsapp"></i> Reenviar Comprovante via WhatsApp
+      </button>
+
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  document.getElementById('btn-close-sale-details')?.addEventListener('click', () => modal.remove());
+
+  document.getElementById('btn-reemit-receipt-80mm')?.addEventListener('click', () => {
+    printThermalReceipt(sale, '80mm');
+  });
+
+  document.getElementById('btn-reemit-receipt-58mm')?.addEventListener('click', () => {
+    printThermalReceipt(sale, '58mm');
+  });
+
+  document.getElementById('btn-reemit-whatsapp')?.addEventListener('click', () => {
+    const text = generateWhatsAppSaleText(sale);
+    const phone = (sale.clientPhone || '').replace(/\D/g, '');
+    const url = phone.length >= 10 
+      ? `https://wa.me/55${phone}?text=${encodeURIComponent(text)}`
+      : `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(url, '_blank');
+  });
+}
+
+// Exportações Globais
+if (typeof window !== 'undefined') {
+  window.openSaleDetailsModal = openSaleDetailsModal;
+  window.reprintSaleReceiptFromFin = function(id) {
+    openSaleDetailsModal(id);
+  };
+}
+
+
 // Gera mensagem formatada para envio do comprovante por WhatsApp
 export function generateWhatsAppSaleText(saleData) {
   const saleId = saleData.protocol || `VD-${Date.now().toString().slice(-6)}`;

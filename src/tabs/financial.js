@@ -353,6 +353,9 @@ export function renderFinancialTab(contentArea) {
                     </td>
                     <td style="padding: 12px 18px; text-align: center;">
                       <div style="display: flex; gap: 6px; justify-content: center;">
+                        <button onclick="window.reprintSaleReceiptFromFin('${t.id}')" title="Ver Detalhes da Venda & Reemitir Cupom Térmico" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.35); color: #38bdf8; padding: 5px 8px; border-radius: 6px; cursor: pointer; font-size: 0.75rem; transition: 0.2s;">
+                          <i class="fa-solid fa-receipt"></i>
+                        </button>
                         ${!isPaid ? `
                           <button onclick="window.markTransactionAsPaid('${t.id}')" title="Marcar como Pago/Recebido" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.3); color: #34d399; padding: 5px 8px; border-radius: 6px; cursor: pointer; font-size: 0.75rem;">
                             <i class="fa-solid fa-check"></i>
