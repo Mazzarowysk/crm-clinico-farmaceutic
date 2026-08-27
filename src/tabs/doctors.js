@@ -27,6 +27,9 @@ async function renderDoctorsTab() {
         </div>
 
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <button id="btn-open-doctor-simulation" class="btn" style="background: linear-gradient(135deg, rgba(147, 51, 234, 0.2), rgba(99, 102, 241, 0.25)); color: #c084fc; border: 1px solid rgba(192, 132, 252, 0.4); padding: 10px 20px; font-size: 0.88rem; font-weight: 700; border-radius: 10px; cursor: pointer; transition: all 0.2s; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(139, 92, 246, 0.25);" onclick="window.openDoctorSimulationModal()">
+            <i class="fa-solid fa-wand-magic-sparkles"></i> Simulação de Atendimento Clínico
+          </button>
           <button id="btn-open-duty-modal" class="btn" style="background: rgba(59,130,246,0.15); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); padding: 10px 20px; font-size: 0.88rem; font-weight: 600; border-radius: 10px; cursor: pointer; transition: all 0.2s;" onclick="window.openDutyScheduleModal()">
             <i class="fa-solid fa-calendar-days" style="margin-right: 6px;"></i> Escala de Plantão
           </button>
@@ -2846,9 +2849,9 @@ window.movePatientSectorFromHistory = function(hospId, patientId, patientName) {
     document.getElementById('history-move-modal-content')?.remove();
   };
 
-  document.getElementById('history-move-close-btn').addEventListener('click', cleanup);
-  document.getElementById('history-move-cancel').addEventListener('click', cleanup);
-  document.getElementById('history-move-confirm').addEventListener('click', () => {
+  document.getElementById('history-move-close-btn')?.addEventListener('click', cleanup);
+  document.getElementById('history-move-cancel')?.addEventListener('click', cleanup);
+  document.getElementById('history-move-confirm')?.addEventListener('click', () => {
     const newSector = document.getElementById('history-new-sector-select').value;
     const db = typeof localDB !== 'undefined' ? localDB : window.localDB;
     if (db) {
