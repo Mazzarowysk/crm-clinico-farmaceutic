@@ -197,7 +197,7 @@ export function openPatientPurchasesModal(patientId, patientName = 'Cliente') {
                     </div>
                     
                     <div style="display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px;">
-                      <button type="button" class="btn-print-purchase-receipt" data-purch-id="${pur.id}" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.35); color: #38bdf8; font-size: 0.74rem; font-weight: 700; padding: 5px 12px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: 0.2s;">
+                      <button type="button" class="btn-print-purchase-receipt" data-purch-id="${pur.id}" data-med="${pur.product_name}" data-price="${pur.total_price || pur.unit_price || 0}" data-qty="${pur.quantity || 1}" data-batch="${pur.batch || 'L-DISP'}" data-resp="${pur.pharmacist_name || 'Farmacêutico Responsável'}" data-proto="${pur.attendance_id || ''}" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.35); color: #38bdf8; font-size: 0.74rem; font-weight: 700; padding: 5px 12px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: 0.2s;">
                         <i class="fa-solid fa-receipt"></i> Emitir Cupom Térmico (80mm)
                       </button>
                     </div>
@@ -223,31 +223,40 @@ export function openPatientPurchasesModal(patientId, patientName = 'Cliente') {
 
     // Listener para Emitir Cupom Térmico da Compra
     modal.querySelectorAll('.btn-print-purchase-receipt').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
         const purchId = btn.getAttribute('data-purch-id');
-        const purchase = allPurchases.find(p => String(p.id) === String(purchId));
-        if (purchase) {
-          const saleData = {
-            protocol: purchase.attendance_id || `VD-${(purchase.id || '').slice(-6)}`,
-            clientName: pName,
-            clientCpf: patient.cpf || '',
-            items: [
-              {
-                product: { name: purchase.product_name, ean: '' },
-                quantity: purchase.quantity || 1,
-                unitPrice: purchase.unit_price || purchase.total_price || 0,
-                subtotal: purchase.total_price || purchase.unit_price || 0
-              }
-            ],
-            subtotalGross: purchase.total_price || purchase.unit_price || 0,
-            discount: 0,
-            totalSale: purchase.total_price || purchase.unit_price || 0,
-            paymentMethod: 'Balcão / Caixa',
-            operatorName: purchase.pharmacist_name || 'Farmacêutico Responsável',
-            created_at: purchase.created_at || new Date().toISOString()
-          };
-          printThermalReceipt(saleData, '80mm');
-        }
+        const medName = btn.getAttribute('data-med') || 'Medicamento';
+        const price = parseFloat(btn.getAttribute('data-price') || 0);
+        const qty = parseInt(btn.getAttribute('data-qty') || 1, 10);
+        const batch = btn.getAttribute('data-batch') || 'L-DISP';
+        const resp = btn.getAttribute('data-resp') || 'Farmacêutico Responsável';
+        const proto = btn.getAttribute('data-proto') || `VD-${Math.floor(100000 + Math.random()*900000)}`;
+
+        const purchase = allPurchases.find(p => String(p.id) === String(purchId)) || {};
+
+        const saleData = {
+          protocol: purchase.attendance_id || proto,
+          clientName: pName,
+          clientCpf: patient.cpf || '',
+          items: [
+            {
+              product: { name: purchase.product_name || medName, ean: '', batch: purchase.batch || batch },
+              quantity: purchase.quantity || qty,
+              unitPrice: purchase.unit_price || price,
+              subtotal: purchase.total_price || (qty * price) || price
+            }
+          ],
+          subtotalGross: purchase.total_price || (qty * price) || price,
+          discount: 0,
+          totalSale: purchase.total_price || (qty * price) || price,
+          paymentMethod: 'Balcão / Caixa',
+          operatorName: purchase.pharmacist_name || resp,
+          created_at: purchase.created_at || new Date().toISOString()
+        };
+
+        showToast('🖨️ Abrindo Cupom Térmico...');
+        printThermalReceipt(saleData, '80mm');
       });
     });
 

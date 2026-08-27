@@ -218,9 +218,11 @@ function openReceiptPreviewModal(receiptHtml, saleData, widthPx) {
   modal.id = 'thermal-receipt-preview-modal';
   modal.className = 'pep-modal';
   modal.style.cssText = `
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(10, 15, 29, 0.92); backdrop-filter: blur(16px);
-    display: flex; justify-content: center; align-items: center; z-index: 10005; padding: 16px;
+    position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+    background: rgba(10, 15, 29, 0.94) !important; backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    display: flex !important; justify-content: center !important; align-items: center !important;
+    z-index: 999999 !important; padding: 16px !important; box-sizing: border-box !important;
   `;
 
   modal.innerHTML = `
@@ -311,9 +313,11 @@ export function openSaleDetailsModal(saleOrTransaction) {
   modal.id = 'sale-details-modal';
   modal.className = 'pep-modal';
   modal.style.cssText = `
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(10, 15, 29, 0.92); backdrop-filter: blur(16px);
-    display: flex; justify-content: center; align-items: center; z-index: 10006; padding: 16px;
+    position: fixed !important; top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+    background: rgba(10, 15, 29, 0.94) !important; backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+    display: flex !important; justify-content: center !important; align-items: center !important;
+    z-index: 999999 !important; padding: 16px !important; box-sizing: border-box !important;
   `;
 
   modal.innerHTML = `
