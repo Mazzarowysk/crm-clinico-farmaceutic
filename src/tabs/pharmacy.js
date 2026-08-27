@@ -611,9 +611,12 @@ function renderBalcaoStepContent(step, patient, allPatients, activeMeds) {
               Atendimento registrado com sucesso no prontuário longitudinal do paciente.
             </p>
           </div>
-          <div style="display: flex; gap: 10px;">
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <button type="button" id="btn-open-checkout-step5" class="btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4); cursor: pointer;">
+              <i class="fa-solid fa-cash-register"></i> Finalizar Venda no Caixa
+            </button>
             <button type="button" id="btn-print-declaration" class="btn btn-secondary" style="background: rgba(30, 41, 59, 0.6); color: #38bdf8; font-weight: 600;">
-              <i class="fa-solid fa-print"></i> Imprimir Declaração
+              <i class="fa-solid fa-print"></i> Imprimir DSF (PDF)
             </button>
             <button type="button" id="btn-send-whatsapp-declaration" class="btn btn-secondary" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4); font-weight: 600;">
               <i class="fa-brands fa-whatsapp"></i> Enviar via WhatsApp
@@ -926,6 +929,18 @@ function setupBalcaoStepListeners(step, allPatients) {
   }
 
   if (step === 5) {
+    document.getElementById('btn-open-checkout-step5')?.addEventListener('click', () => {
+      if (typeof openQuickCheckoutModal === 'function') {
+        openQuickCheckoutModal(() => {
+          showToast('🛒 Venda concluída e faturada no caixa!');
+        });
+      } else if (window.openQuickCheckoutModal) {
+        window.openQuickCheckoutModal(() => {
+          showToast('🛒 Venda concluída e faturada no caixa!');
+        });
+      }
+    });
+
     document.getElementById('btn-print-declaration')?.addEventListener('click', () => {
       window.print();
     });
