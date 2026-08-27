@@ -143,9 +143,9 @@ export function printThermalReceipt(saleData, paperWidth = '80mm') {
   triggerPrintDocument(receiptBodyHtml, `Cupom_${saleId}`, paperWidth);
 }
 
-// Dispara o comando de impressão de forma confiável
-function triggerPrintDocument(receiptHtml, title = 'Cupom', paperWidth = '80mm') {
-  const printWindow = window.open('', '_blank', 'width=420,height=650');
+// Dispara o comando de impressão de forma confiável com barra de ferramentas
+function triggerPrintDocument(receiptHtml, title = 'Cupom', paperWidth = '80mm', saleData = null) {
+  const printWindow = window.open('', '_blank', 'width=460,height=680');
   if (printWindow) {
     printWindow.document.open();
     printWindow.document.write(`
@@ -156,62 +156,185 @@ function triggerPrintDocument(receiptHtml, title = 'Cupom', paperWidth = '80mm')
         <title>${title}</title>
         <style>
           @page { margin: 0; size: ${paperWidth} auto; }
-          body { margin: 0; padding: 0; background: #fff; font-family: 'Courier New', Courier, monospace; }
+          body { margin: 0; padding: 0; background: #334155; font-family: 'Courier New', Courier, monospace; display: flex; flex-direction: column; align-items: center; }
+          .receipt-container { background: #fff; box-shadow: 0 4px 14px rgba(0,0,0,0.3); margin: 15px 0; border-radius: 4px; }
+          @media print {
+            body { background: #fff; }
+            .no-print { display: none !important; }
+            .receipt-container { box-shadow: none; margin: 0; }
+          }
         </style>
       </head>
       <body>
-        ${receiptHtml}
+        <div class="no-print" style="position: sticky; top: 0; width: 100%; background: #0f172a; padding: 10px 14px; border-bottom: 1px solid #334155; display: flex; justify-content: center; gap: 10px; z-index: 1000; box-sizing: border-box;">
+          <button onclick="window.print()" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 6px;">
+            🖨️ Imprimir
+          </button>
+          <button id="btn-popup-download-pdf" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 6px;">
+            📥 Baixar PDF
+          </button>
+          <button onclick="window.close()" style="background: #475569; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px;">
+            ✕ Fechar
+          </button>
+        </div>
+
+        <div class="receipt-container">
+          ${receiptHtml}
+        </div>
+
+        <script>
+          document.getElementById('btn-popup-download-pdf')?.addEventListener('click', () => {
+            if (window.opener && window.opener.exportThermalReceiptPDF) {
+              window.opener.exportThermalReceiptPDF(${JSON.stringify(saleData || {})}, '${paperWidth}');
+            } else {
+              window.print();
+            }
+          });
+        </script>
       </body>
       </html>
     `);
     printWindow.document.close();
     printWindow.focus();
-    setTimeout(() => {
-      try {
-        printWindow.print();
-      } catch(e) {
-        console.warn('Erro ao disparar printWindow.print():', e);
-      }
-    }, 300);
-  } else {
-    // Fallback via iframe com dimensões ativas
-    const iframe = document.createElement('iframe');
-    iframe.style.position = 'fixed';
-    iframe.style.right = '10px';
-    iframe.style.bottom = '10px';
-    iframe.style.width = '350px';
-    iframe.style.height = '500px';
-    iframe.style.border = 'none';
-    iframe.style.opacity = '0.01';
-    iframe.style.zIndex = '999999';
-    document.body.appendChild(iframe);
-
-    const doc = iframe.contentWindow.document;
-    doc.open();
-    doc.write(`
-      <!DOCTYPE html>
-      <html lang="pt-BR">
-      <head>
-        <meta charset="UTF-8">
-        <title>${title}</title>
-        <style>
-          @page { margin: 0; size: ${paperWidth} auto; }
-          body { margin: 0; padding: 0; background: #fff; }
-        </style>
-      </head>
-      <body>
-        ${receiptHtml}
-      </body>
-      </html>
-    `);
-    doc.close();
-
-    setTimeout(() => {
-      iframe.contentWindow.focus();
-      iframe.contentWindow.print();
-      setTimeout(() => iframe.remove(), 2500);
-    }, 350);
   }
+}
+
+// GERAÇÃO E DOWNLOAD DIRETO DO CUPOM EM ARQUIVO PDF
+export function exportThermalReceiptPDF(saleData, paperWidth = '80mm') {
+  if (!window.jspdf) {
+    showToast('⚠️ jsPDF não disponível.');
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const is58 = paperWidth === '58mm';
+  const widthMm = is58 ? 58 : 80;
+  
+  let settings = {};
+  try {
+    settings = localDB.get('settings', 'main') || localDB.getConfig() || {};
+  } catch(e) {
+    settings = localDB.getConfig ? localDB.getConfig() : {};
+  }
+
+  const pharmacyName = settings.clinic_name || settings.pharmacy_name || 'FARMÁCIA & CONSULTÓRIO CLÍNICO';
+  const cnpj = settings.cnpj || '00.000.000/0001-99';
+  const address = settings.address || 'Rua da Saúde, 100 - Centro';
+  const phone = settings.phone || '(11) 99999-0000';
+  const rtName = settings.rt_name || (state.user?.name ? `${state.user.name}` : 'Farmacêutico Responsável');
+  const crf = settings.rt_crf || 'CRF-SP 54180';
+
+  const saleId = saleData.protocol || `VD-${Date.now().toString().slice(-6)}`;
+  const dateStr = new Date(saleData.created_at || Date.now()).toLocaleString('pt-BR');
+  const clientName = saleData.clientName || 'Consumidor Balcão';
+  const clientCpf = saleData.clientCpf ? `CPF: ${saleData.clientCpf}` : '';
+  const operator = saleData.operatorName || (state.user?.name || 'Operador');
+
+  const items = saleData.items || [];
+  const estimatedHeight = Math.max(130, 95 + (items.length * 14));
+
+  const doc = new jsPDF({
+    orientation: 'portrait',
+    unit: 'mm',
+    format: [widthMm, estimatedHeight]
+  });
+
+  const center = widthMm / 2;
+  let y = 6;
+
+  // Cabeçalho
+  doc.setFont('courier', 'bold');
+  doc.setFontSize(is58 ? 8.5 : 10);
+  doc.text(pharmacyName.toUpperCase(), center, y, { align: 'center' });
+  y += 4;
+
+  doc.setFont('courier', 'normal');
+  doc.setFontSize(is58 ? 6.5 : 7.5);
+  doc.text(address, center, y, { align: 'center' });
+  y += 3.5;
+  doc.text(`CNPJ: ${cnpj} • Tel: ${phone}`, center, y, { align: 'center' });
+  y += 3.5;
+  doc.text(`RT: ${rtName} • ${crf}`, center, y, { align: 'center' });
+  y += 4;
+
+  doc.text('------------------------------------------------', center, y, { align: 'center' });
+  y += 3.5;
+
+  doc.setFont('courier', 'bold');
+  doc.setFontSize(is58 ? 7.5 : 8.5);
+  doc.text('COMPROVANTE DE DISPENSAÇÃO & VENDA', center, y, { align: 'center' });
+  y += 3;
+  doc.setFont('courier', 'normal');
+  doc.setFontSize(is58 ? 6 : 7);
+  doc.text('(DOCUMENTO AUXILIAR NÃO FISCAL)', center, y, { align: 'center' });
+  y += 3.5;
+
+  doc.text('------------------------------------------------', center, y, { align: 'center' });
+  y += 4;
+
+  doc.text(`Protocolo: #${saleId}`, 4, y);
+  doc.text(`${dateStr.split(' ')[0]}`, widthMm - 4, y, { align: 'right' });
+  y += 3.5;
+  doc.text(`Hora: ${dateStr.split(' ')[1] || ''}`, 4, y);
+  doc.text(`Op: ${operator.split(' ')[0]}`, widthMm - 4, y, { align: 'right' });
+  y += 3.5;
+  doc.text(`Cliente: ${clientName.slice(0, 24)}`, 4, y);
+  y += 3.5;
+  if (clientCpf) {
+    doc.text(clientCpf, 4, y);
+    y += 3.5;
+  }
+
+  doc.text('------------------------------------------------', center, y, { align: 'center' });
+  y += 4;
+
+  doc.setFont('courier', 'bold');
+  doc.text('ITENS DISPENSADOS / PRODUTOS:', 4, y);
+  y += 4;
+
+  doc.setFont('courier', 'normal');
+  items.forEach((it, i) => {
+    const name = it.product?.name || it.name || 'Produto';
+    const qty = it.quantity || 1;
+    const price = parseFloat(it.unitPrice || 0).toFixed(2).replace('.', ',');
+    const sub = parseFloat(it.subtotal || (qty * it.unitPrice)).toFixed(2).replace('.', ',');
+
+    doc.setFont('courier', 'bold');
+    doc.text(`${i + 1}. ${name.slice(0, 28)}`, 4, y);
+    y += 3.2;
+    doc.setFont('courier', 'normal');
+    doc.text(`   ${qty} un x R$ ${price}`, 4, y);
+    doc.text(`R$ ${sub}`, widthMm - 4, y, { align: 'right' });
+    y += 3.8;
+  });
+
+  doc.text('------------------------------------------------', center, y, { align: 'center' });
+  y += 4;
+
+  const totalNet = parseFloat(saleData.totalSale || 0).toFixed(2).replace('.', ',');
+  doc.setFont('courier', 'bold');
+  doc.setFontSize(is58 ? 9 : 10.5);
+  doc.text('TOTAL A PAGAR:', 4, y);
+  doc.text(`R$ ${totalNet}`, widthMm - 4, y, { align: 'right' });
+  y += 5;
+
+  doc.setFont('courier', 'normal');
+  doc.setFontSize(is58 ? 6.5 : 7.5);
+  doc.text(`Forma Pagto: ${saleData.paymentMethod || 'Dinheiro'}`, 4, y);
+  y += 4;
+
+  doc.text('------------------------------------------------', center, y, { align: 'center' });
+  y += 3.5;
+
+  doc.setFontSize(is58 ? 5.5 : 6.5);
+  doc.text('Promovendo o Uso Racional de Medicamentos.', center, y, { align: 'center' });
+  y += 3;
+  doc.text('Agradecemos a sua preferência!', center, y, { align: 'center' });
+  y += 3.5;
+  doc.text('CRM Clínico Farmacêutico v3.0', center, y, { align: 'center' });
+
+  doc.save(`cupom_venda_${saleId}.pdf`);
+  showToast(`📥 Cupom #${saleId} baixado com sucesso em PDF!`);
 }
 
 // Modal com Visualização Realista do Cupom na Tela
@@ -231,7 +354,7 @@ function openReceiptPreviewModal(receiptHtml, saleData, widthPx) {
   `;
 
   modal.innerHTML = `
-    <div style="width: 100%; max-width: 460px; max-height: 94vh; display: flex; flex-direction: column; background: #0f172a; border: 1.5px solid rgba(16, 185, 129, 0.5); border-radius: 20px; padding: 18px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); overflow: hidden;">
+    <div style="width: 100%; max-width: 480px; max-height: 94vh; display: flex; flex-direction: column; background: #0f172a; border: 1.5px solid rgba(16, 185, 129, 0.5); border-radius: 20px; padding: 18px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); overflow: hidden;">
       
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px;">
         <h4 style="margin: 0; color: #fff; font-family: 'Outfit', sans-serif; font-size: 1.15rem; font-weight: 700; display: flex; align-items: center; gap: 8px;">
@@ -250,11 +373,14 @@ function openReceiptPreviewModal(receiptHtml, saleData, widthPx) {
       </div>
 
       <!-- Botões de Ação -->
-      <div style="display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap;">
-        <button type="button" id="btn-reprint-receipt" class="btn" style="flex: 1; background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 0.86rem; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);">
-          <i class="fa-solid fa-print"></i> Imprimir Cupom
+      <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 14px;">
+        <button type="button" id="btn-reprint-receipt" class="btn" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border: none; padding: 10px 6px; border-radius: 8px; font-weight: 700; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 5px; cursor: pointer; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);">
+          <i class="fa-solid fa-print"></i> Imprimir
         </button>
-        <button type="button" id="btn-preview-whatsapp-receipt" class="btn" style="flex: 1; background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 0.86rem; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);">
+        <button type="button" id="btn-download-pdf-receipt" class="btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; padding: 10px 6px; border-radius: 8px; font-weight: 700; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 5px; cursor: pointer; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);">
+          <i class="fa-solid fa-file-pdf"></i> Baixar PDF
+        </button>
+        <button type="button" id="btn-preview-whatsapp-receipt" class="btn" style="background: linear-gradient(135deg, #22c55e, #16a34a); color: #fff; border: none; padding: 10px 6px; border-radius: 8px; font-weight: 700; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; gap: 5px; cursor: pointer;">
           <i class="fa-brands fa-whatsapp"></i> WhatsApp
         </button>
       </div>
@@ -267,7 +393,11 @@ function openReceiptPreviewModal(receiptHtml, saleData, widthPx) {
   document.getElementById('btn-close-receipt-preview')?.addEventListener('click', () => modal.remove());
 
   document.getElementById('btn-reprint-receipt')?.addEventListener('click', () => {
-    triggerPrintDocument(receiptHtml, `Cupom_${saleData.protocol || 'VD'}`, widthPx.includes('230') ? '58mm' : '80mm');
+    triggerPrintDocument(receiptHtml, `Cupom_${saleData.protocol || 'VD'}`, widthPx.includes('230') ? '58mm' : '80mm', saleData);
+  });
+
+  document.getElementById('btn-download-pdf-receipt')?.addEventListener('click', () => {
+    exportThermalReceiptPDF(saleData, widthPx.includes('230') ? '58mm' : '80mm');
   });
 
   document.getElementById('btn-preview-whatsapp-receipt')?.addEventListener('click', () => {
@@ -429,6 +559,7 @@ export function openSaleDetailsModal(saleOrTransaction) {
 // Exportações Globais
 if (typeof window !== 'undefined') {
   window.printThermalReceipt = printThermalReceipt;
+  window.exportThermalReceiptPDF = exportThermalReceiptPDF;
   window.openSaleDetailsModal = openSaleDetailsModal;
   window.reprintSaleReceiptFromFin = function(id) {
     openSaleDetailsModal(id);
