@@ -423,6 +423,7 @@ export function openSaleDetailsModal(saleOrTransaction) {
 
 // Exportações Globais
 if (typeof window !== 'undefined') {
+  window.printThermalReceipt = printThermalReceipt;
   window.openSaleDetailsModal = openSaleDetailsModal;
   window.reprintSaleReceiptFromFin = function(id) {
     openSaleDetailsModal(id);
