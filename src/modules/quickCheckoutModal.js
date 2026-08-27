@@ -9,7 +9,7 @@ import { playBeepSound, openCameraBarcodeScanner } from './barcodeScanner.js';
 import { printThermalReceipt, generateWhatsAppSaleText } from './thermalReceipt.js';
 import { getActiveCashRegister, openCashRegisterModal } from './cashRegister.js';
 
-export function openQuickCheckoutModal(onFinished = null) {
+export function openQuickCheckoutModal(onFinished = null, initialData = null) {
   const existing = document.getElementById('quick-checkout-modal');
   if (existing) existing.remove();
 
@@ -516,6 +516,65 @@ export function openQuickCheckoutModal(onFinished = null) {
 
   // Render inicial do painel de pagamento
   renderPaymentPanel();
+
+  // Pré-carregamento de dados iniciais (Paciente e Medicamentos Prescritos na Triagem/Balcão)
+  if (initialData) {
+    if (initialData.patient) {
+      const patientSelect = document.getElementById('checkout-patient-select');
+      if (patientSelect) {
+        const pId = initialData.patient.id;
+        let opt = Array.from(patientSelect.options).find(o => o.value === pId || (initialData.patient.cpf && o.dataset.cpf === initialData.patient.cpf));
+        if (!opt) {
+          const newOpt = document.createElement('option');
+          newOpt.value = initialData.patient.id || 'PAT-BALCAO';
+          newOpt.textContent = `${initialData.patient.name || initialData.patient.fullName} (CPF: ${initialData.patient.cpf || 'N/A'})`;
+          newOpt.dataset.phone = initialData.patient.phone || '';
+          newOpt.dataset.cpf = initialData.patient.cpf || '';
+          patientSelect.appendChild(newOpt);
+          patientSelect.value = newOpt.value;
+        } else {
+          patientSelect.value = opt.value;
+        }
+      }
+    }
+
+    if (initialData.items && Array.isArray(initialData.items) && initialData.items.length > 0) {
+      const allProds = localDB.list('products') || [];
+      initialData.items.forEach(it => {
+        const medName = typeof it === 'string' ? it : (it.name || it.productName || 'Medicamento');
+        const matched = allProds.find(p => 
+          (p.name && p.name.toLowerCase().includes(medName.toLowerCase())) ||
+          (medName && p.name && medName.toLowerCase().includes(p.name.toLowerCase()))
+        );
+
+        if (matched) {
+          cart.push({
+            product: matched,
+            quantity: 1,
+            unitPrice: parseFloat(matched.sale_price || 12.00),
+            subtotal: parseFloat(matched.sale_price || 12.00)
+          });
+        } else {
+          const fallbackPrice = medName.toLowerCase().includes('soro') || medName.toLowerCase().includes('reidrat') ? 5.90 : 12.00;
+          const fallbackProd = {
+            id: `PROD-RX-${Date.now()}-${Math.floor(Math.random()*1000)}`,
+            name: medName,
+            sale_price: fallbackPrice,
+            current_stock: 50,
+            batch: 'L-DISP-2026',
+            ean: '7891000' + Math.floor(Math.random()*1000000)
+          };
+          cart.push({
+            product: fallbackProd,
+            quantity: 1,
+            unitPrice: fallbackPrice,
+            subtotal: fallbackPrice
+          });
+        }
+      });
+      updateCartView();
+    }
+  }
 
   // Finalizar Venda & Abrir Modal de Cupom Térmico
   document.getElementById('btn-finish-pdv-sale')?.addEventListener('click', () => {

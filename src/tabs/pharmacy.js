@@ -116,10 +116,15 @@ export async function renderPharmacyTab() {
   document.getElementById('btn-quick-new-patient')?.addEventListener('click', openAddClinicalPatientModal);
 
   document.getElementById('btn-quick-checkout-pharm')?.addEventListener('click', () => {
+    const checkoutData = currentClinicalEncounter.patient ? {
+      patient: currentClinicalEncounter.patient,
+      items: currentClinicalEncounter.prescribedMIPs || []
+    } : null;
+
     openQuickCheckoutModal(() => {
       loadPharmacyData();
       renderCurrentSubTab();
-    });
+    }, checkoutData);
   });
 
   // Carregar dados de estoque e renderizar a sub-aba ativa
@@ -980,14 +985,21 @@ function setupBalcaoStepListeners(step, allPatients) {
 
   if (step === 5) {
     document.getElementById('btn-open-checkout-step5')?.addEventListener('click', () => {
+      const checkoutData = {
+        patient: currentClinicalEncounter.patient,
+        items: (currentClinicalEncounter.prescribedMIPs || []).length > 0 
+          ? currentClinicalEncounter.prescribedMIPs 
+          : [{ name: 'Paracetamol 750mg', indication: 'Cefaleia/Febre', posology: '1 cp 6/6h' }, { name: 'Sais para Reidratação Oral', indication: 'Reidratação', posology: '1 sachê em 1L de água' }]
+      };
+      
       if (typeof openQuickCheckoutModal === 'function') {
         openQuickCheckoutModal(() => {
           showToast('🛒 Venda concluída e faturada no caixa!');
-        });
+        }, checkoutData);
       } else if (window.openQuickCheckoutModal) {
         window.openQuickCheckoutModal(() => {
           showToast('🛒 Venda concluída e faturada no caixa!');
-        });
+        }, checkoutData);
       }
     });
 
