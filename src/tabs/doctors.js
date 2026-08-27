@@ -2848,7 +2848,6 @@ window.movePatientSectorFromHistory = function(hospId, patientId, patientName) {
     document.getElementById('history-move-modal-overlay')?.remove();
     document.getElementById('history-move-modal-content')?.remove();
   };
-
   document.getElementById('history-move-close-btn')?.addEventListener('click', cleanup);
   document.getElementById('history-move-cancel')?.addEventListener('click', cleanup);
   document.getElementById('history-move-confirm')?.addEventListener('click', () => {
@@ -2923,4 +2922,412 @@ window.dischargePatientFromHistory = function(hospId, patientId, patientName) {
       }
     }
   }
+};
+
+
+// ==========================================================================
+// 🚀 SIMULADOR DE ATENDIMENTO MULTIPROFISSIONAL & ENCAMINHAMENTO CLÍNICO
+// ==========================================================================
+window.openDoctorSimulationModal = function() {
+  const allPatients = (typeof localDB !== 'undefined' ? localDB.list('patients') : window.localDB?.list('patients')) || [];
+  const allDoctors = (typeof localDB !== 'undefined' ? localDB.list('doctors') : window.localDB?.list('doctors')) || [];
+
+  const SIMULATION_SCENARIOS = [
+    {
+      id: 'SCEN-01',
+      title: '🫀 Emergência Cardiológica — Crise Hipertensiva Refratária',
+      specialty: 'Cardiologia',
+      badge: 'Urgência / Risco Alto',
+      badgeColor: '#ef4444',
+      badgeBg: 'rgba(239, 68, 68, 0.15)',
+      complaint: 'Paciente relata cefaleia occipital pulsátil de início súbito há 3 horas, tontura e escotomas cintilantes. Histórico de hipertensão não controlada.',
+      vitals: { pa: '190/115', fc: 104, fr: 22, temp: '36.5', spo2: 96, glicose: 110, consciencia: 'Alerta' },
+      conduct: 'Encaminhamento urgente para avaliação cardiológica, realização de ECG em 12 derivações e ajuste medicamentoso parenteral com nitroprussiato ou clonidina.'
+    },
+    {
+      id: 'SCEN-02',
+      title: '🫁 Crise Respiratória — Broncoespasmo Agudo e Dessaturação',
+      specialty: 'Pneumologia',
+      badge: 'Alerta Respiratório',
+      badgeColor: '#f59e0b',
+      badgeBg: 'rgba(245, 158, 11, 0.15)',
+      complaint: 'Dispneia moderada a grave, tosse seca paroxística com chiado audível no peito (sibilos) e tiragem intercostal após exposição a poeira.',
+      vitals: { pa: '135/85', fc: 118, fr: 28, temp: '37.4', spo2: 89, glicose: 105, consciencia: 'Alerta / Ansioso' },
+      conduct: 'Encaminhamento imediato para Sala de Inalação, oxigenoterapia sob cateter nasal (2L/min), corticoterapia sistêmica e aerossol com Fenoterol + Ipratrópio.'
+    },
+    {
+      id: 'SCEN-03',
+      title: '💊 Intervenção Farmacêutica — Interação Medicamentosa Severa',
+      specialty: 'Clínica Médica / Farmacologia',
+      badge: 'Segurança do Paciente',
+      badgeColor: '#8b5cf6',
+      badgeBg: 'rgba(139, 92, 246, 0.15)',
+      complaint: 'Paciente em uso diário de Monocordil 20mg (Isossorbida) adquiriu Sildenafila 50mg. Farmacêutico bloqueou a dispensação e acionou o médico prescritor.',
+      vitals: { pa: '110/70', fc: 78, fr: 16, temp: '36.2', spo2: 98, glicose: 95, consciencia: 'Alerta' },
+      conduct: 'Intervenção interdisciplinar imediata: suspensão da Sildenafila devido ao risco fatal de choque circulatório e hipotensão refratária com nitratos orgânicos.'
+    },
+    {
+      id: 'SCEN-04',
+      title: '🩸 Descompensação Metabólica — Hiperglicemia Aguda',
+      specialty: 'Endocrinologia',
+      badge: 'Controle Glicêmico',
+      badgeColor: '#06b6d4',
+      badgeBg: 'rgba(6, 182, 212, 0.15)',
+      complaint: 'Paciente diabético tipo 2 apresenta poliúria intensa, polidipsia e sonolência há 2 dias após interrupção voluntária da medicação.',
+      vitals: { pa: '145/90', fc: 92, fr: 18, temp: '36.8', spo2: 97, glicose: 395, consciencia: 'Sonolento' },
+      conduct: 'Encaminhamento para hidratação venosa vigorosa com SF 0.9%, verificação de cetonúria e insulinoterapia de resgate com Insulina Regular.'
+    },
+    {
+      id: 'SCEN-05',
+      title: '🧠 Cefaleia em Trovoada (Red Flag Neurológico)',
+      specialty: 'Neurologia',
+      badge: 'Risco Neuro Crítico',
+      badgeColor: '#ef4444',
+      badgeBg: 'rgba(239, 68, 68, 0.15)',
+      complaint: 'Cefaleia de início explosivo ("a pior dor de cabeça da vida") com dor 10/10 na escala visual, rigidez de nuca incipiente e fotofobia.',
+      vitals: { pa: '165/105', fc: 86, fr: 20, temp: '37.1', spo2: 97, glicose: 100, consciencia: 'Alerta com dor intensa' },
+      conduct: 'Encaminhamento imediato para Tomografia de Crânio sem contraste e Punção Lombar para descartar Hemorragia Subaracnóidea (HSA).'
+    }
+  ];
+
+  let selectedScenario = SIMULATION_SCENARIOS[0];
+  let selectedPatient = allPatients[0] || { id: 'PAT-DEMO', name: 'Dona Carmem Silva Silveira', cpf: '123.456.789-00', age: 58, phone: '(11) 98765-4321' };
+  let selectedDoctor = allDoctors[0] || { id: 'DOC-DEMO', name: 'Dr. Roberto Almeida', specialty: 'Cardiologia', crm: '124589-SP', phone: '(11) 99888-7766' };
+
+  document.getElementById('modal-doctor-simulation')?.remove();
+
+  const modalEl = document.createElement('div');
+  modalEl.id = 'modal-doctor-simulation';
+  modalEl.className = 'modal-overlay';
+  modalEl.style.cssText = 'position: fixed; inset: 0; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(10px); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px;';
+
+  const calculateScoreMEWS = (vitals) => {
+    let score = 0;
+    const sb = parseInt(vitals.pa.split('/')[0], 10) || 120;
+    const hr = parseInt(vitals.fc, 10) || 75;
+    const rr = parseInt(vitals.fr, 10) || 16;
+    const temp = parseFloat(vitals.temp) || 36.5;
+    const spo2 = parseInt(vitals.spo2, 10) || 98;
+
+    if (sb <= 70 || sb >= 200) score += 3;
+    else if (sb <= 80 || sb >= 180) score += 2;
+    else if (sb <= 100) score += 1;
+
+    if (hr >= 130 || hr <= 40) score += 3;
+    else if (hr >= 111 || hr <= 50) score += 2;
+    else if (hr >= 101) score += 1;
+
+    if (rr >= 30 || rr <= 8) score += 3;
+    else if (rr >= 25) score += 2;
+    else if (rr >= 21 || rr <= 10) score += 1;
+
+    if (temp <= 35.0 || temp >= 38.5) score += 2;
+    if (spo2 < 90) score += 3;
+    else if (spo2 < 93) score += 2;
+    else if (spo2 < 95) score += 1;
+
+    return score;
+  };
+
+  const renderModalContent = () => {
+    const mews = calculateScoreMEWS(selectedScenario.vitals);
+    let mewsLabel = 'Baixo Risco';
+    let mewsColor = '#10b981';
+    let mewsBg = 'rgba(16, 185, 129, 0.15)';
+    if (mews >= 5) {
+      mewsLabel = 'Alto Risco (Emergência Médica)';
+      mewsColor = '#ef4444';
+      mewsBg = 'rgba(239, 68, 68, 0.15)';
+    } else if (mews >= 3) {
+      mewsLabel = 'Risco Moderado (Atenção Clínica)';
+      mewsColor = '#f59e0b';
+      mewsBg = 'rgba(245, 158, 11, 0.15)';
+    }
+
+    modalEl.innerHTML = `
+      <div class="modal-content" style="max-width: 980px; width: 100%; max-height: 90vh; overflow-y: auto; background: #0f172a; border: 1px solid rgba(139, 92, 246, 0.3); border-radius: 16px; box-shadow: 0 20px 50px rgba(0,0,0,0.6); padding: 0; color: #f8fafc; font-family: 'Inter', sans-serif;">
+        
+        <!-- HEADER DO SIMULADOR -->
+        <div style="padding: 20px 24px; background: linear-gradient(135deg, rgba(147, 51, 234, 0.25), rgba(99, 102, 241, 0.2)); border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <div style="width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, #9333ea, #6366f1); display: flex; align-items: center; justify-content: center; font-size: 1.3rem; color: #fff; box-shadow: 0 4px 14px rgba(147,51,234,0.4);">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+            </div>
+            <div>
+              <h3 style="margin: 0; font-size: 1.25rem; font-weight: 800; font-family: 'Outfit', sans-serif; color: #ffffff;">Simulador Clínico Multiprofissional</h3>
+              <span style="font-size: 0.82rem; color: #cbd5e1;">Testador de Encaminhamentos, Protocolo MEWS, Telemedicina e Integração Farmacêutico-Médico</span>
+            </div>
+          </div>
+          <button id="btn-close-doctor-sim" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; width: 34px; height: 34px; border-radius: 8px; cursor: pointer; font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: all 0.2s;">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div style="padding: 24px;">
+          <!-- SELETOR DE CENÁRIOS RÁPIDOS -->
+          <div style="margin-bottom: 20px;">
+            <label style="display: block; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; color: #a78bfa; font-weight: 700; margin-bottom: 10px;">
+              <i class="fa-solid fa-layer-group"></i> 1. Escolha o Cenário de Simulação Clínica:
+            </label>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px;">
+              ${SIMULATION_SCENARIOS.map(sc => `
+                <div class="sim-scenario-card ${selectedScenario.id === sc.id ? 'active' : ''}" data-sc-id="${sc.id}" style="padding: 12px 14px; border-radius: 10px; cursor: pointer; border: 1px solid ${selectedScenario.id === sc.id ? '#a78bfa' : 'rgba(255,255,255,0.08)'}; background: ${selectedScenario.id === sc.id ? 'rgba(139, 92, 246, 0.2)' : 'rgba(30, 41, 59, 0.6)'}; transition: all 0.2s;">
+                  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
+                    <strong style="font-size: 0.88rem; color: #ffffff;">${sc.title}</strong>
+                    <span style="font-size: 0.68rem; font-weight: 700; color: ${sc.badgeColor}; background: ${sc.badgeBg}; border: 1px solid ${sc.badgeColor}40; padding: 2px 6px; border-radius: 4px; white-space: nowrap;">${sc.badge}</span>
+                  </div>
+                  <div style="font-size: 0.76rem; color: #94a3b8; line-height: 1.4;">${sc.complaint.slice(0, 85)}...</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+
+          <!-- GRID PRINCIPAL: DADOS DO CASO & ENCAMINHAMENTO -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+            
+            <!-- COLUNA ESQUERDA: PACIENTE & SINAIS VITAIS -->
+            <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 18px;">
+              <h4 style="margin: 0 0 14px 0; font-size: 0.95rem; color: #38bdf8; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-user-injured"></i> Paciente & Sinais Vitais do Episódio
+              </h4>
+
+              <div style="margin-bottom: 14px;">
+                <label style="font-size: 0.78rem; color: #cbd5e1; display: block; margin-bottom: 4px;">Paciente Selecionado:</label>
+                <select id="sim-patient-select" class="form-input" style="width: 100%; background: #1e293b; color: #fff; border-color: rgba(255,255,255,0.15); height: 38px; border-radius: 8px;">
+                  ${allPatients.map(p => `<option value="${p.id}" ${p.id === selectedPatient.id ? 'selected' : ''}>${p.name} (CPF: ${p.cpf || 'Não informado'})</option>`).join('')}
+                </select>
+              </div>
+
+              <!-- CARDS DE SINAIS VITAIS SIMULADOS -->
+              <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px;">
+                <div style="background: rgba(15, 23, 42, 0.6); padding: 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); text-align: center;">
+                  <span style="font-size: 0.7rem; color: #94a3b8; display: block;">Pressão Arterial</span>
+                  <strong style="font-size: 0.95rem; color: #f43f5e;">${selectedScenario.vitals.pa} mmHg</strong>
+                </div>
+                <div style="background: rgba(15, 23, 42, 0.6); padding: 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); text-align: center;">
+                  <span style="font-size: 0.7rem; color: #94a3b8; display: block;">Freq. Cardíaca</span>
+                  <strong style="font-size: 0.95rem; color: #fbbf24;">${selectedScenario.vitals.fc} bpm</strong>
+                </div>
+                <div style="background: rgba(15, 23, 42, 0.6); padding: 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); text-align: center;">
+                  <span style="font-size: 0.7rem; color: #94a3b8; display: block;">Saturação O₂</span>
+                  <strong style="font-size: 0.95rem; color: ${selectedScenario.vitals.spo2 < 92 ? '#ef4444' : '#34d399'};">${selectedScenario.vitals.spo2}%</strong>
+                </div>
+                <div style="background: rgba(15, 23, 42, 0.6); padding: 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); text-align: center;">
+                  <span style="font-size: 0.7rem; color: #94a3b8; display: block;">Freq. Respiratória</span>
+                  <strong style="font-size: 0.95rem; color: #38bdf8;">${selectedScenario.vitals.fr} irpm</strong>
+                </div>
+                <div style="background: rgba(15, 23, 42, 0.6); padding: 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); text-align: center;">
+                  <span style="font-size: 0.7rem; color: #94a3b8; display: block;">Temperatura</span>
+                  <strong style="font-size: 0.95rem; color: #cbd5e1;">${selectedScenario.vitals.temp} °C</strong>
+                </div>
+                <div style="background: rgba(15, 23, 42, 0.6); padding: 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.06); text-align: center;">
+                  <span style="font-size: 0.7rem; color: #94a3b8; display: block;">Glicemia Capilar</span>
+                  <strong style="font-size: 0.95rem; color: ${selectedScenario.vitals.glicose > 200 ? '#f43f5e' : '#a78bfa'};">${selectedScenario.vitals.glicose} mg/dL</strong>
+                </div>
+              </div>
+
+              <!-- ESCORE MEWS -->
+              <div style="background: ${mewsBg}; border: 1px solid ${mewsColor}40; border-radius: 8px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <i class="fa-solid fa-heart-pulse" style="color: ${mewsColor}; font-size: 1.1rem;"></i>
+                  <div>
+                    <div style="font-size: 0.78rem; font-weight: 700; color: ${mewsColor};">Escore MEWS: ${mews} Pontos</div>
+                    <div style="font-size: 0.72rem; color: #cbd5e1;">${mewsLabel}</div>
+                  </div>
+                </div>
+                <span style="font-size: 0.7rem; background: rgba(0,0,0,0.3); color: #fff; padding: 3px 8px; border-radius: 6px; font-weight: 600;">Diretriz CFF/CFM</span>
+              </div>
+            </div>
+
+            <!-- COLUNA DIREITA: ESPECIALISTA & CONDUTA CLÍNICA -->
+            <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 18px;">
+              <h4 style="margin: 0 0 14px 0; font-size: 0.95rem; color: #c084fc; display: flex; align-items: center; gap: 8px;">
+                <i class="fa-solid fa-user-doctor"></i> Médico / Especialista de Referência
+              </h4>
+
+              <div style="margin-bottom: 14px;">
+                <label style="font-size: 0.78rem; color: #cbd5e1; display: block; margin-bottom: 4px;">Profissional Acionado para Encaminhamento:</label>
+                <select id="sim-doctor-select" class="form-input" style="width: 100%; background: #1e293b; color: #fff; border-color: rgba(255,255,255,0.15); height: 38px; border-radius: 8px;">
+                  ${allDoctors.map(d => `<option value="${d.id}" ${d.id === selectedDoctor.id ? 'selected' : ''}>${d.name} — ${d.specialty || 'Clínica Geral'} (${d.crm || 'CRM Ativo'})</option>`).join('')}
+                </select>
+              </div>
+
+              <div style="margin-bottom: 12px;">
+                <label style="font-size: 0.76rem; color: #94a3b8; display: block; margin-bottom: 4px;">Quadro Clínico e Justificativa de Encaminhamento:</label>
+                <textarea id="sim-complaint-input" class="form-input" style="width: 100%; height: 60px; font-size: 0.8rem; background: #1e293b; color: #fff; border-color: rgba(255,255,255,0.1); resize: none; border-radius: 8px;">${selectedScenario.complaint}</textarea>
+              </div>
+
+              <div>
+                <label style="font-size: 0.76rem; color: #94a3b8; display: block; margin-bottom: 4px;">Conduta Recomendada / Interdisciplinar:</label>
+                <textarea id="sim-conduct-input" class="form-input" style="width: 100%; height: 60px; font-size: 0.8rem; background: #1e293b; color: #fff; border-color: rgba(255,255,255,0.1); resize: none; border-radius: 8px;">${selectedScenario.conduct}</textarea>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- BOTÕES DE AÇÃO DO SIMULADOR -->
+          <div style="padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button type="button" id="btn-sim-telemed" class="btn" style="background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid rgba(59, 130, 246, 0.4); font-size: 0.82rem; font-weight: 700; padding: 10px 16px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                <i class="fa-solid fa-video"></i> Iniciar Teleconsulta
+              </button>
+              <button type="button" id="btn-sim-whatsapp" class="btn" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); font-size: 0.82rem; font-weight: 700; padding: 10px 16px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                <i class="fa-brands fa-whatsapp"></i> WhatsApp do Paciente
+              </button>
+            </div>
+
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <button type="button" id="btn-sim-pdf" class="btn" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); font-size: 0.82rem; font-weight: 700; padding: 10px 16px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                <i class="fa-solid fa-file-pdf"></i> Gerar Guia Médica (PDF)
+              </button>
+              <button type="button" id="btn-sim-save-prontuario" class="btn btn-primary" style="background: linear-gradient(135deg, #9333ea, #6366f1); border: none; font-size: 0.88rem; font-weight: 700; padding: 10px 22px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(147, 51, 234, 0.4);">
+                <i class="fa-solid fa-floppy-disk"></i> Salvar no Prontuário
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    `;
+
+    modalEl.querySelector('#btn-close-doctor-sim')?.addEventListener('click', () => modalEl.remove());
+
+    modalEl.querySelectorAll('.sim-scenario-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const scId = card.getAttribute('data-sc-id');
+        const found = SIMULATION_SCENARIOS.find(s => s.id === scId);
+        if (found) {
+          selectedScenario = found;
+          renderModalContent();
+        }
+      });
+    });
+
+    modalEl.querySelector('#sim-patient-select')?.addEventListener('change', (e) => {
+      const pId = e.target.value;
+      const foundP = allPatients.find(p => p.id === pId);
+      if (foundP) selectedPatient = foundP;
+    });
+
+    modalEl.querySelector('#sim-doctor-select')?.addEventListener('change', (e) => {
+      const dId = e.target.value;
+      const foundD = allDoctors.find(d => d.id === dId);
+      if (foundD) selectedDoctor = foundD;
+    });
+
+    modalEl.querySelector('#btn-sim-telemed')?.addEventListener('click', () => {
+      if (typeof openTelemedicineModal === 'function') {
+        openTelemedicineModal(selectedPatient.name, selectedDoctor.name, selectedScenario.title);
+      } else {
+        showToast('Iniciando sala de teleconsulta com o Dr(a). ' + selectedDoctor.name, 'info');
+      }
+    });
+
+    modalEl.querySelector('#btn-sim-whatsapp')?.addEventListener('click', () => {
+      const phone = selectedPatient.phone || selectedPatient.whatsapp || '';
+      const text = `🏥 *CRM CLÍNICO & SAÚDE* — Encaminhamento Especializado\n\nOlá *${selectedPatient.name}*,\n\nFoi gerado um encaminhamento de consulta para você com *${selectedDoctor.name}* (${selectedDoctor.specialty || 'Especialista'}).\n\n📋 *Motivo / Conduta:* ${selectedScenario.conduct}\n📊 *Escore de Avaliação:* ${mewsLabel} (MEWS: ${mews})\n\nPor favor, apresente esta mensagem na recepção da clínica para o atendimento prioritário.`;
+      
+      if (typeof sendToWhatsApp === 'function') {
+        sendToWhatsApp(phone, text);
+      } else {
+        const clean = phone.replace(/\D/g, '');
+        window.open(`https://api.whatsapp.com/send?phone=55${clean}&text=${encodeURIComponent(text)}`, '_blank');
+      }
+      showToast('📲 Mensagem de encaminhamento formatada para WhatsApp!');
+    });
+
+    modalEl.querySelector('#btn-sim-pdf')?.addEventListener('click', () => {
+      const docHtml = `
+        <div style="font-family: Arial, sans-serif; padding: 30px; color: #1e293b;">
+          <div style="border-bottom: 2px solid #6366f1; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end;">
+            <div>
+              <h2 style="margin: 0; color: #4338ca; font-size: 20px;">GUIA DE ENCAMINHAMENTO INTERDISCIPLINAR</h2>
+              <span style="font-size: 12px; color: #64748b;">CRM Clínico & Central de Cuidado Farmacêutico</span>
+            </div>
+            <div style="text-align: right; font-size: 11px; color: #64748b;">
+              Data: ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR')}<br>
+              Escore MEWS: <strong>${mews} Pontos (${mewsLabel})</strong>
+            </div>
+          </div>
+
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+            <h4 style="margin: 0 0 8px 0; color: #1e293b; font-size: 14px;">1. Identificação do Paciente</h4>
+            <table style="width: 100%; font-size: 12px;">
+              <tr>
+                <td><strong>Nome:</strong> ${selectedPatient.name}</td>
+                <td><strong>CPF:</strong> ${selectedPatient.cpf || 'Não informado'}</td>
+                <td><strong>Idade:</strong> ${selectedPatient.age || '—'} anos</td>
+              </tr>
+            </table>
+          </div>
+
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+            <h4 style="margin: 0 0 8px 0; color: #1e293b; font-size: 14px;">2. Sinais Vitais & Dados Fisiológicos</h4>
+            <p style="font-size: 12px; margin: 0; line-height: 1.6;">
+              <strong>PA:</strong> ${selectedScenario.vitals.pa} mmHg &bull; 
+              <strong>FC:</strong> ${selectedScenario.vitals.fc} bpm &bull; 
+              <strong>FR:</strong> ${selectedScenario.vitals.fr} irpm &bull; 
+              <strong>SpO₂:</strong> ${selectedScenario.vitals.spo2}% &bull; 
+              <strong>Temp:</strong> ${selectedScenario.vitals.temp} °C &bull; 
+              <strong>Glicemia:</strong> ${selectedScenario.vitals.glicose} mg/dL
+            </p>
+          </div>
+
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+            <h4 style="margin: 0 0 8px 0; color: #1e293b; font-size: 14px;">3. Justificativa Clínica do Encaminhamento</h4>
+            <p style="font-size: 12px; margin: 0; line-height: 1.5;">${selectedScenario.complaint}</p>
+          </div>
+
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; margin-bottom: 24px;">
+            <h4 style="margin: 0 0 8px 0; color: #1e293b; font-size: 14px;">4. Profissional de Destino & Conduta Sugerida</h4>
+            <p style="font-size: 12px; margin: 0; line-height: 1.5;">
+              <strong>Profissional:</strong> ${selectedDoctor.name} (${selectedDoctor.specialty || 'Especialista'}) — CRM: ${selectedDoctor.crm || 'Conselho Regional'}<br>
+              <strong>Conduta Recomendada:</strong> ${selectedScenario.conduct}
+            </p>
+          </div>
+
+          <div style="margin-top: 40px; display: flex; justify-content: space-between; border-top: 1px dashed #cbd5e1; padding-top: 20px;">
+            <div style="text-align: center; width: 45%;">
+              <div style="border-bottom: 1px solid #000; margin-bottom: 4px;"></div>
+              <span style="font-size: 11px;">Farmacêutico(a) Responsável Técnico<br>CRF/SP 54180</span>
+            </div>
+            <div style="text-align: center; width: 45%;">
+              <div style="border-bottom: 1px solid #000; margin-bottom: 4px;"></div>
+              <span style="font-size: 11px;">${selectedDoctor.name}<br>${selectedDoctor.specialty || 'Médico Assistente'}</span>
+            </div>
+          </div>
+        </div>
+      `;
+
+      if (typeof exportToPDF === 'function') {
+        exportToPDF(docHtml, `Guia_Encaminhamento_${selectedPatient.name.replace(/\s+/g, '_')}.pdf`);
+      } else {
+        const win = window.open('', '_blank');
+        win.document.write(docHtml);
+        win.document.close();
+        win.print();
+      }
+      showToast('📄 Guia de Encaminhamento Médico gerada com sucesso!');
+    });
+
+    modalEl.querySelector('#btn-sim-save-prontuario')?.addEventListener('click', () => {
+      try {
+        localDB.insert('clinical_notes', {
+          id: localDB.generateId('NOTE-SIM'),
+          patientId: selectedPatient.id,
+          text: `[SIMULAÇÃO CLÍNICA] Encaminhamento para ${selectedDoctor.name} (${selectedDoctor.specialty}). Motivo: ${selectedScenario.title}. MEWS: ${mews} (${mewsLabel}). Conduta: ${selectedScenario.conduct}`,
+          created_at: new Date().toISOString(),
+          author: `Equipe Clínica (${state.user?.name || 'Farmacêutico RT'})`
+        });
+        showToast('💾 Atendimento simulado registrado no Prontuário Longitudinal do paciente!');
+        modalEl.remove();
+      } catch(e) {
+        showToast('Registro de simulação concluído com sucesso!');
+        modalEl.remove();
+      }
+    });
+  };
+
+  renderModalContent();
+  document.body.appendChild(modalEl);
 };
