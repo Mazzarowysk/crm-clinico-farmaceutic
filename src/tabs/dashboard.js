@@ -27,12 +27,12 @@ const chartModes = {
 // Paleta clínica premium ultra-moderna (Cyber-Clinical Dark Luxury)
 const CLINICAL_PALETTE = {
   emerald: { base: '#10b981', light: '#34d399', dark: '#047857', glow: 'rgba(16, 185, 129, 0.45)' },
-  sky:     { base: '#0284c7', light: '#38bdf8', dark: '#0369a1', glow: 'rgba(56, 189, 248, 0.45)' },
-  indigo:  { base: '#6366f1', light: '#a5b4fc', dark: '#4338ca', glow: 'rgba(99, 102, 241, 0.45)' },
-  amber:   { base: '#f59e0b', light: '#fbbf24', dark: '#b45309', glow: 'rgba(245, 158, 11, 0.45)' },
-  pink:    { base: '#ec4899', light: '#f472b6', dark: '#be185d', glow: 'rgba(236, 72, 153, 0.45)' },
-  teal:    { base: '#14b8a6', light: '#2dd4bf', dark: '#0f766e', glow: 'rgba(20, 184, 166, 0.45)' },
-  rose:    { base: '#f43f5e', light: '#fb7185', dark: '#be123c', glow: 'rgba(244, 63, 94, 0.45)' }
+  sky: { base: '#0284c7', light: '#38bdf8', dark: '#0369a1', glow: 'rgba(56, 189, 248, 0.45)' },
+  indigo: { base: '#6366f1', light: '#a5b4fc', dark: '#4338ca', glow: 'rgba(99, 102, 241, 0.45)' },
+  amber: { base: '#f59e0b', light: '#fbbf24', dark: '#b45309', glow: 'rgba(245, 158, 11, 0.45)' },
+  pink: { base: '#ec4899', light: '#f472b6', dark: '#be185d', glow: 'rgba(236, 72, 153, 0.45)' },
+  teal: { base: '#14b8a6', light: '#2dd4bf', dark: '#0f766e', glow: 'rgba(20, 184, 166, 0.45)' },
+  rose: { base: '#f43f5e', light: '#fb7185', dark: '#be123c', glow: 'rgba(244, 63, 94, 0.45)' }
 };
 
 export async function fetchDashboardData() {
@@ -153,7 +153,7 @@ export async function fetchDashboardData() {
     const dObj = new Date(Date.now() - i * 86400000);
     const dayLabel = days[dObj.getDay()];
     const dateStr = dObj.toISOString().split('T')[0];
-    
+
     let dayAtts = attList.filter(a => (a.data_hora || a.date || a.created_at || '').startsWith(dateStr)).length;
     let dayCdss = cdssList.filter(c => (c.timestamp || c.created_at || '').startsWith(dateStr)).length;
 
@@ -212,8 +212,8 @@ function createPlastic3DGradient(ctx2d, hexColor, vertical = true, height = 300)
   const g = parseInt(hex.substring(2, 4), 16) || 185;
   const b = parseInt(hex.substring(4, 6), 16) || 129;
 
-  const grad = vertical 
-    ? ctx2d.createLinearGradient(0, 0, 0, height) 
+  const grad = vertical
+    ? ctx2d.createLinearGradient(0, 0, 0, height)
     : ctx2d.createLinearGradient(0, 0, 420, 0);
 
   // 1. Reflexo Especular Superior (Plastic Sheen Glare)
@@ -248,7 +248,7 @@ const centerDoughnutPlugin = {
       if (!datasets[0] || !datasets[0].data) return;
       const isZero = chart.data?.isZeroData || false;
       const total = isZero ? 0 : datasets[0].data.reduce((a, b) => (Number(a) || 0) + (Number(b) || 0), 0);
-      
+
       ctx.save();
       const centerX = (left + right) / 2;
       const centerY = (top + bottom) / 2;
@@ -310,7 +310,7 @@ const plastic3DGlossPlugin = {
       ctx.shadowBlur = 18;
       ctx.shadowOffsetY = 10;
       ctx.shadowOffsetX = 3;
-    } catch (e) {}
+    } catch (e) { }
   },
   afterDatasetsDraw(chart) {
     try {
@@ -339,7 +339,7 @@ const plastic3DGlossPlugin = {
           });
         }
       }
-    } catch (e) {}
+    } catch (e) { }
   }
 };
 
@@ -362,7 +362,7 @@ export function initDashboardCharts(data = state.dashboardData) {
     if (typeof ChartClass.register === 'function') {
       ChartClass.register(centerDoughnutPlugin, plastic3DGlossPlugin);
     }
-  } catch(e) {}
+  } catch (e) { }
 
   const sCanvas = document.getElementById('servicesChart');
   const cCanvas = document.getElementById('cdssChart');
@@ -409,18 +409,18 @@ function renderServicesChart(ChartClass, data) {
   let chartType = currentTypeKey;
 
   // Gerar gradientes com brilho plástico 3D volumétrico
-  const backgroundGradients = isZero 
+  const backgroundGradients = isZero
     ? ['rgba(255, 255, 255, 0.05)']
     : services.map(s => createPlastic3DGradient(ctx2d, s.color, chartType !== 'bar', 280));
 
   // Atualizar badge do tipo no card
   const badgeEl = document.getElementById('badge-services-chart-type');
   if (badgeEl) {
-    const names = { 
-      'doughnut': '🔮 Rosca 3D Plástico Glossy (Donut)', 
-      'bar': '🧪 Cilindros 3D Glossy (Plastic Bar)', 
-      'pie': '💎 Pizza 3D Cristalina & Plástico', 
-      'polarArea': '🪐 Esfera Polar 3D Esmaltada' 
+    const names = {
+      'doughnut': '🔮 Rosca 3D Plástico Glossy (Donut)',
+      'bar': '🧪 Cilindros 3D Glossy (Plastic Bar)',
+      'pie': '💎 Pizza 3D Cristalina & Plástico',
+      'polarArea': '🪐 Esfera Polar 3D Esmaltada'
     };
     badgeEl.textContent = names[currentTypeKey] || currentTypeKey;
   }
@@ -525,7 +525,7 @@ function renderServicesChart(ChartClass, data) {
           titleFont: { size: 12, family: 'Outfit', weight: '700' },
           bodyFont: { size: 11.5, family: 'Inter' },
           callbacks: {
-            label: function(context) {
+            label: function (context) {
               const totalVal = context.dataset.data.reduce((a, b) => a + b, 0);
               const val = context.raw || 0;
               const pct = totalVal > 0 ? ((val / totalVal) * 100).toFixed(1) : 0;
@@ -546,7 +546,7 @@ function renderCdssChart(ChartClass, data) {
   if (canvas._chartInstance) {
     try {
       canvas._chartInstance.destroy();
-    } catch(e) {}
+    } catch (e) { }
   }
 
   const ctx2d = canvas.getContext('2d');
@@ -560,12 +560,12 @@ function renderCdssChart(ChartClass, data) {
   // Atualizar badge do tipo no card
   const badgeEl = document.getElementById('badge-cdss-chart-type');
   if (badgeEl) {
-    const names = { 
-      'polarArea': '🪐 Esfera Polar 3D Esmaltada', 
-      'radar': '🕸️ Teia 3D Holográfica Neon', 
-      'doughnut': '🔮 Rosca CDSS 3D Acrílica', 
-      'bar': '📊 Colunas 3D Plástico Volumétrico', 
-      'pie': '🍰 Pizza 3D Alertas Esmaltada' 
+    const names = {
+      'polarArea': '🪐 Esfera Polar 3D Esmaltada',
+      'radar': '🕸️ Teia 3D Holográfica Neon',
+      'doughnut': '🔮 Rosca CDSS 3D Acrílica',
+      'bar': '📊 Colunas 3D Plástico Volumétrico',
+      'pie': '🍰 Pizza 3D Alertas Esmaltada'
     };
     badgeEl.textContent = names[currentTypeKey] || currentTypeKey;
   }
@@ -614,13 +614,13 @@ function renderCdssChart(ChartClass, data) {
     };
   } else if (chartType === 'bar') {
     scalesConfig = {
-      x: { 
-        grid: { display: false }, 
-        ticks: { color: '#cbd5e1', font: { size: 10, family: 'Outfit', weight: '600' } } 
+      x: {
+        grid: { display: false },
+        ticks: { color: '#cbd5e1', font: { size: 10, family: 'Outfit', weight: '600' } }
       },
-      y: { 
-        grid: { color: 'rgba(255,255,255,0.06)', borderDash: [4, 4] }, 
-        ticks: { color: '#94a3b8', font: { family: 'Inter' }, precision: 0 } 
+      y: {
+        grid: { color: 'rgba(255,255,255,0.06)', borderDash: [4, 4] },
+        ticks: { color: '#94a3b8', font: { family: 'Inter' }, precision: 0 }
       }
     };
   }
@@ -693,7 +693,7 @@ function renderCdssChart(ChartClass, data) {
           titleFont: { size: 12, family: 'Outfit', weight: '700' },
           bodyFont: { size: 11.5, family: 'Inter' },
           callbacks: {
-            label: function(context) {
+            label: function (context) {
               const val = context.raw || 0;
               const totalVal = context.dataset.data.reduce((a, b) => a + b, 0);
               const pct = totalVal > 0 ? ((val / totalVal) * 100).toFixed(1) : 0;
@@ -723,12 +723,12 @@ function renderWeeklyChart(ChartClass, data) {
   // Atualizar badge do tipo no card
   const badgeEl = document.getElementById('badge-weekly-chart-type');
   if (badgeEl) {
-    const names = { 
-      'line-smooth': '📈 Tubo Fluido 3D Neon Glossy', 
-      'bar': '📊 Colunas 3D Plástico Acrílico', 
-      'line-stepped': '⚡ Pulso 3D Degrau Glossy', 
-      'radar': '🕸️ Radar Semanal 3D', 
-      'area-stacked': '🏔️ Montanha 3D Resina Translúcida' 
+    const names = {
+      'line-smooth': '📈 Tubo Fluido 3D Neon Glossy',
+      'bar': '📊 Colunas 3D Plástico Acrílico',
+      'line-stepped': '⚡ Pulso 3D Degrau Glossy',
+      'radar': '🕸️ Radar Semanal 3D',
+      'area-stacked': '🏔️ Montanha 3D Resina Translúcida'
     };
     badgeEl.textContent = names[currentTypeKey] || currentTypeKey;
   }
@@ -850,9 +850,9 @@ function renderWeeklyChart(ChartClass, data) {
             ci.setDatasetVisibility(index, !ci.isDatasetVisible(index));
             ci.update();
           },
-          labels: { 
-            color: '#cbd5e1', 
-            font: { size: 11.5, family: 'Outfit', weight: '600' }, 
+          labels: {
+            color: '#cbd5e1',
+            font: { size: 11.5, family: 'Outfit', weight: '600' },
             usePointStyle: true,
             boxWidth: 8,
             padding: 14
@@ -879,7 +879,7 @@ function renderWeeklyChart(ChartClass, data) {
 // FUNÇÕES GLOBAIS DE ALTERNÂNCIA RANDÔMICA / DINÂMICA
 // ─────────────────────────────────────────────────────────────────────────────
 
-window.toggleServicesChart = function(event) {
+window.toggleServicesChart = function (event) {
   if (event) event.stopPropagation();
   chartModes.servicesIdx++;
   const ChartClass = window.Chart || (typeof Chart !== 'undefined' ? Chart : null);
@@ -889,7 +889,7 @@ window.toggleServicesChart = function(event) {
   }
 };
 
-window.toggleCdssChart = function(event) {
+window.toggleCdssChart = function (event) {
   if (event) event.stopPropagation();
   chartModes.cdssIdx++;
   const ChartClass = window.Chart || (typeof Chart !== 'undefined' ? Chart : null);
@@ -899,7 +899,7 @@ window.toggleCdssChart = function(event) {
   }
 };
 
-window.toggleWeeklyChart = function(event) {
+window.toggleWeeklyChart = function (event) {
   if (event) event.stopPropagation();
   chartModes.weeklyIdx++;
   const ChartClass = window.Chart || (typeof Chart !== 'undefined' ? Chart : null);
@@ -913,7 +913,7 @@ window.toggleWeeklyChart = function(event) {
 // MODAL DE DRILL-DOWN / RELATÓRIO INTERATIVO AO CLICAR NOS CARDS
 // ─────────────────────────────────────────────────────────────────────────────
 
-window.openDrillDownModal = function(topic, categoryFilter = null) {
+window.openDrillDownModal = function (topic, categoryFilter = null) {
   const d = state.dashboardData || {};
   let title = '';
   let icon = '';
@@ -1025,7 +1025,7 @@ window.openDrillDownModal = function(topic, categoryFilter = null) {
     title = 'Relatório de Farmacovigilância: Alertas & Bloqueios CDSS 4D';
     icon = 'fa-shield-virus';
     let cdss = localDB.list('pharmacy_decision_audit') || [];
-    
+
     // Se clicou em uma categoria específica no gráfico
     if (categoryFilter) {
       const filterLower = categoryFilter.toLowerCase();
@@ -1201,11 +1201,11 @@ window.openDrillDownModal = function(topic, categoryFilter = null) {
 // EMISSÃO DE LAUDO / RELATÓRIO CLÍNICO EXECUTIVO OFICIAL FARMACÊUTICO (A4)
 // ─────────────────────────────────────────────────────────────────────────────
 
-window.printClinicalDrillDownReport = function(topic) {
+window.printClinicalDrillDownReport = function (topic) {
   const d = state.dashboardData || {};
   const now = new Date().toLocaleString('pt-BR');
   const hash = 'CFF-' + Math.random().toString(36).substring(2, 10).toUpperCase() + '-' + Date.now().toString().slice(-4);
-  
+
   let repTitle = 'RELATÓRIO CLÍNICO EXECUTIVO FARMACÊUTICO';
   let repSubtitle = 'Consolidado Operacional e Indicadores de Saúde CFF 585/586';
   let kpisHtml = '';

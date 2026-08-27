@@ -389,14 +389,19 @@ export function openPatientPurchasesModal(patientId, patientName = 'Cliente') {
     document.getElementById('btn-new-sale-for-patient')?.addEventListener('click', openCheckout);
     document.getElementById('btn-first-sale-for-patient')?.addEventListener('click', openCheckout);
 
-    // Botão WhatsApp Lembrar Recompra
-    modal.querySelectorAll('.btn-whatsapp-refill').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const med = btn.getAttribute('data-med');
-        const date = btn.getAttribute('data-date');
-        const dateFormatted = date ? date.split('-').reverse().join('/') : 'em breve';
-        const msg = encodeURIComponent(`Olá, ${pName}! Passando para lembrar que seu medicamento de uso contínuo *${med}* tem previsão de término para *${dateFormatted}*. Deseja que já deixemos separado para retirada na farmácia?`);
-        window.open(`https://api.whatsapp.com/send?phone=55${pPhone}&text=${msg}`, '_blank');
+    // Botão Imprimir Cupom Térmico
+    modal.querySelectorAll('.btn-print-full-purchase-receipt').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        window.emitFullPurchaseThermalReceipt(btn);
+      });
+    });
+
+    // Botão Baixar PDF
+    modal.querySelectorAll('.btn-download-full-purchase-pdf').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        window.downloadFullPurchasePdf(btn);
       });
     });
 

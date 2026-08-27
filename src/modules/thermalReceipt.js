@@ -28,6 +28,7 @@ export function printThermalReceipt(saleData, paperWidth = '80mm') {
   const clientName = saleData.clientName || 'Consumidor Balcão';
   const clientCpf = saleData.clientCpf ? `CPF: ${saleData.clientCpf}` : '';
   const operator = saleData.operatorName || (state.user?.name || 'Operador');
+  const paymentMethod = saleData.paymentMethod || 'Dinheiro / Balcão';
 
   const itemsHtml = (saleData.items || []).map((item, idx) => {
     const qty = item.quantity || 1;
