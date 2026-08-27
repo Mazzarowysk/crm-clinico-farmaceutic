@@ -10,7 +10,12 @@ export function printThermalReceipt(saleData, paperWidth = '80mm') {
   const widthPx = is58mm ? '230px' : '320px';
   const fontSize = is58mm ? '10px' : '12px';
 
-  const settings = localDB.get('settings', 'main') || {};
+  let settings = {};
+  try {
+    settings = localDB.get('settings', 'main') || localDB.getConfig() || {};
+  } catch (e) {
+    settings = localDB.getConfig ? localDB.getConfig() : {};
+  }
   const pharmacyName = settings.clinic_name || settings.pharmacy_name || 'FARMÁCIA & CONSULTÓRIO CLÍNICO';
   const cnpj = settings.cnpj || '00.000.000/0001-99';
   const address = settings.address || 'Rua da Saúde, 100 - Centro';

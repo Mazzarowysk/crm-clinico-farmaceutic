@@ -272,6 +272,7 @@ if (typeof window !== 'undefined') {
   window.openPatientPurchasesModal = openPatientPurchasesModal;
 
   window.emitThermalReceiptFromPurchase = function(btn) {
+    let saleData = null;
     try {
       if (!btn) return;
       const medName = btn.getAttribute('data-med') || 'Medicamento Dispensado';
@@ -283,7 +284,7 @@ if (typeof window !== 'undefined') {
       const patientName = btn.getAttribute('data-patient') || 'Cliente';
       const patientCpf = btn.getAttribute('data-cpf') || '';
 
-      const saleData = {
+      saleData = {
         protocol: proto,
         clientName: patientName,
         clientCpf: patientCpf,
@@ -304,10 +305,14 @@ if (typeof window !== 'undefined') {
       };
 
       showToast('🖨️ Gerando Cupom Térmico (80mm)...');
-      printThermalReceipt(saleData, '80mm');
+      if (typeof printThermalReceipt === 'function') {
+        printThermalReceipt(saleData, '80mm');
+      } else if (window.printThermalReceipt) {
+        window.printThermalReceipt(saleData, '80mm');
+      }
     } catch (err) {
       console.error('Erro ao emitir cupom térmico:', err);
-      if (window.printThermalReceipt) {
+      if (saleData && window.printThermalReceipt) {
         window.printThermalReceipt(saleData, '80mm');
       }
     }

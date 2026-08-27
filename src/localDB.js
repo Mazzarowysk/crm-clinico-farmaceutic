@@ -71,8 +71,12 @@ export function generateId(prefix = 'ID') {
 // Inicializa a tabela se não existir
 function ensureTable(db, table) {
   let modified = false;
-  if (!db[table]) {
-    db[table] = [];
+  if (!db[table] || !Array.isArray(db[table])) {
+    if (db[table] && typeof db[table] === 'object' && !Array.isArray(db[table])) {
+      db[table] = [db[table]];
+    } else {
+      db[table] = [];
+    }
     modified = true;
   }
   
@@ -511,7 +515,7 @@ function ensureTable(db, table) {
 export function list(table, queryFn = null) {
   const db = getFullDB();
   ensureTable(db, table);
-  let results = db[table];
+  let results = Array.isArray(db[table]) ? db[table] : [];
   
   if (queryFn) {
     results = results.filter(queryFn);
@@ -522,7 +526,11 @@ export function list(table, queryFn = null) {
 export function get(table, id) {
   const db = getFullDB();
   ensureTable(db, table);
-  return db[table].find(item => item.id === id) || null;
+  if (!Array.isArray(db[table])) {
+    if (db[table] && typeof db[table] === 'object') return db[table];
+    return null;
+  }
+  return db[table].find(item => item && (item.id === id || (id === 'main' && !item.id))) || null;
 }
 
 export function insert(table, data) {
