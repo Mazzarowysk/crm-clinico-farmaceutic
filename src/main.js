@@ -1106,23 +1106,6 @@ function renderAuthScreen() {
             </button>
           </form>
 
-          ${isLogin ? `
-            <!-- Acesso Rápido com 1 Clique (Perfis Padrão) -->
-            <div style="margin-top: 14px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 10px 12px;">
-              <span style="font-size: 0.7rem; text-transform: uppercase; font-weight: 800; color: #94a3b8; display: block; margin-bottom: 8px; letter-spacing: 0.5px;">
-                ⚡ Acesso Rápido em 1 Clique (Demonstração):
-              </span>
-              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                <button type="button" class="btn-quick-login-preset" data-user="admin" data-pass="admin123" style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35); color: #fbbf24; padding: 6px 8px; border-radius: 8px; font-size: 0.74rem; font-weight: 700; cursor: pointer; text-align: center; transition: all 0.2s;">
-                  👑 Master Gestor
-                </button>
-                <button type="button" class="btn-quick-login-preset" data-user="farmacia" data-pass="admin123" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.35); color: #34d399; padding: 6px 8px; border-radius: 8px; font-size: 0.74rem; font-weight: 700; cursor: pointer; text-align: center; transition: all 0.2s;">
-                  💊 Farmacêutico RT
-                </button>
-              </div>
-            </div>
-          ` : ''}
-
           <div class="auth-divider"></div>
 
           <div class="auth-toggle">
@@ -1142,25 +1125,6 @@ function renderAuthScreen() {
     document.getElementById('toggle-auth').addEventListener('click', () => {
       isLogin = !isLogin;
       renderForm();
-    });
-
-    // Eventos dos botões de login rápido
-    document.querySelectorAll('.btn-quick-login-preset').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const u = btn.getAttribute('data-user');
-        const p = btn.getAttribute('data-pass');
-        const uInput = document.getElementById('auth-username');
-        const pInput = document.getElementById('auth-password');
-        if (uInput && pInput) {
-          uInput.value = u;
-          pInput.value = p;
-          const authForm = document.getElementById('auth-form');
-          if (authForm) {
-            const submitBtn = document.getElementById('auth-submit-btn');
-            if (submitBtn) submitBtn.click();
-          }
-        }
-      });
     });
 
     const passInput = document.getElementById('auth-password');
