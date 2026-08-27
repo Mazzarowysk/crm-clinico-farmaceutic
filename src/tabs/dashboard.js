@@ -446,11 +446,29 @@ function renderServicesChart(ChartClass, data) {
       responsive: true,
       maintainAspectRatio: false,
       animation: { duration: 750, easing: 'easeOutQuart' },
-      layout: { padding: 8 },
+      onClick: (event, elements) => {
+        if (elements && elements.length > 0 && !isZero) {
+          if (window.openDrillDownModal) {
+            window.openDrillDownModal('services');
+          }
+        }
+      },
       plugins: {
         legend: {
           display: chartType !== 'bar' && !isZero,
           position: 'bottom',
+          onClick: (e, legendItem, legend) => {
+            // Apenas alterna visualmente no gráfico (mostrar/ocultar), SEM abrir janela
+            const index = legendItem.index;
+            const ci = legend.chart;
+            if (typeof ci.toggleDataVisibility === 'function') {
+              ci.toggleDataVisibility(index);
+            } else if (ci.getDatasetMeta(0)?.data[index]) {
+              const meta = ci.getDatasetMeta(0);
+              meta.data[index].hidden = !meta.data[index].hidden;
+            }
+            ci.update();
+          },
           labels: {
             color: '#cbd5e1',
             font: { size: 10.5, family: 'Inter', weight: '500' },
@@ -477,7 +495,7 @@ function renderServicesChart(ChartClass, data) {
               const totalVal = context.dataset.data.reduce((a, b) => a + b, 0);
               const val = context.raw || 0;
               const pct = totalVal > 0 ? ((val / totalVal) * 100).toFixed(1) : 0;
-              return ` ${val} procedimentos (${pct}%)`;
+              return ` ${val} procedimentos (${pct}%) — Clique para ver extrato`;
             }
           }
         }
@@ -585,10 +603,33 @@ function renderCdssChart(ChartClass, data) {
       animation: { duration: 750, easing: 'easeOutQuart' },
       layout: { padding: 6 },
       scales: scalesConfig,
+      onClick: (event, elements) => {
+        if (elements && elements.length > 0) {
+          const firstElement = elements[0];
+          const dataIndex = firstElement.index;
+          const clickedAlert = alerts[dataIndex];
+          const filterKeyword = clickedAlert ? clickedAlert.label : null;
+          if (window.openDrillDownModal) {
+            window.openDrillDownModal('alerts', filterKeyword);
+          }
+        }
+      },
       plugins: {
         legend: {
           display: chartType !== 'bar' && chartType !== 'radar',
           position: 'bottom',
+          onClick: (e, legendItem, legend) => {
+            // Apenas alterna visualmente no gráfico (mostrar/ocultar), SEM abrir janela
+            const index = legendItem.index;
+            const ci = legend.chart;
+            if (typeof ci.toggleDataVisibility === 'function') {
+              ci.toggleDataVisibility(index);
+            } else if (ci.getDatasetMeta(0)?.data[index]) {
+              const meta = ci.getDatasetMeta(0);
+              meta.data[index].hidden = !meta.data[index].hidden;
+            }
+            ci.update();
+          },
           labels: {
             color: '#cbd5e1',
             font: { size: 10.5, family: 'Inter', weight: '600' },
@@ -612,7 +653,7 @@ function renderCdssChart(ChartClass, data) {
               const val = context.raw || 0;
               const totalVal = context.dataset.data.reduce((a, b) => a + b, 0);
               const pct = totalVal > 0 ? ((val / totalVal) * 100).toFixed(1) : 0;
-              return ` ${val} intervenções (${pct}%)`;
+              return ` ${val} intervenções (${pct}%) — Clique para filtrar`;
             }
           }
         }
@@ -804,7 +845,7 @@ window.toggleWeeklyChart = function(event) {
 // MODAL DE DRILL-DOWN / RELATÓRIO INTERATIVO AO CLICAR NOS CARDS
 // ─────────────────────────────────────────────────────────────────────────────
 
-window.openDrillDownModal = function(topic) {
+window.openDrillDownModal = function(topic, categoryFilter = null) {
   const d = state.dashboardData || {};
   let title = '';
   let icon = '';
@@ -818,7 +859,7 @@ window.openDrillDownModal = function(topic) {
     const patients = localDB.list('pharmacy_patients') || localDB.list('patients') || [];
     badgeText = `${patients.length} Pacientes Cadastrados`;
     colorTheme = '#38bdf8';
-    
+
     if (patients.length === 0) {
       contentHtml = `
         <div style="text-align: center; padding: 40px 20px; color: #64748b;">
@@ -899,20 +940,58 @@ window.openDrillDownModal = function(topic) {
   } else if (topic === 'cdss' || topic === 'alerts') {
     title = 'Relatório de Farmacovigilância: Alertas & Bloqueios CDSS 4D';
     icon = 'fa-shield-virus';
-    const cdss = localDB.list('pharmacy_decision_audit') || [];
-    badgeText = `${cdss.length} Intervenções Registradas`;
+    let cdss = localDB.list('pharmacy_decision_audit') || [];
+    
+    // Se clicou em uma categoria específica no gráfico
+    if (categoryFilter) {
+      const filterLower = categoryFilter.toLowerCase();
+      if (filterLower.includes('alimento')) {
+        cdss = cdss.filter(c => {
+          const t = ((c.interaction_title || '') + ' ' + (c.justificativa || '')).toLowerCase();
+          return t.includes('alimento') || t.includes('leite') || t.includes('toranja') || t.includes('cálcio');
+        });
+      } else if (filterLower.includes('hábito') || filterLower.includes('habito')) {
+        cdss = cdss.filter(c => {
+          const t = ((c.interaction_title || '') + ' ' + (c.justificativa || '')).toLowerCase();
+          return t.includes('hábito') || t.includes('álcool') || t.includes('tabaco') || t.includes('tabagismo');
+        });
+      } else if (filterLower.includes('duplic')) {
+        cdss = cdss.filter(c => {
+          const t = ((c.interaction_title || '') + ' ' + (c.justificativa || '')).toLowerCase();
+          return t.includes('duplic');
+        });
+      } else if (filterLower.includes('beers') || filterLower.includes('idoso')) {
+        cdss = cdss.filter(c => {
+          const t = ((c.interaction_title || '') + ' ' + (c.justificativa || '')).toLowerCase();
+          return t.includes('beers') || t.includes('idoso');
+        });
+      } else if (filterLower.includes('alergia')) {
+        cdss = cdss.filter(c => {
+          const t = ((c.interaction_title || '') + ' ' + (c.justificativa || '')).toLowerCase();
+          return t.includes('alergia');
+        });
+      } else if (filterLower.includes('fármaco-fármaco') || filterLower.includes('farmaco-farmaco')) {
+        cdss = cdss.filter(c => {
+          const t = ((c.interaction_title || '') + ' ' + (c.justificativa || '')).toLowerCase();
+          return !t.includes('alimento') && !t.includes('leite') && !t.includes('toranja') && !t.includes('hábito') && !t.includes('álcool') && !t.includes('tabaco') && !t.includes('duplic') && !t.includes('beers') && !t.includes('idoso') && !t.includes('alergia');
+        });
+      }
+    }
+
+    badgeText = categoryFilter ? `${cdss.length} Alertas de ${categoryFilter}` : `${cdss.length} Intervenções Registradas`;
     colorTheme = '#f59e0b';
 
     if (cdss.length === 0) {
       contentHtml = `
         <div style="text-align: center; padding: 40px 20px; color: #64748b;">
           <i class="fa-solid fa-shield-halved" style="font-size: 2.5rem; color: #f59e0b; opacity: 0.4; margin-bottom: 12px;"></i>
-          <div style="font-weight: 700; color: #94a3b8; font-size: 1rem;">Nenhum alerta ou bloqueio registrado</div>
+          <div style="font-weight: 700; color: #94a3b8; font-size: 1rem;">Nenhum alerta encontrado ${categoryFilter ? `para "${categoryFilter}"` : ''}</div>
           <div style="font-size: 0.8rem; margin-top: 4px;">O motor CDSS 4D validará interações em tempo real durante as próximas consultas.</div>
         </div>
       `;
     } else {
       contentHtml = `
+        ${categoryFilter ? `<div style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.35); border-radius: 8px; padding: 8px 12px; margin-bottom: 14px; font-size: 0.82rem; color: #fbbf24; display: flex; align-items: center; justify-content: space-between;"><span><i class="fa-solid fa-filter"></i> Filtrando por: <strong>${categoryFilter}</strong></span><button onclick="window.openDrillDownModal('alerts')" style="background: none; border: none; color: #cbd5e1; text-decoration: underline; font-size: 0.76rem; cursor: pointer;">Ver todos os alertas</button></div>` : ''}
         <table style="width: 100%; border-collapse: collapse; font-size: 0.84rem; text-align: left;">
           <thead>
             <tr style="border-bottom: 1px solid rgba(255,255,255,0.1); color: #94a3b8;">
@@ -1741,7 +1820,7 @@ export async function renderDashboardTab(container) {
             </div>
           </div>
           
-          <div onclick="window.openDrillDownModal('services')" title="Clique para abrir o relatório completo de serviços clínicos" style="height: 290px; position: relative; cursor: pointer;">
+          <div style="height: 290px; position: relative;">
             <canvas id="servicesChart"></canvas>
           </div>
           
@@ -1772,7 +1851,7 @@ export async function renderDashboardTab(container) {
             </div>
           </div>
           
-          <div onclick="window.openDrillDownModal('alerts')" title="Clique para abrir o relatório de farmacovigilância CDSS" style="height: 290px; position: relative; cursor: pointer;">
+          <div style="height: 290px; position: relative;">
             <canvas id="cdssChart"></canvas>
           </div>
 
