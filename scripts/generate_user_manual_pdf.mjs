@@ -18,15 +18,15 @@ async function generateCompleteUserManualPDF() {
       font-family: 'Inter', sans-serif;
       color: #1e293b;
       background: #ffffff;
-      font-size: 9.3px;
-      line-height: 1.38;
+      font-size: 9px;
+      line-height: 1.36;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
     
     @page {
       size: A4;
-      margin: 8mm 10mm 8mm 10mm;
+      margin: 7mm 9mm 7mm 9mm;
     }
 
     .page {
@@ -45,11 +45,11 @@ async function generateCompleteUserManualPDF() {
     .cover-container {
       background: linear-gradient(145deg, #042f2e 0%, #0f172a 50%, #064e3b 100%);
       color: #ffffff;
-      padding: 32px 28px;
+      padding: 30px 26px;
       border-radius: 12px;
       border: 2px solid #14b8a6;
       box-sizing: border-box;
-      min-height: 260mm;
+      min-height: 265mm;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -64,7 +64,7 @@ async function generateCompleteUserManualPDF() {
       padding: 5px 14px;
       border-radius: 999px;
       font-weight: 800;
-      font-size: 10px;
+      font-size: 9.5px;
       letter-spacing: 1px;
       text-transform: uppercase;
       width: fit-content;
@@ -82,48 +82,48 @@ async function generateCompleteUserManualPDF() {
       color: #2dd4bf;
     }
     .cover-subtitle {
-      font-size: 11px;
+      font-size: 10.5px;
       color: #cbd5e1;
       max-width: 660px;
-      line-height: 1.45;
-      margin-bottom: 14px;
+      line-height: 1.4;
+      margin-bottom: 12px;
     }
     .cover-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin: 12px 0;
+      gap: 9px;
+      margin: 10px 0;
     }
     .cover-card {
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 8px;
-      padding: 8px 12px;
+      padding: 8px 11px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 9px;
     }
     .cover-card i {
-      font-size: 16px;
+      font-size: 15px;
       color: #2dd4bf;
     }
     .cover-card strong {
       display: block;
       color: #ffffff;
-      font-size: 10.5px;
+      font-size: 10px;
       font-family: 'Outfit', sans-serif;
     }
     .cover-card span {
       color: #94a3b8;
-      font-size: 8.5px;
+      font-size: 8px;
     }
     .cover-footer {
       border-top: 1px solid rgba(255, 255, 255, 0.15);
-      padding-top: 10px;
+      padding-top: 8px;
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      font-size: 8.5px;
+      font-size: 8px;
       color: #94a3b8;
     }
     .cover-footer strong {
@@ -134,9 +134,9 @@ async function generateCompleteUserManualPDF() {
     .tab-header {
       background: linear-gradient(135deg, #0f172a, #134e4a);
       color: #ffffff;
-      padding: 5px 12px;
+      padding: 5px 11px;
       border-radius: 6px;
-      margin-bottom: 6px;
+      margin-bottom: 5px;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -144,19 +144,19 @@ async function generateCompleteUserManualPDF() {
     }
     .tab-title {
       font-family: 'Outfit', sans-serif;
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 800;
       margin: 0;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
     }
     .tab-tag {
-      font-size: 8px;
+      font-size: 7.5px;
       font-weight: 700;
       text-transform: uppercase;
-      padding: 2px 7px;
-      border-radius: 4px;
+      padding: 2px 6px;
+      border-radius: 3px;
       background: rgba(45, 212, 191, 0.2);
       color: #2dd4bf;
       border: 1px solid rgba(45, 212, 191, 0.4);
@@ -166,51 +166,51 @@ async function generateCompleteUserManualPDF() {
     .section-card {
       background: #ffffff;
       border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      padding: 6px 10px;
-      margin-bottom: 6px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+      border-radius: 5px;
+      padding: 5px 8px;
+      margin-bottom: 5px;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02);
     }
     .section-header {
       display: flex;
       align-items: center;
-      gap: 6px;
-      margin-bottom: 4px;
+      gap: 5px;
+      margin-bottom: 3px;
       font-family: 'Outfit', sans-serif;
       font-weight: 800;
-      font-size: 10px;
+      font-size: 9.8px;
       color: #0f172a;
     }
     .section-header i {
       color: #0d9488;
-      font-size: 11px;
+      font-size: 10.5px;
     }
 
     /* BOX DE EXEMPLO PRÁTICO */
     .example-box {
       background: #f8fafc;
       border: 1.5px solid #0284c7;
-      border-radius: 6px;
-      padding: 6px 10px;
-      margin-bottom: 5px;
+      border-radius: 5px;
+      padding: 6px 8px;
+      margin-bottom: 4px;
     }
     .example-badge {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
       background: #0284c7;
       color: #ffffff;
-      font-size: 8px;
+      font-size: 7.8px;
       font-weight: 800;
-      padding: 2px 6px;
+      padding: 2px 5px;
       border-radius: 3px;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.4px;
       margin-bottom: 3px;
     }
     .example-title {
       font-family: 'Outfit', sans-serif;
-      font-size: 9.5px;
+      font-size: 9.2px;
       font-weight: 800;
       color: #0c4a6e;
       margin-bottom: 3px;
@@ -220,16 +220,16 @@ async function generateCompleteUserManualPDF() {
     .steps-list {
       display: flex;
       flex-direction: column;
-      gap: 3.5px;
+      gap: 3px;
       margin: 2px 0;
     }
     .step-item {
       display: flex;
       align-items: flex-start;
-      gap: 6px;
-      font-size: 8.8px;
+      gap: 5px;
+      font-size: 8.5px;
       color: #334155;
-      line-height: 1.32;
+      line-height: 1.3;
     }
     .step-num {
       width: 14px;
@@ -256,7 +256,7 @@ async function generateCompleteUserManualPDF() {
       padding: 1px 5px;
       border-radius: 3px;
       font-weight: 700;
-      font-size: 8px;
+      font-size: 7.8px;
     }
     .btn-badge-green {
       background: #10b981;
@@ -264,7 +264,7 @@ async function generateCompleteUserManualPDF() {
       padding: 1px 5px;
       border-radius: 3px;
       font-weight: 700;
-      font-size: 8px;
+      font-size: 7.8px;
     }
     .btn-badge-purple {
       background: #9333ea;
@@ -272,7 +272,7 @@ async function generateCompleteUserManualPDF() {
       padding: 1px 5px;
       border-radius: 3px;
       font-weight: 700;
-      font-size: 8px;
+      font-size: 7.8px;
     }
 
     /* CAIXA DE OBSERVAÇÃO CLÍNICA / EXPLICAÇÃO */
@@ -280,12 +280,12 @@ async function generateCompleteUserManualPDF() {
       background: #f0fdf4;
       border: 1px solid #86efac;
       border-left: 3.5px solid #10b981;
-      border-radius: 5px;
-      padding: 5px 8px;
+      border-radius: 4px;
+      padding: 4px 7px;
       margin-top: 3px;
-      font-size: 8.5px;
+      font-size: 8.2px;
       color: #14532d;
-      line-height: 1.3;
+      line-height: 1.28;
     }
     .obs-card strong {
       color: #047857;
@@ -297,9 +297,9 @@ async function generateCompleteUserManualPDF() {
       font-family: 'JetBrains Mono', monospace;
       background: #f1f5f9;
       border: 1px solid #cbd5e1;
-      padding: 1px 4px;
+      padding: 1px 3px;
       border-radius: 3px;
-      font-size: 7.8px;
+      font-size: 7.5px;
       color: #0f766e;
       font-weight: 700;
     }
@@ -309,7 +309,7 @@ async function generateCompleteUserManualPDF() {
       width: 100%;
       border-collapse: collapse;
       margin: 3px 0;
-      font-size: 8.5px;
+      font-size: 8.2px;
     }
     th {
       background: #0f172a;
@@ -317,12 +317,12 @@ async function generateCompleteUserManualPDF() {
       font-family: 'Outfit', sans-serif;
       font-weight: 700;
       text-align: left;
-      padding: 3px 5px;
-      font-size: 8px;
+      padding: 2.5px 4px;
+      font-size: 7.8px;
       text-transform: uppercase;
     }
     td {
-      padding: 2.5px 5px;
+      padding: 2.2px 4px;
       border-bottom: 1px solid #e2e8f0;
       color: #334155;
     }
@@ -332,9 +332,9 @@ async function generateCompleteUserManualPDF() {
 
     .footer-page {
       border-top: 1px solid #e2e8f0;
-      padding-top: 3px;
-      margin-top: 4px;
-      font-size: 7.5px;
+      padding-top: 2px;
+      margin-top: 3px;
+      font-size: 7.2px;
       color: #94a3b8;
       display: flex;
       justify-content: space-between;
@@ -539,7 +539,7 @@ async function generateCompleteUserManualPDF() {
         <p style="font-size: 8.8px; color: #475569; margin-bottom: 3px;">
           Durante a Etapa 4, o sistema executa 4 camadas simultâneas de checagem farmacológica antes de permitir a prescrição:
         </p>
-        <ul style="padding-left: 14px; font-size: 8.5px; color: #334155; line-height: 1.35;">
+        <ul style="padding-left: 14px; font-size: 8.2px; color: #334155; line-height: 1.32;">
           <li><strong>1D - Checagem de Alergias Declaradas:</strong> Bloqueia princípios ativos alergênicos (ex: Dipirona em pacientes hipersensíveis).</li>
           <li><strong>2D - Interações Medicamentosas Medicamento-Medicamento:</strong> Alerta sobre duplicidade de classe ou risco de sangramento/hipotensão.</li>
           <li><strong>3D - Contraindicações Clínicas Patologia-Fármaco:</strong> Avisa sobre hipertensão não controlada, úlcera péptica ou insuficiência renal.</li>
@@ -1020,7 +1020,7 @@ async function generateCompleteUserManualPDF() {
     await page.pdf({
       path: outputPath,
       format: 'A4',
-      margin: { top: '8mm', right: '10mm', bottom: '8mm', left: '10mm' },
+      margin: { top: '7mm', right: '9mm', bottom: '7mm', left: '9mm' },
       printBackground: true
     });
     await browser.close();
