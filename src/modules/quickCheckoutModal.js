@@ -650,8 +650,45 @@ export function openQuickCheckoutModal(onFinished = null, initialData = null) {
       }
     });
 
-    // Salvar no histórico de vendas
+    // Salvar no histórico de vendas global
     localDB.insert('sales', saleRecord);
+
+    // Salvar no Histórico de Compras do Paciente (patient_purchases)
+    cart.forEach(item => {
+      const isCont = (item.product.category && item.product.category.includes('Contínuo')) || 
+                     (item.product.name && (item.product.name.includes('Losartana') || item.product.name.includes('Atenolol') || item.product.name.includes('Metformina') || item.product.name.includes('Enalapril')));
+      localDB.insert('patient_purchases', {
+        id: localDB.generateId('PURCH'),
+        patient_id: patientId || 'PAT-WALKIN',
+        patient_name: clientName,
+        product_id: item.product.id || 'PROD-RX',
+        product_name: item.product.name || item.name,
+        quantity: item.quantity,
+        unit_price: item.unitPrice,
+        total_price: item.quantity * item.unitPrice,
+        is_continuous: isCont,
+        days_supply: isCont ? 30 : null,
+        refill_date: isCont ? new Date(Date.now() + 25 * 86400000).toISOString().split('T')[0] : null,
+        batch: item.product.batch || 'L-DISP-2026',
+        attendance_id: protocol,
+        pharmacist_name: currentUser.name || 'Farmacêutico Responsável',
+        created_at: new Date().toISOString()
+      });
+    });
+
+    // Salvar no Módulo Financeiro & DRE (financial_transactions)
+    localDB.insert('financial_transactions', {
+      id: 'FIN-' + Date.now().toString().slice(-6),
+      type: 'receita',
+      category: 'Venda de Medicamentos (PDV)',
+      description: `Venda #${protocol} — ${cart.map(i => `${i.quantity}x ${i.product.name || i.name}`).join(', ')}`,
+      clientOrSupplier: clientName,
+      amount: net,
+      paymentMethod: paymentNames[selectedPayment] || 'Dinheiro',
+      date: new Date().toISOString(),
+      status: 'recebido',
+      isSimulation: false
+    });
 
     playBeepSound('success');
     syncManager.pushToCloud(false);

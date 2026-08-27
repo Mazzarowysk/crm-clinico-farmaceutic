@@ -4,6 +4,7 @@
 import * as localDB from '../localDB.js';
 import { showToast, showCustomAlert } from './ui.js';
 import { openQuickCheckoutModal } from './quickCheckoutModal.js';
+import { printThermalReceipt } from './thermalReceipt.js';
 
 export function openPatientPurchasesModal(patientId, patientName = 'Cliente') {
   try {
@@ -194,6 +195,13 @@ export function openPatientPurchasesModal(patientId, patientName = 'Cliente') {
                         <small style="color: #64748b; font-size: 0.7rem;">Qtd: ${pur.quantity || 1} un</small>
                       </div>
                     </div>
+                    
+                    <div style="display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px;">
+                      <button type="button" class="btn-print-purchase-receipt" data-purch-id="${pur.id}" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.35); color: #38bdf8; font-size: 0.74rem; font-weight: 700; padding: 5px 12px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: 0.2s;">
+                        <i class="fa-solid fa-receipt"></i> Emitir Cupom Térmico (80mm)
+                      </button>
+                    </div>
+
                     ${refillBanner}
                   </div>
                 `;
@@ -211,6 +219,36 @@ export function openPatientPurchasesModal(patientId, patientName = 'Cliente') {
     document.getElementById('btn-close-purchases-modal')?.addEventListener('click', closeModal);
     modal.addEventListener('click', (e) => {
       if (e.target === modal) closeModal();
+    });
+
+    // Listener para Emitir Cupom Térmico da Compra
+    modal.querySelectorAll('.btn-print-purchase-receipt').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const purchId = btn.getAttribute('data-purch-id');
+        const purchase = allPurchases.find(p => String(p.id) === String(purchId));
+        if (purchase) {
+          const saleData = {
+            protocol: purchase.attendance_id || `VD-${(purchase.id || '').slice(-6)}`,
+            clientName: pName,
+            clientCpf: patient.cpf || '',
+            items: [
+              {
+                product: { name: purchase.product_name, ean: '' },
+                quantity: purchase.quantity || 1,
+                unitPrice: purchase.unit_price || purchase.total_price || 0,
+                subtotal: purchase.total_price || purchase.unit_price || 0
+              }
+            ],
+            subtotalGross: purchase.total_price || purchase.unit_price || 0,
+            discount: 0,
+            totalSale: purchase.total_price || purchase.unit_price || 0,
+            paymentMethod: 'Balcão / Caixa',
+            operatorName: purchase.pharmacist_name || 'Farmacêutico Responsável',
+            created_at: purchase.created_at || new Date().toISOString()
+          };
+          printThermalReceipt(saleData, '80mm');
+        }
+      });
     });
 
     // Abrir Caixa / PDV Rápido
