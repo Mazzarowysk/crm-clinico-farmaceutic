@@ -227,31 +227,35 @@ function renderBalcaoStepContent(step, patient, allPatients, activeMeds) {
         </div>
 
         <!-- Lista Rápida de Pacientes Recentes -->
-        <h4 style="color: var(--text-secondary); font-size: 0.84rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 12px;">
-          Pacientes Cadastrados no CRM
-        </h4>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+          <h4 style="color: var(--text-secondary); font-size: 0.84rem; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">
+            Pacientes Cadastrados no CRM
+          </h4>
+          <span style="font-size: 0.78rem; color: #2dd4bf; font-weight: 600;">
+            <i class="fa-solid fa-hand-pointer"></i> Clique no paciente para iniciar a triagem
+          </span>
+        </div>
 
-        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px;">
           ${allPatients.map(p => `
-            <div class="pharmacy-glass-card patient-select-card ${patient?.id === p.id ? 'selected' : ''}" data-patient-id="${p.id}" style="padding: 16px; cursor: pointer; border: 1px solid ${patient?.id === p.id ? '#0d9488' : 'rgba(255,255,255,0.07)'}; background: ${patient?.id === p.id ? 'rgba(13, 148, 136, 0.15)' : 'rgba(30, 41, 59, 0.45)'};">
+            <div class="pharmacy-glass-card patient-select-card ${patient?.id === p.id ? 'selected' : ''}" data-patient-id="${p.id}" style="padding: 16px; cursor: pointer; border-radius: 12px; border: ${patient?.id === p.id ? '2px solid #2dd4bf' : '1px solid rgba(255,255,255,0.1)'}; background: ${patient?.id === p.id ? 'linear-gradient(135deg, rgba(13, 148, 136, 0.3), rgba(15, 23, 42, 0.9))' : 'rgba(30, 41, 59, 0.6)'}; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 4px 14px rgba(0,0,0,0.25);">
               <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                <div style="font-weight: 700; color: #f8fafc; font-size: 0.95rem;">${p.name}</div>
+                <div style="font-weight: 700; color: #ffffff; font-size: 0.98rem; font-family: 'Outfit', sans-serif;">${p.name || p.fullName}</div>
                 ${p.isPregnantOrLactating ? '<span style="background: rgba(244, 114, 182, 0.2); color: #f472b6; border: 1px solid rgba(244, 114, 182, 0.4); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 700;">Gestante</span>' : ''}
               </div>
-              <div style="font-size: 0.8rem; color: #94a3b8;">CPF: ${p.cpf}</div>
-              <div style="font-size: 0.8rem; color: #94a3b8;">Idade: ${p.age} anos (${p.gender})</div>
-              ${p.allergies ? `<div style="font-size: 0.78rem; color: #f87171; margin-top: 6px;">⚠️ ${p.allergies}</div>` : ''}
+              <div style="font-size: 0.8rem; color: #94a3b8;">CPF: <strong style="color: #cbd5e1;">${p.cpf || 'Não informado'}</strong></div>
+              <div style="font-size: 0.8rem; color: #94a3b8;">Idade: ${p.age || '—'} anos (${p.gender || 'Não Informado'})</div>
+              ${p.allergies ? `<div style="font-size: 0.78rem; color: #f87171; font-weight: 700; margin-top: 6px; background: rgba(239, 68, 68, 0.12); padding: 3px 6px; border-radius: 6px; border: 1px solid rgba(239,68,68,0.25);">⚠️ Alergias: ${p.allergies}</div>` : '<div style="font-size: 0.74rem; color: #34d399; margin-top: 6px;">✓ Sem alergias conhecidas</div>'}
+              
+              <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.72rem; color: #94a3b8;">Selecionar</span>
+                <span style="background: linear-gradient(135deg, #0d9488, #0f766e); color: #fff; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;">
+                  Triagem <i class="fa-solid fa-arrow-right" style="font-size: 0.7rem;"></i>
+                </span>
+              </div>
             </div>
           `).join('')}
         </div>
-
-        ${patient ? `
-          <div style="margin-top: 28px; display: flex; justify-content: flex-end;">
-            <button type="button" id="btn-advance-to-step-2" class="btn btn-primary" style="background: linear-gradient(135deg, #0d9488, #0f766e); border: none; padding: 12px 28px; font-size: 1rem; font-weight: 700; box-shadow: 0 4px 14px rgba(13, 148, 136, 0.4);">
-              Avançar para Triagem de Queixas <i class="fa-solid fa-arrow-right" style="margin-left: 8px;"></i>
-            </button>
-          </div>
-        ` : ''}
       </div>
     `;
   }
@@ -653,6 +657,9 @@ function setupBalcaoStepListeners(step, allPatients) {
         const found = allPatients.find(p => p.id === pId);
         if (found) {
           currentClinicalEncounter.patient = found;
+          currentClinicalEncounter.step = 2;
+          try { playBeepSound('success'); } catch(e) {}
+          showToast(`👤 Paciente "${found.name || found.fullName}" selecionado com sucesso!`);
           renderBalcaoAtendimentoView(document.getElementById('pharmacy-subtab-content'));
         }
       });
@@ -667,9 +674,31 @@ function setupBalcaoStepListeners(step, allPatients) {
       });
     });
 
-    document.getElementById('btn-advance-to-step-2')?.addEventListener('click', () => {
-      currentClinicalEncounter.step = 2;
-      renderBalcaoAtendimentoView(document.getElementById('pharmacy-subtab-content'));
+    const handleSearchSelect = () => {
+      const term = (searchInput?.value || '').trim().toLowerCase();
+      if (!term) {
+        showToast('Digite o nome ou CPF para buscar o paciente.');
+        return;
+      }
+      const found = allPatients.find(p => 
+        (p.name && p.name.toLowerCase().includes(term)) ||
+        (p.fullName && p.fullName.toLowerCase().includes(term)) ||
+        (p.cpf && p.cpf.replace(/\D/g, '').includes(term.replace(/\D/g, '')))
+      );
+      if (found) {
+        currentClinicalEncounter.patient = found;
+        currentClinicalEncounter.step = 2;
+        try { playBeepSound('success'); } catch(e) {}
+        showToast(`👤 Paciente "${found.name || found.fullName}" selecionado!`);
+        renderBalcaoAtendimentoView(document.getElementById('pharmacy-subtab-content'));
+      } else {
+        showCustomAlert({ title: 'Paciente Não Encontrado', message: 'Nenhum paciente encontrado com esse critério de busca. Você pode cadastrar um novo paciente no botão "+ Novo Paciente Clínico".', type: 'info' });
+      }
+    };
+
+    document.getElementById('btn-select-searched-patient')?.addEventListener('click', handleSearchSelect);
+    searchInput?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleSearchSelect();
     });
   }
 
