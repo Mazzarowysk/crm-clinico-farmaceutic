@@ -11,6 +11,8 @@
     "build": "vite build",
     "build:pdf": "node scripts/generate_executive_report_pdf.mjs",
     "build:manual": "node scripts/generate_user_manual_pdf.mjs",
+    "test": "npx vitest run",
+    "test:watch": "npx vitest",
     "preview": "vite preview",
     "start": "node backend/server.js"
   },

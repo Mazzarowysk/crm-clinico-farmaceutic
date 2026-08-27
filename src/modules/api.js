@@ -96,7 +96,7 @@ export const apiFetch = async (url, options = {}) => {
       let users = localDB.list('users') || [];
       let user = users.find(u => (u.username || '').replace('@', '').toLowerCase().trim() === cleanInput);
       
-      // Fallback especial para mazzarowysk se não encontrado
+      // Fallbacks para usuários padrão do sistema caso não estejam no banco local
       if (!user && cleanInput === 'mazzarowysk') {
         user = {
           id: 'USR-MAZZAROWYSK',
@@ -105,6 +105,28 @@ export const apiFetch = async (url, options = {}) => {
           role: 'Master',
           crf: 'CRF-SP 54180',
           password: 'T@zm4n1c0054180',
+          status: 'Ativo'
+        };
+        localDB.insert('users', user);
+      } else if (!user && cleanInput === 'admin') {
+        user = {
+          id: 'USR-ADMIN',
+          name: 'Gestor Master',
+          username: 'admin',
+          role: 'Master',
+          crf: 'CRF-SP 54180',
+          password: 'admin123',
+          status: 'Ativo'
+        };
+        localDB.insert('users', user);
+      } else if (!user && cleanInput === 'farmacia') {
+        user = {
+          id: 'USR-FARMACIA',
+          name: 'Farmacêutico RT',
+          username: 'farmacia',
+          role: 'Farmacêutico RT',
+          crf: 'CRF-SP 12345',
+          password: 'admin123',
           status: 'Ativo'
         };
         localDB.insert('users', user);
@@ -125,8 +147,8 @@ export const apiFetch = async (url, options = {}) => {
             (storedPassword ? (providedPassword === storedPassword || defaultAllowedPasswords.includes(providedPassword)) : defaultAllowedPasswords.includes(providedPassword));
 
           if (isPasswordCorrect) {
-            // Garantir que a role de mazzarowysk é sempre Master
-            if (cleanInput === 'mazzarowysk') {
+            // Garantir que a role de mazzarowysk e admin é sempre Master
+            if (cleanInput === 'mazzarowysk' || cleanInput === 'admin') {
               user.role = 'Master';
               user.status = 'Ativo';
             }

@@ -1,9 +1,10 @@
 // src/modules/universalSearch.js
-// MOTOR DE BUSCA UNIVERSAL COM PLN (PROCESSAMENTO DE LINGUAGEM NATURAL) & RECONHECIMENTO DE INTENÇÃO
+// MOTOR DE BUSCA UNIVERSAL COM IA / PLN (PROCESSAMENTO DE LINGUAGEM NATURAL) & RECONHECIMENTO DE INTENÇÃO
 
 import { state } from '../state.js';
 import * as localDB from '../localDB.js';
 import { showToast } from './ui.js';
+import { manualData } from '../manualTabbed.js';
 
 // Normalização avançada de texto para PLN
 export function normalizePLN(str) {
@@ -17,8 +18,32 @@ export function normalizePLN(str) {
     .trim();
 }
 
-// Dicionário de Sinônimos e Mapeamento Semântico Farmacêutico / Clínico
+// Dicionário de Sinônimos e Mapeamento Semântico Farmacêutico / Clínico / Ações do Sistema
 const CLINICAL_SYNONYMS = {
+  // Ações de Cadastro & Inclusão
+  'incluir': 'cadastrar',
+  'inclu': 'cadastrar',
+  'inserir': 'cadastrar',
+  'adicionar': 'cadastrar',
+  'add': 'cadastrar',
+  'novo': 'cadastrar',
+  'nova': 'cadastrar',
+  'criar': 'cadastrar',
+  'registrar': 'cadastrar',
+  'registro': 'cadastrar',
+  'cadastro': 'cadastrar',
+  'cad': 'cadastrar',
+
+  // Clientes & Pacientes
+  'cliente': 'paciente',
+  'clientes': 'paciente',
+  'clie': 'paciente',
+  'paciente': 'paciente',
+  'pacientes': 'paciente',
+  'paci': 'paciente',
+  'pessoa': 'paciente',
+  'usuario': 'paciente',
+
   // Compras & Adesão
   'compra': 'compras',
   'compras': 'compras',
@@ -46,6 +71,10 @@ const CLINICAL_SYNONYMS = {
   'comprovante': 'pdv',
   'cupom termico': 'pdv',
   'boleto': 'pdv',
+  'sangria': 'caixa_controle',
+  'suprimento': 'caixa_controle',
+  'fechar caixa': 'caixa_controle',
+  'abrir caixa': 'caixa_controle',
 
   // Atendimento & Balcão
   'atendimento': 'balcao',
@@ -62,6 +91,7 @@ const CLINICAL_SYNONYMS = {
   'mips': 'balcao',
   'soap': 'balcao',
   'triagem': 'balcao',
+  'queixa': 'balcao',
 
   // Sintomas / Queixas
   'dor de cabeca': 'cefaleia',
@@ -94,7 +124,7 @@ const CLINICAL_SYNONYMS = {
   'diabetes': 'glicemia',
   'acucar': 'glicemia',
 
-  // Estoque
+  // Estoque & NF-e
   'estoque': 'estoque',
   'produtos': 'estoque',
   'remedios': 'estoque',
@@ -102,6 +132,20 @@ const CLINICAL_SYNONYMS = {
   'validade': 'estoque',
   'lote': 'estoque',
   'kardex': 'estoque',
+  'nfe': 'nfe',
+  'xml': 'nfe',
+  'nota fiscal': 'nfe',
+  'fornecedor': 'nfe',
+  'entrada': 'nfe',
+
+  // Precificação
+  'precificacao': 'precificacao',
+  'precificar': 'precificacao',
+  'markup': 'precificacao',
+  'margem': 'precificacao',
+  'preco': 'precificacao',
+  'cmed': 'precificacao',
+  'pmc': 'precificacao',
 
   // Financeiro
   'financeiro': 'financeiro',
@@ -118,35 +162,43 @@ const CLINICAL_SYNONYMS = {
   'cff': 'dsf',
   'declaracao de servico': 'dsf',
 
-  // Configurações
+  // Configurações & Ajuda
   'configuracao': 'configuracoes',
   'configuracoes': 'configuracoes',
   'usuario': 'configuracoes',
   'usuarios': 'configuracoes',
   'senha': 'configuracoes',
   'crf': 'configuracoes',
-  'cnpj': 'configuracoes'
+  'cnpj': 'configuracoes',
+  'ajuda': 'manual',
+  'manual': 'manual',
+  'tutorial': 'manual',
+  'como usar': 'manual'
 };
 
 // Matriz de Ações Rápidas & Intenções Inteligentes
 export const SYSTEM_INTENTS = [
   {
-    id: 'intent_precificacao',
-    title: '🏷️ Precificação Farmacêutica Inteligente & Formação de Preço',
-    subtitle: 'Calcular Markup, Margem de Contribuição, Impostos, Ponto de Equilíbrio e Trava Anvisa/CMED',
+    id: 'intent_novo_paciente',
+    title: '👤 Cadastrar Novo Cliente & Registrar Queixa',
+    subtitle: 'Abrir ficha limpa de cliente, endereço de entrega, WhatsApp, histórico clínico e queixa para indicação medicamentosa',
     category: 'Ações Rápidas',
-    keywords: ['precificacao', 'precificar', 'formacao de preco', 'preco de venda', 'markup', 'margem de lucro', 'margem', 'calcular preco', 'custo de aquisicao', 'pmc', 'anvisa preco', 'dre produto'],
-    badge: 'Módulo Precificação',
-    badgeColor: '#f59e0b',
-    icon: 'fa-calculator',
-    iconColor: '#fbbf24',
+    keywords: [
+      'novo paciente', 'cadastrar paciente', 'novo cliente', 'cadastrar cliente', 'adicionar paciente', 'adicionar cliente',
+      'incluir cliente', 'incluir paciente', 'incluir clie', 'incluir paci', 'como incluir cliente', 'como cadastrar cliente',
+      'como adicionar cliente', 'como cadastrar paciente', 'novo cadastro', 'cadastrar novo', 'ficha cliente', 'criar cliente',
+      'registrar cliente', 'cadastrar clie', 'adicionar clie', 'inserir cliente', 'inserir paciente', 'abrir cadastro', 'novo pedido'
+    ],
+    badge: 'Cadastro & Queixa',
+    badgeColor: '#38bdf8',
+    icon: 'fa-user-plus',
+    iconColor: '#38bdf8',
     execute: () => {
-      if (typeof window.openPricingCalculatorModal === 'function') {
-        window.openPricingCalculatorModal();
-      } else {
-        if (window.switchTab) window.switchTab('estoque');
-        showToast('🏷️ Abrindo Calculadora de Precificação...');
-      }
+      if (window.switchTab) window.switchTab('pacientes');
+      setTimeout(() => {
+        const btn = document.getElementById('btn-new-patient') || document.getElementById('btn-quick-purchases-header');
+        if (btn) btn.click();
+      }, 250);
     }
   },
   {
@@ -154,7 +206,10 @@ export const SYSTEM_INTENTS = [
     title: '🛒 Histórico de Compras & Adesão Terapêutica dos Pacientes',
     subtitle: 'Consultar medicamentos adquiridos, dispensações no balcão e alertas de recompra (refill)',
     category: 'Ações Rápidas',
-    keywords: ['compras', 'compra', 'historico de compras', 'aquisicao', 'recompra', 'adesao', 'posologia', 'o que o paciente comprou', 'refill', 'dispensacao anterior'],
+    keywords: [
+      'compras', 'compra', 'historico de compras', 'aquisicao', 'recompra', 'adesao', 'posologia',
+      'o que o paciente comprou', 'refill', 'dispensacao anterior', 'como ver compras', 'compras do cliente'
+    ],
     badge: 'Módulo Compras',
     badgeColor: '#10b981',
     icon: 'fa-cart-shopping',
@@ -171,11 +226,36 @@ export const SYSTEM_INTENTS = [
     }
   },
   {
+    id: 'intent_precificacao',
+    title: '🏷️ Precificação Farmacêutica Inteligente & Formação de Preço',
+    subtitle: 'Calcular Markup, Margem de Contribuição, Impostos, Ponto de Equilíbrio e Trava Anvisa/CMED',
+    category: 'Ações Rápidas',
+    keywords: [
+      'precificacao', 'precificar', 'formacao de preco', 'preco de venda', 'markup', 'margem de lucro',
+      'margem', 'calcular preco', 'custo de aquisicao', 'pmc', 'anvisa preco', 'dre produto', 'como precificar', 'como calcular preco'
+    ],
+    badge: 'Módulo Precificação',
+    badgeColor: '#f59e0b',
+    icon: 'fa-calculator',
+    iconColor: '#fbbf24',
+    execute: () => {
+      if (typeof window.openPricingCalculatorModal === 'function') {
+        window.openPricingCalculatorModal();
+      } else {
+        if (window.switchTab) window.switchTab('estoque');
+        showToast('🏷️ Abrindo Calculadora de Precificação...');
+      }
+    }
+  },
+  {
     id: 'intent_pdv',
     title: '⚡ Frente de Caixa & PDV Clínico por Código de Barras',
     subtitle: 'Venda rápida, leitor de código de barras (EAN), formas de pagamento e emissão de cupom térmico',
     category: 'Ações Rápidas',
-    keywords: ['caixa', 'pdv', 'frente de caixa', 'bipar', 'codigo de barras', 'ean', 'venda', 'vender', 'cupom', 'cupom termico', 'comprovante', 'boleto'],
+    keywords: [
+      'caixa', 'pdv', 'frente de caixa', 'bipar', 'codigo de barras', 'ean', 'venda', 'vender',
+      'cupom', 'cupom termico', 'comprovante', 'boleto', 'passar no caixa', 'como vender'
+    ],
     badge: 'Frente de Caixa',
     badgeColor: '#06b6d4',
     icon: 'fa-cash-register',
@@ -191,7 +271,7 @@ export const SYSTEM_INTENTS = [
     title: '💰 Controle & Fechamento de Caixa',
     subtitle: 'Abertura, conferência de sangria, suprimento, saldo e fechamento com comprovante térmico',
     category: 'Ações Rápidas',
-    keywords: ['abrir caixa', 'fechar caixa', 'sangria', 'suprimento', 'saldo do caixa', 'fluxo caixa', 'fechamento'],
+    keywords: ['abrir caixa', 'fechar caixa', 'sangria', 'suprimento', 'saldo do caixa', 'fluxo caixa', 'fechamento', 'como abrir caixa', 'como fechar caixa'],
     badge: 'Financeiro',
     badgeColor: '#f59e0b',
     icon: 'fa-vault',
@@ -207,7 +287,7 @@ export const SYSTEM_INTENTS = [
     title: '🩺 Novo Atendimento Clínico & Balcão Farmacêutico',
     subtitle: 'Triagem de sintomas (Gripe, Cefaleia, Tosse, Rinite...), CDSS 4D e prescrição farmacêutica',
     category: 'Ações Rápidas',
-    keywords: ['novo atendimento', 'atender', 'consulta', 'balcao', 'prescrever', 'prescricao', 'receita', 'indicacao', 'mips', 'triagem', 'soap'],
+    keywords: ['novo atendimento', 'atender', 'consulta', 'balcao', 'prescrever', 'prescricao', 'receita', 'indicacao', 'mips', 'triagem', 'soap', 'como prescrever', 'como atender'],
     badge: 'Clínica & Balcão',
     badgeColor: '#10b981',
     icon: 'fa-stethoscope',
@@ -280,23 +360,6 @@ export const SYSTEM_INTENTS = [
     execute: () => {
       if (window.switchTab) window.switchTab('farmacia');
       showToast('🩸 Selecione Teste de Glicemia Capilar no Balcão.');
-    }
-  },
-  {
-    id: 'intent_novo_paciente',
-    title: '👤 Cadastrar Novo Paciente / Cliente',
-    subtitle: 'Cadastro completo de identificação, WhatsApp, endereço de entrega e convênios PBM',
-    category: 'Ações Rápidas',
-    keywords: ['novo paciente', 'cadastrar paciente', 'novo cliente', 'cadastrar cliente', 'adicionar paciente'],
-    badge: 'Cadastro',
-    badgeColor: '#38bdf8',
-    icon: 'fa-user-plus',
-    iconColor: '#38bdf8',
-    execute: () => {
-      if (window.switchTab) window.switchTab('pacientes');
-      setTimeout(() => {
-        document.getElementById('btn-add-patient')?.click();
-      }, 250);
     }
   },
   {
@@ -398,15 +461,60 @@ export const SYSTEM_INTENTS = [
     icon: 'fa-book-medical',
     iconColor: '#2dd4bf',
     execute: () => {
-      document.getElementById('btn-header-manual')?.click();
+      if (typeof window.showInteractiveManualModal === 'function') {
+        window.showInteractiveManualModal();
+      } else {
+        document.getElementById('btn-header-manual')?.click();
+      }
     }
   }
 ];
 
-// Função Principal de Pesquisa Semântica PLN
+// Compara se um termo de busca bate com uma palavra-alvo usando sinônimos e prefixos (Fuzzy)
+function tokenMatchesTarget(token, targetWord) {
+  if (!token || !targetWord) return false;
+  const t = token.toLowerCase();
+  const target = targetWord.toLowerCase();
+  
+  if (target.includes(t) || t.includes(target)) return true;
+  if (t.length >= 3 && target.startsWith(t)) return true;
+  if (target.length >= 3 && t.startsWith(target)) return true;
+
+  // Consulta tabela de sinônimos
+  const mappedSyn = CLINICAL_SYNONYMS[t];
+  if (mappedSyn && (target.includes(mappedSyn) || mappedSyn.includes(target))) {
+    return true;
+  }
+
+  return false;
+}
+
+// Avalia se uma frase/conjunto de keywords atende aos tokens digitados
+function matchIntentTokens(qTokens, keywordsList, titleNorm, subtitleNorm) {
+  // Ignora tokens de pergunta comuns para focar na intenção central
+  const contentTokens = qTokens.filter(t => !['como', 'onde', 'qual', 'o', 'a', 'de', 'do', 'da', 'para', 'em', 'um', 'uma'].includes(t));
+  const tokensToTest = contentTokens.length > 0 ? contentTokens : qTokens;
+
+  return keywordsList.some(kw => {
+    const kwNorm = normalizePLN(kw);
+    const kwTokens = kwNorm.split(' ');
+
+    return tokensToTest.every(t => {
+      // O token bate com a keyword completa ou com alguma palavra individual dela?
+      if (kwNorm.includes(t)) return true;
+      if (kwTokens.some(kwToken => tokenMatchesTarget(t, kwToken))) return true;
+      if (tokenMatchesTarget(t, kwNorm)) return true;
+      return false;
+    });
+  }) || tokensToTest.every(t => {
+    return titleNorm.split(' ').some(w => tokenMatchesTarget(t, w)) || subtitleNorm.split(' ').some(w => tokenMatchesTarget(t, w));
+  });
+}
+
+// Função Principal de Pesquisa Semântica PLN & IA
 export function searchSystemWithPLN(rawQuery) {
   const query = (rawQuery || '').trim();
-  if (!query) return { intents: [], patients: [], products: [], attendances: [], sales: [] };
+  if (!query) return { intents: [], helpGuides: [], patients: [], products: [], attendances: [], sales: [] };
 
   const qNorm = normalizePLN(query);
   const qTokens = qNorm.split(' ').filter(Boolean);
@@ -420,35 +528,61 @@ export function searchSystemWithPLN(rawQuery) {
     // Correspondência direta
     if (titleNorm.includes(qNorm) || subtitleNorm.includes(qNorm)) return true;
 
-    // Correspondência de palavras-chave e sinônimos
-    const hasKeyword = item.keywords.some(kw => {
-      const kwNorm = normalizePLN(kw);
-      if (kwNorm.includes(qNorm) || qNorm.includes(kwNorm)) return true;
-      return qTokens.every(t => {
-        const syn = CLINICAL_SYNONYMS[t] || t;
-        return kwNorm.includes(syn) || kwNorm.includes(t);
-      });
-    });
-
-    if (hasKeyword) return true;
-
-    // Todos os tokens presentes no título ou subtítulo
-    return qTokens.every(t => titleNorm.includes(t) || subtitleNorm.includes(t));
+    // Correspondência de PLN com expansão semântica
+    return matchIntentTokens(qTokens, item.keywords, titleNorm, subtitleNorm);
   });
 
-  // 2. Busca Universal em Pacientes / Clientes
+  // 2. Busca de Ajuda & Guia do Manual Interativo (IA / Procedimentos)
+  const helpGuides = [];
+  if (Array.isArray(manualData)) {
+    manualData.forEach(tab => {
+      // Busca nos botões e funcionalidades do manual
+      tab.buttons?.forEach(btn => {
+        const btnName = normalizePLN(btn.name);
+        const btnDesc = normalizePLN(btn.description);
+        const btnKw = (btn.keywords || []).map(normalizePLN).join(' ');
+        
+        const isMatch = qTokens.some(t => {
+          if (['como', 'onde', 'qual', 'de', 'para', 'em'].includes(t)) return false;
+          return btnName.includes(t) || btnDesc.includes(t) || btnKw.includes(t) || (CLINICAL_SYNONYMS[t] && (btnName.includes(CLINICAL_SYNONYMS[t]) || btnDesc.includes(CLINICAL_SYNONYMS[t])));
+        });
+
+        if (isMatch) {
+          helpGuides.push({
+            id: `manual_btn_${tab.id}_${normalizePLN(btn.name).substring(0, 15)}`,
+            title: `📖 ${btn.name}`,
+            subtitle: `${btn.description} (Local: ${tab.title} • ${btn.shortcut})`,
+            category: 'Guia do Manual',
+            badge: tab.title,
+            badgeColor: tab.color || '#2dd4bf',
+            icon: btn.icon || 'fa-book-open',
+            iconColor: btn.color || '#2dd4bf',
+            execute: () => {
+              if (typeof window.showInteractiveManualModal === 'function') {
+                window.showInteractiveManualModal(tab.id);
+              }
+            }
+          });
+        }
+      });
+    });
+  }
+
+  // 3. Busca Universal em Pacientes / Clientes
   const allPatients = [
     ...(localDB.list('pharmacy_patients') || []),
     ...(localDB.list('patients') || []),
     ...(state.patients || [])
   ];
-  // Deduplicar pacientes por ID ou CPF ou Nome
+  // Deduplicar pacientes por Nome e CPF
   const uniquePatients = [];
   const seenP = new Set();
   allPatients.forEach(p => {
     if (!p) return;
-    const key = p.id || p.cpf || p.fullName || p.name;
-    if (!seenP.has(key)) {
+    const cleanName = normalizePLN((p.fullName || p.name || '').replace(/\[simulado\]/gi, ''));
+    const cleanCpf = (p.cpf || '').replace(/\D/g, '');
+    const key = cleanCpf && cleanCpf.length === 11 ? `cpf:${cleanCpf}` : `name:${cleanName}`;
+    if (!seenP.has(key) && cleanName) {
       seenP.add(key);
       uniquePatients.push(p);
     }
@@ -463,14 +597,13 @@ export function searchSystemWithPLN(rawQuery) {
     const allergies = normalizePLN(p.allergies || '');
 
     if (name.includes(qNorm)) return true;
-    if (qDigits && cpf.includes(qDigits)) return true;
-    if (qDigits && phone.includes(qDigits)) return true;
+    if (qDigits.length >= 3 && (cpf.includes(qDigits) || phone.includes(qDigits))) return true;
     if (conditions.includes(qNorm) || meds.includes(qNorm) || allergies.includes(qNorm)) return true;
 
     return qTokens.every(t => name.includes(t) || conditions.includes(t) || meds.includes(t) || allergies.includes(t));
   });
 
-  // 3. Busca Universal em Medicamentos & Produtos
+  // 4. Busca Universal em Medicamentos & Produtos
   const allProducts = localDB.list('products') || [];
   const matchedProducts = allProducts.filter(prod => {
     if (!prod) return false;
@@ -481,12 +614,12 @@ export function searchSystemWithPLN(rawQuery) {
     const batch = normalizePLN(prod.batch || '');
 
     if (name.includes(qNorm) || dcb.includes(qNorm) || category.includes(qNorm) || batch.includes(qNorm)) return true;
-    if (qDigits && ean.includes(qDigits)) return true;
+    if (qDigits.length >= 3 && ean.includes(qDigits)) return true;
 
     return qTokens.every(t => name.includes(t) || dcb.includes(t) || category.includes(t));
   });
 
-  // 4. Busca Universal em Atendimentos Clínicos & Prescrições
+  // 5. Busca Universal em Atendimentos Clínicos & Prescrições
   const allAttendances = [
     ...(localDB.list('pharmacy_attendances') || []),
     ...(localDB.list('clinical_attendances') || [])
@@ -503,7 +636,7 @@ export function searchSystemWithPLN(rawQuery) {
     return qTokens.every(t => pName.includes(t) || complaint.includes(t) || conduct.includes(t));
   });
 
-  // 5. Busca Universal em Vendas & Histórico de Compras
+  // 6. Busca Universal em Vendas & Histórico de Compras
   const allSales = [
     ...(localDB.list('sales') || []),
     ...(localDB.list('patient_purchases') || [])
@@ -521,9 +654,10 @@ export function searchSystemWithPLN(rawQuery) {
 
   return {
     intents: matchedIntents,
-    patients: matchedPatients,
-    products: matchedProducts,
-    attendances: matchedAttendances,
-    sales: matchedSales
+    helpGuides: helpGuides.slice(0, 4),
+    patients: matchedPatients.slice(0, 6),
+    products: matchedProducts.slice(0, 6),
+    attendances: matchedAttendances.slice(0, 4),
+    sales: matchedSales.slice(0, 4)
   };
 }

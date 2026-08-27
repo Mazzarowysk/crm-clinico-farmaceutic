@@ -1,8 +1,18 @@
+const getStoredToken = () => typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('hn_token') : null;
+const getStoredUser = () => {
+  if (typeof sessionStorage === 'undefined') return null;
+  try {
+    return JSON.parse(sessionStorage.getItem('hn_user')) || null;
+  } catch {
+    return null;
+  }
+};
+
 export const state = {
   activeTab: 'dashboard',
-  isAuthenticated: !!sessionStorage.getItem('hn_token'),
-  token: sessionStorage.getItem('hn_token') || null,
-  user: JSON.parse(sessionStorage.getItem('hn_user')) || null,
+  isAuthenticated: !!getStoredToken(),
+  token: getStoredToken(),
+  user: getStoredUser(),
   dashboardData: {
     activePatients: 0,
     occupancyRate: 0,

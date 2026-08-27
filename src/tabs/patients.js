@@ -74,13 +74,28 @@ export function renderPatientsTab(contentArea) {
               
               <!-- 1. IDENTIFICAÇÃO DO CLIENTE -->
               <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 18px 20px;">
-                <div style="font-size: 0.82rem; font-weight: 800; color: #38bdf8; text-transform: uppercase; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
-                  <i class="fa-solid fa-id-card"></i> 1. Identificação do Cliente
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+                  <div style="font-size: 0.82rem; font-weight: 800; color: #38bdf8; text-transform: uppercase; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-id-card"></i> 1. Identificação do Cliente
+                  </div>
+                  <button type="button" id="btn-modal-clear-client" style="background: rgba(239, 68, 68, 0.12); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); padding: 4px 10px; border-radius: 6px; font-size: 0.74rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 4px; transition: all 0.2s;">
+                    <i class="fa-solid fa-eraser"></i> Limpar / Novo Cliente
+                  </button>
                 </div>
 
-                <div class="form-group" style="margin-bottom: 12px;">
+                <!-- BUSCA RÁPIDA DE CLIENTE JÁ CADASTRADO -->
+                <div style="position: relative; margin-bottom: 14px;">
+                  <div style="position: relative; display: flex; align-items: center;">
+                    <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 12px; color: #38bdf8; font-size: 0.85rem;"></i>
+                    <input type="text" id="modal-quick-search-client" class="form-input" placeholder="🔍 Cliente já cadastrado? Busque por Nome, CPF ou Telefone para preencher..." autocomplete="off" style="padding: 9px 12px 9px 34px; font-size: 0.82rem; background: rgba(15, 23, 42, 0.85); border-color: rgba(56, 189, 248, 0.4); color: #ffffff; width: 100%; box-sizing: border-box; border-radius: 8px;">
+                  </div>
+                  <div id="modal-client-search-results" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #0f172a; border: 1.5px solid #38bdf8; border-radius: 8px; z-index: 1050; max-height: 220px; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.8); margin-top: 4px;"></div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 12px; position: relative;">
                   <label class="form-label" for="fullName" style="font-size: 0.82rem; font-weight: 600; margin-bottom: 5px; display: block;">* Nome Completo do Cliente:</label>
-                  <input type="text" id="fullName" class="form-input" placeholder="Nome completo do cliente" style="padding: 10px 14px;">
+                  <input type="text" id="fullName" class="form-input" placeholder="Nome completo do cliente" autocomplete="off" style="padding: 10px 14px;">
+                  <div id="fullname-client-search-results" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: #0f172a; border: 1.5px solid #38bdf8; border-radius: 8px; z-index: 1050; max-height: 220px; overflow-y: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.8); margin-top: 4px;"></div>
                 </div>
                 
                 <div class="form-row" style="display: grid; grid-template-columns: 1.1fr 1fr; gap: 12px; margin-bottom: 12px;">
@@ -697,16 +712,7 @@ export function renderPatientsTab(contentArea) {
     purchasesHeaderBtn.onclick = (e) => {
       e.preventDefault();
       e.stopPropagation();
-      const currentPatients = [
-        ...(localDB.list('pharmacy_patients') || []),
-        ...(localDB.list('patients') || [])
-      ];
-      const targetPatient = state.activePatient || (allPatients && allPatients[0]) || currentPatients[0];
-      if (targetPatient) {
-        openPatientPurchasesModal(targetPatient.id, targetPatient.fullName || targetPatient.name);
-      } else {
-        showToast('⚠️ Cadastre ou selecione um cliente para ver o histórico de compras.');
-      }
+      document.getElementById('btn-new-patient')?.click();
     };
   }
 
@@ -1241,6 +1247,271 @@ export function renderPatientsTab(contentArea) {
     if (modalOverlay) modalOverlay.style.display = 'none';
   };
 
+  // Preenche dados do paciente no formulário mantendo a seção de queixa/indicação limpa para nova visita
+  const populatePatientIntoForm = (p) => {
+    if (!p) return;
+    document.getElementById('editId').value = p.id || '';
+    document.getElementById('fullName').value = p.fullName || p.name || '';
+    document.getElementById('cpf').value = p.cpf || '';
+    document.getElementById('birthDate').value = p.birthDate || '';
+    
+    if (document.getElementById('gender')) document.getElementById('gender').value = p.gender || 'Não Informado';
+    if (document.getElementById('healthPlan')) document.getElementById('healthPlan').value = p.healthPlan || 'Particular';
+    if (document.getElementById('cardNumber')) document.getElementById('cardNumber').value = p.cardNumber || '';
+    if (document.getElementById('allergies')) document.getElementById('allergies').value = p.allergies || '';
+    if (document.getElementById('chronicConditions')) document.getElementById('chronicConditions').value = p.chronicConditions || '';
+    if (document.getElementById('continuousMedications')) document.getElementById('continuousMedications').value = p.continuousMedications || '';
+
+    // Sinais Vitais
+    if (document.getElementById('vitalBloodPressure')) document.getElementById('vitalBloodPressure').value = p.bloodPressure || (p.vitalSigns && p.vitalSigns.bloodPressure) || '';
+    if (document.getElementById('vitalHeartRate')) document.getElementById('vitalHeartRate').value = p.heartRate || (p.vitalSigns && p.vitalSigns.heartRate) || '';
+    if (document.getElementById('vitalSpO2')) document.getElementById('vitalSpO2').value = p.oxygenSaturation || (p.vitalSigns && p.vitalSigns.oxygenSaturation) || '';
+    if (document.getElementById('vitalBloodGlucose')) document.getElementById('vitalBloodGlucose').value = p.bloodGlucose || (p.vitalSigns && p.vitalSigns.bloodGlucose) || '';
+    if (document.getElementById('vitalTemperature')) document.getElementById('vitalTemperature').value = p.temperature || (p.vitalSigns && p.vitalSigns.temperature) || '';
+    if (document.getElementById('vitalWeight')) document.getElementById('vitalWeight').value = p.weight || (p.vitalSigns && p.vitalSigns.weight) || '';
+
+    if (document.getElementById('responsibleName')) document.getElementById('responsibleName').value = p.responsibleName || '';
+    if (document.getElementById('responsibleCpf')) document.getElementById('responsibleCpf').value = p.responsibleCpf || '';
+    if (document.getElementById('responsiblePhone')) document.getElementById('responsiblePhone').value = p.responsiblePhone || '';
+    if (document.getElementById('responsibleRelationship')) document.getElementById('responsibleRelationship').value = p.responsibleRelationship || 'Pai/Mãe';
+
+    const cepEl = document.getElementById('cep');
+    if (cepEl) cepEl.value = p.cep || '';
+    document.getElementById('address').value = p.address || '';
+    const numEl = document.getElementById('number');
+    if (numEl) numEl.value = p.number || '';
+    const neighEl = document.getElementById('neighborhood');
+    if (neighEl) neighEl.value = p.neighborhood || '';
+    document.getElementById('city').value = p.city || '';
+    document.getElementById('phone').value = p.phone || '';
+    document.getElementById('cellphone').value = p.cellphone || '';
+    if (document.getElementById('email')) document.getElementById('email').value = p.email || '';
+
+    document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-notes-medical" style="color: #10b981;"></i> Atendimento &amp; Queixa — <span style="color: #38bdf8;">${p.fullName || p.name}</span>`;
+    document.getElementById('submit-btn').innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Salvar / Atualizar Cadastro';
+
+    checkAgeValidation();
+
+    const quickInput = document.getElementById('modal-quick-search-client');
+    if (quickInput) quickInput.value = '';
+    const resBox = document.getElementById('modal-client-search-results');
+    if (resBox) resBox.style.display = 'none';
+
+    showToast(`✓ Cliente "${p.fullName || p.name}" carregado. Preencha a queixa ou indicação.`);
+    document.getElementById('customComplaintNotes')?.focus();
+  };
+
+  // Obtém todos os registros pesquisáveis do sistema com desduplicação inteligente por Nome e CPF
+  const getAllSearchableClients = () => {
+    const rawList = [
+      ...(allPatients || []),
+      ...(localDB.list('pharmacy_patients') || []),
+      ...(localDB.list('patients') || [])
+    ];
+
+    const uniqueClientsMap = new Map();
+
+    for (const item of rawList) {
+      if (!item) continue;
+      const rawName = (item.fullName || item.name || '').trim();
+      if (!rawName) continue;
+
+      // Normaliza o nome removendo a tag [SIMULADO] e acentos para agrupar duplicatas
+      const normName = removeAccents(rawName.replace(/\[simulado\]/gi, '').trim().toLowerCase());
+      const cleanCpf = (item.cpf || '').replace(/\D/g, '');
+
+      // Chave primária de desduplicação: CPF quando válido ou Nome normalizado
+      const primaryKey = (cleanCpf && cleanCpf.length === 11) ? `cpf:${cleanCpf}` : `name:${normName}`;
+
+      if (!uniqueClientsMap.has(primaryKey)) {
+        uniqueClientsMap.set(primaryKey, item);
+      } else {
+        // Se já existe o mesmo cliente, prioriza o cadastro real (sem [SIMULADO]) ou o com mais informações
+        const existing = uniqueClientsMap.get(primaryKey);
+        const isCurrentSimulated = (item.fullName || item.name || '').includes('[SIMULADO]');
+        const isExistingSimulated = (existing.fullName || existing.name || '').includes('[SIMULADO]');
+
+        if (isExistingSimulated && !isCurrentSimulated) {
+          uniqueClientsMap.set(primaryKey, item);
+        } else if ((item.cellphone || item.phone) && !(existing.cellphone || existing.phone)) {
+          uniqueClientsMap.set(primaryKey, { ...existing, ...item });
+        }
+      }
+    }
+
+    return Array.from(uniqueClientsMap.values());
+  };
+
+  // Motor de busca inteligente por palavras, iniciais, CPF ou telefone
+  const searchClientsEngine = (rawQuery) => {
+    if (!rawQuery || typeof rawQuery !== 'string') return [];
+    const q = removeAccents(rawQuery.trim().toLowerCase());
+    if (q.length < 2) return [];
+
+    const digitsOnly = q.replace(/\D/g, '');
+    const searchWords = q.split(/\s+/).filter(w => w.length > 0);
+
+    const allClients = getAllSearchableClients();
+
+    return allClients.filter(p => {
+      const pName = removeAccents((p.fullName || p.name || '').toLowerCase());
+      const pCpfDigits = (p.cpf || '').replace(/\D/g, '');
+      const pPhoneDigits = (p.cellphone || p.phone || '').replace(/\D/g, '');
+      const pCity = removeAccents((p.city || '').toLowerCase());
+
+      // 1. Busca por números (CPF ou Telefone) se o usuário digitou dígitos
+      if (digitsOnly.length >= 2) {
+        if (pCpfDigits.includes(digitsOnly) || pPhoneDigits.includes(digitsOnly)) {
+          return true;
+        }
+      }
+
+      // 2. Busca textual por palavras (Todas as palavras digitadas devem estar presentes no nome ou cidade)
+      if (searchWords.length > 0) {
+        const allWordsInName = searchWords.every(w => pName.includes(w));
+        if (allWordsInName) return true;
+
+        const allWordsInInfo = searchWords.every(w => pName.includes(w) || pCity.includes(w));
+        if (allWordsInInfo) return true;
+      }
+
+      return false;
+    }).slice(0, 8);
+  };
+
+  // Renderiza os resultados da busca no dropdown
+  const renderClientSearchResults = (matches, targetContainer, originalQuery) => {
+    if (!targetContainer) return;
+
+    if (matches.length === 0) {
+      targetContainer.innerHTML = `
+        <div style="padding: 12px 14px; font-size: 0.82rem; color: #94a3b8; text-align: center;">
+          <i class="fa-solid fa-user-xmark" style="margin-right: 6px; color: #f87171;"></i>
+          Nenhum cliente cadastrado encontrado com <strong>"${originalQuery}"</strong>.<br>
+          <span style="font-size: 0.75rem; color: #38bdf8;">Preencha os campos abaixo para cadastrar um novo cliente.</span>
+        </div>
+      `;
+      targetContainer.style.display = 'block';
+      return;
+    }
+
+    targetContainer.innerHTML = matches.map(p => `
+      <div class="modal-search-client-item" data-patient-id="${p.id}" style="padding: 11px 14px; border-bottom: 1px solid rgba(255,255,255,0.06); cursor: pointer; display: flex; justify-content: space-between; align-items: center; transition: background 0.15s;">
+        <div>
+          <div style="font-weight: 700; color: #f8fafc; font-size: 0.88rem; display: flex; align-items: center; gap: 8px;">
+            <i class="fa-solid fa-user" style="color: #2dd4bf; font-size: 0.78rem;"></i>
+            ${p.fullName || p.name}
+            ${p.role ? `<span style="font-size: 0.68rem; background: rgba(56,189,248,0.15); color: #38bdf8; padding: 1px 6px; border-radius: 4px;">${p.role}</span>` : ''}
+          </div>
+          <div style="font-size: 0.74rem; color: #94a3b8; display: flex; gap: 10px; margin-top: 3px;">
+            <span>CPF: <strong>${p.cpf || 'Não inf.'}</strong></span>
+            <span>•</span>
+            <span>Tel: ${p.cellphone || p.phone || 'Não inf.'}</span>
+            ${p.city ? `<span>•</span><span>${p.city}</span>` : ''}
+          </div>
+        </div>
+        <span style="font-size: 0.72rem; background: rgba(16,185,129,0.2); color: #34d399; border: 1px solid rgba(16,185,129,0.4); padding: 4px 10px; border-radius: 6px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
+          <i class="fa-solid fa-check"></i> Selecionar
+        </span>
+      </div>
+    `).join('');
+
+    targetContainer.style.display = 'block';
+
+    targetContainer.querySelectorAll('.modal-search-client-item').forEach(item => {
+      item.addEventListener('mouseenter', () => {
+        item.style.background = 'rgba(56, 189, 248, 0.15)';
+      });
+      item.addEventListener('mouseleave', () => {
+        item.style.background = 'transparent';
+      });
+      item.addEventListener('click', () => {
+        const pId = item.getAttribute('data-patient-id');
+        const chosen = matches.find(m => String(m.id) === String(pId));
+        if (chosen) {
+          populatePatientIntoForm(chosen);
+          targetContainer.style.display = 'none';
+        }
+      });
+    });
+  };
+
+  // Busca rápida de cliente já cadastrado dentro do modal
+  const modalSearchInput = document.getElementById('modal-quick-search-client');
+  const modalSearchResults = document.getElementById('modal-client-search-results');
+  const btnClearModalClient = document.getElementById('btn-modal-clear-client');
+
+  if (btnClearModalClient) {
+    btnClearModalClient.addEventListener('click', () => {
+      resetForm();
+      const modalOverlay = document.getElementById('patient-modal-overlay');
+      if (modalOverlay) modalOverlay.style.display = 'flex';
+      showToast('Formulário limpo para novo cliente.');
+      document.getElementById('fullName')?.focus();
+    });
+  }
+
+  if (modalSearchInput && modalSearchResults) {
+    modalSearchInput.addEventListener('input', (e) => {
+      const q = e.target.value.trim();
+      if (q.length < 2) {
+        modalSearchResults.innerHTML = '';
+        modalSearchResults.style.display = 'none';
+        return;
+      }
+      const matches = searchClientsEngine(q);
+      renderClientSearchResults(matches, modalSearchResults, q);
+    });
+
+    document.addEventListener('click', (ev) => {
+      if (!modalSearchInput.contains(ev.target) && !modalSearchResults.contains(ev.target)) {
+        modalSearchResults.style.display = 'none';
+      }
+    });
+  }
+
+  // Busca e Autocomplete direto no campo de Nome Completo
+  const fullNameInputEl = document.getElementById('fullName');
+  const fullNameSearchResults = document.getElementById('fullname-client-search-results');
+
+  if (fullNameInputEl && fullNameSearchResults) {
+    fullNameInputEl.addEventListener('input', (e) => {
+      const q = e.target.value.trim();
+      const isAlreadySelected = !!document.getElementById('editId')?.value;
+      if (isAlreadySelected || q.length < 2) {
+        fullNameSearchResults.innerHTML = '';
+        fullNameSearchResults.style.display = 'none';
+        return;
+      }
+      const matches = searchClientsEngine(q);
+      renderClientSearchResults(matches, fullNameSearchResults, q);
+    });
+
+    document.addEventListener('click', (ev) => {
+      if (!fullNameInputEl.contains(ev.target) && !fullNameSearchResults.contains(ev.target)) {
+        fullNameSearchResults.style.display = 'none';
+      }
+    });
+  }
+
+  // Preenchimento automático ao digitar CPF completo no campo de CPF
+  const cpfInputEl = document.getElementById('cpf');
+  if (cpfInputEl) {
+    cpfInputEl.addEventListener('blur', () => {
+      const cleanCpf = (cpfInputEl.value || '').replace(/\D/g, '');
+      if (cleanCpf.length === 11) {
+        const editIdVal = document.getElementById('editId')?.value;
+        if (!editIdVal) {
+          const allRegistered = getAllSearchableClients();
+          const found = allRegistered.find(p => (p.cpf || '').replace(/\D/g, '') === cleanCpf);
+          if (found) {
+            populatePatientIntoForm(found);
+          }
+        }
+      }
+    });
+  }
+
   document.getElementById('cancel-edit-btn')?.addEventListener('click', resetForm);
   document.getElementById('btn-close-patient-modal')?.addEventListener('click', resetForm);
   document.getElementById('btn-new-patient')?.addEventListener('click', () => {
@@ -1256,6 +1527,7 @@ export function renderPatientsTab(contentArea) {
     if (allergiesInput) attachMedicationAutocomplete(allergiesInput, { multiValue: true });
     if (continuousMedInput) attachMedicationAutocomplete(continuousMedInput, { multiValue: true });
     if (chronicInput) attachMedicationAutocomplete(chronicInput, { multiValue: true });
+    document.getElementById('modal-quick-search-client')?.focus();
   });
 
   document.getElementById('patients-trash-btn')?.addEventListener('click', () => {

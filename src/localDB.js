@@ -80,30 +80,52 @@ function ensureTable(db, table) {
     modified = true;
   }
   
-  // Seed padrão exclusivo para o usuário Master do CRM Clínico Farmacêutico
+  // Seed padrão para usuários do CRM Clínico Farmacêutico
   if (table === 'users') {
-    const masterUser = {
-      id: 'USR-MAZZAROWYSK',
-      name: 'Marcelo Mazaro',
-      username: 'mazzarowysk',
-      role: 'Master',
-      crf: 'CRF-SP 54180',
-      password: 'T@zm4n1c0054180',
-      status: 'Ativo',
-      created_at: new Date().toISOString()
-    };
+    const defaultUsers = [
+      {
+        id: 'USR-MAZZAROWYSK',
+        name: 'Marcelo Mazaro',
+        username: 'mazzarowysk',
+        role: 'Master',
+        crf: 'CRF-SP 54180',
+        password: 'T@zm4n1c0054180',
+        status: 'Ativo',
+        created_at: new Date().toISOString()
+      },
+      {
+        id: 'USR-ADMIN',
+        name: 'Gestor Master',
+        username: 'admin',
+        role: 'Master',
+        crf: 'CRF-SP 54180',
+        password: 'admin123',
+        status: 'Ativo',
+        created_at: new Date().toISOString()
+      },
+      {
+        id: 'USR-FARMACIA',
+        name: 'Farmacêutico RT',
+        username: 'farmacia',
+        role: 'Farmacêutico RT',
+        crf: 'CRF-SP 12345',
+        password: 'admin123',
+        status: 'Ativo',
+        created_at: new Date().toISOString()
+      }
+    ];
 
-    // Remove usuários de teste, médicos legados ou demonstração antigos e mantém apenas o Master ou cadastros reais
-    if (Array.isArray(db[table]) && db[table].length > 0) {
-      const legacyUsernames = ['bcoltri', 'ffacco', 'pforte', 'farmacia', 'admin', 'atendente', 'medico', 'enfermeiro', 'recepcionista'];
-      const legacyRoles = ['Médico', 'Desenvolvedor', 'Enfermeiro', 'Plantonista'];
-      
+    if (!Array.isArray(db[table]) || db[table].length === 0) {
+      db[table] = [...defaultUsers];
+      modified = true;
+    } else {
+      // Remove contas legadas de teste mas mantém os usuários oficiais
+      const legacyUsernames = ['bcoltri', 'ffacco', 'pforte', 'atendente', 'medico', 'enfermeiro', 'recepcionista'];
       const filtered = db[table].filter(u => {
         const uname = (u.username || '').toLowerCase().trim();
-        if (uname === 'mazzarowysk') return true;
+        if (['mazzarowysk', 'admin', 'farmacia'].includes(uname)) return true;
         if (uname.startsWith('dr.') || uname.startsWith('dra.') || uname.startsWith('dr_') || uname.startsWith('dra_')) return false;
         if (legacyUsernames.includes(uname)) return false;
-        if (legacyRoles.includes(u.role)) return false;
         return true;
       });
 
@@ -111,29 +133,26 @@ function ensureTable(db, table) {
         db[table] = filtered;
         modified = true;
       }
-    }
 
-    if (!Array.isArray(db[table]) || db[table].length === 0) {
-      db[table] = [masterUser];
-      modified = true;
-    } else {
-      // Garante que o usuário Master oficial (mazzarowysk) esteja sempre presente e ativo
-      const existingMasterIndex = db[table].findIndex(u => (u.username || '').toLowerCase().trim() === 'mazzarowysk');
-      
-      if (existingMasterIndex === -1) {
-        db[table].unshift(masterUser);
-        modified = true;
-      } else {
-        const curr = db[table][existingMasterIndex];
-        if (curr.role !== 'Master' || curr.status !== 'Ativo' || curr.password !== 'T@zm4n1c0054180') {
-          curr.name = curr.name || 'Marcelo Mazaro';
-          curr.role = 'Master';
-          curr.status = 'Ativo';
-          curr.password = 'T@zm4n1c0054180';
-          curr.crf = curr.crf || 'CRF-SP 54180';
+      // Garante que mazzarowysk, admin e farmacia estejam sempre presentes e ativos
+      defaultUsers.forEach(defU => {
+        const idx = db[table].findIndex(u => (u.username || '').toLowerCase().trim() === defU.username);
+        if (idx === -1) {
+          db[table].push(defU);
           modified = true;
+        } else {
+          const curr = db[table][idx];
+          if (curr.status !== 'Ativo') {
+            curr.status = 'Ativo';
+            modified = true;
+          }
+          if (defU.username === 'mazzarowysk') {
+            curr.role = 'Master';
+            curr.password = 'T@zm4n1c0054180';
+            modified = true;
+          }
         }
-      }
+      });
     }
   }
 

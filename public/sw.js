@@ -39,8 +39,20 @@ self.addEventListener('activate', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  // Ignora requisições não-GET, APIs e banco externo
-  if (event.request.method !== 'GET' || event.request.url.includes('/api/') || event.request.url.includes('turso.io')) {
+  const url = new URL(event.request.url);
+
+  // Ignora requisições locais em desenvolvimento, não-GET, APIs e banco externo
+  if (
+    url.hostname === 'localhost' ||
+    url.hostname === '127.0.0.1' ||
+    url.port === '5175' ||
+    url.port === '3001' ||
+    url.pathname.startsWith('/@') ||
+    url.pathname.startsWith('/src/') ||
+    event.request.method !== 'GET' ||
+    url.pathname.includes('/api/') ||
+    url.hostname.includes('turso.io')
+  ) {
     return;
   }
 
@@ -59,10 +71,13 @@ self.addEventListener('fetch', (event) => {
         const cached = await caches.match(event.request);
         if (cached) return cached;
         if (event.request.mode === 'navigate') {
-          const indexCached = await caches.match('/index.html');
+          const indexCached = await caches.match('/index.html') || await caches.match('/');
           if (indexCached) return indexCached;
         }
-        return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
+        return new Response('<html><body style="background:#080c14;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;"><div style="text-align:center;"><h2>Modo Offline</h2><p>Verifique sua conexão ou recarregue a página.</p><button onclick="location.reload()" style="background:#14b8a6;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;">Recarregar</button></div></body></html>', {
+          status: 200,
+          headers: { 'Content-Type': 'text/html; charset=utf-8' }
+        });
       })
   );
 });

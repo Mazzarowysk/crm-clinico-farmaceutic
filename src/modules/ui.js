@@ -6,27 +6,67 @@
 import * as localDB from '../localDB.js';
 import { state } from '../state.js';
 
-// --- CONTROLE DE TEMA (CLARO/ESCURO) ---
+// --- CONTROLE DE TEMA (DARK / LIGHT / SUNLIGHT ALTO CONTRASTE) ---
 export const initTheme = () => {
   const savedTheme = localStorage.getItem('hn_theme') || 'dark';
+  document.body.classList.remove('light-theme', 'sunlight-theme');
   if (savedTheme === 'light') {
     document.body.classList.add('light-theme');
+  } else if (savedTheme === 'sunlight') {
+    document.body.classList.add('sunlight-theme');
+  }
+  updateThemeIcon();
+};
+
+export const cycleTheme = () => {
+  const isSunlight = document.body.classList.contains('sunlight-theme');
+  const isLight = document.body.classList.contains('light-theme');
+  
+  document.body.classList.remove('light-theme', 'sunlight-theme');
+  
+  let newTheme = 'dark';
+  if (!isLight && !isSunlight) {
+    // De Dark -> Light
+    document.body.classList.add('light-theme');
+    newTheme = 'light';
+    showToast('💡 Tema Claro Ativado!');
+  } else if (isLight) {
+    // De Light -> Sunlight (Alto Contraste Solar)
+    document.body.classList.add('sunlight-theme');
+    newTheme = 'sunlight';
+    showToast('☀️ Modo Alto Contraste Solar (Anti-Reflexo) Ativado!');
   } else {
-    document.body.classList.remove('light-theme');
+    // De Sunlight -> Dark
+    newTheme = 'dark';
+    showToast('🌙 Modo Noturno Slate (Padrão) Ativado.');
+  }
+
+  localStorage.setItem('hn_theme', newTheme);
+  updateThemeIcon();
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme: newTheme } }));
   }
 };
 
-export const toggleTheme = () => {
-  const isLight = document.body.classList.toggle('light-theme');
-  localStorage.setItem('hn_theme', isLight ? 'light' : 'dark');
-  updateThemeIcon();
-};
+export const toggleTheme = cycleTheme;
 
 export const updateThemeIcon = () => {
   const icon = document.getElementById('theme-icon');
   if (!icon) return;
-  icon.className = 'fa-solid fa-circle-half-stroke';
+  if (document.body.classList.contains('sunlight-theme')) {
+    icon.className = 'fa-solid fa-sun';
+    icon.style.color = '#f59e0b';
+  } else if (document.body.classList.contains('light-theme')) {
+    icon.className = 'fa-regular fa-sun';
+    icon.style.color = '#0284c7';
+  } else {
+    icon.className = 'fa-solid fa-moon';
+    icon.style.color = '#38bdf8';
+  }
 };
+if (typeof window !== 'undefined') {
+  window.cycleTheme = cycleTheme;
+}
 
 // --- HELPER COMPONENTE DE SELEÇÃO CUSTOMIZADA E PESQUISÁVEL ---
 export const createChartGradient = function(canvasOrCtx, colorHex, alpha1 = 'ff', alpha2 = '11', height = 200) {

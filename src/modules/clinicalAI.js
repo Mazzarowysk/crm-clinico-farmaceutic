@@ -147,6 +147,37 @@ export const stopVoiceDictation = () => {
   }
 };
 
+export const createVoiceDictationButton = (targetInputId, extraClass = '') => {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = `btn btn-voice-dictation ${extraClass}`.trim();
+  btn.id = `btn-dictate-${targetInputId}`;
+  btn.innerHTML = '<i class="fa-solid fa-microphone"></i> Ditar';
+  btn.style.cssText = `
+    background: rgba(13, 148, 136, 0.2);
+    border: 1px solid rgba(20, 184, 166, 0.4);
+    color: #2dd4bf;
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 0.76rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: all 0.2s ease;
+  `;
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    startVoiceDictation(targetInputId, btn.id);
+  });
+  return btn;
+};
+if (typeof window !== 'undefined') {
+  window.createVoiceDictationButton = createVoiceDictationButton;
+}
+
 // --- 2. ESCORE CLÍNICO MEWS (MODIFIED EARLY WARNING SCORE) & ALERTA DE SEPSE ---
 
 export const calculateMEWS = (vitals = {}) => {
@@ -234,10 +265,13 @@ export const calculateMEWS = (vitals = {}) => {
   return {
     score,
     riskLevel,
+    riskCategory: riskLevel,
     badgeColor,
+    colorCode: badgeColor,
     badgeBg,
     reasons,
     recommendation,
+    recommendedAction: recommendation,
     isSepsisAlert
   };
 };

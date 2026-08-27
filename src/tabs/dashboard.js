@@ -249,6 +249,8 @@ const centerDoughnutPlugin = {
       const isZero = chart.data?.isZeroData || false;
       const total = isZero ? 0 : datasets[0].data.reduce((a, b) => (Number(a) || 0) + (Number(b) || 0), 0);
 
+      const isLight = document.body.classList.contains('light-theme') || document.body.classList.contains('sunlight-theme');
+
       ctx.save();
       const centerX = (left + right) / 2;
       const centerY = (top + bottom) / 2;
@@ -257,37 +259,45 @@ const centerDoughnutPlugin = {
       innerRadius = Math.max(10, (innerRadius || 60) - 6);
 
       if (innerRadius > 15 && isFinite(innerRadius) && isFinite(centerX) && isFinite(centerY)) {
-        // 1. Disco 3D Esmaltado Central
-        const discGrad = ctx.createRadialGradient(centerX - 8, centerY - 8, 2, centerX, centerY, innerRadius);
-        discGrad.addColorStop(0, 'rgba(30, 41, 59, 0.95)');
-        discGrad.addColorStop(0.7, 'rgba(15, 23, 42, 0.98)');
-        discGrad.addColorStop(1, 'rgba(2, 6, 23, 1)');
+        // 1. Disco 3D Central Esmaltado (adaptado para tema Claro / Escuro)
+        const discGrad = ctx.createRadialGradient(centerX - 6, centerY - 6, 2, centerX, centerY, innerRadius);
+        if (isLight) {
+          discGrad.addColorStop(0, '#ffffff');
+          discGrad.addColorStop(0.7, '#f8fafc');
+          discGrad.addColorStop(1, '#e2e8f0');
+        } else {
+          discGrad.addColorStop(0, 'rgba(30, 41, 59, 0.95)');
+          discGrad.addColorStop(0.7, 'rgba(15, 23, 42, 0.98)');
+          discGrad.addColorStop(1, 'rgba(2, 6, 23, 1)');
+        }
 
         ctx.beginPath();
         ctx.arc(centerX, centerY, innerRadius, 0, Math.PI * 2);
         ctx.fillStyle = discGrad;
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
-        ctx.shadowBlur = 14;
+        ctx.shadowColor = isLight ? 'rgba(0, 0, 0, 0.08)' : 'rgba(0, 0, 0, 0.7)';
+        ctx.shadowBlur = isLight ? 8 : 14;
         ctx.fill();
 
         // Borda com Specular Ring
         ctx.lineWidth = 1.5;
-        ctx.strokeStyle = isZero ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.16)';
+        ctx.strokeStyle = isLight 
+          ? (isZero ? 'rgba(0, 0, 0, 0.06)' : 'rgba(2, 132, 199, 0.25)') 
+          : (isZero ? 'rgba(255, 255, 255, 0.08)' : 'rgba(255, 255, 255, 0.16)');
         ctx.stroke();
       }
 
       // 2. Número do Total em Destaque 3D
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-      ctx.shadowBlur = 8;
+      ctx.shadowColor = isLight ? 'rgba(0, 0, 0, 0.05)' : 'rgba(0, 0, 0, 0.8)';
+      ctx.shadowBlur = isLight ? 2 : 8;
       ctx.font = '800 1.85rem "Outfit", sans-serif';
-      ctx.fillStyle = isZero ? '#64748b' : '#ffffff';
+      ctx.fillStyle = isZero ? (isLight ? '#94a3b8' : '#64748b') : (isLight ? '#0f172a' : '#ffffff');
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.fillText(total, centerX, centerY - 9);
 
       // 3. Label do Centro
       ctx.font = '700 0.68rem "Inter", sans-serif';
-      ctx.fillStyle = isZero ? '#475569' : '#38bdf8';
+      ctx.fillStyle = isZero ? (isLight ? '#64748b' : '#475569') : (isLight ? '#0284c7' : '#38bdf8');
       ctx.letterSpacing = '1px';
       ctx.fillText(isZero ? 'SEM DADOS' : 'PROCEDIMENTOS', centerX, centerY + 14);
 
@@ -305,11 +315,12 @@ const plastic3DGlossPlugin = {
     try {
       const { ctx } = chart;
       if (!ctx) return;
+      const isLight = document.body.classList.contains('light-theme') || document.body.classList.contains('sunlight-theme');
       ctx.save();
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.52)';
-      ctx.shadowBlur = 18;
-      ctx.shadowOffsetY = 10;
-      ctx.shadowOffsetX = 3;
+      ctx.shadowColor = isLight ? 'rgba(0, 0, 0, 0.10)' : 'rgba(0, 0, 0, 0.52)';
+      ctx.shadowBlur = isLight ? 8 : 18;
+      ctx.shadowOffsetY = isLight ? 4 : 10;
+      ctx.shadowOffsetX = isLight ? 1 : 3;
     } catch (e) { }
   },
   afterDatasetsDraw(chart) {
@@ -425,24 +436,26 @@ function renderServicesChart(ChartClass, data) {
     badgeEl.textContent = names[currentTypeKey] || currentTypeKey;
   }
 
+  const isLight = document.body.classList.contains('light-theme') || document.body.classList.contains('sunlight-theme');
+
   let customScales = {};
   if (chartType === 'bar') {
     customScales = {
       indexAxis: 'y',
       x: {
-        grid: { color: 'rgba(255,255,255,0.04)', borderDash: [4, 4] },
-        ticks: { color: '#94a3b8', font: { family: 'Inter', size: 10.5 } }
+        grid: { color: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.04)', borderDash: [4, 4] },
+        ticks: { color: isLight ? '#475569' : '#94a3b8', font: { family: 'Inter', size: 10.5 } }
       },
       y: {
         grid: { display: false },
-        ticks: { color: '#f1f5f9', font: { family: 'Outfit', weight: '600', size: 11 } }
+        ticks: { color: isLight ? '#0f172a' : '#f1f5f9', font: { family: 'Outfit', weight: '600', size: 11 } }
       }
     };
   } else if (chartType === 'polarArea') {
     customScales = {
       r: {
-        grid: { color: 'rgba(255, 255, 255, 0.08)', borderDash: [3, 3] },
-        angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+        grid: { color: isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255, 255, 255, 0.08)', borderDash: [3, 3] },
+        angleLines: { color: isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255, 255, 255, 0.1)' },
         ticks: { display: false }
       }
     };
@@ -456,7 +469,7 @@ function renderServicesChart(ChartClass, data) {
       datasets: [{
         data: isZero ? (chartType === 'bar' ? [0] : [1]) : values,
         backgroundColor: backgroundGradients,
-        borderColor: isZero ? 'rgba(255, 255, 255, 0.1)' : (chartType === 'doughnut' ? 'rgba(255, 255, 255, 0.25)' : 'rgba(255, 255, 255, 0.35)'),
+        borderColor: isZero ? (isLight ? 'rgba(0,0,0,0.1)' : 'rgba(255, 255, 255, 0.1)') : (chartType === 'doughnut' ? (isLight ? 'rgba(255,255,255,0.9)' : 'rgba(255, 255, 255, 0.25)') : (isLight ? 'rgba(255,255,255,0.9)' : 'rgba(255, 255, 255, 0.35)')),
         borderWidth: chartType === 'doughnut' ? 2.5 : 1.8,
         hoverOffset: isZero ? 0 : 14,
         borderRadius: chartType === 'bar' ? 12 : (chartType === 'doughnut' ? 10 : 4),
@@ -504,8 +517,8 @@ function renderServicesChart(ChartClass, data) {
             ci.update();
           },
           labels: {
-            color: '#cbd5e1',
-            font: { size: 10.5, family: 'Inter', weight: '500' },
+            color: isLight ? '#334155' : '#cbd5e1',
+            font: { size: 10.5, family: 'Inter', weight: '600' },
             padding: 12,
             usePointStyle: true,
             pointStyleWidth: 8,
@@ -514,10 +527,10 @@ function renderServicesChart(ChartClass, data) {
         },
         tooltip: {
           enabled: !isZero,
-          backgroundColor: 'rgba(15, 23, 42, 0.95)',
-          titleColor: '#38bdf8',
-          bodyColor: '#f8fafc',
-          borderColor: 'rgba(56, 189, 248, 0.45)',
+          backgroundColor: isLight ? 'rgba(255, 255, 255, 0.98)' : 'rgba(15, 23, 42, 0.95)',
+          titleColor: isLight ? '#0284c7' : '#38bdf8',
+          bodyColor: isLight ? '#0f172a' : '#f8fafc',
+          borderColor: isLight ? '#cbd5e1' : 'rgba(56, 189, 248, 0.45)',
           borderWidth: 1.5,
           cornerRadius: 12,
           padding: 12,
@@ -554,6 +567,7 @@ function renderCdssChart(ChartClass, data) {
   const labels = alerts.map(a => a.label);
   const values = alerts.map(a => a.value);
 
+  const isLight = document.body.classList.contains('light-theme') || document.body.classList.contains('sunlight-theme');
   const currentTypeKey = chartModes.cdss[chartModes.cdssIdx % chartModes.cdss.length];
   let chartType = currentTypeKey;
 
@@ -585,16 +599,16 @@ function renderCdssChart(ChartClass, data) {
 
   if (chartType === 'radar') {
     const radarGrad = ctx2d.createLinearGradient(0, 0, 0, 260);
-    radarGrad.addColorStop(0, 'rgba(245, 158, 11, 0.55)');
-    radarGrad.addColorStop(1, 'rgba(239, 68, 68, 0.15)');
+    radarGrad.addColorStop(0, isLight ? 'rgba(217, 119, 6, 0.45)' : 'rgba(245, 158, 11, 0.55)');
+    radarGrad.addColorStop(1, isLight ? 'rgba(239, 68, 68, 0.10)' : 'rgba(239, 68, 68, 0.15)');
 
     datasetConfig = {
       label: 'Alertas CDSS Evitados',
       data: values,
       backgroundColor: radarGrad,
-      borderColor: '#fbbf24',
+      borderColor: isLight ? '#d97706' : '#fbbf24',
       borderWidth: 3,
-      pointBackgroundColor: '#fbbf24',
+      pointBackgroundColor: isLight ? '#d97706' : '#fbbf24',
       pointBorderColor: '#ffffff',
       pointBorderWidth: 2.5,
       pointRadius: 6,
@@ -606,9 +620,9 @@ function renderCdssChart(ChartClass, data) {
   if (chartType === 'radar' || chartType === 'polarArea') {
     scalesConfig = {
       r: {
-        grid: { color: 'rgba(255, 255, 255, 0.12)', borderDash: [3, 3] },
-        angleLines: { color: 'rgba(255, 255, 255, 0.15)' },
-        pointLabels: { color: '#f8fafc', font: { size: 10.5, family: 'Outfit', weight: '700' } },
+        grid: { color: isLight ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.12)', borderDash: [3, 3] },
+        angleLines: { color: isLight ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.15)' },
+        pointLabels: { color: isLight ? '#0f172a' : '#f8fafc', font: { size: 10.5, family: 'Outfit', weight: '700' } },
         ticks: { display: false, backdropColor: 'transparent' }
       }
     };
@@ -616,11 +630,11 @@ function renderCdssChart(ChartClass, data) {
     scalesConfig = {
       x: {
         grid: { display: false },
-        ticks: { color: '#cbd5e1', font: { size: 10, family: 'Outfit', weight: '600' } }
+        ticks: { color: isLight ? '#334155' : '#cbd5e1', font: { size: 10, family: 'Outfit', weight: '600' } }
       },
       y: {
-        grid: { color: 'rgba(255,255,255,0.06)', borderDash: [4, 4] },
-        ticks: { color: '#94a3b8', font: { family: 'Inter' }, precision: 0 }
+        grid: { color: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.06)', borderDash: [4, 4] },
+        ticks: { color: isLight ? '#475569' : '#94a3b8', font: { family: 'Inter' }, precision: 0 }
       }
     };
   }
@@ -675,7 +689,7 @@ function renderCdssChart(ChartClass, data) {
             ci.update();
           },
           labels: {
-            color: '#cbd5e1',
+            color: isLight ? '#334155' : '#cbd5e1',
             font: { size: 10.5, family: 'Inter', weight: '600' },
             padding: 12,
             usePointStyle: true,
@@ -683,10 +697,10 @@ function renderCdssChart(ChartClass, data) {
           }
         },
         tooltip: {
-          backgroundColor: 'rgba(15, 23, 42, 0.95)',
-          titleColor: '#fbbf24',
-          bodyColor: '#f8fafc',
-          borderColor: 'rgba(245, 158, 11, 0.45)',
+          backgroundColor: isLight ? 'rgba(255, 255, 255, 0.98)' : 'rgba(15, 23, 42, 0.95)',
+          titleColor: isLight ? '#b45309' : '#fbbf24',
+          bodyColor: isLight ? '#0f172a' : '#f8fafc',
+          borderColor: isLight ? '#fcd34d' : 'rgba(245, 158, 11, 0.45)',
           borderWidth: 1.5,
           cornerRadius: 12,
           padding: 12,
@@ -718,6 +732,7 @@ function renderWeeklyChart(ChartClass, data) {
   const atendimentos = history.map(h => h.atendimentos);
   const intervencoes = history.map(h => h.intervencoes);
 
+  const isLight = document.body.classList.contains('light-theme') || document.body.classList.contains('sunlight-theme');
   const currentTypeKey = chartModes.weekly[chartModes.weeklyIdx % chartModes.weekly.length];
 
   // Atualizar badge do tipo no card
@@ -755,22 +770,22 @@ function renderWeeklyChart(ChartClass, data) {
 
   let scalesConfig = {
     x: {
-      grid: { color: 'rgba(255,255,255,0.03)', drawBorder: false },
-      ticks: { color: '#cbd5e1', font: { family: 'Outfit', weight: '600', size: 11 } }
+      grid: { color: isLight ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.03)', drawBorder: false },
+      ticks: { color: isLight ? '#334155' : '#cbd5e1', font: { family: 'Outfit', weight: '600', size: 11 } }
     },
     y: {
       stacked: isStacked,
-      grid: { color: 'rgba(255,255,255,0.05)', borderDash: [4, 4], drawBorder: false },
-      ticks: { color: '#94a3b8', font: { family: 'Inter', size: 10.5 }, precision: 0 }
+      grid: { color: isLight ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.05)', borderDash: [4, 4], drawBorder: false },
+      ticks: { color: isLight ? '#475569' : '#94a3b8', font: { family: 'Inter', size: 10.5 }, precision: 0 }
     }
   };
 
   if (chartType === 'radar') {
     scalesConfig = {
       r: {
-        grid: { color: 'rgba(255, 255, 255, 0.08)', borderDash: [3, 3] },
-        angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
-        pointLabels: { color: '#cbd5e1', font: { size: 10.5, family: 'Outfit', weight: '600' } },
+        grid: { color: isLight ? 'rgba(0, 0, 0, 0.08)' : 'rgba(255, 255, 255, 0.08)', borderDash: [3, 3] },
+        angleLines: { color: isLight ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)' },
+        pointLabels: { color: isLight ? '#0f172a' : '#cbd5e1', font: { size: 10.5, family: 'Outfit', weight: '600' } },
         ticks: { display: false }
       }
     };
@@ -784,13 +799,13 @@ function renderWeeklyChart(ChartClass, data) {
         {
           label: 'Atendimentos Clínicos',
           data: atendimentos,
-          borderColor: '#34d399',
+          borderColor: isLight ? '#059669' : '#34d399',
           borderWidth: 3.5,
           backgroundColor: emeraldGradient,
           fill: true,
           stepped: isStepped,
           tension: isStepped ? 0 : 0.45,
-          pointBackgroundColor: '#10b981',
+          pointBackgroundColor: isLight ? '#059669' : '#10b981',
           pointBorderColor: '#ffffff',
           pointBorderWidth: 2.5,
           pointRadius: 5,
@@ -801,13 +816,13 @@ function renderWeeklyChart(ChartClass, data) {
         {
           label: 'Intervenções Farmacêuticas',
           data: intervencoes,
-          borderColor: '#fbbf24',
+          borderColor: isLight ? '#d97706' : '#fbbf24',
           borderWidth: 3.5,
           backgroundColor: amberGradient,
           fill: true,
           stepped: isStepped,
           tension: isStepped ? 0 : 0.45,
-          pointBackgroundColor: '#f59e0b',
+          pointBackgroundColor: isLight ? '#d97706' : '#f59e0b',
           pointBorderColor: '#ffffff',
           pointBorderWidth: 2.5,
           pointRadius: 5,
@@ -851,7 +866,7 @@ function renderWeeklyChart(ChartClass, data) {
             ci.update();
           },
           labels: {
-            color: '#cbd5e1',
+            color: isLight ? '#334155' : '#cbd5e1',
             font: { size: 11.5, family: 'Outfit', weight: '600' },
             usePointStyle: true,
             boxWidth: 8,
@@ -859,10 +874,10 @@ function renderWeeklyChart(ChartClass, data) {
           }
         },
         tooltip: {
-          backgroundColor: 'rgba(15, 23, 42, 0.95)',
-          titleColor: '#34d399',
-          bodyColor: '#f8fafc',
-          borderColor: 'rgba(16, 185, 129, 0.45)',
+          backgroundColor: isLight ? 'rgba(255, 255, 255, 0.98)' : 'rgba(15, 23, 42, 0.95)',
+          titleColor: isLight ? '#059669' : '#34d399',
+          bodyColor: isLight ? '#0f172a' : '#f8fafc',
+          borderColor: isLight ? '#86efac' : 'rgba(16, 185, 129, 0.45)',
           borderWidth: 1.5,
           cornerRadius: 12,
           padding: 12,
@@ -1143,45 +1158,41 @@ window.openDrillDownModal = function (topic, categoryFilter = null) {
     contentHtml = `<p style="color: #94a3b8;">Consulte todos os dados consolidados no módulo de relatórios.</p>`;
   }
 
-  // Criar elemento do modal
   const existing = document.getElementById('drilldown-modal');
   if (existing) existing.remove();
 
   const modal = document.createElement('div');
   modal.id = 'drilldown-modal';
+  modal.className = 'dashboard-drilldown-modal-overlay';
   modal.style.cssText = `
-    position: fixed; inset: 0; background: rgba(0, 0, 0, 0.82);
+    position: fixed; inset: 0; background: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(16px); z-index: 9999; display: flex;
     align-items: center; justify-content: center; padding: 20px;
     animation: fadeIn 0.25s ease-out;
   `;
 
   modal.innerHTML = `
-    <div style="
-      background: #0f172a; border: 1.5px solid ${colorTheme}55; border-radius: 20px;
-      max-width: 900px; width: 100%; max-height: 90vh; overflow-y: auto;
-      box-shadow: 0 25px 60px rgba(0,0,0,0.6); padding: 26px; position: relative;
-    ">
-      <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 16px;">
+    <div class="dashboard-drilldown-modal-content" style="background: #0f172a; border-radius: 20px; border: 1.5px solid ${colorTheme}55; max-width: 900px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 26px; position: relative; box-shadow: 0 25px 60px rgba(0,0,0,0.6);">
+      <div class="dashboard-drilldown-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; border-bottom: 1px solid var(--border-color, rgba(255,255,255,0.08)); padding-bottom: 16px;">
         <div style="display: flex; align-items: center; gap: 14px;">
           <div style="width: 48px; height: 48px; border-radius: 14px; background: ${colorTheme}22; border: 1.5px solid ${colorTheme}; display: flex; align-items: center; justify-content: center; color: ${colorTheme}; font-size: 1.4rem;">
             <i class="fa-solid ${icon}"></i>
           </div>
           <div>
-            <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.25rem; font-weight: 700; color: #fff; margin: 0 0 4px;">${title}</h3>
+            <h3 class="dashboard-drilldown-title" style="font-family: 'Outfit', sans-serif; font-size: 1.25rem; font-weight: 700; color: #fff; margin: 0 0 4px;">${title}</h3>
             <span style="font-size: 0.76rem; background: ${colorTheme}22; color: ${colorTheme}; padding: 3px 10px; border-radius: 12px; font-weight: 700; border: 1px solid ${colorTheme}44;">${badgeText}</span>
           </div>
         </div>
-        <button onclick="document.getElementById('drilldown-modal')?.remove()" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; width: 34px; height: 34px; border-radius: 50%; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+        <button class="dashboard-drilldown-close" onclick="document.getElementById('drilldown-modal')?.remove()" style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); color: #cbd5e1; width: 34px; height: 34px; border-radius: 50%; font-size: 1.1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;">
           &times;
         </button>
       </div>
 
-      <div style="margin-bottom: 24px;">
+      <div class="dashboard-drilldown-body" style="margin-bottom: 24px;">
         ${contentHtml}
       </div>
 
-      <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 18px;">
+      <div class="dashboard-drilldown-footer" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-top: 1px solid var(--border-color, rgba(255,255,255,0.08)); padding-top: 18px;">
         <button class="btn btn-secondary" onclick="window.printClinicalDrillDownReport('${topic}')" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border: none; padding: 9px 18px; border-radius: 10px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35);">
           <i class="fa-solid fa-file-pdf"></i> Gerar Laudo Executivo / Salvar PDF
         </button>
@@ -1288,15 +1299,15 @@ window.printClinicalDrillDownReport = function (topic) {
           <th>Serviço Clínico Regulamentado</th>
           <th>Base Normativa CFF</th>
           <th>Tempo Médio</th>
-          <th>Volume Realizado</th>
-          <th>Documento / Desfecho</th>
+          <th>Volume Mensal</th>
+          <th>Documento Gerado</th>
         </tr>
       </thead>
       <tbody>
         <tr>
           <td><strong>Aferição de Pressão Arterial (PA)</strong></td>
           <td>Res. CFF nº 585/2013, Art. 7º</td>
-          <td>8 min</td>
+          <td>08 min</td>
           <td><strong>34 procedimentos</strong></td>
           <td>Declaração de Serviço Farmacêutico (DSF)</td>
         </tr>
@@ -1450,281 +1461,89 @@ window.printClinicalDrillDownReport = function (topic) {
   <meta charset="UTF-8">
   <title>${repTitle}</title>
   <style>
-    @page {
-      size: A4 portrait;
-      margin: 12mm 15mm 12mm 15mm;
-    }
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    body {
-      font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, Helvetica, Arial, sans-serif;
-      color: #0f172a;
-      background: #ffffff;
-      font-size: 9pt;
-      line-height: 1.4;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
-    }
-    
-    /* CABEÇALHO INSTITUCIONAL */
-    .header-table {
-      width: 100%;
-      border-collapse: collapse;
-      border-bottom: 2.5px solid #0f766e;
-      padding-bottom: 10px;
-      margin-bottom: 14px;
-    }
-    .header-logo {
-      width: 65px;
-      vertical-align: middle;
-    }
-    .header-info {
-      vertical-align: middle;
-      padding-left: 12px;
-    }
-    .inst-title {
-      font-size: 12.5pt;
-      font-weight: 800;
-      color: #0f766e;
-      letter-spacing: -0.2px;
-      text-transform: uppercase;
-    }
-    .inst-sub {
-      font-size: 7.8pt;
-      color: #475569;
-      margin-top: 1px;
-    }
-    .header-meta {
-      text-align: right;
-      vertical-align: middle;
-      font-size: 7.2pt;
-      color: #64748b;
-      line-height: 1.4;
-    }
-    
-    /* BANNER DO LAUDO */
-    .report-banner {
-      background: #f0fdfa;
-      border-left: 4px solid #0d9488;
-      padding: 9px 12px;
-      margin-bottom: 14px;
-      border-radius: 0 6px 6px 0;
-    }
-    .report-banner h1 {
-      font-size: 11pt;
-      font-weight: 800;
-      color: #115e59;
-      text-transform: uppercase;
-      letter-spacing: 0.2px;
-    }
-    .report-banner p {
-      font-size: 8pt;
-      color: #475569;
-      margin-top: 2px;
-    }
-
-    /* CARDS DE INDICADORES EXECUTIVOS */
-    .kpi-container {
-      display: table;
-      width: 100%;
-      margin-bottom: 14px;
-      table-layout: fixed;
-    }
-    .kpi-box {
-      display: table-cell;
-      background: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 8px 10px;
-      text-align: center;
-    }
-    .kpi-val {
-      font-size: 13.5pt;
-      font-weight: 800;
-      color: #0f172a;
-    }
-    .kpi-lbl {
-      font-size: 7pt;
-      font-weight: 700;
-      color: #64748b;
-      text-transform: uppercase;
-      margin-top: 1px;
-      letter-spacing: 0.3px;
-    }
-
-    /* TABELA DE DADOS */
-    .section-title {
-      font-size: 8.5pt;
-      font-weight: 800;
-      color: #0f766e;
-      text-transform: uppercase;
-      letter-spacing: 0.4px;
-      margin-bottom: 5px;
-    }
-    table.data-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-bottom: 14px;
-      font-size: 8.2pt;
-    }
-    table.data-table th {
-      background: #0f172a;
-      color: #ffffff;
-      font-weight: 700;
-      text-align: left;
-      padding: 6px 9px;
-      font-size: 7.8pt;
-      text-transform: uppercase;
-      letter-spacing: 0.2px;
-      border: 1px solid #0f172a;
-    }
-    table.data-table td {
-      padding: 6px 9px;
-      border: 1px solid #e2e8f0;
-      color: #1e293b;
-      vertical-align: middle;
-    }
-    table.data-table tbody tr:nth-child(even) {
-      background: #f8fafc;
-    }
-    .badge {
-      display: inline-block;
-      padding: 2px 6px;
-      border-radius: 8px;
-      font-size: 7pt;
-      font-weight: 700;
-      text-transform: uppercase;
-    }
-
-    /* PARECER TÉCNICO */
-    .notes-box {
-      background: #f8fafc;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      padding: 9px 12px;
-      font-size: 8pt;
-      color: #334155;
-      line-height: 1.45;
-      margin-bottom: 18px;
-    }
-
-    /* ASSINATURA E RODAPÉ */
-    .footer-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 20px;
-      border-top: 1px solid #cbd5e1;
-      padding-top: 12px;
-    }
-    .signature-area {
-      text-align: right;
-      vertical-align: bottom;
-      width: 50%;
-    }
-    .signature-line {
-      display: inline-block;
-      width: 230px;
-      border-top: 1.5px solid #0f172a;
-      padding-top: 3px;
-      text-align: center;
-    }
-    .signature-name {
-      font-size: 8.8pt;
-      font-weight: 800;
-      color: #0f172a;
-    }
-    .signature-crf {
-      font-size: 7.5pt;
-      color: #475569;
-    }
-    .legal-footer {
-      font-size: 6.8pt;
-      color: #94a3b8;
-      line-height: 1.35;
-      vertical-align: bottom;
-    }
+    @page { size: A4 portrait; margin: 12mm; }
+    body { font-family: sans-serif; color: #0f172a; font-size: 9pt; }
+    .header-table { width: 100%; border-bottom: 2px solid #0f766e; padding-bottom: 10px; margin-bottom: 14px; }
+    .inst-title { font-size: 12pt; font-weight: 800; color: #0f766e; }
+    .inst-sub { font-size: 7.5pt; color: #475569; }
+    .header-meta { text-align: right; vertical-align: middle; font-size: 7.5pt; color: #64748b; }
+    .doc-banner { background: #f1f5f9; border-left: 4.5px solid #0f766e; padding: 8px 12px; margin-bottom: 14px; }
+    .doc-title { font-size: 11pt; font-weight: 800; color: #0f172a; text-transform: uppercase; }
+    .doc-subtitle { font-size: 8pt; color: #475569; margin-top: 2px; }
+    .kpi-row { display: flex; gap: 12px; margin-bottom: 16px; }
+    .kpi-box { flex: 1; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 10px; background: #f8fafc; text-align: center; }
+    .kpi-val { font-size: 14pt; font-weight: 800; color: #0f766e; }
+    .kpi-lbl { font-size: 7pt; text-transform: uppercase; font-weight: 600; color: #64748b; margin-top: 2px; }
+    table.data-table { width: 100%; border-collapse: collapse; margin-bottom: 16px; font-size: 8.2pt; }
+    table.data-table th { background: #f1f5f9; color: #334155; font-weight: 700; text-align: left; padding: 6px 8px; border: 1px solid #cbd5e1; font-size: 7.8pt; text-transform: uppercase; }
+    table.data-table td { padding: 6px 8px; border: 1px solid #e2e8f0; color: #1e293b; vertical-align: middle; }
+    table.data-table tr:nth-child(even) { background: #f8fafc; }
+    .badge { display: inline-block; padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 7pt; text-transform: uppercase; }
+    .notes-box { border: 1px dashed #cbd5e1; background: #f8fafc; padding: 8px 12px; border-radius: 6px; font-size: 7.5pt; color: #475569; margin-bottom: 24px; }
+    .sign-table { width: 100%; margin-top: 30px; page-break-inside: avoid; }
+    .sign-line { width: 240px; border-top: 1.5px solid #0f172a; margin: 0 auto 4px auto; }
+    .sign-title { font-weight: 700; font-size: 8.5pt; color: #0f172a; text-align: center; }
+    .sign-sub { font-size: 7.2pt; color: #64748b; text-align: center; }
+    .footer-doc { margin-top: 18px; border-top: 1px solid #e2e8f0; padding-top: 6px; display: flex; justify-content: space-between; font-size: 6.8pt; color: #94a3b8; }
   </style>
 </head>
 <body>
-  
   <table class="header-table">
     <tr>
-      <td class="header-logo">
-        <img src="/assets/crm-logo.png?v=2" alt="CRM Clínico Farmacêutico" style="height: 44px; width: auto; object-fit: contain;">
-      </td>
-      <td class="header-info">
+      <td style="width: 55px;"><svg width="55" height="55" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="48" fill="#0f766e"/><path d="M50 20 V80 M20 50 H80" stroke="#ffffff" stroke-width="12" stroke-linecap="round"/><circle cx="50" cy="50" r="14" fill="#14b8a6"/></svg></td>
+      <td class="header-info" style="padding-left:12px;">
         <div class="inst-title">CRM Clínico Farmacêutico</div>
-        <div class="inst-sub">Consultório Farmacêutico &bull; Cuidado Farmacoterapêutico &bull; CDSS 4D</div>
-        <div class="inst-sub" style="font-size: 7.2pt; color: #0d9488; font-weight: 600;">Conforme Resoluções CFF nº 585/2013 e nº 586/2013 &bull; RDC ANVISA nº 44/2009</div>
+        <div class="inst-sub">Consultório &amp; Cuidado Farmacêutico Especializado &bull; CNPJ: 42.109.843/0001-90</div>
+        <div class="inst-sub" style="color: #0f766e; font-weight: 600;">Diretrizes CFF nº 585/2013 &amp; nº 586/2013 &bull; RDC ANVISA nº 44/2009</div>
       </td>
       <td class="header-meta">
         <div><strong>Emissão:</strong> ${now}</div>
-        <div><strong>Autenticação:</strong> <span style="font-family: monospace;">${hash}</span></div>
-        <div><strong>RT:</strong> Dr. Marcelo Mazaro (CRF-SP 54180)</div>
+        <div><strong>Controle:</strong> ${hash}</div>
+        <div><strong>Pág:</strong> 01 de 01</div>
       </td>
     </tr>
   </table>
-
-  <div class="report-banner">
-    <h1>${repTitle}</h1>
-    <p>${repSubtitle}</p>
+  <div class="doc-banner">
+    <div class="doc-title">${repTitle}</div>
+    <div class="doc-subtitle">${repSubtitle}</div>
   </div>
-
-  <div class="kpi-container">
-    ${kpisHtml}
-  </div>
-
-  <div class="section-title">📊 Demonstrativo Estruturado de Dados</div>
-  <table class="data-table">
-    ${tableHtml}
-  </table>
-
-  <div class="section-title">📝 Parecer Técnico &amp; Observações Clínicas</div>
-  <div class="notes-box">
-    <strong>Fundamentação Farmacoterapêutica:</strong> ${notesHtml}
-  </div>
-
-  <table class="footer-table">
+  <div class="kpi-row">${kpisHtml}</div>
+  <table class="data-table">${tableHtml}</table>
+  <div class="notes-box"><strong>Declaração de Responsabilidade Técnica:</strong> ${notesHtml}</div>
+  <table class="sign-table">
     <tr>
-      <td class="legal-footer">
-        <div>Documento clínico de valor farmacoterapêutico emitido eletronicamente.</div>
-        <div>Rastreabilidade garantida por chave criptográfica SHA-256 única.</div>
-        <div>CRM Clínico Farmacêutico v3.0 &bull; Gestão Clínico &amp; Prescrição Segura</div>
+      <td style="width: 50%; text-align: center;">
+        <div class="sign-line"></div>
+        <div class="sign-title">Dr. Marcelo Mazaro, CRF-SP 54.180</div>
+        <div class="sign-sub">Farmacêutico Responsável Técnico &bull; Especialista em Farmacologia Clínica</div>
       </td>
-      <td class="signature-area">
-        <div class="signature-line">
-          <div class="signature-name">Dr. Marcelo Mazaro</div>
-          <div class="signature-crf">Farmacêutico Responsável Técnico &bull; CRF-SP 54180</div>
-          <div style="font-size: 7pt; color: #059669; font-weight: 700; margin-top: 1px;">Assinado Digitalmente &bull; ICP-Brasil / CFF</div>
-        </div>
+      <td style="width: 50%; text-align: center;">
+        <div class="sign-line"></div>
+        <div class="sign-title">CRM Clínico Farmacêutico — Sistema de Gestão</div>
+        <div class="sign-sub">Validação Digital ICP-Brasil Padrão SHA-256 &bull; ${hash}</div>
       </td>
     </tr>
   </table>
-
+  <div class="footer-doc">
+    <div>CRM Clínico Farmacêutico &bull; Software Clínico de Alta Fidelidade</div>
+    <div>Documento Informativo e Regulatório emitido para controle técnico do consultório farmacêutico.</div>
+  </div>
 </body>
 </html>`;
 
-  const printWin = window.open('', '_blank', 'width=950,height=750');
+  const printWin = window.open('', '_blank', 'width=900,height=750');
   if (!printWin) {
-    if (typeof showToast === 'function') showToast('⚠️ Habilite os pop-ups do navegador para visualizar o PDF.');
+    if (typeof showToast === 'function') showToast('Bloqueador de pop-ups ativado! Permita a abertura para imprimir.', 'warning');
     return;
   }
-
   printWin.document.open();
   printWin.document.write(printDoc);
   printWin.document.close();
-
-  setTimeout(() => {
-    printWin.focus();
-    printWin.print();
-  }, 450);
+  setTimeout(() => { printWin.focus(); printWin.print(); }, 450);
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// RENDERIZAÇÃO DA ABA DASHBOARD COM DESIGN REFINADO
+// RENDERIZAÇÃO DA ABA DASHBOARD COM DESIGN REFINADO & THEME-AWARE
 // ─────────────────────────────────────────────────────────────────────────────
 
 export async function renderDashboardTab(container) {
@@ -1734,295 +1553,156 @@ export async function renderDashboardTab(container) {
   const d = state.dashboardData || {};
 
   container.innerHTML = `
-    <div style="padding: 10px 0 30px 0; max-width: 1400px; margin: 0 auto; animation: fadeIn 0.3s ease;">
-      
-      <!-- Banner de Cabeçalho do Consultório Clínico (Dark Glassmorphism Luxury) -->
-      <div style="
-        background: linear-gradient(135deg, rgba(16, 185, 129, 0.16) 0%, rgba(6, 182, 212, 0.12) 50%, rgba(15, 23, 42, 0.75) 100%);
-        border: 1px solid rgba(16, 185, 129, 0.35);
-        border-radius: 18px;
-        padding: 24px 28px;
-        margin-bottom: 24px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 16px;
-        box-shadow: 0 12px 35px rgba(0,0,0,0.35);
-        backdrop-filter: blur(14px);
-      ">
+    <div class="dashboard-main-container" style="padding: 10px 0 30px 0; max-width: 1400px; margin: 0 auto; animation: fadeIn 0.3s ease;">
+      <div class="dashboard-hero-banner">
         <div style="display: flex; align-items: center; gap: 18px;">
-          <div style="
-            width: 58px; height: 58px; border-radius: 16px;
-            background: linear-gradient(135deg, #10b981 0%, #0d9488 100%);
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.8rem; color: #fff; box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
-            border: 1px solid rgba(255,255,255,0.2);
-          ">
-            <i class="fa-solid fa-chart-line"></i>
-          </div>
+          <div class="dashboard-hero-icon"><i class="fa-solid fa-chart-line"></i></div>
           <div>
-            <h2 style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.45rem; color: #f8fafc; font-weight: 700; letter-spacing: -0.3px;">
-              Métricas &amp; Inteligência Clínica do Consultório
-            </h2>
-            <p style="margin: 4px 0 0 0; color: #94a3b8; font-size: 0.86rem;">
-              Indicadores farmacoterapêuticos em tempo real, prevenção de riscos iatrogênicos e adesão às condutas CFF.
-            </p>
+            <h2 class="dashboard-hero-title">Métricas &amp; Inteligência Clínica do Consultório</h2>
+            <p class="dashboard-hero-desc">Indicadores farmacoterapêuticos em tempo real, prevenção de riscos iatrogênicos e adesão às condutas CFF.</p>
           </div>
         </div>
-
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <button class="btn btn-secondary" onclick="window.switchTab('relatorios')" style="background: rgba(129, 140, 248, 0.15); color: #a5b4fc; border: 1px solid rgba(129, 140, 248, 0.4); padding: 9px 18px; border-radius: 10px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-            <i class="fa-solid fa-file-contract"></i> Central de Relatórios
-          </button>
-          <button class="btn btn-secondary" onclick="window.switchTab('farmacia')" style="background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); padding: 9px 18px; border-radius: 10px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-            <i class="fa-solid fa-prescription-bottle-medical"></i> Ir para Balcão &amp; CDSS
-          </button>
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <button class="btn dashboard-hero-btn-secondary" onclick="window.switchTab('relatorios')"><i class="fa-solid fa-file-contract"></i> Central de Relatórios</button>
+          <button class="btn dashboard-hero-btn-primary" onclick="window.switchTab('farmacia')"><i class="fa-solid fa-prescription-bottle-medical"></i> Ir para Balcão &amp; CDSS</button>
         </div>
       </div>
 
-      <!-- 5 CARDS HERO DE KPIs CLÍNICOS (CLICÁVEIS PARA DRILL-DOWN) -->
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px;">
-        
-        <!-- 1. Clientes Acompanhados -->
-        <div onclick="window.openDrillDownModal('patients')" title="Clique para ver o relatório detalhado de clientes" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 16px; padding: 18px; position: relative; overflow: hidden; cursor: pointer; transition: all 0.25s ease;" onmouseenter="this.style.transform='translateY(-3px)'; this.style.borderColor='#38bdf8'; this.style.boxShadow='0 10px 25px rgba(56,189,248,0.2)';" onmouseleave="this.style.transform='none'; this.style.borderColor='rgba(56, 189, 248, 0.3)'; this.style.boxShadow='none';">
+      <div class="dashboard-kpis-grid">
+        <div class="dashboard-kpi-card card-kpi-patients" onclick="window.openDrillDownModal('patients')" title="Clique para ver o relatório detalhado de clientes">
           <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
-              <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; color: #38bdf8; letter-spacing: 0.5px;">Clientes Cadastrados</div>
-              <div style="font-size: 2.0rem; font-weight: 800; color: #f8fafc; margin-top: 4px; font-family: 'Outfit', sans-serif;">
-                ${d.activePatients || 0}
-              </div>
+              <div class="dashboard-kpi-label kpi-label-sky">Clientes Cadastrados</div>
+              <div class="dashboard-kpi-val">${d.activePatients || 0}</div>
             </div>
-            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(56, 189, 248, 0.15); display: flex; align-items: center; justify-content: center; color: #38bdf8; font-size: 1.3rem; border: 1px solid rgba(56, 189, 248, 0.3);">
-              <i class="fa-solid fa-user-nurse"></i>
-            </div>
+            <div class="dashboard-kpi-icon-box kpi-icon-sky"><i class="fa-solid fa-user-nurse"></i></div>
           </div>
-          <div style="margin-top: 12px; font-size: 0.76rem; color: #94a3b8; display: flex; align-items: center; justify-content: space-between;">
-            <span><i class="fa-solid fa-arrow-trend-up" style="color: #10b981;"></i> Histórico ativo</span>
-            <span style="font-size: 0.7rem; color: #38bdf8; font-weight: 700;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver detalhes</span>
-          </div>
+          <div class="dashboard-kpi-footer"><span><i class="fa-solid fa-arrow-trend-up" style="color: #10b981;"></i> Histórico ativo</span><span class="dashboard-kpi-more kpi-more-sky"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver detalhes</span></div>
         </div>
 
-        <!-- 2. Atendimentos & Prescrições (MIPs) -->
-        <div onclick="window.openDrillDownModal('encounters')" title="Clique para ver o relatório detalhado de atendimentos" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 16px; padding: 18px; position: relative; overflow: hidden; cursor: pointer; transition: all 0.25s ease;" onmouseenter="this.style.transform='translateY(-3px)'; this.style.borderColor='#10b981'; this.style.boxShadow='0 10px 25px rgba(16,185,129,0.2)';" onmouseleave="this.style.transform='none'; this.style.borderColor='rgba(16, 185, 129, 0.3)'; this.style.boxShadow='none';">
+        <div class="dashboard-kpi-card card-kpi-encounters" onclick="window.openDrillDownModal('encounters')" title="Clique para ver o relatório detalhado de atendimentos">
           <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
-              <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; color: #10b981; letter-spacing: 0.5px;">Atendimentos Clínicos</div>
-              <div style="font-size: 2.0rem; font-weight: 800; color: #f8fafc; margin-top: 4px; font-family: 'Outfit', sans-serif;">
-                ${d.clinicalEncounters || 0}
-              </div>
+              <div class="dashboard-kpi-label kpi-label-emerald">Atendimentos Clínicos</div>
+              <div class="dashboard-kpi-val">${d.clinicalEncounters || 0}</div>
             </div>
-            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(16, 185, 129, 0.15); display: flex; align-items: center; justify-content: center; color: #10b981; font-size: 1.3rem; border: 1px solid rgba(16, 185, 129, 0.3);">
-              <i class="fa-solid fa-prescription-bottle-medical"></i>
-            </div>
+            <div class="dashboard-kpi-icon-box kpi-icon-emerald"><i class="fa-solid fa-prescription-bottle-medical"></i></div>
           </div>
-          <div style="margin-top: 12px; font-size: 0.76rem; color: #94a3b8; display: flex; align-items: center; justify-content: space-between;">
-            <span><i class="fa-solid fa-check" style="color: #10b981;"></i> MIPs &amp; Orientações</span>
-            <span style="font-size: 0.7rem; color: #10b981; font-weight: 700;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver detalhes</span>
-          </div>
+          <div class="dashboard-kpi-footer"><span><i class="fa-solid fa-check" style="color: #10b981;"></i> MIPs &amp; Orientações</span><span class="dashboard-kpi-more kpi-more-emerald"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver detalhes</span></div>
         </div>
 
-        <!-- 3. Intervenções CDSS & Alertas Barrados -->
-        <div onclick="window.openDrillDownModal('cdss')" title="Clique para ver o relatório detalhado de intervenções CDSS" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 16px; padding: 18px; position: relative; overflow: hidden; cursor: pointer; transition: all 0.25s ease;" onmouseenter="this.style.transform='translateY(-3px)'; this.style.borderColor='#f59e0b'; this.style.boxShadow='0 10px 25px rgba(245,158,11,0.2)';" onmouseleave="this.style.transform='none'; this.style.borderColor='rgba(245, 158, 11, 0.3)'; this.style.boxShadow='none';">
+        <div class="dashboard-kpi-card card-kpi-cdss" onclick="window.openDrillDownModal('cdss')" title="Clique para ver o relatório detalhado de intervenções CDSS">
           <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
-              <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; color: #f59e0b; letter-spacing: 0.5px;">Intervenções CDSS 4D</div>
-              <div style="font-size: 2.0rem; font-weight: 800; color: #f8fafc; margin-top: 4px; font-family: 'Outfit', sans-serif;">
-                ${d.cdssInterventions || 0}
-              </div>
+              <div class="dashboard-kpi-label kpi-label-amber">Intervenções CDSS 4D</div>
+              <div class="dashboard-kpi-val">${d.cdssInterventions || 0}</div>
             </div>
-            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(245, 158, 11, 0.15); display: flex; align-items: center; justify-content: center; color: #f59e0b; font-size: 1.3rem; border: 1px solid rgba(245, 158, 11, 0.3);">
-              <i class="fa-solid fa-shield-virus"></i>
-            </div>
+            <div class="dashboard-kpi-icon-box kpi-icon-amber"><i class="fa-solid fa-shield-virus"></i></div>
           </div>
-          <div style="margin-top: 12px; font-size: 0.76rem; color: #94a3b8; display: flex; align-items: center; justify-content: space-between;">
-            <span><i class="fa-solid fa-circle-exclamation" style="color: #f59e0b;"></i> Riscos evitados</span>
-            <span style="font-size: 0.7rem; color: #f59e0b; font-weight: 700;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver detalhes</span>
-          </div>
+          <div class="dashboard-kpi-footer"><span><i class="fa-solid fa-circle-exclamation" style="color: #f59e0b;"></i> Riscos evitados</span><span class="dashboard-kpi-more kpi-more-amber"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver detalhes</span></div>
         </div>
 
-        <!-- 4. Declarações DSF Emitidas -->
-        <div onclick="window.openDrillDownModal('services')" title="Clique para ver o relatório detalhado de declarações DSF" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(129, 140, 248, 0.3); border-radius: 16px; padding: 18px; position: relative; overflow: hidden; cursor: pointer; transition: all 0.25s ease;" onmouseenter="this.style.transform='translateY(-3px)'; this.style.borderColor='#818cf8'; this.style.boxShadow='0 10px 25px rgba(129,140,248,0.2)';" onmouseleave="this.style.transform='none'; this.style.borderColor='rgba(129, 140, 248, 0.3)'; this.style.boxShadow='none';">
+        <div class="dashboard-kpi-card card-kpi-reports" onclick="window.openDrillDownModal('services')" title="Clique para ver o relatório detalhado de declarações DSF">
           <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
-              <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; color: #818cf8; letter-spacing: 0.5px;">Declarações DSF (CFF)</div>
-              <div style="font-size: 2.0rem; font-weight: 800; color: #f8fafc; margin-top: 4px; font-family: 'Outfit', sans-serif;">
-                ${d.dsfIssuedCount || 0}
-              </div>
+              <div class="dashboard-kpi-label kpi-label-indigo">Declarações DSF (CFF)</div>
+              <div class="dashboard-kpi-val">${d.dsfIssuedCount || 0}</div>
             </div>
-            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(129, 140, 248, 0.15); display: flex; align-items: center; justify-content: center; color: #818cf8; font-size: 1.3rem; border: 1px solid rgba(129, 140, 248, 0.3);">
-              <i class="fa-solid fa-file-signature"></i>
-            </div>
+            <div class="dashboard-kpi-icon-box kpi-icon-indigo"><i class="fa-solid fa-file-signature"></i></div>
           </div>
-          <div style="margin-top: 12px; font-size: 0.76rem; color: #94a3b8; display: flex; align-items: center; justify-content: space-between;">
-            <span><i class="fa-solid fa-stamp" style="color: #818cf8;"></i> CFF 585/586</span>
-            <span style="font-size: 0.7rem; color: #818cf8; font-weight: 700;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver detalhes</span>
-          </div>
+          <div class="dashboard-kpi-footer"><span><i class="fa-solid fa-stamp" style="color: #818cf8;"></i> CFF 585/586</span><span class="dashboard-kpi-more kpi-more-indigo"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver detalhes</span></div>
         </div>
 
-        <!-- 5. Taxa de Adesão Farmacoterapêutica -->
-        <div onclick="window.openDrillDownModal('patients')" title="Clique para ver o relatório detalhado de adesão" style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(236, 72, 153, 0.3); border-radius: 16px; padding: 18px; position: relative; overflow: hidden; cursor: pointer; transition: all 0.25s ease;" onmouseenter="this.style.transform='translateY(-3px)'; this.style.borderColor='#ec4899'; this.style.boxShadow='0 10px 25px rgba(236,72,153,0.2)';" onmouseleave="this.style.transform='none'; this.style.borderColor='rgba(236, 72, 153, 0.3)'; this.style.boxShadow='none';">
+        <div class="dashboard-kpi-card card-kpi-adherence" onclick="window.openDrillDownModal('patients')" title="Clique para ver o relatório detalhado de adesão">
           <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
-              <div style="font-size: 0.76rem; font-weight: 700; text-transform: uppercase; color: #ec4899; letter-spacing: 0.5px;">Adesão Terapêutica</div>
-              <div style="font-size: 2.0rem; font-weight: 800; color: #f8fafc; margin-top: 4px; font-family: 'Outfit', sans-serif;">
-                ${d.adherenceRate || 85}%
-              </div>
+              <div class="dashboard-kpi-label kpi-label-pink">Adesão Terapêutica</div>
+              <div class="dashboard-kpi-val">${d.adherenceRate || 85}%</div>
             </div>
-            <div style="width: 44px; height: 44px; border-radius: 12px; background: rgba(236, 72, 153, 0.15); display: flex; align-items: center; justify-content: center; color: #ec4899; font-size: 1.3rem; border: 1px solid rgba(236, 72, 153, 0.3);">
-              <i class="fa-solid fa-heart-pulse"></i>
-            </div>
+            <div class="dashboard-kpi-icon-box kpi-icon-pink"><i class="fa-solid fa-heart-pulse"></i></div>
           </div>
-          <div style="margin-top: 12px; font-size: 0.76rem; color: #94a3b8; display: flex; align-items: center; justify-content: space-between;">
-            <span><i class="fa-solid fa-clipboard-check" style="color: #ec4899;"></i> Morisky Score</span>
-            <span style="font-size: 0.7rem; color: #ec4899; font-weight: 700;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver detalhes</span>
-          </div>
+          <div class="dashboard-kpi-footer"><span><i class="fa-solid fa-clipboard-check" style="color: #ec4899;"></i> Morisky Score</span><span class="dashboard-kpi-more kpi-more-pink"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ver detalhes</span></div>
         </div>
-
       </div>
 
-      <!-- SEÇÃO PRINCIPAL DE GRÁFICOS DO CONSULTÓRIO (REFINADOS E ILUMINADOS) -->
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 20px; margin-bottom: 24px;">
-        
-        <!-- Gráfico 1: Serviços Farmacêuticos Mais Realizados -->
-        <div style="background: linear-gradient(145deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.95)); border: 1.5px solid rgba(20, 184, 166, 0.35); border-radius: 22px; padding: 22px; box-shadow: inset 0 1.5px 3px rgba(255, 255, 255, 0.18), inset 0 -3px 8px rgba(0, 0, 0, 0.6), 0 18px 40px rgba(0,0,0,0.5); position: relative; backdrop-filter: blur(16px);">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+      <div class="dashboard-charts-grid">
+        <div class="dashboard-chart-card dashboard-card-services">
+          <div class="dashboard-chart-header">
             <div>
-              <h3 style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 700; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
-                <i class="fa-solid fa-stethoscope" style="color: #10b981;"></i> Serviços Farmacêuticos Realizados
-              </h3>
-              <p style="margin: 2px 0 0 0; font-size: 0.78rem; color: #94a3b8;">Procedimentos clínicos regulamentados pelo CFF</p>
+              <h3 class="dashboard-chart-title"><i class="fa-solid fa-stethoscope" style="color: #10b981;"></i> Serviços Farmacêuticos Realizados</h3>
+              <p class="dashboard-chart-desc">Procedimentos clínicos regulamentados pelo CFF</p>
             </div>
-            
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span id="badge-services-chart-type" style="font-size: 0.7rem; background: rgba(16, 185, 129, 0.2); color: #34d399; padding: 4px 10px; border-radius: 12px; font-weight: 700; border: 1px solid rgba(16,185,129,0.4); box-shadow: inset 0 1px 2px rgba(255,255,255,0.2);">
-                🔮 Rosca 3D Plástico Glossy
-              </span>
-              <button onclick="window.toggleServicesChart(event)" class="btn btn-sm" title="Alternar formato visual do gráfico (Donut, Barras, Pizza, Polar)" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(5, 150, 105, 0.45)); border: 1px solid rgba(16, 185, 129, 0.6); color: #34d399; font-size: 0.78rem; font-weight: 700; padding: 6px 12px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: inset 0 1px 2px rgba(255,255,255,0.3), 0 4px 12px rgba(16, 185, 129, 0.3); transition: all 0.2s ease;">
-                <i class="fa-solid fa-shuffle"></i> Alternar 3D
-              </button>
+              <span id="badge-services-chart-type" class="dashboard-chart-badge badge-services-theme">🔮 Rosca 3D Plástico Glossy</span>
+              <button onclick="window.toggleServicesChart(event)" class="dashboard-chart-btn-toggle btn-toggle-services" title="Alternar formato visual"><i class="fa-solid fa-shuffle"></i> Alternar 3D</button>
             </div>
           </div>
-          
-          <div style="height: 290px; position: relative;">
-            <canvas id="servicesChart"></canvas>
-          </div>
-          
-          <div style="margin-top: 12px; text-align: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px;">
-            <button onclick="window.openDrillDownModal('services')" class="btn btn-link" style="background: none; border: none; color: #38bdf8; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-              <i class="fa-solid fa-table-list"></i> Ver extrato de ${d.clinicalEncounters || 0} atendimentos e exportar relatório
-            </button>
-          </div>
+          <div style="height: 290px; position: relative;"><canvas id="servicesChart"></canvas></div>
+          <div class="dashboard-chart-footer"><button onclick="window.openDrillDownModal('services')" class="dashboard-chart-footer-link" style="color: #0284c7;"><i class="fa-solid fa-table-list"></i> Ver extrato de ${d.clinicalEncounters || 0} atendimentos</button></div>
         </div>
 
-        <!-- Gráfico 2: Alertas do Motor CDSS 4D por Categoria -->
-        <div style="background: linear-gradient(145deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.95)); border: 1.5px solid rgba(245, 158, 11, 0.35); border-radius: 22px; padding: 22px; box-shadow: inset 0 1.5px 3px rgba(255, 255, 255, 0.18), inset 0 -3px 8px rgba(0, 0, 0, 0.6), 0 18px 40px rgba(0,0,0,0.5); position: relative; backdrop-filter: blur(16px);">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+        <div class="dashboard-chart-card dashboard-card-cdss">
+          <div class="dashboard-chart-header">
             <div>
-              <h3 style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 700; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
-                <i class="fa-solid fa-shield-virus" style="color: #f59e0b;"></i> Alertas do Motor CDSS 4D
-              </h3>
-              <p style="margin: 2px 0 0 0; font-size: 0.78rem; color: #94a3b8;">Prevenção de riscos iatrogênicos e duplicidades</p>
+              <h3 class="dashboard-chart-title"><i class="fa-solid fa-shield-virus" style="color: #f59e0b;"></i> Alertas do Motor CDSS 4D</h3>
+              <p class="dashboard-chart-desc">Prevenção de riscos iatrogênicos e duplicidades</p>
             </div>
-            
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span id="badge-cdss-chart-type" style="font-size: 0.7rem; background: rgba(245, 158, 11, 0.2); color: #fbbf24; padding: 4px 10px; border-radius: 12px; font-weight: 700; border: 1px solid rgba(245,158,11,0.4); box-shadow: inset 0 1px 2px rgba(255,255,255,0.2);">
-                🪐 Esfera Polar 3D Esmaltada
-              </span>
-              <button onclick="window.toggleCdssChart(event)" class="btn btn-sm" title="Alternar formato visual do gráfico (Polar, Radar, Donut, Barras)" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(217, 119, 6, 0.45)); border: 1px solid rgba(245, 158, 11, 0.6); color: #fbbf24; font-size: 0.78rem; font-weight: 700; padding: 6px 12px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: inset 0 1px 2px rgba(255,255,255,0.3), 0 4px 12px rgba(245, 158, 11, 0.3); transition: all 0.2s ease;">
-                <i class="fa-solid fa-shuffle"></i> Alternar 3D
-              </button>
+              <span id="badge-cdss-chart-type" class="dashboard-chart-badge badge-cdss-theme">🪐 Esfera Polar 3D Esmaltada</span>
+              <button onclick="window.toggleCdssChart(event)" class="dashboard-chart-btn-toggle btn-toggle-cdss" title="Alternar formato visual"><i class="fa-solid fa-shuffle"></i> Alternar 3D</button>
             </div>
           </div>
-          
-          <div style="height: 290px; position: relative;">
-            <canvas id="cdssChart"></canvas>
-          </div>
-
-          <div style="margin-top: 12px; text-align: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px;">
-            <button onclick="window.openDrillDownModal('alerts')" class="btn btn-link" style="background: none; border: none; color: #fbbf24; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-              <i class="fa-solid fa-shield-halved"></i> Ver tabela de ${d.cdssInterventions || 0} alertas e interações evitadas
-            </button>
-          </div>
+          <div style="height: 290px; position: relative;"><canvas id="cdssChart"></canvas></div>
+          <div class="dashboard-chart-footer"><button onclick="window.openDrillDownModal('alerts')" class="dashboard-chart-footer-link" style="color: #d97706;"><i class="fa-solid fa-shield-halved"></i> Ver tabela de ${d.cdssInterventions || 0} alertas</button></div>
         </div>
-
       </div>
 
-      <!-- SEÇÃO INFERIOR: EVOLUÇÃO SEMANAL & PAINEL DE RED FLAGS -->
-      <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: start;">
-        
-        <!-- Gráfico 3: Evolução Semanal de Atendimentos e Intervenções -->
-        <div style="background: linear-gradient(145deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.95)); border: 1.5px solid rgba(129, 140, 248, 0.35); border-radius: 22px; padding: 22px; box-shadow: inset 0 1.5px 3px rgba(255, 255, 255, 0.18), inset 0 -3px 8px rgba(0, 0, 0, 0.6), 0 18px 40px rgba(0,0,0,0.5); backdrop-filter: blur(16px);">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+      <div class="dashboard-bottom-grid">
+        <div class="dashboard-chart-card dashboard-card-weekly">
+          <div class="dashboard-chart-header">
             <div>
-              <h3 style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.1rem; font-weight: 700; color: #f8fafc; display: flex; align-items: center; gap: 8px;">
-                <i class="fa-solid fa-chart-area" style="color: #818cf8;"></i> Tendência de Consultas &amp; Intervenções Farmacêuticas
-              </h3>
-              <p style="margin: 2px 0 0 0; font-size: 0.78rem; color: #94a3b8;">Volume diário de triagens e intervenções clínicas</p>
+              <h3 class="dashboard-chart-title"><i class="fa-solid fa-chart-area" style="color: #818cf8;"></i> Tendência de Consultas &amp; Intervenções</h3>
+              <p class="dashboard-chart-desc">Volume diário de triagens e intervenções clínicas</p>
             </div>
-            
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span id="badge-weekly-chart-type" style="font-size: 0.7rem; background: rgba(129, 140, 248, 0.2); color: #a5b4fc; padding: 4px 10px; border-radius: 12px; font-weight: 700; border: 1px solid rgba(129,140,248,0.4); box-shadow: inset 0 1px 2px rgba(255,255,255,0.2);">
-                📈 Tubo Fluido 3D Neon Glossy
-              </span>
-              <button onclick="window.toggleWeeklyChart(event)" class="btn btn-sm" title="Alternar formato visual (Linha, Barras, Degrau, Radar, Área)" style="background: linear-gradient(135deg, rgba(129, 140, 248, 0.3), rgba(99, 102, 241, 0.45)); border: 1px solid rgba(129, 140, 248, 0.6); color: #a5b4fc; font-size: 0.78rem; font-weight: 700; padding: 6px 12px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: inset 0 1px 2px rgba(255,255,255,0.3), 0 4px 12px rgba(129, 140, 248, 0.3); transition: all 0.2s ease;">
-                <i class="fa-solid fa-shuffle"></i> Alternar 3D
-              </button>
+              <span id="badge-weekly-chart-type" class="dashboard-chart-badge badge-weekly-theme">📈 Tubo Fluido 3D Neon Glossy</span>
+              <button onclick="window.toggleWeeklyChart(event)" class="dashboard-chart-btn-toggle btn-toggle-weekly" title="Alternar formato visual"><i class="fa-solid fa-shuffle"></i> Alternar 3D</button>
             </div>
           </div>
-          
-          <div style="height: 250px; position: relative;">
-            <canvas id="weeklyAppointmentsChart"></canvas>
-          </div>
-
-          <div style="margin-top: 12px; text-align: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px;">
-            <button onclick="window.openDrillDownModal('encounters')" class="btn btn-link" style="background: none; border: none; color: #a5b4fc; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
-              <i class="fa-solid fa-chart-line"></i> Ver extrato detalhado de consultas e intervenções
-            </button>
-          </div>
+          <div style="height: 250px; position: relative;"><canvas id="weeklyAppointmentsChart"></canvas></div>
+          <div class="dashboard-chart-footer"><button onclick="window.openDrillDownModal('encounters')" class="dashboard-chart-footer-link" style="color: #6366f1;"><i class="fa-solid fa-chart-line"></i> Ver extrato de consultas</button></div>
         </div>
 
-        <!-- Painel de Red Flags e Encaminhamentos -->
-        <div onclick="window.openDrillDownModal('redflags')" title="Clique para ver o relatório completo de Red Flags" style="background: rgba(15, 23, 42, 0.88); border: 1.5px solid rgba(239, 68, 68, 0.35); border-radius: 18px; padding: 22px; box-shadow: 0 10px 30px rgba(239,68,68,0.1); cursor: pointer; transition: all 0.2s ease; backdrop-filter: blur(12px);" onmouseenter="this.style.borderColor='#ef4444'; this.style.boxShadow='0 12px 35px rgba(239,68,68,0.2)';" onmouseleave="this.style.borderColor='rgba(239, 68, 68, 0.35)'; this.style.boxShadow='0 10px 30px rgba(239,68,68,0.1)';">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-            <h3 style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.05rem; font-weight: 700; color: #f87171; display: flex; align-items: center; gap: 8px;">
-              <i class="fa-solid fa-triangle-exclamation"></i> Sinais de Alerta (Red Flags)
-            </h3>
-            <span style="font-size: 0.7rem; background: rgba(239, 68, 68, 0.25); color: #fca5a5; padding: 4px 10px; border-radius: 12px; font-weight: 700; border: 1px solid rgba(239,68,68,0.4);">
-              ${(d.redFlagsData || []).reduce((acc, rf) => acc + (rf.count || 0), 0)} Encaminhados
-            </span>
+        <div class="dashboard-redflags-card" onclick="window.openDrillDownModal('redflags')" title="Clique para ver o relatório completo de Red Flags">
+          <div class="dashboard-redflags-header">
+            <h3 class="dashboard-redflags-title"><i class="fa-solid fa-triangle-exclamation"></i> Sinais de Alerta (Red Flags)</h3>
+            <span class="dashboard-redflags-badge">${(d.redFlagsData || []).reduce((acc, rf) => acc + (rf.count || 0), 0)} Encaminhados</span>
           </div>
-          <p style="margin: 0 0 14px 0; font-size: 0.76rem; color: #94a3b8; line-height: 1.35;">
-            Casos em que a prescrição de MIP foi contraindicada com direcionamento seguro para suporte médico:
-          </p>
-
+          <p class="dashboard-redflags-desc">Casos em que a prescrição de MIP foi contraindicada com direcionamento seguro para suporte médico:</p>
           <div style="display: flex; flex-direction: column; gap: 10px;">
             ${(d.redFlagsData && d.redFlagsData.length > 0) ? d.redFlagsData.map(rf => `
-              <div style="
-                background: rgba(255, 255, 255, 0.03); border-left: 3px solid ${rf.severity === 'Crítica' ? '#ef4444' : '#f59e0b'};
-                padding: 10px 12px; border-radius: 0 10px 10px 0; display: flex; justify-content: space-between; align-items: center;
-              ">
+              <div class="dashboard-redflag-item ${rf.severity === 'Crítica' ? 'redflag-critica' : 'redflag-alta'}">
                 <div>
-                  <div style="font-weight: 700; font-size: 0.84rem; color: #f8fafc; font-family: 'Outfit';">${rf.label}</div>
-                  <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">
-                    <i class="fa-solid fa-arrow-right" style="font-size: 0.65rem; color: #38bdf8;"></i> ${rf.action}
+                  <div class="dashboard-redflag-label">${rf.label}</div>
+                  <div class="dashboard-redflag-sub">
+                    <i class="fa-solid fa-arrow-right" style="font-size: 0.65rem; color: #0284c7;"></i> ${rf.action}
                   </div>
                 </div>
                 <div style="text-align: right;">
-                  <span style="font-weight: 800; font-size: 0.95rem; color: #f8fafc; font-family: 'Outfit';">${rf.count}</span>
-                  <small style="display: block; font-size: 0.65rem; color: ${rf.severity === 'Crítica' ? '#ef4444' : '#f59e0b'}; font-weight: 700;">${rf.severity}</small>
+                  <span class="dashboard-redflag-count">${rf.count}</span>
+                  <small class="dashboard-redflag-severity ${rf.severity === 'Crítica' ? 'sev-critica' : 'sev-alta'}">${rf.severity}</small>
                 </div>
               </div>
             `).join('') : `
-              <div style="text-align: center; padding: 20px 10px; color: #64748b; font-size: 0.8rem; background: rgba(255,255,255,0.02); border-radius: 10px;">
+              <div class="dashboard-redflag-empty">
                 <i class="fa-solid fa-circle-check" style="color: #10b981; font-size: 1.4rem; display: block; margin-bottom: 6px;"></i>
                 Nenhum sinal de alerta crítico detectado
               </div>
             `}
           </div>
 
-          <div style="margin-top: 14px; text-align: center;">
-            <span style="font-size: 0.74rem; color: #f87171; font-weight: 700;">
+          <div class="dashboard-redflags-footer">
+            <span style="font-size: 0.74rem; font-weight: 700; color: #dc2626;">
               <i class="fa-solid fa-arrow-up-right-from-square"></i> Ver protocolo detalhado de encaminhamento
             </span>
           </div>
@@ -2044,6 +1724,16 @@ export async function renderDashboardTab(container) {
   requestAnimationFrame(renderChartsSafely);
   setTimeout(renderChartsSafely, 60);
   setTimeout(renderChartsSafely, 250);
+
+  // Listener para re-renderizar gráficos quando o tema for alterado
+  if (!window._dashboardThemeListenerAttached) {
+    window._dashboardThemeListenerAttached = true;
+    window.addEventListener('themeChanged', () => {
+      if (state.activeTab === 'dashboard') {
+        renderChartsSafely();
+      }
+    });
+  }
 
   // Observer para redimensionamento e garantia de visibilidade contínua
   if (window.ResizeObserver) {

@@ -130,17 +130,1581 @@ select option:hover, select option:focus, select option:active, select option:ch
   color: #ffffff !important;
 }
 
-body.light-theme select {
+/* ==========================================================================
+   MODO CLARO REFINADO (LIGHT THEME — CLINICAL HEALTHCARE DESIGN SYSTEM)
+   Paleta hospitalar de alta legibilidade, contraste AAA e estética premium
+   ========================================================================== */
+
+body.light-theme {
+  --bg-primary: #f1f5f9;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #e2e8f0;
+  --bg-solid: #ffffff;
+  --bg-card: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+  --border-focus: #0284c7;
+  --glass-bg: rgba(255, 255, 255, 0.96);
+  --glass-border: #e2e8f0;
+  --color-primary: #0284c7;
+  --color-primary-hover: #0369a1;
+  --color-accent: #0d9488;
+  --color-danger: #dc2626;
+  --color-warning: #d97706;
+  --color-success: #059669;
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.03);
+  --shadow-md: 0 4px 14px rgba(15, 23, 42, 0.06), 0 2px 6px rgba(15, 23, 42, 0.03);
+  --shadow-lg: 0 12px 32px rgba(15, 23, 42, 0.08), 0 4px 12px rgba(15, 23, 42, 0.04);
+  color-scheme: light;
+}
+
+body.light-theme {
+  background: #f1f5f9 !important;
+  background-image: 
+    radial-gradient(ellipse at 50% -20%, rgba(2, 132, 199, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse at 85% 120%, rgba(13, 148, 136, 0.04) 0%, transparent 50%) !important;
+  color: #0f172a !important;
+}
+
+/* Sidebar & Navigation no Modo Claro */
+body.light-theme .app-sidebar {
+  background: #ffffff !important;
+  border-right: 1px solid #e2e8f0 !important;
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.02) !important;
+}
+
+body.light-theme .app-sidebar .brand-logo div:first-child {
+  color: #0f172a !important;
+}
+
+body.light-theme .sidebar-mode-switcher-container div {
+  background: #f1f5f9 !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+body.light-theme .btn-sidebar-mode-switch {
+  color: #475569 !important;
+}
+
+body.light-theme .btn-sidebar-mode-switch.active {
+  color: #ffffff !important;
+}
+
+body.light-theme .app-sidebar .nav-item {
+  color: #334155 !important;
+  font-weight: 600 !important;
+}
+
+body.light-theme .app-sidebar .nav-item:hover {
+  background-color: #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+body.light-theme .app-sidebar .nav-item.active {
+  background: linear-gradient(135deg, rgba(2, 132, 199, 0.12), rgba(13, 148, 136, 0.06)) !important;
+  color: #0284c7 !important;
+  border-left: 3.5px solid #0284c7 !important;
+  font-weight: 700 !important;
+}
+
+/* Header no Modo Claro */
+body.light-theme .app-header {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02) !important;
+}
+
+body.light-theme .page-title {
+  color: #0f172a !important;
+}
+
+body.light-theme .header-brand-text {
+  color: #475569 !important;
+}
+
+body.light-theme #global-system-search {
+  background: #ffffff !important;
+  border: 1.5px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+
+body.light-theme #global-system-search::placeholder {
+  color: #94a3b8 !important;
+}
+
+body.light-theme #global-system-search:focus {
+  border-color: #0284c7 !important;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15) !important;
+}
+
+body.light-theme #global-search-results {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.12) !important;
+}
+
+body.light-theme #sync-status-badge {
+  background: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #334155 !important;
+}
+
+body.light-theme #btn-theme-toggle,
+body.light-theme #btn-density-toggle {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+}
+
+body.light-theme #btn-theme-toggle:hover,
+body.light-theme #btn-density-toggle:hover {
+  background: #f1f5f9 !important;
+}
+
+/* Área de Conteúdo Principal */
+body.light-theme .app-content {
+  background: #f1f5f9 !important;
+}
+
+/* Cartões & Painéis */
+body.light-theme .kpi-card,
+body.light-theme .interactive-card,
+body.light-theme .patients-form-container,
+body.light-theme .card,
+body.light-theme .panel {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04) !important;
+}
+
+body.light-theme .kpi-value {
+  color: #0f172a !important;
+}
+
+body.light-theme .kpi-header {
+  color: #475569 !important;
+}
+
+/* Inputs, Textareas e Selects */
+body.light-theme input,
+body.light-theme textarea,
+body.light-theme select,
+body.light-theme .form-input,
+body.light-theme .pep-textarea {
   background-color: #ffffff !important;
-  color: #1e293b !important;
+  color: #0f172a !important;
+  border: 1.5px solid #cbd5e1 !important;
+}
+
+body.light-theme input::placeholder,
+body.light-theme textarea::placeholder {
+  color: #94a3b8 !important;
+}
+
+body.light-theme input:focus,
+body.light-theme textarea:focus,
+body.light-theme select:focus,
+body.light-theme .form-input:focus,
+body.light-theme .pep-textarea:focus {
+  border-color: #0284c7 !important;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15) !important;
 }
 
 body.light-theme select option {
   background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+body.light-theme .form-label {
+  color: #1e293b !important;
+  font-weight: 600 !important;
+}
+
+/* Tabelas */
+body.light-theme table {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+}
+
+body.light-theme th {
+  background: #f1f5f9 !important;
+  color: #334155 !important;
+  border-bottom: 2px solid #cbd5e1 !important;
+  font-weight: 700 !important;
+}
+
+body.light-theme td {
+  border-bottom: 1px solid #e2e8f0 !important;
   color: #1e293b !important;
 }
 
-/* --- RESET & LAYOUT BASE --- */
+body.light-theme tr:hover td {
+  background: #f8fafc !important;
+}
+
+/* PEP & Modais */
+body.light-theme .modal-content,
+body.light-theme .pep-content {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15) !important;
+}
+
+body.light-theme .modal-header,
+body.light-theme .pep-header {
+  background: #f8fafc !important;
+  border-bottom: 1px solid #e2e8f0 !important;
+}
+
+body.light-theme .modal-header h3,
+body.light-theme .pep-title span {
+  color: #0f172a !important;
+}
+
+body.light-theme .modal-footer,
+body.light-theme .pep-footer {
+  background: #f8fafc !important;
+  border-top: 1px solid #e2e8f0 !important;
+}
+
+body.light-theme .pep-soap-card {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+}
+
+body.light-theme .pep-soap-header label {
+  color: #0f172a !important;
+}
+
+body.light-theme .pep-sidebar {
+  background: #f8fafc !important;
+  border-right: 1px solid #e2e8f0 !important;
+}
+
+body.light-theme .pep-vital-item {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+body.light-theme .pep-vital-val strong {
+  color: #0f172a !important;
+}
+
+body.light-theme .pep-info-chip {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #1e293b !important;
+}
+
+/* Overrides para blocos com fundos escuros fixos */
+body.light-theme div[style*="background: #0f172a"],
+body.light-theme div[style*="background: #1e293b"],
+body.light-theme div[style*="background: #131c2e"],
+body.light-theme div[style*="background: #0b0f19"],
+body.light-theme div[style*="background:#0f172a"],
+body.light-theme div[style*="background:#1e293b"],
+body.light-theme div[style*="background:#131c2e"],
+body.light-theme div[style*="background:#0b0f19"] {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+body.light-theme div[style*="color: #f8fafc"],
+body.light-theme span[style*="color: #f8fafc"],
+body.light-theme div[style*="color:#f8fafc"],
+body.light-theme span[style*="color:#f8fafc"],
+body.light-theme h1[style*="color: #f8fafc"],
+body.light-theme h2[style*="color: #f8fafc"],
+body.light-theme h3[style*="color: #f8fafc"] {
+  color: #0f172a !important;
+}
+
+body.light-theme div[style*="color: #cbd5e1"],
+body.light-theme span[style*="color: #cbd5e1"],
+body.light-theme div[style*="color: #94a3b8"],
+body.light-theme span[style*="color: #94a3b8"],
+body.light-theme small[style*="color: #94a3b8"] {
+  color: #475569 !important;
+}
+
+/* Botões e Ações no Modo Claro */
+body.light-theme button[style*="background: #1e293b"],
+body.light-theme button[style*="background:#1e293b"],
+body.light-theme button[style*="background: #0f172a"],
+body.light-theme button[style*="background:#0f172a"] {
+  background: #f1f5f9 !important;
+  border-color: #cbd5e1 !important;
+  color: #334155 !important;
+}
+
+body.light-theme button[style*="background: #1e293b"]:hover,
+body.light-theme button[style*="background:#1e293b"]:hover,
+body.light-theme button[style*="background: #0f172a"]:hover,
+body.light-theme button[style*="background:#0f172a"]:hover {
+  background: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+/* Itens da Busca Global no Modo Claro */
+body.light-theme .global-search-result-item {
+  background: #ffffff !important;
+  border-bottom: 1px solid #f1f5f9 !important;
+  color: #0f172a !important;
+}
+
+body.light-theme .global-search-result-item:hover {
+  background: #f8fafc !important;
+  border-left: 3px solid #0284c7 !important;
+}
+
+/* Sub-Abas e Filtros */
+body.light-theme .subtabs-bar,
+body.light-theme .filter-bar {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+}
+
+body.light-theme .subtab-btn {
+  color: #475569 !important;
+}
+
+body.light-theme .subtab-btn:hover {
+  color: #0f172a !important;
+  background: #f1f5f9 !important;
+}
+
+body.light-theme .subtab-btn.active {
+  background: #ffffff !important;
+  color: #0284c7 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* Badges e Pílulas Clínicas no Modo Claro */
+body.light-theme .badge-danger,
+body.light-theme .pill-critical {
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+  border: 1px solid #fca5a5 !important;
+}
+
+body.light-theme .badge-warning,
+body.light-theme .pill-moderate {
+  background: #fef3c7 !important;
+  color: #92400e !important;
+  border: 1px solid #fcd34d !important;
+}
+
+body.light-theme .badge-success,
+body.light-theme .pill-low {
+  background: #dcfce7 !important;
+  color: #166534 !important;
+  border: 1px solid #86efac !important;
+}
+
+/* ==========================================================================
+   DASHBOARD CLÍNICO — REFINAMENTO MODO CLARO (WHITE & PASTEL CLINICAL LUXURY)
+   ========================================================================== */
+
+/* Banner de Métricas & Inteligência */
+body.light-theme .dashboard-hero-banner {
+  background: linear-gradient(135deg, #ffffff 0%, #f0fdfa 50%, #f8fafc 100%) !important;
+  border: 1.5px solid #ccfbf1 !important;
+  box-shadow: 0 10px 30px rgba(13, 148, 136, 0.08), 0 2px 8px rgba(0, 0, 0, 0.02) !important;
+}
+
+body.light-theme .dashboard-hero-title {
+  color: #0f172a !important;
+}
+
+body.light-theme .dashboard-hero-desc {
+  color: #475569 !important;
+}
+
+body.light-theme .dashboard-hero-btn-secondary {
+  background: #f8fafc !important;
+  color: #4338ca !important;
+  border: 1px solid #c7d2fe !important;
+}
+
+body.light-theme .dashboard-hero-btn-secondary:hover {
+  background: #eef2ff !important;
+  color: #3730a3 !important;
+}
+
+body.light-theme .dashboard-hero-btn-primary {
+  background: #ecfdf5 !important;
+  color: #047857 !important;
+  border: 1px solid #a7f3d0 !important;
+}
+
+body.light-theme .dashboard-hero-btn-primary:hover {
+  background: #d1fae5 !important;
+  color: #065f46 !important;
+}
+
+/* Cards de KPIs Clínicos no Modo Claro */
+body.light-theme .dashboard-kpi-card {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+}
+
+body.light-theme .dashboard-kpi-card:hover {
+  background: #ffffff !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.08) !important;
+}
+
+body.light-theme .card-kpi-patients {
+  border-color: #bae6fd !important;
+}
+body.light-theme .card-kpi-patients:hover {
+  border-color: #0284c7 !important;
+  box-shadow: 0 12px 28px rgba(2, 132, 199, 0.14) !important;
+}
+
+body.light-theme .card-kpi-encounters {
+  border-color: #a7f3d0 !important;
+}
+body.light-theme .card-kpi-encounters:hover {
+  border-color: #059669 !important;
+  box-shadow: 0 12px 28px rgba(5, 150, 105, 0.14) !important;
+}
+
+body.light-theme .card-kpi-cdss {
+  border-color: #fde68a !important;
+}
+body.light-theme .card-kpi-cdss:hover {
+  border-color: #d97706 !important;
+  box-shadow: 0 12px 28px rgba(217, 119, 6, 0.14) !important;
+}
+
+body.light-theme .card-kpi-reports {
+  border-color: #c7d2fe !important;
+}
+body.light-theme .card-kpi-reports:hover {
+  border-color: #4f46e5 !important;
+  box-shadow: 0 12px 28px rgba(99, 102, 241, 0.14) !important;
+}
+
+body.light-theme .card-kpi-adherence {
+  border-color: #fbcfe8 !important;
+}
+body.light-theme .card-kpi-adherence:hover {
+  border-color: #db2777 !important;
+  box-shadow: 0 12px 28px rgba(219, 39, 119, 0.14) !important;
+}
+
+body.light-theme .dashboard-kpi-val {
+  color: #0f172a !important;
+}
+
+body.light-theme .dashboard-kpi-footer {
+  color: #64748b !important;
+}
+
+/* Ícones dos Cards KPI no Modo Claro */
+body.light-theme .kpi-icon-sky {
+  background: #e0f2fe !important;
+  color: #0284c7 !important;
+  border: 1px solid #bae6fd !important;
+}
+body.light-theme .kpi-icon-emerald {
+  background: #dcfce7 !important;
+  color: #059669 !important;
+  border: 1px solid #a7f3d0 !important;
+}
+body.light-theme .kpi-icon-amber {
+  background: #fef3c7 !important;
+  color: #d97706 !important;
+  border: 1px solid #fde68a !important;
+}
+body.light-theme .kpi-icon-indigo {
+  background: #e0e7ff !important;
+  color: #4f46e5 !important;
+  border: 1px solid #c7d2fe !important;
+}
+body.light-theme .kpi-icon-pink {
+  background: #fce7f3 !important;
+  color: #db2777 !important;
+  border: 1px solid #fbcfe8 !important;
+}
+
+/* Labels e Textos dos KPIs */
+body.light-theme .kpi-label-sky { color: #0369a1 !important; }
+body.light-theme .kpi-label-emerald { color: #047857 !important; }
+body.light-theme .kpi-label-amber { color: #b45309 !important; }
+body.light-theme .kpi-label-indigo { color: #4338ca !important; }
+body.light-theme .kpi-label-pink { color: #be185d !important; }
+
+body.light-theme .kpi-more-sky { color: #0284c7 !important; }
+body.light-theme .kpi-more-emerald { color: #059669 !important; }
+body.light-theme .kpi-more-amber { color: #d97706 !important; }
+body.light-theme .kpi-more-indigo { color: #4f46e5 !important; }
+body.light-theme .kpi-more-pink { color: #db2777 !important; }
+
+/* Cards de Gráficos no Modo Claro */
+body.light-theme .dashboard-chart-card {
+  background: #ffffff !important;
+  border: 1.5px solid #e2e8f0 !important;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.04), 0 1px 3px rgba(0, 0, 0, 0.02) !important;
+}
+
+body.light-theme .dashboard-card-services {
+  border-color: #99f6e4 !important;
+}
+body.light-theme .dashboard-card-cdss {
+  border-color: #fde68a !important;
+}
+body.light-theme .dashboard-card-weekly {
+  border-color: #c7d2fe !important;
+}
+
+body.light-theme .dashboard-chart-title {
+  color: #0f172a !important;
+}
+
+body.light-theme .dashboard-chart-desc {
+  color: #64748b !important;
+}
+
+body.light-theme .badge-services-theme {
+  background: #ccfbf1 !important;
+  color: #0f766e !important;
+  border: 1px solid #99f6e4 !important;
+  box-shadow: none !important;
+}
+body.light-theme .btn-toggle-services {
+  background: #f0fdfa !important;
+  color: #0d9488 !important;
+  border: 1px solid #99f6e4 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+body.light-theme .btn-toggle-services:hover {
+  background: #ccfbf1 !important;
+  color: #0f766e !important;
+}
+
+body.light-theme .badge-cdss-theme {
+  background: #fef3c7 !important;
+  color: #b45309 !important;
+  border: 1px solid #fde68a !important;
+  box-shadow: none !important;
+}
+body.light-theme .btn-toggle-cdss {
+  background: #fffbeb !important;
+  color: #d97706 !important;
+  border: 1px solid #fde68a !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+body.light-theme .btn-toggle-cdss:hover {
+  background: #fef3c7 !important;
+  color: #b45309 !important;
+}
+
+body.light-theme .badge-weekly-theme {
+  background: #e0e7ff !important;
+  color: #4338ca !important;
+  border: 1px solid #c7d2fe !important;
+  box-shadow: none !important;
+}
+body.light-theme .btn-toggle-weekly {
+  background: #eef2ff !important;
+  color: #4f46e5 !important;
+  border: 1px solid #c7d2fe !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04) !important;
+}
+body.light-theme .btn-toggle-weekly:hover {
+  background: #e0e7ff !important;
+  color: #4338ca !important;
+}
+
+body.light-theme .dashboard-chart-footer {
+  border-top: 1px solid #f1f5f9 !important;
+}
+
+/* Painel de Red Flags no Modo Claro */
+body.light-theme .dashboard-redflags-card {
+  background: #ffffff !important;
+  border: 1.5px solid #fecaca !important;
+  box-shadow: 0 6px 24px rgba(220, 38, 38, 0.06), 0 1px 3px rgba(0,0,0,0.02) !important;
+}
+body.light-theme .dashboard-redflags-card:hover {
+  border-color: #ef4444 !important;
+  box-shadow: 0 12px 30px rgba(239, 68, 68, 0.12) !important;
+}
+
+body.light-theme .dashboard-redflags-title {
+  color: #b91c1c !important;
+}
+
+body.light-theme .dashboard-redflags-badge {
+  background: #fee2e2 !important;
+  color: #991b1b !important;
+  border: 1px solid #fca5a5 !important;
+}
+
+body.light-theme .dashboard-redflags-desc {
+  color: #64748b !important;
+}
+
+body.light-theme .dashboard-redflag-item {
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+}
+body.light-theme .redflag-critica {
+  border-left: 4px solid #dc2626 !important;
+  background: #fff5f5 !important;
+}
+body.light-theme .redflag-alta {
+  border-left: 4px solid #d97706 !important;
+  background: #fffbeb !important;
+}
+
+body.light-theme .dashboard-redflag-label {
+  color: #0f172a !important;
+}
+
+body.light-theme .dashboard-redflag-sub {
+  color: #64748b !important;
+}
+
+body.light-theme .dashboard-redflag-count {
+  color: #0f172a !important;
+}
+
+body.light-theme .sev-critica {
+  color: #dc2626 !important;
+}
+
+body.light-theme .sev-alta {
+  color: #d97706 !important;
+}
+
+body.light-theme .dashboard-redflag-empty {
+  background: #f0fdf4 !important;
+  color: #166534 !important;
+  border: 1px solid #bbf7d0 !important;
+}
+
+/* Modal de Drilldown e Relatório no Modo Claro */
+body.light-theme .dashboard-drilldown-modal-content {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.15) !important;
+}
+
+body.light-theme .dashboard-drilldown-title {
+  color: #0f172a !important;
+}
+
+body.light-theme .dashboard-drilldown-close {
+  background: #f1f5f9 !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #475569 !important;
+}
+body.light-theme .dashboard-drilldown-close:hover {
+  background: #e2e8f0 !important;
+  color: #0f172a !important;
+}
+
+/* Overrides Universais para Eliminar Caixas Escuras Residuais */
+body.light-theme div[style*="rgba(15, 23, 42"],
+body.light-theme div[style*="rgba(30, 41, 59"],
+body.light-theme div[style*="background: rgba(15, 23, 42"],
+body.light-theme div[style*="background: rgba(30, 41, 59"],
+body.light-theme div[style*="background:rgba(15, 23, 42"],
+body.light-theme div[style*="background:rgba(30, 41, 59"],
+body.light-theme div[style*="background:#111827"],
+body.light-theme div[style*="background: #111827"] {
+  background: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #0f172a !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
+}
+
+body.light-theme div[style*="rgba(255, 255, 255, 0.03)"],
+body.light-theme div[style*="rgba(255, 255, 255, 0.05)"] {
+  background: #f8fafc !important;
+}
+
+/* ==========================================================================
+   FARMÁCIA & BALCÃO CLÍNICO — REFINAMENTO MODO CLARO (WHITE & PASTEL LUXURY)
+   ========================================================================== */
+
+/* Painel Principal e Cabeçalho do Balcão */
+body.light-theme .pharmacy-glass-panel {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.02) !important;
+  color: #0f172a !important;
+  backdrop-filter: none !important;
+}
+
+body.light-theme .pharmacy-glass-panel h2,
+body.light-theme .pharmacy-glass-panel h3,
+body.light-theme .pharmacy-glass-panel h4 {
+  color: #0f172a !important;
+}
+
+body.light-theme .pharmacy-glass-panel p {
+  color: #475569 !important;
+}
+
+body.light-theme .pharmacy-glass-card {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+  color: #0f172a !important;
+}
+
+/* Sub-Abas da Farmácia */
+body.light-theme .pharmacy-subnav-container {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+}
+
+body.light-theme .pharmacy-subnav-btn {
+  background: #f8fafc !important;
+  border: 1.5px solid #e2e8f0 !important;
+  color: #475569 !important;
+  box-shadow: none !important;
+}
+
+body.light-theme .pharmacy-subnav-btn:hover {
+  background: #f1f5f9 !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+body.light-theme #subnav-btn-balcao.active {
+  background: linear-gradient(135deg, #0d9488, #0f766e) !important;
+  border-color: #0d9488 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(13, 148, 136, 0.35) !important;
+}
+body.light-theme #subnav-btn-balcao.active i {
+  color: #ffffff !important;
+  text-shadow: none !important;
+}
+
+body.light-theme #subnav-btn-prontuario.active {
+  background: linear-gradient(135deg, #0284c7, #0369a1) !important;
+  border-color: #0284c7 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35) !important;
+}
+body.light-theme #subnav-btn-prontuario.active i {
+  color: #ffffff !important;
+  text-shadow: none !important;
+}
+
+body.light-theme #subnav-btn-simulador.active {
+  background: linear-gradient(135deg, #d97706, #b45309) !important;
+  border-color: #d97706 !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(217, 119, 6, 0.35) !important;
+}
+body.light-theme #subnav-btn-simulador.active i {
+  color: #ffffff !important;
+  text-shadow: none !important;
+}
+
+body.light-theme #subnav-btn-estoque.active {
+  background: linear-gradient(135deg, #7c3aed, #6d28d9) !important;
+  border-color: #7c3aed !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35) !important;
+}
+body.light-theme #subnav-btn-estoque.active i {
+  color: #ffffff !important;
+  text-shadow: none !important;
+}
+
+/* Stepper de 5 Etapas no Modo Claro */
+body.light-theme .pharmacy-stepper {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+}
+
+body.light-theme .pharmacy-step-item {
+  background: #f8fafc !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #64748b !important;
+}
+
+body.light-theme .pharmacy-step-badge {
+  background: #e2e8f0 !important;
+  color: #475569 !important;
+  border: 1px solid #cbd5e1 !important;
+}
+
+body.light-theme .pharmacy-step-item.active {
+  background: #ecfdf5 !important;
+  border: 1.5px solid #10b981 !important;
+  color: #047857 !important;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15) !important;
+}
+
+body.light-theme .pharmacy-step-item.active .pharmacy-step-badge {
+  background: #10b981 !important;
+  color: #ffffff !important;
+  box-shadow: none !important;
+}
+
+body.light-theme .pharmacy-step-item.completed {
+  background: #f0fdf4 !important;
+  border: 1px solid #bbf7d0 !important;
+  color: #166534 !important;
+}
+
+body.light-theme .pharmacy-step-item.completed .pharmacy-step-badge {
+  background: #059669 !important;
+  color: #ffffff !important;
+}
+
+/* Cards de Pacientes (Etapa 1) no Modo Claro */
+body.light-theme .patient-select-card {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+}
+
+body.light-theme .patient-select-card:hover {
+  border-color: #0d9488 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(13, 148, 136, 0.14) !important;
+}
+
+body.light-theme .patient-select-card.selected {
+  background: linear-gradient(135deg, #f0fdfa 0%, #e6fffa 100%) !important;
+  border: 2px solid #0d9488 !important;
+  box-shadow: 0 4px 16px rgba(13, 148, 136, 0.18) !important;
+}
+
+body.light-theme .patient-select-card div[style*="color: #ffffff"],
+body.light-theme .patient-select-card div[style*="color:#ffffff"] {
+  color: #0f172a !important;
+}
+
+/* Cards de Protocolos de Triagem (Etapa 2) no Modo Claro */
+body.light-theme .triage-protocol-card {
+  background: #ffffff !important;
+  border: 1.5px solid #e2e8f0 !important;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+}
+
+body.light-theme .triage-protocol-card:hover {
+  border-color: #0284c7 !important;
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 20px rgba(2, 132, 199, 0.14) !important;
+}
+
+body.light-theme .triage-protocol-card.selected {
+  background: linear-gradient(135deg, #f0fdfa 0%, #e6fffa 100%) !important;
+  border: 2px solid #0d9488 !important;
+  box-shadow: 0 4px 20px rgba(13, 148, 136, 0.2) !important;
+}
+
+body.light-theme .triage-protocol-card div[style*="color: #ffffff"],
+body.light-theme .triage-protocol-card div[style*="color:#ffffff"],
+body.light-theme .triage-protocol-card div[style*="color: #f1f5f9"] {
+  color: #0f172a !important;
+}
+
+/* Campos de Formulário, Selects e Inputs na Farmácia */
+body.light-theme #balcao-step-container input,
+body.light-theme #balcao-step-container select,
+body.light-theme #balcao-step-container textarea,
+body.light-theme #balcao-step-container .form-input {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border: 1.5px solid #cbd5e1 !important;
+}
+
+body.light-theme #balcao-step-container label span {
+  color: #1e293b !important;
+}
+
+/* CDSS Alertas e Banners (Etapa 3 e 4) */
+body.light-theme .cdss-alert-box.grave {
+  background: #fef2f2 !important;
+  border: 1.5px solid #fecaca !important;
+}
+body.light-theme .cdss-alert-box.moderada {
+  background: #fffbeb !important;
+  border: 1.5px solid #fde68a !important;
+}
+body.light-theme .cdss-alert-box.leve {
+  background: #f0fdf4 !important;
+  border: 1.5px solid #bbf7d0 !important;
+}
+
+body.light-theme .cdss-content div[style*="color: #f8fafc"] {
+  color: #0f172a !important;
+}
+body.light-theme .cdss-content div[style*="color: #cbd5e1"] {
+  color: #475569 !important;
+}
+
+body.light-theme .red-flag-banner {
+  background: #fff1f2 !important;
+  border: 1.5px solid #fecdd3 !important;
+  box-shadow: 0 4px 16px rgba(225, 29, 72, 0.08) !important;
+}
+body.light-theme .red-flag-banner h4 {
+  color: #9f1239 !important;
+}
+body.light-theme .red-flag-banner p {
+  color: #be123c !important;
+}
+
+/* Dropdown PLN de Busca de Medicamentos */
+body.light-theme .nlp-search-dropdown {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.12) !important;
+}
+body.light-theme .nlp-search-item {
+  border-bottom: 1px solid #f1f5f9 !important;
+  color: #0f172a !important;
+}
+body.light-theme .nlp-search-item:hover {
+  background: #f8fafc !important;
+}
+body.light-theme .nlp-item-title {
+  color: #0f172a !important;
+}
+body.light-theme .nlp-item-active-substance {
+  color: #0d9488 !important;
+}
+body.light-theme .nlp-item-meta {
+  color: #64748b !important;
+}
+
+/* Prontuário e Simulador no Modo Claro */
+body.light-theme #prontuario-patients-list .pharmacy-glass-card {
+  background: #ffffff !important;
+  border: 1px solid #e2e8f0 !important;
+  color: #0f172a !important;
+}
+body.light-theme #prontuario-patients-list .pharmacy-glass-card:hover {
+  background: #f8fafc !important;
+  border-color: #0284c7 !important;
+}
+
+/* Scrollbars no Modo Claro */
+body.light-theme *::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+body.light-theme *::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 6px;
+}
+body.light-theme *::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* --- MODO ALTO CONTRASTE SOLAR (ANTI-REFLEXO PARA BALCÃO ENVIDRAÇADO) --- */
+body.sunlight-theme {
+  --bg-primary: #f1f5f9 !important;
+  --bg-secondary: #ffffff !important;
+  --bg-tertiary: #e2e8f0 !important;
+  --bg-solid: #ffffff !important;
+  --bg-card: #ffffff !important;
+  --text-primary: #000000 !important;
+  --text-secondary: #1e293b !important;
+  --text-muted: #334155 !important;
+  --border-color: #0f172a !important;
+  --glass-bg: #ffffff !important;
+  --glass-border: #000000 !important;
+  --color-primary: #0284c7 !important;
+  --color-accent: #0f766e !important;
+  --color-danger: #b91c1c !important;
+  --color-warning: #b45309 !important;
+  --color-success: #047857 !important;
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.2) !important;
+  color-scheme: light;
+}
+
+body.sunlight-theme {
+  background: #f1f5f9 !important;
+  background-image: none !important;
+  color: #000000 !important;
+}
+
+body.sunlight-theme .app-layout,
+body.sunlight-theme .app-content,
+body.sunlight-theme #main-content,
+body.sunlight-theme .tab-section,
+body.sunlight-theme .main-container {
+  background: #f1f5f9 !important;
+  background-image: none !important;
+}
+
+body.sunlight-theme * {
+  text-shadow: none !important;
+}
+
+body.sunlight-theme select,
+body.sunlight-theme .form-input,
+body.sunlight-theme .pep-textarea,
+body.sunlight-theme input,
+body.sunlight-theme textarea {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  border: 2px solid #0f172a !important;
+  font-weight: 700 !important;
+}
+
+body.sunlight-theme .interactive-card,
+body.sunlight-theme .kpi-card,
+body.sunlight-theme .card,
+body.sunlight-theme .panel,
+body.sunlight-theme .pharmacy-glass-panel,
+body.sunlight-theme .pharmacy-glass-card {
+  background: #ffffff !important;
+  border: 2px solid #0f172a !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1) !important;
+  color: #000000 !important;
+}
+
+body.sunlight-theme .app-sidebar {
+  background: #ffffff !important;
+  border-right: 2px solid #0f172a !important;
+}
+
+body.sunlight-theme .app-sidebar .nav-item {
+  color: #0f172a !important;
+  font-weight: 700 !important;
+}
+
+body.sunlight-theme .app-sidebar .nav-item.active {
+  background: #0284c7 !important;
+  color: #ffffff !important;
+  border-left: 4px solid #000000 !important;
+}
+
+body.sunlight-theme .app-header {
+  background: #ffffff !important;
+  border-bottom: 2px solid #0f172a !important;
+}
+
+body.sunlight-theme .dashboard-hero-banner,
+body.sunlight-theme .dashboard-kpi-card,
+body.sunlight-theme .dashboard-chart-card,
+body.sunlight-theme .dashboard-redflags-card,
+body.sunlight-theme .dashboard-drilldown-modal-content {
+  background: #ffffff !important;
+  border: 2px solid #0f172a !important;
+  color: #000000 !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08) !important;
+}
+
+body.sunlight-theme .dashboard-kpi-val,
+body.sunlight-theme .dashboard-hero-title,
+body.sunlight-theme .dashboard-chart-title,
+body.sunlight-theme .dashboard-redflag-label,
+body.sunlight-theme .dashboard-drilldown-title {
+  color: #000000 !important;
+  font-weight: 800 !important;
+}
+
+body.sunlight-theme .dashboard-hero-desc,
+body.sunlight-theme .dashboard-kpi-lbl {
+  color: #1e293b !important;
+  font-weight: 600 !important;
+}
+
+/* Overrides Universais no Modo Alto Contraste Solar */
+body.sunlight-theme div[style*="rgba(15, 23, 42"],
+body.sunlight-theme div[style*="rgba(30, 41, 59"],
+body.sunlight-theme div[style*="background: rgba(15, 23, 42"],
+body.sunlight-theme div[style*="background: rgba(30, 41, 59"],
+body.sunlight-theme div[style*="background:rgba(15, 23, 42"],
+body.sunlight-theme div[style*="background:rgba(30, 41, 59"],
+body.sunlight-theme div[style*="background:#111827"],
+body.sunlight-theme div[style*="background: #111827"],
+body.sunlight-theme div[style*="background: #080c14"],
+body.sunlight-theme div[style*="background:#080c14"],
+body.sunlight-theme div[style*="background: #0b0f19"],
+body.sunlight-theme div[style*="background:#0b0f19"] {
+  background: #ffffff !important;
+  border-color: #0f172a !important;
+  color: #000000 !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+}
+
+body.sunlight-theme div[style*="color: #ffffff"],
+body.sunlight-theme div[style*="color:#ffffff"],
+body.sunlight-theme div[style*="color: #f8fafc"],
+body.sunlight-theme div[style*="color:#f8fafc"] {
+  color: #000000 !important;
+}
+
+/* ==========================================================================
+   DASHBOARD CLÍNICO — CLASSES BASE (PADRÃO DARK GLASSMORPHISM LUXURY)
+   ========================================================================== */
+
+.dashboard-hero-banner {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.16) 0%, rgba(6, 182, 212, 0.12) 50%, rgba(15, 23, 42, 0.75) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  border-radius: 18px;
+  padding: 24px 28px;
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(14px);
+  transition: all 0.3s ease;
+}
+
+.dashboard-hero-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #10b981 0%, #0d9488 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  color: #fff;
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dashboard-hero-title {
+  margin: 0;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.45rem;
+  color: #f8fafc;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.dashboard-hero-desc {
+  margin: 4px 0 0 0;
+  color: #94a3b8;
+  font-size: 0.86rem;
+}
+
+.dashboard-hero-btn-secondary {
+  background: rgba(129, 140, 248, 0.15);
+  color: #a5b4fc;
+  border: 1px solid rgba(129, 140, 248, 0.4);
+  padding: 9px 18px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.84rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+.dashboard-hero-btn-primary {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  padding: 9px 18px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.84rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+}
+
+/* Grid de KPIs */
+.dashboard-kpis-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.dashboard-kpi-card {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 18px;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(12px);
+}
+
+.card-kpi-patients { border-color: rgba(56, 189, 248, 0.3); }
+.card-kpi-patients:hover { border-color: #38bdf8; transform: translateY(-3px); box-shadow: 0 10px 25px rgba(56, 189, 248, 0.2); }
+
+.card-kpi-encounters { border-color: rgba(16, 185, 129, 0.3); }
+.card-kpi-encounters:hover { border-color: #10b981; transform: translateY(-3px); box-shadow: 0 10px 25px rgba(16, 185, 129, 0.2); }
+
+.card-kpi-cdss { border-color: rgba(245, 158, 11, 0.3); }
+.card-kpi-cdss:hover { border-color: #f59e0b; transform: translateY(-3px); box-shadow: 0 10px 25px rgba(245, 158, 11, 0.2); }
+
+.card-kpi-reports { border-color: rgba(129, 140, 248, 0.3); }
+.card-kpi-reports:hover { border-color: #818cf8; transform: translateY(-3px); box-shadow: 0 10px 25px rgba(129, 140, 248, 0.2); }
+
+.card-kpi-adherence { border-color: rgba(236, 72, 153, 0.3); }
+.card-kpi-adherence:hover { border-color: #ec4899; transform: translateY(-3px); box-shadow: 0 10px 25px rgba(236, 72, 153, 0.2); }
+
+.dashboard-kpi-label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.kpi-label-sky { color: #38bdf8; }
+.kpi-label-emerald { color: #10b981; }
+.kpi-label-amber { color: #f59e0b; }
+.kpi-label-indigo { color: #818cf8; }
+.kpi-label-pink { color: #ec4899; }
+
+.dashboard-kpi-val {
+  font-size: 2.0rem;
+  font-weight: 800;
+  color: #f8fafc;
+  margin-top: 4px;
+  font-family: 'Outfit', sans-serif;
+}
+
+.dashboard-kpi-icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  border: 1px solid transparent;
+}
+
+.kpi-icon-sky { background: rgba(56, 189, 248, 0.15); color: #38bdf8; border-color: rgba(56, 189, 248, 0.3); }
+.kpi-icon-emerald { background: rgba(16, 185, 129, 0.15); color: #10b981; border-color: rgba(16, 185, 129, 0.3); }
+.kpi-icon-amber { background: rgba(245, 158, 11, 0.15); color: #f59e0b; border-color: rgba(245, 158, 11, 0.3); }
+.kpi-icon-indigo { background: rgba(129, 140, 248, 0.15); color: #818cf8; border-color: rgba(129, 140, 248, 0.3); }
+.kpi-icon-pink { background: rgba(236, 72, 153, 0.15); color: #ec4899; border-color: rgba(236, 72, 153, 0.3); }
+
+.dashboard-kpi-footer {
+  margin-top: 12px;
+  font-size: 0.76rem;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dashboard-kpi-more {
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.kpi-more-sky { color: #38bdf8; }
+.kpi-more-emerald { color: #10b981; }
+.kpi-more-amber { color: #f59e0b; }
+.kpi-more-indigo { color: #818cf8; }
+.kpi-more-pink { color: #ec4899; }
+
+/* Grid de Gráficos */
+.dashboard-charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+  gap: 20px;
+  margin-bottom: 24px;
+}
+
+.dashboard-chart-card {
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.95));
+  border: 1.5px solid rgba(20, 184, 166, 0.35);
+  border-radius: 22px;
+  padding: 22px;
+  box-shadow: inset 0 1.5px 3px rgba(255, 255, 255, 0.18), inset 0 -3px 8px rgba(0, 0, 0, 0.6), 0 18px 40px rgba(0,0,0,0.5);
+  position: relative;
+  backdrop-filter: blur(16px);
+  transition: all 0.3s ease;
+}
+
+.dashboard-card-services { border-color: rgba(20, 184, 166, 0.35); }
+.dashboard-card-cdss { border-color: rgba(245, 158, 11, 0.35); }
+.dashboard-card-weekly { border-color: rgba(129, 140, 248, 0.35); }
+
+.dashboard-chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.dashboard-chart-title {
+  margin: 0;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #f8fafc;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dashboard-chart-desc {
+  margin: 2px 0 0 0;
+  font-size: 0.78rem;
+  color: #94a3b8;
+}
+
+.dashboard-chart-badge {
+  font-size: 0.7rem;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+.badge-services-theme {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.2);
+}
+
+.btn-toggle-services {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(5, 150, 105, 0.45));
+  border: 1px solid rgba(16, 185, 129, 0.6);
+  color: #34d399;
+}
+
+.badge-cdss-theme {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.2);
+}
+
+.btn-toggle-cdss {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.3), rgba(217, 119, 6, 0.45));
+  border: 1px solid rgba(245, 158, 11, 0.6);
+  color: #fbbf24;
+}
+
+.badge-weekly-theme {
+  background: rgba(129, 140, 248, 0.2);
+  color: #a5b4fc;
+  border: 1px solid rgba(129, 140, 248, 0.4);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.2);
+}
+
+.btn-toggle-weekly {
+  background: linear-gradient(135deg, rgba(129, 140, 248, 0.3), rgba(99, 102, 241, 0.45));
+  border: 1px solid rgba(129, 140, 248, 0.6);
+  color: #a5b4fc;
+}
+
+.dashboard-chart-btn-toggle {
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.3);
+  transition: all 0.2s ease;
+}
+
+.dashboard-chart-footer {
+  margin-top: 12px;
+  text-align: center;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 10px;
+}
+
+.dashboard-chart-footer-link {
+  background: none;
+  border: none;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+.dashboard-chart-footer-link:hover {
+  opacity: 0.85;
+  text-decoration: underline;
+}
+
+/* Grid Inferior */
+.dashboard-bottom-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .dashboard-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Red Flags Card */
+.dashboard-redflags-card {
+  background: rgba(15, 23, 42, 0.88);
+  border: 1.5px solid rgba(239, 68, 68, 0.35);
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: 0 10px 30px rgba(239, 68, 68, 0.1);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(12px);
+}
+.dashboard-redflags-card:hover {
+  border-color: #ef4444;
+  box-shadow: 0 12px 35px rgba(239, 68, 68, 0.2);
+}
+
+.dashboard-redflags-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.dashboard-redflags-title {
+  margin: 0;
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #f87171;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dashboard-redflags-badge {
+  font-size: 0.7rem;
+  background: rgba(239, 68, 68, 0.25);
+  color: #fca5a5;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-weight: 700;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.dashboard-redflags-desc {
+  margin: 0 0 14px 0;
+  font-size: 0.76rem;
+  color: #94a3b8;
+  line-height: 1.35;
+}
+
+.dashboard-redflag-item {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 10px 12px;
+  border-radius: 0 10px 10px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s ease;
+}
+
+.redflag-critica { border-left: 3px solid #ef4444; }
+.redflag-alta { border-left: 3px solid #f59e0b; }
+
+.dashboard-redflag-label {
+  font-weight: 700;
+  font-size: 0.84rem;
+  color: #f8fafc;
+  font-family: 'Outfit', sans-serif;
+}
+
+.dashboard-redflag-sub {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  margin-top: 2px;
+}
+
+.dashboard-redflag-count {
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: #f8fafc;
+  font-family: 'Outfit', sans-serif;
+}
+
+.dashboard-redflag-severity {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+.sev-critica { color: #ef4444; }
+.sev-alta { color: #f59e0b; }
+
+.dashboard-redflag-empty {
+  text-align: center;
+  padding: 20px 10px;
+  color: #64748b;
+  font-size: 0.8rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 10px;
+}
+
+.dashboard-redflags-footer {
+  margin-top: 14px;
+  text-align: center;
+}
+
+/* Modais de Drilldown */
+.dashboard-drilldown-modal-overlay {
+  animation: fadeIn 0.25s ease-out;
+}
+
+.dashboard-drilldown-modal-content {
+  background: #0f172a;
+  border-radius: 20px;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+  transition: all 0.3s ease;
+}
+
+.dashboard-drilldown-close {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+.dashboard-drilldown-close:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
 * {
   margin: 0;
   padding: 0;

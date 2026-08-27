@@ -40,6 +40,12 @@ import { openNFeImporterModal } from './modules/nfeImporter.js';
 import { openPricingCalculatorModal } from './modules/pricingCalculatorModal.js';
 import { renderSmartFlowGuide, updateFlowGuideStep, completeFlow } from './modules/smartFlowGuide.js';
 import { searchSystemWithPLN, SYSTEM_INTENTS } from './modules/universalSearch.js';
+import { initGlobalKeyboardShortcuts, openHelpShortcutsModal, KEYBOARD_SHORTCUTS } from './modules/shortcuts.js';
+import { cycleTheme } from './modules/ui.js';
+
+window.openHelpShortcutsModal = openHelpShortcutsModal;
+window.KEYBOARD_SHORTCUTS = KEYBOARD_SHORTCUTS;
+window.cycleTheme = cycleTheme;
 
 window.localDB = localDB;
 window.openPricingCalculatorModal = openPricingCalculatorModal;
@@ -82,8 +88,8 @@ window.renderSmartFlowGuide = renderSmartFlowGuide;
 window.updateFlowGuideStep = updateFlowGuideStep;
 window.completeFlow = completeFlow;
 
-// Registro do Service Worker PWA e Notificações Push
-if ('serviceWorker' in navigator) {
+// Registro do Service Worker PWA e Notificações Push (apenas em produção para evitar bloqueio no localhost)
+if ('serviceWorker' in navigator && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').then((reg) => {
       console.log('[PWA] Service Worker registrado:', reg.scope);
@@ -1313,7 +1319,6 @@ function renderAuthScreen() {
 
   renderForm();
 }
-
 // --- ANIMAÇÃO DE CONSTELAÇÃO TECNOLÓGICA INTERATIVA (CANVAS 2D 60FPS) ---
 function initConstellationCanvas() {
   const canvas = document.getElementById('auth-constellation-canvas');
@@ -1464,9 +1469,7 @@ function initConstellationCanvas() {
   animate();
 }
 
-
-
-// --- ESTRUTURA GERAL DA INTERFACE (TEMPLATE DINÂMICO POR PERFIL) ---
+// --- ESTRUTURA GERAL DA INTERFACE (TEMPLATE DINÂMICO POR PERFIL) ---
 function renderAppStructure() {
   const root = document.getElementById('app');
   const perms = getRolePermissions(state.user);
@@ -1474,12 +1477,10 @@ function renderAppStructure() {
   state.systemViewMode = state.systemViewMode || localStorage.getItem('system_view_mode') || 'todos';
 
   const allNavItems = [
-    // FRENTE DE FARMÁCIA & CLÍNICA (Front-Office)
     { id: 'dashboard', label: 'Métricas do Consultório', icon: 'fa-chart-line', group: 'frente' },
     { id: 'farmacia', label: 'CRM Farmacêutico & Balcão', icon: 'fa-prescription-bottle-medical', group: 'frente' },
     { id: 'pacientes', label: 'Clientes & Prontuário', icon: 'fa-users', group: 'frente' },
     { id: 'relatorios', label: 'Declarações (DSF) & Relatórios', icon: 'fa-file-signature', group: 'frente' },
-    // CADEIA DE SUPRIMENTOS & ADMINISTRAÇÃO (Back-Office)
     { id: 'estoque', label: 'Estoque & Suprimentos', icon: 'fa-boxes-stacked', group: 'suprimentos' },
     { id: 'financeiro', label: 'Controle Financeiro', icon: 'fa-sack-dollar', group: 'suprimentos' },
     { id: 'configuracoes', label: 'Configurações & Gestão', icon: 'fa-sliders', group: 'suprimentos', badge: pendingApprovalsCount > 0 ? pendingApprovalsCount : null }
@@ -1489,10 +1490,9 @@ function renderAppStructure() {
   const filteredNavItems = allowedNavItems.filter(item => {
     if (state.systemViewMode === 'frente') return item.group === 'frente';
     if (state.systemViewMode === 'suprimentos') return item.group === 'suprimentos';
-    return true; // 'todos'
+    return true;
   });
 
-  // Ajusta aba ativa caso ela não esteja no modo selecionado
   const currentTabVisible = filteredNavItems.some(i => i.id === state.activeTab);
   if (!currentTabVisible && filteredNavItems.length > 0) {
     state.activeTab = filteredNavItems[0].id;
@@ -1504,48 +1504,16 @@ function renderAppStructure() {
     const supItems = filteredNavItems.filter(i => i.group === 'suprimentos');
 
     if (frenteItems.length > 0) {
-      navHtml += `
-        <li style="padding: 8px 12px 4px; font-size: 0.64rem; font-weight: 800; text-transform: uppercase; color: #14b8a6; letter-spacing: 0.6px; display: flex; align-items: center; gap: 6px;">
-          <i class="fa-solid fa-stethoscope"></i> Frente &amp; Balcão Clínico
-        </li>
-      `;
-      navHtml += frenteItems.map(item => `
-        <li>
-          <a class="nav-item ${state.activeTab === item.id ? 'active' : ''}" data-tab="${item.id}" style="${item.hasBadge ? 'position: relative;' : ''}">
-            <i class="fa-solid ${item.icon}"></i>
-            <span>${item.label}</span>
-            ${item.badge ? `<span style="background: #d97706; color: #fff; font-size: 0.68rem; font-weight: 800; padding: 2px 7px; border-radius: 10px; margin-left: auto; box-shadow: 0 0 8px rgba(217, 119, 6, 0.6);">${item.badge}</span>` : ''}
-          </a>
-        </li>
-      `).join('');
+      navHtml += `<li style="padding: 8px 12px 4px; font-size: 0.64rem; font-weight: 800; text-transform: uppercase; color: #14b8a6; letter-spacing: 0.6px; display: flex; align-items: center; gap: 6px;"><i class="fa-solid fa-stethoscope"></i> Frente &amp; Balcão Clínico</li>`;
+      navHtml += frenteItems.map(item => `<li><a class="nav-item ${state.activeTab === item.id ? 'active' : ''}" data-tab="${item.id}"> <i class="fa-solid ${item.icon}"></i> <span>${item.label}</span> ${item.badge ? `<span style="background: #d97706; color: #fff; font-size: 0.68rem; font-weight: 800; padding: 2px 7px; border-radius: 10px; margin-left: auto; box-shadow: 0 0 8px rgba(217, 119, 6, 0.6);">${item.badge}</span>` : ''} </a></li>`).join('');
     }
 
     if (supItems.length > 0) {
-      navHtml += `
-        <li style="padding: 12px 12px 4px; font-size: 0.64rem; font-weight: 800; text-transform: uppercase; color: #38bdf8; letter-spacing: 0.6px; display: flex; align-items: center; gap: 6px; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 6px;">
-          <i class="fa-solid fa-truck-ramp-box"></i> Suprimentos &amp; Gestão
-        </li>
-      `;
-      navHtml += supItems.map(item => `
-        <li>
-          <a class="nav-item ${state.activeTab === item.id ? 'active' : ''}" data-tab="${item.id}" style="${item.hasBadge ? 'position: relative;' : ''}">
-            <i class="fa-solid ${item.icon}"></i>
-            <span>${item.label}</span>
-            ${item.badge ? `<span style="background: #d97706; color: #fff; font-size: 0.68rem; font-weight: 800; padding: 2px 7px; border-radius: 10px; margin-left: auto; box-shadow: 0 0 8px rgba(217, 119, 6, 0.6);">${item.badge}</span>` : ''}
-          </a>
-        </li>
-      `).join('');
+      navHtml += `<li style="padding: 12px 12px 4px; font-size: 0.64rem; font-weight: 800; text-transform: uppercase; color: #38bdf8; letter-spacing: 0.6px; display: flex; align-items: center; gap: 6px; border-top: 1px solid rgba(255,255,255,0.06); margin-top: 6px;"><i class="fa-solid fa-truck-ramp-box"></i> Suprimentos &amp; Gestão</li>`;
+      navHtml += supItems.map(item => `<li><a class="nav-item ${state.activeTab === item.id ? 'active' : ''}" data-tab="${item.id}"> <i class="fa-solid ${item.icon}"></i> <span>${item.label}</span> ${item.badge ? `<span style="background: #d97706; color: #fff; font-size: 0.68rem; font-weight: 800; padding: 2px 7px; border-radius: 10px; margin-left: auto; box-shadow: 0 0 8px rgba(217, 119, 6, 0.6);">${item.badge}</span>` : ''} </a></li>`).join('');
     }
   } else {
-    navHtml = filteredNavItems.map(item => `
-      <li>
-        <a class="nav-item ${state.activeTab === item.id ? 'active' : ''}" data-tab="${item.id}" style="${item.hasBadge ? 'position: relative;' : ''}">
-          <i class="fa-solid ${item.icon}"></i>
-          <span>${item.label}</span>
-          ${item.badge ? `<span style="background: #d97706; color: #fff; font-size: 0.68rem; font-weight: 800; padding: 2px 7px; border-radius: 10px; margin-left: auto; box-shadow: 0 0 8px rgba(217, 119, 6, 0.6);">${item.badge}</span>` : ''}
-        </a>
-      </li>
-    `).join('');
+    navHtml = filteredNavItems.map(item => `<li><a class="nav-item ${state.activeTab === item.id ? 'active' : ''}" data-tab="${item.id}"> <i class="fa-solid ${item.icon}"></i> <span>${item.label}</span> ${item.badge ? `<span style="background: #d97706; color: #fff; font-size: 0.68rem; font-weight: 800; padding: 2px 7px; border-radius: 10px; margin-left: auto; box-shadow: 0 0 8px rgba(217, 119, 6, 0.6);">${item.badge}</span>` : ''} </a></li>`).join('');
   }
 
   root.innerHTML = `
@@ -1616,7 +1584,6 @@ function renderAppStructure() {
           </div>
         </div>
 
-        <!-- CAMPO DE BUSCA GLOBAL DO SISTEMA (SPOTLIGHT / COMMAND PALETTE) -->
         <div class="global-search-wrapper" style="position: relative; flex: 1; max-width: 540px; margin: 0 16px; transition: max-width 0.3s ease;">
           <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #818cf8; font-size: 0.88rem; pointer-events: none; z-index: 3;"></i>
           <input type="text" id="global-system-search" placeholder="Buscar no sistema (ex: Excluir Usuário, RBAC, Novo Paciente)..." style="
@@ -1627,8 +1594,6 @@ function renderAppStructure() {
           <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 0.68rem; font-weight: 700; background: rgba(129, 140, 248, 0.15); color: #a5b4fc; padding: 2px 8px; border-radius: 6px; pointer-events: none; border: 1px solid rgba(129, 140, 248, 0.3); z-index: 3;">
             Ctrl K
           </span>
-
-          <!-- Dropdown de Resultados da Busca em Tempo Real -->
           <div id="global-search-results" style="
             display: none; position: absolute; top: 46px; left: 0; right: 0;
             background: #0b0f19; border: 1px solid rgba(129, 140, 248, 0.5);
@@ -1656,19 +1621,16 @@ function renderAppStructure() {
           <button id="btn-density-toggle" class="btn" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0 14px; height: 40px; border-radius: 20px; font-size: 0.82rem; font-weight: 600; gap: 6px; transition: transform 0.2s ease, background 0.2s ease;" title="Alternar Densidade Visual (Modo Normal / Modo Compacto Hospitalar)">
             <i class="fa-solid fa-compress" id="density-icon"></i> <span id="density-label">Modo Compacto</span>
           </button>
-          <button id="btn-theme-toggle" class="btn" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; padding: 0; font-size: 1.15rem; transition: transform 0.2s ease, background 0.2s ease;" title="Alternar Tema Claro/Escuro">
-            <i class="fa-solid fa-circle-half-stroke" id="theme-icon"></i>
+          <button id="btn-theme-toggle" class="btn" style="background: var(--bg-tertiary); border: 1px solid var(--border-color); color: var(--text-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 50%; padding: 0; font-size: 1.15rem; transition: transform 0.2s ease, background 0.2s ease;" title="Alternar Tema (Noturno / Claro / Alto Contraste Solar)">
+            <i class="fa-solid fa-moon" id="theme-icon"></i>
           </button>
         </div>
       </header>
 
-      <!-- Área de Conteúdo Principal -->
       <main class="app-content" id="main-content">
-        <!-- O conteúdo específico da aba ativa será injetado aqui -->
       </main>
     </div>
 
-    <!-- PEP Modal (Prontuário) -->
     <div id="pep-modal" class="pep-modal">
       <div class="pep-content">
         <div class="pep-header">
@@ -1799,7 +1761,6 @@ function renderAppStructure() {
       </div>
     </div>
 
-    <!-- Modal de Assinatura -->
     <div id="sign-modal" class="modal-overlay" style="z-index: 3000; display: none;">
       <div class="modal-content" style="max-width: 400px;">
         <div class="modal-header">
@@ -1823,7 +1784,6 @@ function renderAppStructure() {
     </div>
   `;
 
-  // Registrar eventos de clique na navegação
   document.querySelectorAll('.nav-item').forEach(item => {
     item.addEventListener('click', (e) => {
       e.preventDefault();
@@ -1832,14 +1792,14 @@ function renderAppStructure() {
     });
   });
 
-  // Botão de alternar tema
   const themeToggle = document.getElementById('btn-theme-toggle');
   if (themeToggle) {
-    themeToggle.addEventListener('click', toggleTheme);
+    themeToggle.addEventListener('click', cycleTheme);
     updateThemeIcon();
   }
 
-  // Botão de alternar densidade (Modo Compacto Hospitalar)
+  initGlobalKeyboardShortcuts();
+
   const savedDensity = localStorage.getItem('hn_density');
   if (savedDensity === 'compact') {
     document.body.classList.add('compact-mode');
@@ -1928,8 +1888,8 @@ function initGlobalSystemSearch() {
       return;
     }
 
-    const { intents, patients, products, attendances, sales } = searchSystemWithPLN(rawQuery);
-    const totalFound = intents.length + patients.length + products.length + attendances.length + sales.length;
+    const { intents, helpGuides, patients, products, attendances, sales } = searchSystemWithPLN(rawQuery);
+    const totalFound = intents.length + (helpGuides ? helpGuides.length : 0) + patients.length + products.length + attendances.length + sales.length;
 
     let html = '';
 
@@ -1937,7 +1897,7 @@ function initGlobalSystemSearch() {
     html += `
       <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 10px 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 8px;">
         <span style="font-size: 0.72rem; color: #94a3b8; font-weight: 600;">
-          <i class="fa-solid fa-wand-magic-sparkles" style="color: #818cf8;"></i> Busca Inteligente (PLN): <strong style="color: #f8fafc;">${totalFound} resultado${totalFound !== 1 ? 's' : ''}</strong>
+          <i class="fa-solid fa-wand-magic-sparkles" style="color: #818cf8;"></i> Busca Inteligente (PLN & IA): <strong style="color: #f8fafc;">${totalFound} resultado${totalFound !== 1 ? 's' : ''}</strong>
         </span>
         <span style="font-size: 0.68rem; background: rgba(99, 102, 241, 0.2); color: #a5b4fc; padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(129, 140, 248, 0.3);">
           ESC para fechar
@@ -1949,7 +1909,7 @@ function initGlobalSystemSearch() {
     if (intents.length > 0) {
       html += `
         <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #38bdf8; letter-spacing: 0.6px; padding: 6px 8px 4px 8px; display: flex; align-items: center; gap: 6px;">
-          <i class="fa-solid fa-bolt"></i> Ações Rápidas & Intenções Clínicas (${intents.length})
+          <i class="fa-solid fa-bolt"></i> Ações Rápidas & Intenções do Sistema (${intents.length})
         </div>
       `;
       intents.forEach((item, idx) => {
@@ -1973,6 +1933,40 @@ function initGlobalSystemSearch() {
             </div>
             <button type="button" class="btn" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-weight: 700; font-size: 0.72rem; cursor: pointer; white-space: nowrap; flex-shrink: 0; display: flex; align-items: center; gap: 5px;">
               Executar <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+        `;
+      });
+    }
+
+    // 1.5 SEÇÃO: GUIA DO MANUAL INTERATIVO & TUTORIAIS (IA / PLN)
+    if (helpGuides && helpGuides.length > 0) {
+      html += `
+        <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #2dd4bf; letter-spacing: 0.6px; padding: 10px 8px 4px 8px; display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-book-open-reader"></i> Guia do Manual Interativo & Procedimentos (${helpGuides.length})
+        </div>
+      `;
+      helpGuides.forEach(g => {
+        html += `
+          <div class="search-pln-item search-guide-item" data-guide-id="${g.id}" style="
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            padding: 9px 12px; border-radius: 10px; cursor: pointer; transition: all 0.2s;
+            background: rgba(255,255,255,0.03); margin-bottom: 5px; border: 1px solid rgba(255,255,255,0.06);
+          " onmouseover="this.style.background='rgba(45, 212, 191, 0.12)'; this.style.borderColor='rgba(45, 212, 191, 0.4)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'; this.style.borderColor='rgba(255,255,255,0.06)'">
+            <div style="display: flex; align-items: flex-start; gap: 10px; flex: 1;">
+              <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+                <i class="fa-solid ${g.icon}" style="color: ${g.iconColor}; font-size: 1rem;"></i>
+              </div>
+              <div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
+                  <strong style="color: #f8fafc; font-size: 0.86rem;">${highlightMatch(g.title, rawQuery)}</strong>
+                  <span style="font-size: 0.64rem; font-weight: 700; background: rgba(45, 212, 191, 0.15); color: ${g.badgeColor}; padding: 1px 6px; border-radius: 4px; border: 1px solid ${g.badgeColor}40;">${g.badge}</span>
+                </div>
+                <span style="font-size: 0.74rem; color: #94a3b8; display: block; line-height: 1.3;">${g.subtitle}</span>
+              </div>
+            </div>
+            <button type="button" class="btn" style="background: rgba(45, 212, 191, 0.2); color: #2dd4bf; border: 1px solid rgba(45, 212, 191, 0.4); padding: 6px 12px; border-radius: 8px; font-weight: 700; font-size: 0.72rem; cursor: pointer; white-space: nowrap; flex-shrink: 0; display: flex; align-items: center; gap: 5px;">
+              Ver no Manual <i class="fa-solid fa-arrow-right"></i>
             </button>
           </div>
         `;
@@ -2163,6 +2157,19 @@ function initGlobalSystemSearch() {
         const targetIntent = SYSTEM_INTENTS.find(i => i.id === intentId);
         if (targetIntent && typeof targetIntent.execute === 'function') {
           targetIntent.execute();
+        }
+        searchResultsContainer.style.display = 'none';
+        searchInput.value = '';
+      });
+    });
+
+    // Abrir Tópico do Manual Interativo
+    searchResultsContainer.querySelectorAll('.search-guide-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const guideId = item.dataset.guideId;
+        const targetGuide = helpGuides?.find(g => g.id === guideId);
+        if (targetGuide && typeof targetGuide.execute === 'function') {
+          targetGuide.execute();
         }
         searchResultsContainer.style.display = 'none';
         searchInput.value = '';

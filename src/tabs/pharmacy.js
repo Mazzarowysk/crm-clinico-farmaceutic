@@ -49,10 +49,10 @@ export async function renderPharmacyTab() {
               <i class="fa-solid fa-notes-medical"></i>
             </div>
             <div>
-              <h2 style="font-size: 1.5rem; color: #f8fafc; font-family: 'Outfit', sans-serif; margin: 0; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+              <h2 style="font-size: 1.5rem; font-family: 'Outfit', sans-serif; margin: 0; font-weight: 700; display: flex; align-items: center; gap: 8px;">
                 CRM Clínico Farmacêutico &amp; Suporte à Decisão
               </h2>
-              <p style="color: #94a3b8; font-size: 0.86rem; margin: 3px 0 0 0;">
+              <p style="font-size: 0.86rem; margin: 3px 0 0 0;">
                 Rastreamento longitudinal, triagem rápida de sintomas, validação de Red Flags e motor de interações medicamentosas em tempo real.
               </p>
             </div>
@@ -60,13 +60,13 @@ export async function renderPharmacyTab() {
         </div>
 
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-          <a href="/Manual_do_Usuario_CRM_Clinico_Farmaceutico.pdf" download="Manual_do_Usuario_CRM_Clinico_Farmaceutico.pdf" target="_blank" class="btn" style="background: linear-gradient(135deg, rgba(45, 212, 191, 0.22), rgba(13, 148, 136, 0.35)); border: 1px solid rgba(45, 212, 191, 0.55); color: #2dd4bf; text-decoration: none; font-weight: 700; padding: 9px 15px; border-radius: 10px; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(20, 184, 166, 0.25);" title="Baixar Manual do Usuário Completo em PDF (v3.0)">
+          <a href="/Manual_do_Usuario_CRM_Clinico_Farmaceutico.pdf" download="Manual_do_Usuario_CRM_Clinico_Farmaceutico.pdf" target="_blank" class="btn" style="background: linear-gradient(135deg, rgba(45, 212, 191, 0.22), rgba(13, 148, 136, 0.35)); border: 1px solid rgba(45, 212, 191, 0.55); color: #0d9488; text-decoration: none; font-weight: 700; padding: 9px 15px; border-radius: 10px; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(20, 184, 166, 0.25);" title="Baixar Manual do Usuário Completo em PDF (v3.0)">
             <i class="fa-solid fa-file-pdf"></i> Manual PDF
           </a>
           <button id="btn-quick-checkout-pharm" class="btn" style="background: linear-gradient(135deg, #38bdf8, #0284c7); color: #fff; border: none; font-weight: 700; padding: 9px 16px; border-radius: 10px; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(56, 189, 248, 0.35); cursor: pointer;">
             <i class="fa-solid fa-cash-register"></i> Saída / Venda (PDV)
           </button>
-          <button id="btn-open-interactive-manual-pharm" class="btn btn-secondary" style="background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(255,255,255,0.1); color: #38bdf8; font-weight: 600; padding: 9px 16px; border-radius: 10px; display: flex; align-items: center; gap: 8px; backdrop-filter: blur(10px);">
+          <button id="btn-open-interactive-manual-pharm" class="btn btn-secondary" style="color: #0284c7; font-weight: 600; padding: 9px 16px; border-radius: 10px; display: flex; align-items: center; gap: 8px;">
             <i class="fa-solid fa-book-medical"></i> Manual Interativo &amp; Busca
           </button>
           <button id="btn-quick-new-patient" class="btn btn-primary" style="background: linear-gradient(135deg, #0d9488, #0f766e); border: none; box-shadow: 0 4px 14px rgba(13, 148, 136, 0.35); font-weight: 600; padding: 9px 18px; border-radius: 10px;">
@@ -160,13 +160,46 @@ function renderCurrentSubTab() {
   }
 }
 
+export function getAllPharmacyUnifiedPatients() {
+  const p1 = localDB.list('pharmacy_patients') || [];
+  const p2 = localDB.list('patients') || [];
+  const combined = [...p1, ...p2];
+  
+  const map = new Map();
+  combined.forEach(p => {
+    if (!p) return;
+    const cleanCpf = p.cpf ? p.cpf.replace(/\D/g, '') : '';
+    const key = cleanCpf || String(p.id);
+    if (!map.has(key)) {
+      map.set(key, {
+        ...p,
+        name: p.name || p.fullName || 'Cliente',
+        fullName: p.fullName || p.name || 'Cliente'
+      });
+    } else {
+      const existing = map.get(key);
+      map.set(key, {
+        ...existing,
+        ...p,
+        name: p.name || existing.name || p.fullName || existing.fullName,
+        fullName: p.fullName || existing.fullName || p.name || existing.name,
+        allergies: p.allergies || existing.allergies || '',
+        chronicConditions: p.chronicConditions || existing.chronicConditions || '',
+        continuousMedications: p.continuousMedications || existing.continuousMedications || ''
+      });
+    }
+  });
+
+  return Array.from(map.values());
+}
+
 // ============================================================================
 // 1. SUB-ABA: BALCÃO DE ATENDIMENTO CLÍNICO & TRIAGEM RÁPIDA (< 60s)
 // ============================================================================
 function renderBalcaoAtendimentoView(container) {
   const step = currentClinicalEncounter.step || 1;
   const currentPatient = currentClinicalEncounter.patient;
-  const allPatients = localDB.list('pharmacy_patients') || [];
+  const allPatients = getAllPharmacyUnifiedPatients();
 
   // Obter medicamentos contínuos do paciente selecionado
   const activeMeds = currentPatient ? (localDB.list('pharmacy_active_meds', m => m.patient_id === currentPatient.id) || []) : [];
@@ -218,10 +251,10 @@ function renderBalcaoStepContent(step, patient, allPatients, activeMeds) {
     return `
       <div style="max-width: 800px; margin: 0 auto;">
         <div style="text-align: center; margin-bottom: 24px;">
-          <h3 style="color: #f8fafc; font-family: 'Outfit', sans-serif; font-size: 1.3rem; margin: 0 0 6px 0;">
+          <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.3rem; margin: 0 0 6px 0;">
             Etapa 1 — Localização e Identificação Unificada do Paciente
           </h3>
-          <p style="color: #94a3b8; font-size: 0.88rem; margin: 0;">
+          <p style="font-size: 0.88rem; margin: 0;">
             Digite o CPF, nome ou selecione um paciente cadastrado para carregar seu histórico longitudinal instantaneamente.
           </p>
         </div>
@@ -238,27 +271,27 @@ function renderBalcaoStepContent(step, patient, allPatients, activeMeds) {
 
         <!-- Lista Rápida de Pacientes Recentes -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-          <h4 style="color: var(--text-secondary); font-size: 0.84rem; text-transform: uppercase; letter-spacing: 0.05em; margin: 0;">
+          <h4 style="font-size: 0.84rem; text-transform: uppercase; letter-spacing: 0.05em; margin: 0; font-weight: 700;">
             Pacientes Cadastrados no CRM
           </h4>
-          <span style="font-size: 0.78rem; color: #2dd4bf; font-weight: 600;">
+          <span style="font-size: 0.78rem; color: #0d9488; font-weight: 600;">
             <i class="fa-solid fa-hand-pointer"></i> Clique no paciente para iniciar a triagem
           </span>
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px;">
           ${allPatients.map(p => `
-            <div class="pharmacy-glass-card patient-select-card ${patient?.id === p.id ? 'selected' : ''}" data-patient-id="${p.id}" style="padding: 16px; cursor: pointer; border-radius: 12px; border: ${patient?.id === p.id ? '2px solid #2dd4bf' : '1px solid rgba(255,255,255,0.1)'}; background: ${patient?.id === p.id ? 'linear-gradient(135deg, rgba(13, 148, 136, 0.3), rgba(15, 23, 42, 0.9))' : 'rgba(30, 41, 59, 0.6)'}; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0 4px 14px rgba(0,0,0,0.25);">
+            <div class="pharmacy-glass-card patient-select-card ${patient?.id === p.id ? 'selected' : ''}" data-patient-id="${p.id}" style="padding: 16px; cursor: pointer; border-radius: 12px; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);">
               <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px;">
-                <div style="font-weight: 700; color: #ffffff; font-size: 0.98rem; font-family: 'Outfit', sans-serif;">${p.name || p.fullName}</div>
-                ${p.isPregnantOrLactating ? '<span style="background: rgba(244, 114, 182, 0.2); color: #f472b6; border: 1px solid rgba(244, 114, 182, 0.4); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 700;">Gestante</span>' : ''}
+                <div style="font-weight: 700; font-size: 0.98rem; font-family: 'Outfit', sans-serif;">${p.name || p.fullName}</div>
+                ${p.isPregnantOrLactating ? '<span style="background: rgba(244, 114, 182, 0.2); color: #db2777; border: 1px solid rgba(244, 114, 182, 0.4); padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; font-weight: 700;">Gestante</span>' : ''}
               </div>
-              <div style="font-size: 0.8rem; color: #94a3b8;">CPF: <strong style="color: #cbd5e1;">${p.cpf || 'Não informado'}</strong></div>
-              <div style="font-size: 0.8rem; color: #94a3b8;">Idade: ${p.age || '—'} anos (${p.gender || 'Não Informado'})</div>
-              ${p.allergies ? `<div style="font-size: 0.78rem; color: #f87171; font-weight: 700; margin-top: 6px; background: rgba(239, 68, 68, 0.12); padding: 3px 6px; border-radius: 6px; border: 1px solid rgba(239,68,68,0.25);">⚠️ Alergias: ${p.allergies}</div>` : '<div style="font-size: 0.74rem; color: #34d399; margin-top: 6px;">✓ Sem alergias conhecidas</div>'}
+              <div style="font-size: 0.8rem;">CPF: <strong>${p.cpf || 'Não informado'}</strong></div>
+              <div style="font-size: 0.8rem;">Idade: ${p.age || '—'} anos (${p.gender || 'Não Informado'})</div>
+              ${p.allergies ? `<div style="font-size: 0.78rem; color: #dc2626; font-weight: 700; margin-top: 6px; background: rgba(239, 68, 68, 0.12); padding: 3px 6px; border-radius: 6px; border: 1px solid rgba(239,68,68,0.25);">⚠️ Alergias: ${p.allergies}</div>` : '<div style="font-size: 0.74rem; color: #059669; margin-top: 6px;">✓ Sem alergias conhecidas</div>'}
               
-              <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 0.72rem; color: #94a3b8;">Selecionar</span>
+              <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border-color, rgba(255,255,255,0.08)); display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 0.72rem;">Selecionar</span>
                 <span style="background: linear-gradient(135deg, #0d9488, #0f766e); color: #fff; font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;">
                   Triagem <i class="fa-solid fa-arrow-right" style="font-size: 0.7rem;"></i>
                 </span>
@@ -288,13 +321,13 @@ function renderBalcaoStepContent(step, patient, allPatients, activeMeds) {
 
     return `
       <div>
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 14px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color, rgba(255,255,255,0.08)); padding-bottom: 14px; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
           <div>
-            <h3 style="color: #f8fafc; font-family: 'Outfit', sans-serif; font-size: 1.25rem; margin: 0; display: flex; align-items: center; gap: 8px;">
-              <i class="fa-solid fa-stethoscope" style="color: #2dd4bf;"></i> Etapa 2 — Coleta Estruturada de Queixas &amp; Sintomas
+            <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.25rem; margin: 0; display: flex; align-items: center; gap: 8px;">
+              <i class="fa-solid fa-stethoscope" style="color: #0d9488;"></i> Etapa 2 — Coleta Estruturada de Queixas &amp; Sintomas
             </h3>
-            <p style="color: #94a3b8; font-size: 0.86rem; margin: 2px 0 0 0;">
-              Paciente: <strong style="color: #2dd4bf;">${patient.name || patient.fullName}</strong> (${patientAgeDisplay}) | Alergias Conhecidas: <span style="color: ${patient.allergies ? '#f87171' : '#34d399'}; font-weight: 700;">${patient.allergies || 'Nenhuma declarada'}</span>
+            <p style="font-size: 0.86rem; margin: 2px 0 0 0;">
+              Paciente: <strong style="color: #0d9488;">${patient.name || patient.fullName}</strong> (${patientAgeDisplay}) | Alergias Conhecidas: <span style="color: ${patient.allergies ? '#dc2626' : '#059669'}; font-weight: 700;">${patient.allergies || 'Nenhuma declarada'}</span>
             </p>
           </div>
           <button type="button" id="btn-step2-back" class="btn btn-secondary" style="padding: 7px 14px; font-size: 0.82rem; border-radius: 8px;">
@@ -304,54 +337,54 @@ function renderBalcaoStepContent(step, patient, allPatients, activeMeds) {
 
         <!-- Seletor de Protocolo Clínico Guiado -->
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
-          <h4 style="color: #38bdf8; font-size: 0.86rem; font-weight: 700; text-transform: uppercase; margin: 0; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
+          <h4 style="color: #0284c7; font-size: 0.86rem; font-weight: 700; text-transform: uppercase; margin: 0; letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;">
             <i class="fa-solid fa-clipboard-list"></i> Selecione a Queixa Principal / Protocolo de Triagem (${protocols.length} Protocolos Disponíveis)
           </h4>
-          <span style="font-size: 0.76rem; color: #94a3b8;">Clique no card correspondente ao sintoma do cliente</span>
+          <span style="font-size: 0.76rem;">Clique no card correspondente ao sintoma do cliente</span>
         </div>
 
         <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; margin-bottom: 26px;">
           ${protocols.map(prot => {
             const isSelected = activeKey === prot.id;
             return `
-              <div class="pharmacy-glass-card triage-protocol-card ${isSelected ? 'selected' : ''}" data-protocol-key="${prot.id}" style="padding: 16px 18px; cursor: pointer; border-radius: 14px; position: relative; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); border: ${isSelected ? '2px solid #2dd4bf' : '1.5px solid rgba(255,255,255,0.1)'}; background: ${isSelected ? 'linear-gradient(135deg, rgba(13, 148, 136, 0.35), rgba(15, 23, 42, 0.95))' : 'linear-gradient(180deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.85))'}; box-shadow: ${isSelected ? '0 0 24px rgba(20, 184, 166, 0.5), inset 0 1px 2px rgba(255,255,255,0.4)' : '0 4px 12px rgba(0,0,0,0.25)'}; transform: ${isSelected ? 'scale(1.02)' : 'scale(1)'};">
+              <div class="pharmacy-glass-card triage-protocol-card ${isSelected ? 'selected' : ''}" data-protocol-key="${prot.id}" style="padding: 16px 18px; cursor: pointer; border-radius: 14px; position: relative; transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);">
                 
                 ${isSelected ? `
-                  <div style="position: absolute; top: 10px; right: 10px; background: #10b981; color: #042f2e; font-size: 0.68rem; font-weight: 800; padding: 3px 8px; border-radius: 20px; display: flex; align-items: center; gap: 4px; box-shadow: 0 0 10px #10b981; text-transform: uppercase;">
+                  <div style="position: absolute; top: 10px; right: 10px; background: #10b981; color: #ffffff; font-size: 0.68rem; font-weight: 800; padding: 3px 8px; border-radius: 20px; display: flex; align-items: center; gap: 4px; text-transform: uppercase;">
                     <i class="fa-solid fa-circle-check"></i> Selecionado
                   </div>
                 ` : ''}
 
-                <div style="font-size: 1.5rem; color: ${isSelected ? '#34d399' : '#38bdf8'}; margin-bottom: 10px; text-shadow: ${isSelected ? '0 0 12px #34d399' : 'none'};">
+                <div style="font-size: 1.5rem; color: ${isSelected ? '#059669' : '#0284c7'}; margin-bottom: 10px;">
                   <i class="fa-solid ${prot.icon}"></i>
                 </div>
-                <div style="font-weight: 700; color: ${isSelected ? '#ffffff' : '#f1f5f9'}; font-size: 0.96rem; margin-bottom: 6px; font-family: 'Outfit', sans-serif;">${prot.title}</div>
-                <div style="font-size: 0.79rem; color: ${isSelected ? '#e2e8f0' : '#94a3b8'}; line-height: 1.35;">${prot.description}</div>
+                <div style="font-weight: 700; font-size: 0.96rem; margin-bottom: 6px; font-family: 'Outfit', sans-serif;">${prot.title}</div>
+                <div style="font-size: 0.79rem; line-height: 1.35;">${prot.description}</div>
               </div>
             `;
           }).join('')}
         </div>
 
         <!-- Duração, Intensidade e Observações com Botões de Ajuda (?) -->
-        <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 22px 24px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.35);">
+        <div class="pharmacy-glass-card" style="border-radius: 16px; padding: 22px 24px; margin-bottom: 24px;">
           <div style="display: grid; grid-template-columns: 180px 1.4fr 2fr; gap: 22px; align-items: flex-start;">
             <div>
-              <label style="display: flex; align-items: center; justify-content: space-between; font-size: 0.88rem; color: #e2e8f0; margin-bottom: 10px; font-weight: 700; letter-spacing: -0.2px;">
+              <label style="display: flex; align-items: center; justify-content: space-between; font-size: 0.88rem; margin-bottom: 10px; font-weight: 700; letter-spacing: -0.2px;">
                 <span>Tempo de Evolução</span>
-                <button type="button" onclick="window.showClinicalFieldHelp && window.showClinicalFieldHelp('tempo_evolucao')" title="Entenda o que é o Tempo de Evolução" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; border-radius: 50%; width: 22px; height: 22px; font-size: 0.75rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; transition: all 0.2s;">?</button>
+                <button type="button" onclick="window.showClinicalFieldHelp && window.showClinicalFieldHelp('tempo_evolucao')" title="Entenda o que é o Tempo de Evolução" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #0284c7; border-radius: 50%; width: 22px; height: 22px; font-size: 0.75rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; transition: all 0.2s;">?</button>
               </label>
               <div style="position: relative; display: flex; align-items: center;">
-                <input type="number" id="input-symptom-days" class="form-input" min="1" max="90" value="${currentClinicalEncounter.symptomDurationDays || 1}" style="width: 100%; min-height: 48px; height: 48px; font-size: 1.05rem; font-weight: 800; color: #38bdf8; background: #0b1120; border: 1.5px solid rgba(255,255,255,0.18); border-radius: 10px; padding: 8px 50px 8px 16px; box-sizing: border-box; line-height: 1.4;">
-                <span style="position: absolute; right: 14px; color: #94a3b8; font-size: 0.85rem; font-weight: 700; pointer-events: none;">dias</span>
+                <input type="number" id="input-symptom-days" class="form-input" min="1" max="90" value="${currentClinicalEncounter.symptomDurationDays || 1}" style="width: 100%; min-height: 48px; height: 48px; font-size: 1.05rem; font-weight: 800; color: #0284c7; border-radius: 10px; padding: 8px 50px 8px 16px; box-sizing: border-box; line-height: 1.4;">
+                <span style="position: absolute; right: 14px; font-size: 0.85rem; font-weight: 700; pointer-events: none;">dias</span>
               </div>
             </div>
 
             <div>
-              <label style="display: flex; align-items: center; justify-content: space-between; font-size: 0.88rem; color: #e2e8f0; margin-bottom: 10px; font-weight: 700; letter-spacing: -0.2px;">
+              <label style="display: flex; align-items: center; justify-content: space-between; font-size: 0.88rem; margin-bottom: 10px; font-weight: 700; letter-spacing: -0.2px;">
                 <span>Intensidade Relatada</span>
-                <button type="button" onclick="window.showClinicalFieldHelp && window.showClinicalFieldHelp('intensidade_relatada')" title="Entenda a Escala de Intensidade" style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); color: #fbbf24; border-radius: 50%; width: 22px; height: 22px; font-size: 0.75rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; transition: all 0.2s;">?</button>
+                <button type="button" onclick="window.showClinicalFieldHelp && window.showClinicalFieldHelp('intensidade_relatada')" title="Entenda a Escala de Intensidade" style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); color: #d97706; border-radius: 50%; width: 22px; height: 22px; font-size: 0.75rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; transition: all 0.2s;">?</button>
               </label>
-              <select id="select-symptom-intensity" class="form-input" style="width: 100%; min-height: 48px; height: 48px; font-size: 0.93rem; font-weight: 600; color: #f8fafc; background: #0b1120; border: 1.5px solid rgba(255,255,255,0.18); border-radius: 10px; padding: 6px 14px; line-height: 1.4; box-sizing: border-box; cursor: pointer;">
+              <select id="select-symptom-intensity" class="form-input" style="width: 100%; min-height: 48px; height: 48px; font-size: 0.93rem; font-weight: 600; border-radius: 10px; padding: 6px 14px; line-height: 1.4; box-sizing: border-box; cursor: pointer;">
                 <option value="Leve" ${currentClinicalEncounter.symptomSeverity === 'Leve' ? 'selected' : ''}>🟢 Leve (Incômodo suportável)</option>
                 <option value="Leve a Moderado" ${currentClinicalEncounter.symptomSeverity === 'Leve a Moderado' ? 'selected' : ''}>🟡 Leve a Moderado (Afeta atividades parciais)</option>
                 <option value="Moderado a Forte" ${currentClinicalEncounter.symptomSeverity === 'Moderado a Forte' ? 'selected' : ''}>🟠 Moderado a Forte (Dificulta rotina/sono)</option>
@@ -360,17 +393,17 @@ function renderBalcaoStepContent(step, patient, allPatients, activeMeds) {
             </div>
 
             <div>
-              <label style="display: flex; align-items: center; justify-content: space-between; font-size: 0.88rem; color: #e2e8f0; margin-bottom: 10px; font-weight: 700; letter-spacing: -0.2px;">
+              <label style="display: flex; align-items: center; justify-content: space-between; font-size: 0.88rem; margin-bottom: 10px; font-weight: 700; letter-spacing: -0.2px;">
                 <span>Observações Adicionais da Queixa</span>
-                <button type="button" onclick="window.showClinicalFieldHelp && window.showClinicalFieldHelp('observacoes_queixa')" title="Entenda o campo de Observações" style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; border-radius: 50%; width: 22px; height: 22px; font-size: 0.75rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; transition: all 0.2s;">?</button>
+                <button type="button" onclick="window.showClinicalFieldHelp && window.showClinicalFieldHelp('observacoes_queixa')" title="Entenda o campo de Observações" style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); color: #7c3aed; border-radius: 50%; width: 22px; height: 22px; font-size: 0.75rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; transition: all 0.2s;">?</button>
               </label>
-              <input type="text" id="input-complaint-notes" class="form-input" placeholder="Ex.: Piora à noite, dor latejante, tomou chá em casa..." value="${currentClinicalEncounter.customComplaintNotes || ''}" style="width: 100%; min-height: 48px; height: 48px; font-size: 0.93rem; color: #f8fafc; background: #0b1120; border: 1.5px solid rgba(255,255,255,0.18); border-radius: 10px; padding: 8px 16px; box-sizing: border-box; line-height: 1.4;">
+              <input type="text" id="input-complaint-notes" class="form-input" placeholder="Ex.: Piora à noite, dor latejante, tomou chá em casa..." value="${currentClinicalEncounter.customComplaintNotes || ''}" style="width: 100%; min-height: 48px; height: 48px; font-size: 0.93rem; border-radius: 10px; padding: 8px 16px; box-sizing: border-box; line-height: 1.4;">
             </div>
           </div>
         </div>
 
         <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
-          <button type="button" id="btn-advance-to-step-3" class="btn btn-primary" style="background: linear-gradient(135deg, #0d9488, #0f766e); border: 1px solid #2dd4bf; padding: 12px 28px; font-weight: 700; font-size: 0.95rem; border-radius: 10px; box-shadow: 0 4px 16px rgba(13, 148, 136, 0.4); display: flex; align-items: center; gap: 8px; cursor: pointer;">
+          <button type="button" id="btn-advance-to-step-3" class="btn btn-primary" style="background: linear-gradient(135deg, #0d9488, #0f766e); border: 1px solid #0d9488; padding: 12px 28px; font-weight: 700; font-size: 0.95rem; border-radius: 10px; box-shadow: 0 4px 16px rgba(13, 148, 136, 0.4); display: flex; align-items: center; gap: 8px; cursor: pointer;">
             Checar Sinais de Alerta (Red Flags) <i class="fa-solid fa-arrow-right"></i>
           </button>
         </div>
@@ -384,12 +417,12 @@ function renderBalcaoStepContent(step, patient, allPatients, activeMeds) {
 
     return `
       <div>
-        <div style="border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 14px; margin-bottom: 20px;">
-          <h3 style="color: #f8fafc; font-family: 'Outfit', sans-serif; font-size: 1.25rem; margin: 0;">
+        <div style="border-bottom: 1px solid var(--border-color, rgba(255,255,255,0.08)); padding-bottom: 14px; margin-bottom: 20px;">
+          <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.25rem; margin: 0;">
             Etapa 3 — Validação de Sinais de Alerta Críticos (Red Flags)
           </h3>
-          <p style="color: #94a3b8; font-size: 0.86rem; margin: 2px 0 0 0;">
-            Protocolo Ativo: <strong style="color: #14b8a6;">${protocol.title}</strong>. Marque caso o paciente apresente qualquer sinal de emergência abaixo:
+          <p style="font-size: 0.86rem; margin: 2px 0 0 0;">
+            Protocolo Ativo: <strong style="color: #0d9488;">${protocol.title}</strong>. Marque caso o paciente apresente qualquer sinal de emergência abaixo:
           </p>
         </div>
 
@@ -397,12 +430,12 @@ function renderBalcaoStepContent(step, patient, allPatients, activeMeds) {
           ${protocol.redFlags.map(rf => {
             const isChecked = currentClinicalEncounter.selectedRedFlags.includes(rf.label);
             return `
-              <label class="pharmacy-glass-card" style="display: flex; align-items: center; gap: 14px; padding: 14px 18px; cursor: pointer; border: 1px solid ${isChecked ? 'rgba(225, 29, 72, 0.6)' : 'rgba(255,255,255,0.07)'}; background: ${isChecked ? 'rgba(225, 29, 72, 0.15)' : 'rgba(30, 41, 59, 0.45)'};">
+              <label class="pharmacy-glass-card" style="display: flex; align-items: center; gap: 14px; padding: 14px 18px; cursor: pointer; border: 1px solid ${isChecked ? '#e11d48' : 'var(--border-color, rgba(255,255,255,0.07))'}; background: ${isChecked ? 'rgba(225, 29, 72, 0.08)' : 'transparent'};">
                 <input type="checkbox" class="red-flag-checkbox" value="${rf.label}" ${isChecked ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: #e11d48; cursor: pointer;">
                 <div style="flex: 1;">
-                  <div style="color: #f8fafc; font-weight: 600; font-size: 0.92rem;">${rf.label}</div>
+                  <div style="font-weight: 600; font-size: 0.92rem;">${rf.label}</div>
                 </div>
-                <span class="badge" style="background: rgba(225,29,72,0.2); color: #f43f5e; border: 1px solid rgba(225,29,72,0.4); font-size: 0.72rem;">RED FLAG</span>
+                <span class="badge" style="background: rgba(225,29,72,0.15); color: #e11d48; border: 1px solid rgba(225,29,72,0.3); font-size: 0.72rem; font-weight: 700;">RED FLAG</span>
               </label>
             `;
           }).join('')}
@@ -465,12 +498,12 @@ function renderBalcaoStepContent(step, patient, allPatients, activeMeds) {
 
     return `
       <div>
-        <div style="border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 14px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="border-bottom: 1px solid var(--border-color, rgba(255,255,255,0.08)); padding-bottom: 14px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
           <div>
-            <h3 style="color: #f8fafc; font-family: 'Outfit', sans-serif; font-size: 1.25rem; margin: 0;">
+            <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.25rem; margin: 0;">
               Etapa 4 — Prescrição Farmacêutica &amp; Motor de Cruzamento em Tempo Real (CDSS)
             </h3>
-            <p style="color: #94a3b8; font-size: 0.86rem; margin: 2px 0 0 0;">
+            <p style="font-size: 0.86rem; margin: 2px 0 0 0;">
               Validação cruzada multidimensional automática contra medicamentos em uso, alergias e patologias pré-existentes.
             </p>
           </div>
@@ -482,12 +515,12 @@ function renderBalcaoStepContent(step, patient, allPatients, activeMeds) {
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
           <!-- COLUNA 1: CATÁLOGO DE MIPS E CONDUTAS -->
           <div>
-            <h4 style="color: #14b8a6; font-size: 0.95rem; font-family: 'Outfit', sans-serif; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+            <h4 style="color: #0d9488; font-size: 0.95rem; font-family: 'Outfit', sans-serif; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
               <i class="fa-solid fa-pills"></i> MIPs Sugeridos pelo Protocolo
             </h4>
 
             ${isRedFlagActive ? `
-              <div style="background: rgba(225, 29, 72, 0.1); border: 1px solid rgba(225, 29, 72, 0.3); border-radius: 10px; padding: 14px; color: #fda4af; font-size: 0.85rem;">
+              <div style="background: rgba(225, 29, 72, 0.1); border: 1px solid rgba(225, 29, 72, 0.3); border-radius: 10px; padding: 14px; color: #e11d48; font-size: 0.85rem; font-weight: 600;">
                 🚫 Indicação de MIPs bloqueada devido à presença de Red Flags na Etapa 3.
               </div>
             ` : `
@@ -495,12 +528,12 @@ function renderBalcaoStepContent(step, patient, allPatients, activeMeds) {
                 ${protocol.recommendedMIPs.map(mip => {
                   const isPrescribed = currentClinicalEncounter.prescribedMIPs.some(m => (m.name || m) === mip.name);
                   return `
-                    <div class="pharmacy-glass-card" style="padding: 12px 16px; border: 1px solid ${isPrescribed ? '#0d9488' : 'rgba(255,255,255,0.07)'}; background: ${isPrescribed ? 'rgba(13,148,136,0.18)' : 'rgba(30,41,59,0.45)'};">
+                    <div class="pharmacy-glass-card" style="padding: 12px 16px; border: 1px solid ${isPrescribed ? '#0d9488' : 'var(--border-color, rgba(255,255,255,0.07))'}; background: ${isPrescribed ? 'rgba(13,148,136,0.12)' : 'transparent'};">
                       <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                         <div>
-                          <div style="font-weight: 700; color: #f8fafc; font-size: 0.92rem;">${mip.name}</div>
-                          <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 2px;">${mip.indication}</div>
-                          <div style="font-size: 0.78rem; color: #14b8a6; margin-top: 3px;"><strong>Posologia:</strong> ${mip.posology}</div>
+                          <div style="font-weight: 700; font-size: 0.92rem;">${mip.name}</div>
+                          <div style="font-size: 0.8rem; margin-top: 2px;">${mip.indication}</div>
+                          <div style="font-size: 0.78rem; color: #0d9488; margin-top: 3px;"><strong>Posologia:</strong> ${mip.posology}</div>
                         </div>
                         <button type="button" class="btn btn-sm ${isPrescribed ? 'btn-danger' : 'btn-primary'} btn-toggle-prescribe-mip" data-mip-name="${mip.name}" data-mip-indication="${mip.indication}" data-mip-posology="${mip.posology}" style="font-size: 0.75rem; padding: 4px 10px; border-radius: 6px;">
                           ${isPrescribed ? '<i class="fa-solid fa-trash"></i> Remover' : '<i class="fa-solid fa-plus"></i> Prescrever'}
@@ -513,8 +546,8 @@ function renderBalcaoStepContent(step, patient, allPatients, activeMeds) {
             `}
 
             <!-- BUSCA DINÂMICA DE MEDICAMENTOS VIA PLN (PROCESSAMENTO DE LINGUAGEM NATURAL) -->
-            <div style="margin-top: 16px; background: rgba(15, 23, 42, 0.6); padding: 14px; border-radius: 12px; border: 1px solid rgba(20, 184, 166, 0.25);">
-              <label style="display: block; font-size: 0.84rem; color: #14b8a6; margin-bottom: 6px; font-weight: 700;">
+            <div class="pharmacy-glass-card" style="margin-top: 16px; padding: 14px; border-radius: 12px; border: 1px solid rgba(13, 148, 136, 0.35);">
+              <label style="display: block; font-size: 0.84rem; color: #0d9488; margin-bottom: 6px; font-weight: 700;">
                 <i class="fa-solid fa-brain"></i> Busca Dinâmica por PLN (Sintomas, Nomes ou Princípios Ativos):
               </label>
               
@@ -531,10 +564,10 @@ function renderBalcaoStepContent(step, patient, allPatients, activeMeds) {
             </div>
 
             <!-- Condutas Não Farmacológicas -->
-            <h4 style="color: #38bdf8; font-size: 0.95rem; font-family: 'Outfit', sans-serif; margin: 18px 0 10px 0;">
+            <h4 style="color: #0284c7; font-size: 0.95rem; font-family: 'Outfit', sans-serif; margin: 18px 0 10px 0;">
               <i class="fa-solid fa-apple-whole"></i> Condutas Não-Medicamentosas Recomendadas
             </h4>
-            <div style="background: rgba(30, 41, 59, 0.4); border-radius: 10px; padding: 12px; border: 1px solid rgba(255,255,255,0.05); font-size: 0.84rem; color: #cbd5e1;">
+            <div class="pharmacy-glass-card" style="border-radius: 10px; padding: 12px; font-size: 0.84rem;">
               <ul style="margin: 0; padding-left: 18px;">
                 ${protocol.nonPharmaActions.map(act => `<li style="margin-bottom: 4px;">${act}</li>`).join('')}
               </ul>
@@ -543,16 +576,16 @@ function renderBalcaoStepContent(step, patient, allPatients, activeMeds) {
 
           <!-- COLUNA 2: MOTOR DE ALERTAS CDSS EM TEMPO REAL -->
           <div>
-            <h4 style="color: #f8fafc; font-size: 0.95rem; font-family: 'Outfit', sans-serif; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+            <h4 style="font-size: 0.95rem; font-family: 'Outfit', sans-serif; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
               <span><i class="fa-solid fa-shield-halved" style="color: #e11d48;"></i> Painel de Interações &amp; Segurança (CDSS)</span>
-              <span style="font-size: 0.78rem; color: #94a3b8; font-weight: normal;">${detectedAlerts.length} alerta(s) ativos</span>
+              <span style="font-size: 0.78rem; font-weight: normal;">${detectedAlerts.length} alerta(s) ativos</span>
             </h4>
 
             ${detectedAlerts.length === 0 ? `
               <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; padding: 24px; text-align: center;">
                 <i class="fa-solid fa-shield-check" style="font-size: 2.2rem; color: #10b981; margin-bottom: 8px;"></i>
-                <div style="font-weight: 700; color: #a7f3d0; font-size: 1rem;">Nenhuma Incompatibilidade Crítica Detectada</div>
-                <p style="color: #6ee7b7; font-size: 0.84rem; margin: 4px 0 0 0;">
+                <div style="font-weight: 700; color: #059669; font-size: 1rem;">Nenhuma Incompatibilidade Crítica Detectada</div>
+                <p style="color: #047857; font-size: 0.84rem; margin: 4px 0 0 0;">
                   A prescrição proposta é compatível com o histórico de medicamentos ativos, alergias e condições crônicas do paciente.
                 </p>
               </div>
@@ -567,9 +600,9 @@ function renderBalcaoStepContent(step, patient, allPatients, activeMeds) {
                       <div class="cdss-badge ${alert.severity === 'Critica' || alert.severity === 'Grave' ? 'grave' : (alert.severity === 'Moderada' ? 'moderada' : 'leve')}">
                         ${alert.severity} • ${alert.dimension}
                       </div>
-                      <div style="font-weight: 700; color: #f8fafc; font-size: 0.92rem; margin-bottom: 3px;">${alert.title}</div>
-                      <div style="font-size: 0.82rem; color: #cbd5e1; margin-bottom: 6px; line-height: 1.35;">${alert.desc}</div>
-                      <div style="font-size: 0.8rem; color: #14b8a6; background: rgba(0,0,0,0.25); padding: 6px 10px; border-radius: 6px; border-left: 3px solid #14b8a6;">
+                      <div style="font-weight: 700; font-size: 0.92rem; margin-bottom: 3px;">${alert.title}</div>
+                      <div style="font-size: 0.82rem; margin-bottom: 6px; line-height: 1.35;">${alert.desc}</div>
+                      <div style="font-size: 0.8rem; color: #0d9488; background: rgba(13,148,136,0.08); padding: 6px 10px; border-radius: 6px; border-left: 3px solid #0d9488;">
                         <strong>Conduta Sugerida:</strong> ${alert.action}
                       </div>
                     </div>
@@ -580,11 +613,11 @@ function renderBalcaoStepContent(step, patient, allPatients, activeMeds) {
 
             <!-- Bloco de Justificativa Farmacêutica Obrigatória em caso de Trava -->
             ${hasBlocker ? `
-              <div style="margin-top: 16px; background: rgba(225, 29, 72, 0.15); border: 1px solid rgba(225, 29, 72, 0.45); border-radius: 12px; padding: 16px;">
-                <div style="color: #fecdd3; font-weight: 700; font-size: 0.9rem; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+              <div style="margin-top: 16px; background: rgba(225, 29, 72, 0.12); border: 1px solid rgba(225, 29, 72, 0.4); border-radius: 12px; padding: 16px;">
+                <div style="color: #e11d48; font-weight: 700; font-size: 0.9rem; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
                   <i class="fa-solid fa-lock"></i> TRAVA DE SEGURANÇA ATIVADA (RESOLUÇÃO CFF)
                 </div>
-                <p style="color: #fda4af; font-size: 0.82rem; margin: 0 0 10px 0;">
+                <p style="color: #be123c; font-size: 0.82rem; margin: 0 0 10px 0;">
                   Para prosseguir com dispensação em caso de contraindicação crítica, é mandatório registrar a justificativa técnica com o CRF do farmacêutico responsável:
                 </p>
                 <textarea id="textarea-override-justification" class="form-input" rows="2" placeholder="Descreva a fundamentação farmacológica e a conduta de monitoramento adotada..." style="width: 100%; font-size: 0.85rem;"></textarea>
