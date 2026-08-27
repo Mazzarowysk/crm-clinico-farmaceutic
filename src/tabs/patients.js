@@ -6,6 +6,7 @@ import { syncManager } from '../modules/sync.js';
 import { getRolePermissions } from '../modules/auth.js';
 import { openVaccinationModal } from '../modules/vaccination.js';
 import { openPatientPortalModal } from '../modules/patientPortal.js';
+import { openPatientPurchasesModal } from '../modules/patientPurchasesModal.js';
 import { attachMedicationAutocomplete } from '../modules/medicationSearch.js';
 
 export function renderPatientsTab(contentArea) {
@@ -339,11 +340,71 @@ export function renderPatientsTab(contentArea) {
                   <input type="text" id="chronicConditions" class="form-input" placeholder="Ex: Hipertensão, Diabetes Tipo 2, Gastrite/Úlcera, Asma, Doença Renal, Gestante..." style="padding: 10px 14px;">
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" style="margin-bottom: 14px;">
                   <label class="form-label" for="continuousMedications" style="font-size: 0.82rem; font-weight: 600; margin-bottom: 5px; display: block;">
                     <i class="fa-solid fa-pills" style="color: #a78bfa;"></i> Medicamentos de Uso Contínuo:
                   </label>
                   <input type="text" id="continuousMedications" class="form-input" placeholder="Ex: Losartana 50mg, Metformina 850mg, AAS 100mg..." style="padding: 10px 14px;">
+                </div>
+
+                <!-- SEÇÃO EXCLUSIVA DE SINAIS VITAIS & PARÂMETROS CLÍNICOS DA VISITA -->
+                <div style="margin-top: 14px; padding-top: 14px; border-top: 1px dashed rgba(255,255,255,0.12);">
+                  <div style="font-size: 0.78rem; font-weight: 800; color: #38bdf8; text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; justify-content: space-between;">
+                    <span><i class="fa-solid fa-heart-pulse"></i> Sinais Vitais &amp; Aferições Clínicas da Visita</span>
+                    <span style="font-size: 0.68rem; color: #10b981; font-weight: 700; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); padding: 2px 8px; border-radius: 6px;">CFF Res. 585/586</span>
+                  </div>
+
+                  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+                    <!-- 1. Pressão Arterial (PA) -->
+                    <div class="form-group">
+                      <label class="form-label" for="vitalBloodPressure" style="font-size: 0.76rem; font-weight: 700; color: #cbd5e1; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
+                        <i class="fa-solid fa-heart" style="color: #f87171;"></i> Pressão (PA):
+                      </label>
+                      <input type="text" id="vitalBloodPressure" class="form-input" placeholder="120/80 mmHg" style="padding: 8px 10px; font-size: 0.84rem; font-family: monospace;">
+                    </div>
+
+                    <!-- 2. Batimento Cardíaco / Frequência Cardíaca (FC) -->
+                    <div class="form-group">
+                      <label class="form-label" for="vitalHeartRate" style="font-size: 0.76rem; font-weight: 700; color: #cbd5e1; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
+                        <i class="fa-solid fa-wave-square" style="color: #38bdf8;"></i> Batimentos (FC):
+                      </label>
+                      <input type="text" id="vitalHeartRate" class="form-input" placeholder="75 bpm" inputmode="numeric" style="padding: 8px 10px; font-size: 0.84rem; font-family: monospace;">
+                    </div>
+
+                    <!-- 3. Saturação de Oxigênio (SpO2) -->
+                    <div class="form-group">
+                      <label class="form-label" for="vitalSpO2" style="font-size: 0.76rem; font-weight: 700; color: #cbd5e1; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
+                        <i class="fa-solid fa-lungs" style="color: #a78bfa;"></i> Saturação (SpO₂):
+                      </label>
+                      <input type="text" id="vitalSpO2" class="form-input" placeholder="98 %" inputmode="numeric" style="padding: 8px 10px; font-size: 0.84rem; font-family: monospace;">
+                    </div>
+                  </div>
+
+                  <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                    <!-- 4. Glicemia Capilar -->
+                    <div class="form-group">
+                      <label class="form-label" for="vitalBloodGlucose" style="font-size: 0.76rem; font-weight: 700; color: #cbd5e1; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
+                        <i class="fa-solid fa-droplet" style="color: #fbbf24;"></i> Glicemia Capilar:
+                      </label>
+                      <input type="text" id="vitalBloodGlucose" class="form-input" placeholder="95 mg/dL" inputmode="numeric" style="padding: 8px 10px; font-size: 0.84rem; font-family: monospace;">
+                    </div>
+
+                    <!-- 5. Temperatura -->
+                    <div class="form-group">
+                      <label class="form-label" for="vitalTemperature" style="font-size: 0.76rem; font-weight: 700; color: #cbd5e1; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
+                        <i class="fa-solid fa-temperature-half" style="color: #f97316;"></i> Temperatura:
+                      </label>
+                      <input type="text" id="vitalTemperature" class="form-input" placeholder="36.5 °C" style="padding: 8px 10px; font-size: 0.84rem; font-family: monospace;">
+                    </div>
+
+                    <!-- 6. Peso / IMC -->
+                    <div class="form-group">
+                      <label class="form-label" for="vitalWeight" style="font-size: 0.76rem; font-weight: 700; color: #cbd5e1; margin-bottom: 4px; display: flex; align-items: center; gap: 4px;">
+                        <i class="fa-solid fa-weight-scale" style="color: #34d399;"></i> Peso / IMC:
+                      </label>
+                      <input type="text" id="vitalWeight" class="form-input" placeholder="72.5 kg" style="padding: 8px 10px; font-size: 0.84rem; font-family: monospace;">
+                    </div>
+                  </div>
                 </div>
               </div>
 
@@ -462,8 +523,12 @@ export function renderPatientsTab(contentArea) {
                 data-neighborhood="${p.neighborhood || ''}"
                 data-city="${p.city || ''}"
                 data-phone="${p.phone || ''}"
-                data-cellphone="${p.cellphone || ''}"
-                data-email="${p.email || ''}"
+                data-blood-pressure="${p.bloodPressure || (p.vitalSigns && p.vitalSigns.bloodPressure) || ''}"
+                data-heart-rate="${p.heartRate || (p.vitalSigns && p.vitalSigns.heartRate) || ''}"
+                data-oxygen-saturation="${p.oxygenSaturation || (p.vitalSigns && p.vitalSigns.oxygenSaturation) || ''}"
+                data-blood-glucose="${p.bloodGlucose || (p.vitalSigns && p.vitalSigns.bloodGlucose) || ''}"
+                data-temperature="${p.temperature || (p.vitalSigns && p.vitalSigns.temperature) || ''}"
+                data-weight="${p.weight || (p.vitalSigns && p.vitalSigns.weight) || ''}"
                 title="Alterar / Editar Dados do Cliente">
                 <i class="fa-solid fa-pen-to-square"></i>
               </button>
@@ -493,6 +558,14 @@ export function renderPatientsTab(contentArea) {
         if (document.getElementById('allergies')) document.getElementById('allergies').value = btn.getAttribute('data-allergies') || '';
         if (document.getElementById('chronicConditions')) document.getElementById('chronicConditions').value = btn.getAttribute('data-chronic-conditions') || '';
         if (document.getElementById('continuousMedications')) document.getElementById('continuousMedications').value = btn.getAttribute('data-continuous-medications') || '';
+
+        // Sinais Vitais
+        if (document.getElementById('vitalBloodPressure')) document.getElementById('vitalBloodPressure').value = btn.getAttribute('data-blood-pressure') || '';
+        if (document.getElementById('vitalHeartRate')) document.getElementById('vitalHeartRate').value = btn.getAttribute('data-heart-rate') || '';
+        if (document.getElementById('vitalSpO2')) document.getElementById('vitalSpO2').value = btn.getAttribute('data-oxygen-saturation') || '';
+        if (document.getElementById('vitalBloodGlucose')) document.getElementById('vitalBloodGlucose').value = btn.getAttribute('data-blood-glucose') || '';
+        if (document.getElementById('vitalTemperature')) document.getElementById('vitalTemperature').value = btn.getAttribute('data-temperature') || '';
+        if (document.getElementById('vitalWeight')) document.getElementById('vitalWeight').value = btn.getAttribute('data-weight') || '';
 
         if (document.getElementById('responsibleName')) document.getElementById('responsibleName').value = btn.getAttribute('data-responsible-name') || '';
         if (document.getElementById('responsibleCpf')) document.getElementById('responsibleCpf').value = btn.getAttribute('data-responsible-cpf') || '';
@@ -590,8 +663,16 @@ export function renderPatientsTab(contentArea) {
     vacHeaderBtn.onclick = (e) => {
       e.preventDefault();
       e.stopPropagation();
-      if (typeof openVaccinationModal === 'function') openVaccinationModal();
-      else if (window.openVaccinationModal) window.openVaccinationModal();
+      const currentPatients = [
+        ...(localDB.list('pharmacy_patients') || []),
+        ...(localDB.list('patients') || [])
+      ];
+      const targetPatient = state.activePatient || (allPatients && allPatients[0]) || currentPatients[0];
+      if (targetPatient) {
+        openVaccinationModal(targetPatient.id, targetPatient.fullName || targetPatient.name, targetPatient.cpf || '', targetPatient.cellphone || targetPatient.phone || '');
+      } else {
+        openVaccinationModal();
+      }
     };
   }
 
@@ -600,8 +681,12 @@ export function renderPatientsTab(contentArea) {
     portalHeaderBtn.onclick = (e) => {
       e.preventDefault();
       e.stopPropagation();
-      if (typeof openPatientPortalModal === 'function') openPatientPortalModal();
-      else if (window.openPatientPortalModal) window.openPatientPortalModal();
+      const currentPatients = [
+        ...(localDB.list('pharmacy_patients') || []),
+        ...(localDB.list('patients') || [])
+      ];
+      const targetPatient = state.activePatient || (allPatients && allPatients[0]) || currentPatients[0];
+      openPatientPortalModal(targetPatient);
     };
   }
 
@@ -610,11 +695,16 @@ export function renderPatientsTab(contentArea) {
     purchasesHeaderBtn.onclick = (e) => {
       e.preventDefault();
       e.stopPropagation();
-      const firstPatient = (patientsToRender || [])[0] || (localDB.list('patients') || [])[0];
-      const pId = firstPatient ? firstPatient.id : 'demo';
-      const pName = firstPatient ? (firstPatient.fullName || firstPatient.name) : 'Cliente';
-      if (typeof openPatientPurchasesModal === 'function') openPatientPurchasesModal(pId, pName);
-      else if (window.openPatientPurchasesModal) window.openPatientPurchasesModal(pId, pName);
+      const currentPatients = [
+        ...(localDB.list('pharmacy_patients') || []),
+        ...(localDB.list('patients') || [])
+      ];
+      const targetPatient = state.activePatient || (allPatients && allPatients[0]) || currentPatients[0];
+      if (targetPatient) {
+        openPatientPurchasesModal(targetPatient.id, targetPatient.fullName || targetPatient.name);
+      } else {
+        showToast('⚠️ Cadastre ou selecione um cliente para ver o histórico de compras.');
+      }
     };
   }
 
@@ -1084,6 +1174,12 @@ export function renderPatientsTab(contentArea) {
       complaintSelectEl.value = 'auto';
       complaintSelectEl.removeAttribute('data-user-locked');
     }
+
+    // Limpar campos de sinais vitais
+    ['vitalBloodPressure', 'vitalHeartRate', 'vitalSpO2', 'vitalBloodGlucose', 'vitalTemperature', 'vitalWeight'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
     
     const modalOverlay = document.getElementById('patient-modal-overlay');
     if (modalOverlay) modalOverlay.style.display = 'none';
@@ -1165,6 +1261,14 @@ function detectComplaintFromNotes(notes = '') {
     const chronicConditions = document.getElementById('chronicConditions')?.value || '';
     const continuousMedications = document.getElementById('continuousMedications')?.value || '';
 
+    // Sinais Vitais Aferidos na Visita
+    const vitalBloodPressure = document.getElementById('vitalBloodPressure')?.value?.trim() || '';
+    const vitalHeartRate = document.getElementById('vitalHeartRate')?.value?.trim() || '';
+    const vitalSpO2 = document.getElementById('vitalSpO2')?.value?.trim() || '';
+    const vitalBloodGlucose = document.getElementById('vitalBloodGlucose')?.value?.trim() || '';
+    const vitalTemperature = document.getElementById('vitalTemperature')?.value?.trim() || '';
+    const vitalWeight = document.getElementById('vitalWeight')?.value?.trim() || '';
+
     // Validações essenciais diretas
     if (!fullName) {
       showToast('⚠️ Por favor, informe o Nome Completo do cliente.', 'warning');
@@ -1234,6 +1338,21 @@ function detectComplaintFromNotes(notes = '') {
         allergies,
         chronicConditions,
         continuousMedications,
+        bloodPressure: vitalBloodPressure,
+        heartRate: vitalHeartRate,
+        oxygenSaturation: vitalSpO2,
+        bloodGlucose: vitalBloodGlucose,
+        temperature: vitalTemperature,
+        weight: vitalWeight,
+        vitalSigns: {
+          bloodPressure: vitalBloodPressure,
+          heartRate: vitalHeartRate,
+          oxygenSaturation: vitalSpO2,
+          bloodGlucose: vitalBloodGlucose,
+          temperature: vitalTemperature,
+          weight: vitalWeight,
+          updated_at: new Date().toISOString()
+        },
         responsibleName,
         responsibleCpf,
         responsiblePhone,
