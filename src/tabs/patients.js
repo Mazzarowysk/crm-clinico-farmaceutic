@@ -8,6 +8,7 @@ import { openVaccinationModal } from '../modules/vaccination.js';
 import { openPatientPortalModal } from '../modules/patientPortal.js';
 import { openPatientPurchasesModal } from '../modules/patientPurchasesModal.js';
 import { attachMedicationAutocomplete } from '../modules/medicationSearch.js';
+import * as localDB from '../localDB.js';
 
 export function renderPatientsTab(contentArea) {
   contentArea.innerHTML = `

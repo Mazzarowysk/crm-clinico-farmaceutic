@@ -41,6 +41,7 @@ import { openPricingCalculatorModal } from './modules/pricingCalculatorModal.js'
 import { renderSmartFlowGuide, updateFlowGuideStep, completeFlow } from './modules/smartFlowGuide.js';
 import { searchSystemWithPLN, SYSTEM_INTENTS } from './modules/universalSearch.js';
 
+window.localDB = localDB;
 window.openPricingCalculatorModal = openPricingCalculatorModal;
 window.searchSystemWithPLN = searchSystemWithPLN;
 window.SYSTEM_INTENTS = SYSTEM_INTENTS;
