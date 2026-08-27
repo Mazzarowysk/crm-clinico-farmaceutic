@@ -536,17 +536,26 @@ export function openQuickCheckoutModal(onFinished = null, initialData = null) {
 
   // Pré-carregamento de dados iniciais (Paciente e Medicamentos Prescritos na Triagem/Balcão)
   if (initialData) {
-    if (initialData.patient) {
+    if (initialData.patient || initialData.patientId) {
       const patientSelect = document.getElementById('checkout-patient-select');
       if (patientSelect) {
-        const pId = initialData.patient.id;
-        let opt = Array.from(patientSelect.options).find(o => o.value === pId || (initialData.patient.cpf && o.dataset.cpf === initialData.patient.cpf));
+        const pObj = initialData.patient || {};
+        const pId = String(pObj.id || initialData.patientId || '');
+        const pCpf = pObj.cpf || initialData.cpf || '';
+        const pName = pObj.name || pObj.fullName || initialData.patientName || 'Cliente';
+        
+        let opt = Array.from(patientSelect.options).find(o => 
+          (pId && String(o.value) === pId) || 
+          (pCpf && o.dataset.cpf === pCpf) ||
+          (pName && o.textContent.toLowerCase().includes(pName.toLowerCase()))
+        );
+
         if (!opt) {
           const newOpt = document.createElement('option');
-          newOpt.value = initialData.patient.id || 'PAT-BALCAO';
-          newOpt.textContent = `${initialData.patient.name || initialData.patient.fullName} (CPF: ${initialData.patient.cpf || 'N/A'})`;
-          newOpt.dataset.phone = initialData.patient.phone || '';
-          newOpt.dataset.cpf = initialData.patient.cpf || '';
+          newOpt.value = pId || 'PAT-BALCAO';
+          newOpt.textContent = `${pName} (CPF: ${pCpf || 'N/A'})`;
+          newOpt.dataset.phone = pObj.phone || pObj.cellphone || '';
+          newOpt.dataset.cpf = pCpf || '';
           patientSelect.appendChild(newOpt);
           patientSelect.value = newOpt.value;
         } else {

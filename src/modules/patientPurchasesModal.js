@@ -372,17 +372,26 @@ export function openPatientPurchasesModal(patientId, patientName = 'Cliente') {
       if (e.target === modal) closeModal();
     });
 
-    // Abrir Caixa / PDV Rápido
+    // Abrir Caixa / PDV Rápido Vinculando o Paciente Ativo
     const openCheckout = () => {
       closeModal();
+      const allPatients = (localDB.list('pharmacy_patients') || []).concat(localDB.list('patients') || []);
+      const patientObj = allPatients.find(p => String(p.id) === String(patientId)) || { id: patientId, name: patientName, fullName: patientName };
+
+      const initData = {
+        patient: patientObj,
+        patientId: patientId,
+        patientName: patientName
+      };
+
       if (typeof openQuickCheckoutModal === 'function') {
         openQuickCheckoutModal(() => {
-          showToast('🛒 Venda registrada com sucesso!');
-        });
+          showToast('🛒 Venda registrada e vinculada com sucesso!');
+        }, initData);
       } else if (window.openQuickCheckoutModal) {
         window.openQuickCheckoutModal(() => {
-          showToast('🛒 Venda registrada com sucesso!');
-        });
+          showToast('🛒 Venda registrada e vinculada com sucesso!');
+        }, initData);
       }
     };
 
