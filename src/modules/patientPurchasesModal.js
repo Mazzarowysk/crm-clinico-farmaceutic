@@ -338,12 +338,14 @@ export function openPatientPurchasesModal(patientId, patientName = 'Cliente') {
 
                       <div style="display: flex; align-items: center; gap: 8px;">
                         <button type="button" 
+                          onclick="window.emitFullPurchaseThermalReceipt(this)"
                           class="btn-print-full-purchase-receipt" 
                           data-sale-json="${encodeURIComponent(JSON.stringify(saleDataForPrint))}"
                           style="background: rgba(254, 240, 138, 0.15); border: 1.5px solid #fef08a; color: #fef08a; font-size: 0.76rem; font-weight: 800; padding: 6px 14px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(254, 240, 138, 0.2); transition: 0.2s;">
                           <i class="fa-solid fa-receipt"></i> 🖨️ Emitir Cupom Térmico (80mm)
                         </button>
                         <button type="button" 
+                          onclick="window.downloadFullPurchasePdf(this)"
                           class="btn-download-full-purchase-pdf" 
                           data-sale-json="${encodeURIComponent(JSON.stringify(saleDataForPrint))}"
                           style="background: linear-gradient(135deg, #10b981, #059669); border: none; color: #ffffff; font-size: 0.76rem; font-weight: 800; padding: 6px 14px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35); transition: 0.2s;">
@@ -387,40 +389,6 @@ export function openPatientPurchasesModal(patientId, patientName = 'Cliente') {
     document.getElementById('btn-new-sale-for-patient')?.addEventListener('click', openCheckout);
     document.getElementById('btn-first-sale-for-patient')?.addEventListener('click', openCheckout);
 
-    // Botões de Emissão de Cupom Térmico e Download PDF da Compra
-    modal.querySelectorAll('.btn-print-full-purchase-receipt').forEach(btn => {
-      btn.addEventListener('click', () => {
-        try {
-          const raw = btn.getAttribute('data-sale-json');
-          const saleObj = JSON.parse(decodeURIComponent(raw));
-          showToast('🖨️ Emitindo Cupom Térmico da compra...');
-          if (typeof printThermalReceipt === 'function') {
-            printThermalReceipt(saleObj, '80mm');
-          } else if (window.printThermalReceipt) {
-            window.printThermalReceipt(saleObj, '80mm');
-          }
-        } catch(e) {
-          console.error('Erro ao emitir cupom térmico:', e);
-        }
-      });
-    });
-
-    modal.querySelectorAll('.btn-download-full-purchase-pdf').forEach(btn => {
-      btn.addEventListener('click', () => {
-        try {
-          const raw = btn.getAttribute('data-sale-json');
-          const saleObj = JSON.parse(decodeURIComponent(raw));
-          if (typeof exportThermalReceiptPDF === 'function') {
-            exportThermalReceiptPDF(saleObj, '80mm');
-          } else if (window.exportThermalReceiptPDF) {
-            window.exportThermalReceiptPDF(saleObj, '80mm');
-          }
-        } catch(e) {
-          console.error('Erro ao baixar PDF:', e);
-        }
-      });
-    });
-
     // Botão WhatsApp Lembrar Recompra
     modal.querySelectorAll('.btn-whatsapp-refill').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -438,7 +406,49 @@ export function openPatientPurchasesModal(patientId, patientName = 'Cliente') {
   }
 }
 
-// Exportação global da função
+// Exportações globais para acionamento direto via onclick
 if (typeof window !== 'undefined') {
   window.openPatientPurchasesModal = openPatientPurchasesModal;
+
+  window.emitFullPurchaseThermalReceipt = function(btn) {
+    try {
+      if (!btn) return;
+      const raw = btn.getAttribute('data-sale-json');
+      if (!raw) {
+        showToast('⚠️ Dados da compra não encontrados.');
+        return;
+      }
+      const saleObj = JSON.parse(decodeURIComponent(raw));
+      showToast('🖨️ Abrindo Cupom Térmico (Bobina Amarela)...');
+      if (typeof printThermalReceipt === 'function') {
+        printThermalReceipt(saleObj, '80mm');
+      } else if (window.printThermalReceipt) {
+        window.printThermalReceipt(saleObj, '80mm');
+      }
+    } catch(e) {
+      console.error('Erro ao emitir cupom térmico:', e);
+      showToast('Erro ao processar cupom térmico.');
+    }
+  };
+
+  window.downloadFullPurchasePdf = function(btn) {
+    try {
+      if (!btn) return;
+      const raw = btn.getAttribute('data-sale-json');
+      if (!raw) {
+        showToast('⚠️ Dados da compra não encontrados.');
+        return;
+      }
+      const saleObj = JSON.parse(decodeURIComponent(raw));
+      showToast('📥 Baixando Cupom em PDF...');
+      if (typeof exportThermalReceiptPDF === 'function') {
+        exportThermalReceiptPDF(saleObj, '80mm');
+      } else if (window.exportThermalReceiptPDF) {
+        window.exportThermalReceiptPDF(saleObj, '80mm');
+      }
+    } catch(e) {
+      console.error('Erro ao baixar PDF:', e);
+      showToast('Erro ao baixar arquivo PDF.');
+    }
+  };
 }
