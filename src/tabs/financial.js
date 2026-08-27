@@ -50,11 +50,11 @@ export function renderFinancialTab(contentArea) {
         </div>
       </div>
 
-      <!-- CARDS DE METRICAS FINANCEIRAS (KPIS NEON) -->
+      <!-- CARDS DE METRICAS FINANCEIRAS (KPIS NEON INTERATIVOS COM RELATÓRIOS) -->
       <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 24px;">
         
         <!-- Faturamento Total -->
-        <div class="pharmacy-glass-card" style="padding: 18px 20px; border-radius: 16px; border: 1.5px solid rgba(16, 185, 129, 0.4); background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(15, 23, 42, 0.85)); box-shadow: 0 0 20px rgba(16, 185, 129, 0.15);">
+        <div id="card-kpi-revenue" class="pharmacy-glass-card kpi-interactive-card" title="Clique para ver o Relatório Analítico de Receitas & Vendas" style="padding: 18px 20px; border-radius: 16px; border: 1.5px solid rgba(16, 185, 129, 0.4); background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(15, 23, 42, 0.85)); box-shadow: 0 0 20px rgba(16, 185, 129, 0.15); cursor: pointer; transition: all 0.25s ease;" onmouseenter="this.style.transform='translateY(-3px)'; this.style.borderColor='#10b981'; this.style.boxShadow='0 10px 25px rgba(16, 185, 129, 0.3)';" onmouseleave="this.style.transform='translateY(0)'; this.style.borderColor='rgba(16, 185, 129, 0.4)'; this.style.boxShadow='0 0 20px rgba(16, 185, 129, 0.15)';">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <span style="font-size: 0.76rem; font-weight: 800; text-transform: uppercase; color: #34d399; letter-spacing: 0.5px;">Receita Bruta Total</span>
             <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-content: center; color: #34d399;">
@@ -67,10 +67,14 @@ export function renderFinancialTab(contentArea) {
           <div style="font-size: 0.76rem; color: #94a3b8; margin-top: 4px; display: flex; align-items: center; gap: 6px;">
             <i class="fa-solid fa-circle-check" style="color: #34d399;"></i> ${metrics.revenueCount} lançamentos registrados
           </div>
+          <div style="margin-top: 10px; font-size: 0.74rem; color: #34d399; font-weight: 700; display: flex; align-items: center; justify-content: space-between; border-top: 1px dashed rgba(52, 211, 153, 0.25); padding-top: 7px;">
+            <span><i class="fa-solid fa-chart-pie"></i> Relatório de Receitas</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </div>
         </div>
 
         <!-- Receita Serviços Clínicos -->
-        <div class="pharmacy-glass-card" style="padding: 18px 20px; border-radius: 16px; border: 1.5px solid rgba(56, 189, 248, 0.4); background: linear-gradient(135deg, rgba(56, 189, 248, 0.12), rgba(15, 23, 42, 0.85)); box-shadow: 0 0 20px rgba(56, 189, 248, 0.15);">
+        <div id="card-kpi-clinical" class="pharmacy-glass-card kpi-interactive-card" title="Clique para ver o Relatório de Produtividade Clínica (RDC 786)" style="padding: 18px 20px; border-radius: 16px; border: 1.5px solid rgba(56, 189, 248, 0.4); background: linear-gradient(135deg, rgba(56, 189, 248, 0.12), rgba(15, 23, 42, 0.85)); box-shadow: 0 0 20px rgba(56, 189, 248, 0.15); cursor: pointer; transition: all 0.25s ease;" onmouseenter="this.style.transform='translateY(-3px)'; this.style.borderColor='#38bdf8'; this.style.boxShadow='0 10px 25px rgba(56, 189, 248, 0.3)';" onmouseleave="this.style.transform='translateY(0)'; this.style.borderColor='rgba(56, 189, 248, 0.4)'; this.style.boxShadow='0 0 20px rgba(56, 189, 248, 0.15)';">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <span style="font-size: 0.76rem; font-weight: 800; text-transform: uppercase; color: #38bdf8; letter-spacing: 0.5px;">Serviços Clínicos Farmacêuticos</span>
             <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(56, 189, 248, 0.2); display: flex; align-items: center; justify-content: center; color: #38bdf8;">
@@ -83,10 +87,14 @@ export function renderFinancialTab(contentArea) {
           <div style="font-size: 0.76rem; color: #94a3b8; margin-top: 4px;">
             Consultas, Vacinas &amp; Testes TLR (${metrics.clinicalPercent}% do total)
           </div>
+          <div style="margin-top: 10px; font-size: 0.74rem; color: #38bdf8; font-weight: 700; display: flex; align-items: center; justify-content: space-between; border-top: 1px dashed rgba(56, 189, 248, 0.25); padding-top: 7px;">
+            <span><i class="fa-solid fa-file-medical"></i> Relatório Clínico (RDC 786)</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </div>
         </div>
 
         <!-- Despesas Totais -->
-        <div class="pharmacy-glass-card" style="padding: 18px 20px; border-radius: 16px; border: 1.5px solid rgba(244, 63, 94, 0.4); background: linear-gradient(135deg, rgba(244, 63, 94, 0.12), rgba(15, 23, 42, 0.85)); box-shadow: 0 0 20px rgba(244, 63, 94, 0.15);">
+        <div id="card-kpi-expenses" class="pharmacy-glass-card kpi-interactive-card" title="Clique para ver o Relatório Analítico de Despesas & Compras" style="padding: 18px 20px; border-radius: 16px; border: 1.5px solid rgba(244, 63, 94, 0.4); background: linear-gradient(135deg, rgba(244, 63, 94, 0.12), rgba(15, 23, 42, 0.85)); box-shadow: 0 0 20px rgba(244, 63, 94, 0.15); cursor: pointer; transition: all 0.25s ease;" onmouseenter="this.style.transform='translateY(-3px)'; this.style.borderColor='#f43f5e'; this.style.boxShadow='0 10px 25px rgba(244, 63, 94, 0.3)';" onmouseleave="this.style.transform='translateY(0)'; this.style.borderColor='rgba(244, 63, 94, 0.4)'; this.style.boxShadow='0 0 20px rgba(244, 63, 94, 0.15)';">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <span style="font-size: 0.76rem; font-weight: 800; text-transform: uppercase; color: #fb7185; letter-spacing: 0.5px;">Despesas &amp; Compras</span>
             <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(244, 63, 94, 0.2); display: flex; align-items: center; justify-content: center; color: #fb7185;">
@@ -99,10 +107,14 @@ export function renderFinancialTab(contentArea) {
           <div style="font-size: 0.76rem; color: #94a3b8; margin-top: 4px;">
             Distribuidoras, insumos &amp; operacionais
           </div>
+          <div style="margin-top: 10px; font-size: 0.74rem; color: #fb7185; font-weight: 700; display: flex; align-items: center; justify-content: space-between; border-top: 1px dashed rgba(244, 63, 94, 0.25); padding-top: 7px;">
+            <span><i class="fa-solid fa-chart-pie"></i> Relatório de Despesas</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </div>
         </div>
 
         <!-- Lucro Líquido -->
-        <div class="pharmacy-glass-card" style="padding: 18px 20px; border-radius: 16px; border: 1.5px solid ${metrics.netProfit >= 0 ? 'rgba(52, 211, 153, 0.5)' : 'rgba(239, 68, 68, 0.5)'}; background: linear-gradient(135deg, ${metrics.netProfit >= 0 ? 'rgba(16, 185, 129, 0.18)' : 'rgba(239, 68, 68, 0.18)'}, rgba(15, 23, 42, 0.9));">
+        <div id="card-kpi-netprofit" class="pharmacy-glass-card kpi-interactive-card" title="Clique para ver o Demonstrativo DRE & Indicadores Gerenciais" style="padding: 18px 20px; border-radius: 16px; border: 1.5px solid ${metrics.netProfit >= 0 ? 'rgba(52, 211, 153, 0.5)' : 'rgba(239, 68, 68, 0.5)'}; background: linear-gradient(135deg, ${metrics.netProfit >= 0 ? 'rgba(16, 185, 129, 0.18)' : 'rgba(239, 68, 68, 0.18)'}, rgba(15, 23, 42, 0.9)); cursor: pointer; transition: all 0.25s ease;" onmouseenter="this.style.transform='translateY(-3px)'; this.style.borderColor='${metrics.netProfit >= 0 ? '#34d399' : '#f87171'}'; this.style.boxShadow='0 10px 25px rgba(255, 255, 255, 0.15)';" onmouseleave="this.style.transform='translateY(0)'; this.style.borderColor='${metrics.netProfit >= 0 ? 'rgba(52, 211, 153, 0.5)' : 'rgba(239, 68, 68, 0.5)'}'; this.style.boxShadow='none';">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <span style="font-size: 0.76rem; font-weight: 800; text-transform: uppercase; color: ${metrics.netProfit >= 0 ? '#34d399' : '#f87171'}; letter-spacing: 0.5px;">Resultado Líquido (DRE)</span>
             <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(255, 255, 255, 0.08); display: flex; align-items: center; justify-content: center; color: ${metrics.netProfit >= 0 ? '#34d399' : '#f87171'};">
@@ -114,6 +126,10 @@ export function renderFinancialTab(contentArea) {
           </div>
           <div style="font-size: 0.76rem; color: #cbd5e1; margin-top: 4px;">
             Margem Operacional: <strong style="color: #fff;">${metrics.profitMargin}%</strong>
+          </div>
+          <div style="margin-top: 10px; font-size: 0.74rem; color: ${metrics.netProfit >= 0 ? '#34d399' : '#f87171'}; font-weight: 700; display: flex; align-items: center; justify-content: space-between; border-top: 1px dashed rgba(255, 255, 255, 0.2); padding-top: 7px;">
+            <span><i class="fa-solid fa-file-invoice-dollar"></i> Demonstrativo DRE</span>
+            <i class="fa-solid fa-arrow-right"></i>
           </div>
         </div>
 
@@ -402,6 +418,23 @@ function setupFinancialListeners(container) {
   searchInput?.addEventListener('input', (e) => {
     currentSearchTerm = e.target.value;
     renderFinancialTab(container);
+  });
+
+  // Cliques nos Cards de Métricas para Abrir Relatórios Específicos
+  container.querySelector('#card-kpi-revenue')?.addEventListener('click', () => {
+    openRevenueReportModal();
+  });
+
+  container.querySelector('#card-kpi-clinical')?.addEventListener('click', () => {
+    openClinicalServicesReportModal();
+  });
+
+  container.querySelector('#card-kpi-expenses')?.addEventListener('click', () => {
+    openExpensesReportModal();
+  });
+
+  container.querySelector('#card-kpi-netprofit')?.addEventListener('click', () => {
+    openDREDetailsModal();
   });
 
   // Botão Novo Lançamento
@@ -858,4 +891,467 @@ export async function exportFinancialDRE_PDF() {
   showToast('📄 Relatório DRE em PDF exportado com sucesso!');
 }
 
-window.renderFinancialTab = renderFinancialTab;
+// ─── MODAIS DE RELATÓRIOS ANALÍTICOS INTERATIVOS DOS CARDS ───
+
+// 1. RELATÓRIO ANALÍTICO DE RECEITAS & VENDAS
+export function openRevenueReportModal() {
+  const transactions = getFinancialTransactions().filter(t => t.type === 'receita');
+  const metrics = calculateFinancialMetrics(getFinancialTransactions());
+  
+  const catMap = {};
+  transactions.forEach(t => {
+    const cat = t.category || 'Venda de Balcão';
+    catMap[cat] = (catMap[cat] || 0) + (Number(t.amount) || 0);
+  });
+
+  const categories = Object.entries(catMap).sort((a, b) => b[1] - a[1]);
+  const avgTicket = transactions.length > 0 ? (metrics.totalRevenue / transactions.length) : 0;
+
+  const existing = document.getElementById('fin-report-modal');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'fin-report-modal';
+  modal.className = 'pep-modal';
+  modal.style.cssText = `
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(10, 15, 29, 0.92); backdrop-filter: blur(16px);
+    display: flex; justify-content: center; align-items: center; z-index: 10006; padding: 16px;
+  `;
+
+  modal.innerHTML = `
+    <div style="width: 100%; max-width: 680px; max-height: 92vh; display: flex; flex-direction: column; background: #0f172a; border: 1.5px solid rgba(16, 185, 129, 0.5); border-radius: 20px; padding: 22px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); overflow: hidden;">
+      
+      <!-- Cabeçalho -->
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.4); display: flex; align-items: center; justify-content: center; color: #34d399; font-size: 1.25rem;">
+            <i class="fa-solid fa-chart-pie"></i>
+          </div>
+          <div>
+            <h3 style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.2rem; color: #fff; font-weight: 700;">
+              Relatório Analítico de Receitas &amp; Vendas
+            </h3>
+            <div style="font-size: 0.78rem; color: #94a3b8;">
+              Composição do faturamento bruto, ticket médio e categorias
+            </div>
+          </div>
+        </div>
+        <button id="btn-close-fin-report" style="background: none; border: none; color: #94a3b8; font-size: 1.3rem; cursor: pointer; padding: 4px;">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Resumo Rápido -->
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px;">
+        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 12px; padding: 12px; text-align: center;">
+          <small style="color: #94a3b8; font-size: 0.72rem; text-transform: uppercase;">Receita Total</small>
+          <div style="color: #34d399; font-size: 1.3rem; font-weight: 800; font-family: 'Outfit';">${formatCurrency(metrics.totalRevenue)}</div>
+        </div>
+        <div style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 12px; padding: 12px; text-align: center;">
+          <small style="color: #94a3b8; font-size: 0.72rem; text-transform: uppercase;">Ticket Médio</small>
+          <div style="color: #38bdf8; font-size: 1.3rem; font-weight: 800; font-family: 'Outfit';">${formatCurrency(avgTicket)}</div>
+        </div>
+        <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 12px; text-align: center;">
+          <small style="color: #94a3b8; font-size: 0.72rem; text-transform: uppercase;">Lançamentos</small>
+          <div style="color: #fff; font-size: 1.3rem; font-weight: 800; font-family: 'Outfit';">${transactions.length} vendas</div>
+        </div>
+      </div>
+
+      <!-- Distribuição por Categoria com Barras -->
+      <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 4px; margin-bottom: 16px;">
+        <h4 style="margin: 0; color: #cbd5e1; font-size: 0.86rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
+          Distribuição por Categoria Farmacêutica
+        </h4>
+        ${categories.map(([cat, val]) => {
+          const pct = metrics.totalRevenue > 0 ? ((val / metrics.totalRevenue) * 100).toFixed(1) : 0;
+          return `
+            <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 10px 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 0.84rem;">
+                <strong style="color: #f8fafc;">${cat}</strong>
+                <span style="color: #34d399; font-weight: 800; font-family: 'Outfit';">${formatCurrency(val)} (${pct}%)</span>
+              </div>
+              <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden;">
+                <div style="width: ${pct}%; height: 100%; background: linear-gradient(90deg, #10b981, #34d399); border-radius: 4px;"></div>
+              </div>
+            </div>
+          `;
+        }).join('')}
+
+        <!-- Maiores Receitas -->
+        <h4 style="margin: 8px 0 0; color: #cbd5e1; font-size: 0.86rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
+          Últimos Lançamentos de Receita
+        </h4>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          ${transactions.slice(0, 5).map(t => `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; font-size: 0.82rem;">
+              <div>
+                <strong style="color: #f8fafc;">${t.description}</strong>
+                <div style="font-size: 0.72rem; color: #94a3b8;">${t.clientOrSupplier ? `Ref: ${t.clientOrSupplier} &bull; ` : ''}${t.paymentMethod || 'PIX'}</div>
+              </div>
+              <strong style="color: #34d399; font-family: 'Outfit'; font-size: 0.95rem;">+ ${formatCurrency(t.amount)}</strong>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- Botões de Ação -->
+      <div style="display: flex; gap: 10px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px;">
+        <button type="button" id="btn-filter-receipts-table" class="btn" style="flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; padding: 10px; border-radius: 8px; font-weight: 600; font-size: 0.84rem; cursor: pointer;">
+          <i class="fa-solid fa-filter"></i> Ver na Tabela de Lançamentos
+        </button>
+        <button type="button" id="btn-export-revenue-pdf" class="btn" style="flex: 1; background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 0.86rem; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);">
+          <i class="fa-solid fa-file-pdf"></i> Exportar Relatório em PDF
+        </button>
+      </div>
+
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  document.getElementById('btn-close-fin-report')?.addEventListener('click', () => modal.remove());
+  modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+
+  document.getElementById('btn-filter-receipts-table')?.addEventListener('click', () => {
+    modal.remove();
+    currentFilterType = 'receita';
+    renderFinancialTab();
+  });
+
+  document.getElementById('btn-export-revenue-pdf')?.addEventListener('click', () => {
+    exportFinancialDRE_PDF();
+  });
+}
+
+// 2. RELATÓRIO DE SERVIÇOS CLÍNICOS FARMACÊUTICOS (RDC 786 / CFF 585)
+export function openClinicalServicesReportModal() {
+  const allTrans = getFinancialTransactions();
+  const metrics = calculateFinancialMetrics(allTrans);
+  const clinicalTrans = allTrans.filter(t => t.type === 'receita' && t.category && (
+    t.category.includes('Consulta') || 
+    t.category.includes('Injetáveis') || 
+    t.category.includes('Vacina') || 
+    t.category.includes('TLR') || 
+    t.category.includes('Teste') || 
+    t.category.includes('Pressão') || 
+    t.category.includes('Serviço')
+  ));
+
+  const existing = document.getElementById('fin-report-modal');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'fin-report-modal';
+  modal.className = 'pep-modal';
+  modal.style.cssText = `
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(10, 15, 29, 0.92); backdrop-filter: blur(16px);
+    display: flex; justify-content: center; align-items: center; z-index: 10006; padding: 16px;
+  `;
+
+  modal.innerHTML = `
+    <div style="width: 100%; max-width: 680px; max-height: 92vh; display: flex; flex-direction: column; background: #0f172a; border: 1.5px solid rgba(56, 189, 248, 0.5); border-radius: 20px; padding: 22px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); overflow: hidden;">
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(56, 189, 248, 0.2); border: 1px solid rgba(56, 189, 248, 0.4); display: flex; align-items: center; justify-content: center; color: #38bdf8; font-size: 1.25rem;">
+            <i class="fa-solid fa-stethoscope"></i>
+          </div>
+          <div>
+            <h3 style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.2rem; color: #fff; font-weight: 700;">
+              Produtividade Clínica Farmacêutica (RDC 786)
+            </h3>
+            <div style="font-size: 0.78rem; color: #94a3b8;">
+              Consultas, Triagens, Testes Rápidos TLR e Aplicações
+            </div>
+          </div>
+        </div>
+        <button id="btn-close-fin-report" style="background: none; border: none; color: #94a3b8; font-size: 1.3rem; cursor: pointer; padding: 4px;">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px;">
+        <div style="background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 12px; padding: 12px; text-align: center;">
+          <small style="color: #94a3b8; font-size: 0.72rem; text-transform: uppercase;">Faturamento Clínico</small>
+          <div style="color: #38bdf8; font-size: 1.3rem; font-weight: 800; font-family: 'Outfit';">${formatCurrency(metrics.clinicalRevenue)}</div>
+        </div>
+        <div style="background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 12px; padding: 12px; text-align: center;">
+          <small style="color: #94a3b8; font-size: 0.72rem; text-transform: uppercase;">% do Faturamento</small>
+          <div style="color: #34d399; font-size: 1.3rem; font-weight: 800; font-family: 'Outfit';">${metrics.clinicalPercent}%</div>
+        </div>
+        <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 12px; text-align: center;">
+          <small style="color: #94a3b8; font-size: 0.72rem; text-transform: uppercase;">Procedimentos</small>
+          <div style="color: #fff; font-size: 1.3rem; font-weight: 800; font-family: 'Outfit';">${clinicalTrans.length} atendimentos</div>
+        </div>
+      </div>
+
+      <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 4px; margin-bottom: 16px;">
+        <h4 style="margin: 0; color: #cbd5e1; font-size: 0.86rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
+          Procedimentos Clínicos Realizados
+        </h4>
+        ${clinicalTrans.length === 0 ? `
+          <div style="text-align: center; padding: 30px; color: #94a3b8;">Nenhum serviço clínico registrado ainda.</div>
+        ` : clinicalTrans.map(t => `
+          <div style="display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(56, 189, 248, 0.15); border-radius: 10px; font-size: 0.84rem;">
+            <div>
+              <strong style="color: #f8fafc;">${t.description}</strong>
+              <div style="font-size: 0.74rem; color: #94a3b8; margin-top: 2px;">
+                Paciente: <span style="color: #38bdf8;">${t.clientOrSupplier || 'Atendimento Clínico'}</span> &bull; ${t.category}
+              </div>
+            </div>
+            <strong style="color: #38bdf8; font-family: 'Outfit'; font-size: 1rem;">+ ${formatCurrency(t.amount)}</strong>
+          </div>
+        `).join('')}
+      </div>
+
+      <div style="display: flex; gap: 10px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px;">
+        <button type="button" id="btn-export-clinical-pdf" class="btn" style="flex: 1; background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 0.86rem; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);">
+          <i class="fa-solid fa-file-pdf"></i> Exportar Relatório Clínico (PDF)
+        </button>
+      </div>
+
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  document.getElementById('btn-close-fin-report')?.addEventListener('click', () => modal.remove());
+  modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+  document.getElementById('btn-export-clinical-pdf')?.addEventListener('click', () => {
+    exportFinancialDRE_PDF();
+  });
+}
+
+// 3. RELATÓRIO ANALÍTICO DE DESPESAS & COMPRAS
+export function openExpensesReportModal() {
+  const transactions = getFinancialTransactions().filter(t => t.type === 'despesa');
+  const metrics = calculateFinancialMetrics(getFinancialTransactions());
+  
+  const catMap = {};
+  transactions.forEach(t => {
+    const cat = t.category || 'Despesas Gerais';
+    catMap[cat] = (catMap[cat] || 0) + (Number(t.amount) || 0);
+  });
+
+  const categories = Object.entries(catMap).sort((a, b) => b[1] - a[1]);
+
+  const existing = document.getElementById('fin-report-modal');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'fin-report-modal';
+  modal.className = 'pep-modal';
+  modal.style.cssText = `
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(10, 15, 29, 0.92); backdrop-filter: blur(16px);
+    display: flex; justify-content: center; align-items: center; z-index: 10006; padding: 16px;
+  `;
+
+  modal.innerHTML = `
+    <div style="width: 100%; max-width: 680px; max-height: 92vh; display: flex; flex-direction: column; background: #0f172a; border: 1.5px solid rgba(244, 63, 94, 0.5); border-radius: 20px; padding: 22px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); overflow: hidden;">
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(244, 63, 94, 0.2); border: 1px solid rgba(244, 63, 94, 0.4); display: flex; align-items: center; justify-content: center; color: #fb7185; font-size: 1.25rem;">
+            <i class="fa-solid fa-arrow-trend-down"></i>
+          </div>
+          <div>
+            <h3 style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.2rem; color: #fff; font-weight: 700;">
+              Relatório de Despesas &amp; Compras de Distribuidoras
+            </h3>
+            <div style="font-size: 0.78rem; color: #94a3b8;">
+              Centros de custos, reposição de estoque e despesas fixas
+            </div>
+          </div>
+        </div>
+        <button id="btn-close-fin-report" style="background: none; border: none; color: #94a3b8; font-size: 1.3rem; cursor: pointer; padding: 4px;">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px;">
+        <div style="background: rgba(244, 63, 94, 0.1); border: 1px solid rgba(244, 63, 94, 0.25); border-radius: 12px; padding: 12px; text-align: center;">
+          <small style="color: #94a3b8; font-size: 0.72rem; text-transform: uppercase;">Total de Despesas</small>
+          <div style="color: #fb7185; font-size: 1.3rem; font-weight: 800; font-family: 'Outfit';">${formatCurrency(metrics.totalExpenses)}</div>
+        </div>
+        <div style="background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px; padding: 12px; text-align: center;">
+          <small style="color: #94a3b8; font-size: 0.72rem; text-transform: uppercase;">Registros de Saída</small>
+          <div style="color: #fff; font-size: 1.3rem; font-weight: 800; font-family: 'Outfit';">${transactions.length} saídas</div>
+        </div>
+      </div>
+
+      <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 4px; margin-bottom: 16px;">
+        <h4 style="margin: 0; color: #cbd5e1; font-size: 0.86rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
+          Despesas por Centro de Custo
+        </h4>
+        ${categories.map(([cat, val]) => {
+          const pct = metrics.totalExpenses > 0 ? ((val / metrics.totalExpenses) * 100).toFixed(1) : 0;
+          return `
+            <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 10px 14px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; font-size: 0.84rem;">
+                <strong style="color: #f8fafc;">${cat}</strong>
+                <span style="color: #fb7185; font-weight: 800; font-family: 'Outfit';">${formatCurrency(val)} (${pct}%)</span>
+              </div>
+              <div style="width: 100%; height: 6px; background: rgba(255,255,255,0.08); border-radius: 4px; overflow: hidden;">
+                <div style="width: ${pct}%; height: 100%; background: linear-gradient(90deg, #f43f5e, #fb7185); border-radius: 4px;"></div>
+              </div>
+            </div>
+          `;
+        }).join('')}
+
+        <h4 style="margin: 8px 0 0; color: #cbd5e1; font-size: 0.86rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
+          Últimas Despesas Registradas
+        </h4>
+        <div style="display: flex; flex-direction: column; gap: 6px;">
+          ${transactions.slice(0, 5).map(t => `
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; font-size: 0.82rem;">
+              <div>
+                <strong style="color: #f8fafc;">${t.description}</strong>
+                <div style="font-size: 0.72rem; color: #94a3b8;">${t.clientOrSupplier ? `Fornecedor: ${t.clientOrSupplier} &bull; ` : ''}${t.paymentMethod || 'PIX'}</div>
+              </div>
+              <strong style="color: #fb7185; font-family: 'Outfit'; font-size: 0.95rem;">- ${formatCurrency(t.amount)}</strong>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px;">
+        <button type="button" id="btn-filter-expenses-table" class="btn" style="flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; padding: 10px; border-radius: 8px; font-weight: 600; font-size: 0.84rem; cursor: pointer;">
+          <i class="fa-solid fa-filter"></i> Ver na Tabela de Lançamentos
+        </button>
+        <button type="button" id="btn-export-expenses-pdf" class="btn" style="flex: 1; background: linear-gradient(135deg, #e11d48, #be123c); color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 0.86rem; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 14px rgba(225, 29, 72, 0.35);">
+          <i class="fa-solid fa-file-pdf"></i> Exportar Relatório em PDF
+        </button>
+      </div>
+
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  document.getElementById('btn-close-fin-report')?.addEventListener('click', () => modal.remove());
+  modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+
+  document.getElementById('btn-filter-expenses-table')?.addEventListener('click', () => {
+    modal.remove();
+    currentFilterType = 'despesa';
+    renderFinancialTab();
+  });
+
+  document.getElementById('btn-export-expenses-pdf')?.addEventListener('click', () => {
+    exportFinancialDRE_PDF();
+  });
+}
+
+// 4. RELATÓRIO DO DEMONSTRATIVO DRE ANALÍTICO
+export function openDREDetailsModal() {
+  const transactions = getFinancialTransactions();
+  const metrics = calculateFinancialMetrics(transactions);
+
+  const cmv = transactions
+    .filter(t => t.type === 'despesa' && (t.category?.includes('Medicamento') || t.category?.includes('Distribuidora')))
+    .reduce((acc, t) => acc + (Number(t.amount) || 0), 0);
+
+  const operationalExpenses = metrics.totalExpenses - cmv;
+  const grossProfit = metrics.totalRevenue - cmv;
+  const grossMargin = metrics.totalRevenue > 0 ? ((grossProfit / metrics.totalRevenue) * 100).toFixed(1) : '0.0';
+
+  const existing = document.getElementById('fin-report-modal');
+  if (existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'fin-report-modal';
+  modal.className = 'pep-modal';
+  modal.style.cssText = `
+    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(10, 15, 29, 0.92); backdrop-filter: blur(16px);
+    display: flex; justify-content: center; align-items: center; z-index: 10006; padding: 16px;
+  `;
+
+  modal.innerHTML = `
+    <div style="width: 100%; max-width: 680px; max-height: 92vh; display: flex; flex-direction: column; background: #0f172a; border: 1.5px solid ${metrics.netProfit >= 0 ? 'rgba(16, 185, 129, 0.5)' : 'rgba(239, 68, 68, 0.5)'}; border-radius: 20px; padding: 22px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); overflow: hidden;">
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 42px; height: 42px; border-radius: 12px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); display: flex; align-items: center; justify-content: center; color: ${metrics.netProfit >= 0 ? '#34d399' : '#f87171'}; font-size: 1.25rem;">
+            <i class="fa-solid fa-file-invoice-dollar"></i>
+          </div>
+          <div>
+            <h3 style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.2rem; color: #fff; font-weight: 700;">
+              Demonstrativo de Resultado do Exercício (DRE)
+            </h3>
+            <div style="font-size: 0.78rem; color: #94a3b8;">
+              Estrutura contábil e diagnóstico da saúde financeira
+            </div>
+          </div>
+        </div>
+        <button id="btn-close-fin-report" style="background: none; border: none; color: #94a3b8; font-size: 1.3rem; cursor: pointer; padding: 4px;">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Estrutura DRE em Cascata -->
+      <div style="flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; font-size: 0.86rem;">
+        
+        <div style="display: flex; justify-content: space-between; padding: 10px 14px; background: rgba(16, 185, 129, 0.12); border-radius: 8px; border: 1px solid rgba(16, 185, 129, 0.3);">
+          <span style="color: #fff; font-weight: 700;">(+) RECEITA OPERACIONAL BRUTA</span>
+          <strong style="color: #34d399; font-family: 'Outfit'; font-size: 1.05rem;">${formatCurrency(metrics.totalRevenue)}</strong>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; padding: 8px 14px; background: rgba(244, 63, 94, 0.08); border-radius: 8px;">
+          <span style="color: #cbd5e1;">(-) Custos de Mercadorias (CMV / Distribuidoras)</span>
+          <strong style="color: #fb7185; font-family: 'Outfit';">- ${formatCurrency(cmv)}</strong>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; padding: 10px 14px; background: rgba(56, 189, 248, 0.1); border-radius: 8px; border: 1px solid rgba(56, 189, 248, 0.25);">
+          <span style="color: #fff; font-weight: 700;">(=) LUCRO BRUTO / MARGEM CONTRIBUIÇÃO</span>
+          <strong style="color: #38bdf8; font-family: 'Outfit'; font-size: 1.05rem;">${formatCurrency(grossProfit)} (${grossMargin}%)</strong>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; padding: 8px 14px; background: rgba(244, 63, 94, 0.08); border-radius: 8px;">
+          <span style="color: #cbd5e1;">(-) Despesas Operacionais, Insumos &amp; Fixas</span>
+          <strong style="color: #fb7185; font-family: 'Outfit';">- ${formatCurrency(operationalExpenses)}</strong>
+        </div>
+
+        <div style="display: flex; justify-content: space-between; padding: 14px 16px; background: ${metrics.netProfit >= 0 ? 'rgba(16, 185, 129, 0.22)' : 'rgba(239, 68, 68, 0.22)'}; border-radius: 10px; border: 1.5px solid ${metrics.netProfit >= 0 ? '#10b981' : '#ef4444'}; margin-top: 8px;">
+          <div>
+            <div style="color: #fff; font-weight: 800; font-size: 1rem;">(=) RESULTADO LÍQUIDO DO EXERCÍCIO</div>
+            <div style="font-size: 0.74rem; color: #cbd5e1;">Margem Operacional Líquida: <strong>${metrics.profitMargin}%</strong></div>
+          </div>
+          <div style="color: ${metrics.netProfit >= 0 ? '#34d399' : '#f87171'}; font-size: 1.45rem; font-weight: 800; font-family: 'Outfit';">
+            ${formatCurrency(metrics.netProfit)}
+          </div>
+        </div>
+
+      </div>
+
+      <div style="display: flex; gap: 10px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 14px;">
+        <button type="button" id="btn-export-dre-modal-pdf" class="btn" style="flex: 1; background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; padding: 10px; border-radius: 8px; font-weight: 700; font-size: 0.86rem; display: flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);">
+          <i class="fa-solid fa-file-pdf"></i> Exportar DRE Completo em PDF
+        </button>
+      </div>
+
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  document.getElementById('btn-close-fin-report')?.addEventListener('click', () => modal.remove());
+  modal.addEventListener('click', (e) => { if (e.target === modal) modal.remove(); });
+
+  document.getElementById('btn-export-dre-modal-pdf')?.addEventListener('click', () => {
+    exportFinancialDRE_PDF();
+  });
+}
+
+// Exportações globais no window
+if (typeof window !== 'undefined') {
+  window.renderFinancialTab = renderFinancialTab;
+  window.openRevenueReportModal = openRevenueReportModal;
+  window.openClinicalServicesReportModal = openClinicalServicesReportModal;
+  window.openExpensesReportModal = openExpensesReportModal;
+  window.openDREDetailsModal = openDREDetailsModal;
+}
+
