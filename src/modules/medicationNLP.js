@@ -92,28 +92,39 @@ export const extractClinicalEntities = (query = '') => {
 
 // Dicionário de Sinônimos Clínicos e Mapeamento de Linguagem Natural / Queixas Leigas
 export const CLINICAL_INTENT_SYNONYMS = {
-  // Dores & Febre
-  dor: ['dor', 'doendo', 'dor forte', 'dor no corpo', 'mialgia', 'analgesico', 'analgesia', 'febre', 'quente', 'temperatura alta'],
-  dor_cabeca: ['dor de cabeca', 'dor na cabeca', 'enxaqueca', 'cefaleia', 'cabeca latejando', 'dor frontal'],
-  dor_muscular: ['dor muscular', 'torcicolo', 'musculo travado', 'pescoco duro', 'dor nas costas', 'lombar', 'lombalgia', 'contratura'],
-  dor_garganta: ['dor de garganta', 'garganta inflamada', 'garganta raspando', 'amigdalite', 'engolir doi'],
+  // Dores, Febre & Inflamações
+  dor: ['dor', 'doendo', 'dor forte', 'dor no corpo', 'mialgia', 'analgesico', 'analgesia', 'febre', 'quente', 'temperatura alta', 'moleza', 'fraqueza'],
+  dor_cabeca: ['dor de cabeca', 'dor na cabeca', 'enxaqueca', 'cefaleia', 'cabeca latejando', 'dor frontal', 'dor na testa', 'isometepteno', 'neosaldina', 'doralgina'],
+  dor_muscular: ['dor muscular', 'torcicolo', 'musculo travado', 'pescoco duro', 'dor nas costas', 'lombar', 'lombalgia', 'contratura', 'tandrilax', 'mioflex', 'dorflex', 'orfenadrina'],
+  dor_dente: ['dor de dente', 'dente furado', 'canal de dente', 'dor na gengiva', 'odontalgia', 'toragesic', 'cetorolaco', 'nimesulida'],
+  dor_garganta: ['dor de garganta', 'garganta inflamada', 'garganta raspando', 'amigdalite', 'engolir doi', 'flanax', 'naproxeno', 'anti-inflamatorio garganta'],
+  colica: ['colica', 'colica menstrual', 'colica intestinal', 'dor na barriga', 'espasmo', 'buscopan', 'escopolamina', 'atroveran', 'dismenorreia'],
   
-  // Gastrointestinal
-  azia: ['azia', 'queimacao', 'refluxo', 'estomago queimando', 'estomago pesado', 'gastrite', 'antiacido', 'pirose', 'protetor gastrico'],
-  diarreia: ['diarreia', 'desarranjo', 'intestino solto', 'evacuacao liquida', 'soro', 'reidratacao', 'flora intestinal'],
-  gases: ['gases', 'estufamento', 'barriga inchada', 'antiflatulento', 'flatulencia', 'gases preso'],
+  // Gastrointestinal, Fígado & Enjoos
+  azia: ['azia', 'queimacao', 'refluxo', 'estomago queimando', 'estomago pesado', 'gastrite', 'antiacido', 'pirose', 'protetor gastrico', 'omeprazol', 'pantoprazol', 'sal de fruta', 'eno', 'estomazil'],
+  enjoo: ['enjoo', 'nausea', 'vomito', 'ansia', 'ansia de vomito', 'estomago embrulhado', 'cinetose', 'enjoo de viagem', 'enjoo de carro', 'dramin', 'vonau', 'ondansetrona', 'dimenidrinato', 'plasil', 'metoclopramida'],
+  figado: ['figado', 'figado atacado', 'remedio pro figado', 'ressaca', 'ma digestao', 'epocler', 'hepatilon', 'xantinon', 'colina', 'gordura pesada'],
+  diarreia: ['diarreia', 'desarranjo', 'intestino solto', 'evacuacao liquida', 'soro', 'reidratacao', 'flora intestinal', 'floratil', 'repoflor', 'boulardii', 'probiotico', 'imosec', 'loperamida'],
+  gases: ['gases', 'estufamento', 'barriga inchada', 'antiflatulento', 'flatulencia', 'gases preso', 'luftal', 'simeticona', 'flagass'],
+  constipacao: ['prisao de ventre', 'constipacao', 'intestino preso', 'nao consigo evacuar', 'lactulose', 'lactulona', 'laxante', 'soltar intestino'],
 
-  // Cardiovascular & Metabólico
-  pressao_alta: ['pressao alta', 'hipertensao', 'remedio de pressao', 'pressao subiu', 'anti-hipertensivo'],
-  colesterol: ['colesterol', 'colesterol alto', 'gordura no sangue', 'estatina', 'triglicerideos'],
-  dor_peito: ['dor no peito', 'angina', 'coronaria', 'vasodilatador', 'infarto'],
-  afinar_sangue: ['afinar o sangue', 'anticoagulante', 'trombose', 'prevenir avc', 'trombofilia'],
+  // Respiratório, Gripes & Alergias
+  gripe: ['gripe', 'resfriado', 'gripe forte', 'febre e moleza', 'antigripal', 'benegrip', 'cimegripe', 'resfenol', 'coristina', 'apracur', 'coriza e dor'],
+  tosse: ['tosse', 'tosse seca', 'tosse com catarro', 'tosse cheia', 'expectorante', 'xarope', 'xaropes', 'catarro', 'peito cheio', 'vibral', 'notuss', 'acebrofilina', 'brondilat', 'hedera helix', 'abrilar', 'vick', 'guaifenesina', 'acetilcisteina', 'fluimucil'],
+  rinite_alergia: ['rinite', 'alergia', 'espirros', 'coriza', 'nariz entupido', 'coceira no nariz', 'alergia na pele', 'coceira', 'polaramine', 'dexclorfeniramina', 'claritin', 'loratadina', 'desalex', 'desloratadina', 'allegra', 'fexofenadina', 'antialergico'],
+  congestao_nasal: ['nariz entupido', 'lavagem nasal', 'soro nasal', 'descongestionante', 'rinosoro', 'maresis', 'salsep', 'sorine', 'cloreto de sodio'],
 
-  // Saúde Sexual & Urologia
-  disfuncao: ['impotencia', 'disfuncao eretil', 'viagra', 'erecao', 'estimulante', 'vasodilatador masculino'],
+  // SNC, Sono, Calmantes & Suplementos
+  calmante: ['calmante', 'calmante natural', 'ansiedade', 'nervoso', 'estresse', 'maracugina', 'seakalm', 'calman', 'passiflora', 'valeriana', 'valerimed', 'fitoterapico ansiedade'],
+  sono: ['sono', 'insonia', 'dormir', 'remedio pra dormir', 'melatonina', 'sono leve', 'acordando a noite'],
+  vitaminas: ['vitamina', 'vitaminas', 'imunidade', 'vitamina c', 'acido ascorbico', 'redoxon', 'cewin', 'vitamina d', 'vitamina d3', 'addera', 'depura', 'colecalciferol', 'complexo b', 'zinco', 'magnesio', 'calcio', 'ossos fracos', 'falta de vitamina'],
 
-  // Saúde Mental & SNC
-  ansiedade: ['ansiedade', 'calmante', 'tranquilizante', 'panico', 'crise de ansiedade', 'insonia', 'dormir', 'tarja preta']
+  // Crônicos & Metabólicos
+  pressao: ['pressao', 'pressao alta', 'hipertensao', 'remedio de pressao', 'losartana', 'aradois', 'cozaar', 'enalapril', 'renitec', 'captopril', 'atenolol', 'anlodipino', 'norvasc', 'hidroclorotiazida'],
+  diabetes: ['diabetes', 'diabetico', 'acucar no sangue', 'glicemia', 'glicose alta', 'metformina', 'glifage', 'glibenclamida'],
+  colesterol: ['colesterol', 'colesterol alto', 'gordura no sangue', 'estatina', 'sinvastatina', 'zocor', 'atorvastatina', 'lipitor', 'rosuvastatina', 'crestor'],
+  tireoide: ['tireoide', 'hipotireoidismo', 'remedio de tireoide', 'puran', 'puran t4', 'synthroid', 'levotiroxina', 'tsh'],
+  anticoagulante: ['anticoagulante', 'afinar o sangue', 'trombose', 'prevenir avc', 'marevan', 'varfarina', 'aspirina prevent', 'aas protect']
 };
 
 // Motor Principal de Busca por PLN (Relevance Scoring)
@@ -129,40 +140,106 @@ export const searchMedicationsNLP = (rawQuery = '', database = CANONICAL_MEDICAT
     let score = 0;
     const matchReasons = [];
 
-    const normName = normalizeText(med.name);
-    const normActive = normalizeText(med.activeSubstance);
+    const normName = normalizeText(med.name || '');
+    const normActive = normalizeText(med.activeSubstance || '');
     const normTrades = (med.tradeNames || []).map(t => normalizeText(t));
-    const normClass = normalizeText(med.therapeuticClass + ' ' + (med.pharmaceuticalClass || ''));
+    const normClass = normalizeText((med.therapeuticClass || '') + ' ' + (med.pharmaceuticalClass || ''));
     const normSymptoms = (med.symptomKeywords || []).map(s => normalizeText(s));
     const normForms = (med.pharmaceuticalForms || []).map(f => normalizeText(f));
+    const fullMedText = `${normName} ${normActive} ${normTrades.join(' ')} ${normClass} ${normSymptoms.join(' ')} ${normForms.join(' ')}`;
 
-    // 1. MATCH EXATO NO NOME OU PRINCÍPIO ATIVO (100 pts)
+    // 1. MATCH EXATO OU INÍCIO NO NOME OU PRINCÍPIO ATIVO (100 pts)
     if (normName === cleanQuery || normActive === cleanQuery) {
       score += 100;
-      matchReasons.push('Correspondência Exata no Nome/Princípio Ativo');
+      matchReasons.push('Correspondência Exata no Nome / Princípio Ativo');
     } else if (normName.startsWith(cleanQuery) || normActive.startsWith(cleanQuery)) {
       score += 85;
       matchReasons.push('Início do Nome do Medicamento');
     } else if (normName.includes(cleanQuery) || normActive.includes(cleanQuery)) {
-      score += 70;
-      matchReasons.push('Termo presente no Nome');
+      score += 75;
+      matchReasons.push('Termo presente no Nome / Princípio Ativo');
     }
 
-    // 2. MATCH EM NOMES COMERCIAIS / MARCAS DE REFERÊNCIA (95 pts)
+    // 2. MATCH EM NOMES COMERCIAIS / MARCAS POPULARES (95 pts)
     normTrades.forEach(trade => {
       if (trade === cleanQuery) {
         score += 95;
         matchReasons.push(`Marca Comercial Conhecida: ${trade}`);
       } else if (trade.startsWith(cleanQuery)) {
-        score += 75;
+        score += 80;
         matchReasons.push(`Início da Marca: ${trade}`);
       } else if (trade.includes(cleanQuery)) {
-        score += 60;
+        score += 65;
         matchReasons.push(`Marca relacionada: ${trade}`);
       }
     });
 
-    // 3. FUZZY SEARCH (Tolerância a erros de digitação como "iboprofeno", "parasetamol")
+    // 3. MATCH EM SUBSTÂNCIAS / FÓRMULAS QUÍMICAS FRACIONADAS (Ex: "metamizol", "ondansetrona", "cafeina", "fenilefrina")
+    queryTokens.forEach(token => {
+      if (token.length >= 3) {
+        if (normActive.includes(token)) {
+          score += 70;
+          matchReasons.push(`Fórmula / Princípio Ativo: "${token}"`);
+        }
+        if (normName.includes(token)) {
+          score += 60;
+          matchReasons.push(`Nome contém: "${token}"`);
+        }
+        normTrades.forEach(t => {
+          if (t.includes(token)) {
+            score += 55;
+            matchReasons.push(`Marca contém: "${token}"`);
+          }
+        });
+      }
+    });
+
+    // 4. MAPEAMENTO SEMÂNTICO DE SINTOMAS, QUEIXAS LEIGAS E INTENÇÃO CLÍNICA
+    normSymptoms.forEach(symp => {
+      if (symp.includes(cleanQuery) || cleanQuery.includes(symp)) {
+        score += 65;
+        matchReasons.push(`Indicação Clínica para: ${symp}`);
+      } else {
+        queryTokens.forEach(token => {
+          if (token.length >= 3 && symp.includes(token)) {
+            score += 45;
+            matchReasons.push(`Sintoma relacionado: ${symp}`);
+          }
+        });
+      }
+    });
+
+    // 5. MAPEAMENTO POR DICIONÁRIO DE INTENÇÃO POPULAR (Ex: "remédio pro fígado", "remédio de pressão")
+    for (const [intentKey, aliases] of Object.entries(CLINICAL_INTENT_SYNONYMS)) {
+      const isMatchingIntent = aliases.some(alias => {
+        const normAlias = normalizeText(alias);
+        return cleanQuery.includes(normAlias) || normAlias.includes(cleanQuery);
+      });
+      if (isMatchingIntent) {
+        if (aliases.some(alias => fullMedText.includes(normalizeText(alias)))) {
+          score += 65;
+          matchReasons.push(`Termo Popular / Queixa: "${cleanQuery}"`);
+          break;
+        }
+      }
+    }
+
+    // 6. CORRESPONDÊNCIA DIRETA DE FORMA FARMACÊUTICA (Xarope, Gotas, Spray, Pomada, Sachê, etc.)
+    const isDirectFormQuery = ['xarope', 'xaropes', 'gotas', 'spray', 'pomada', 'sache', 'saches', 'comprimido', 'comprimidos', 'solucao', 'capsula', 'capsulas', 'creme', 'colirio', 'efervescente', 'sublingual'].some(f => cleanQuery.includes(f));
+    
+    const hasMatchingForm = normForms.some(f => f.includes(cleanQuery) || (entities.form && f.includes(entities.form)));
+    if (hasMatchingForm) {
+      score += isDirectFormQuery ? 80 : 25;
+      matchReasons.push(`Apresentação Farmacêutica em ${cleanQuery.toUpperCase()}`);
+    }
+
+    // 7. CORRESPONDÊNCIA DE CLASSE TERAPÊUTICA
+    if (normClass.includes(cleanQuery)) {
+      score += 50;
+      matchReasons.push('Classe Terapêutica Correspondente');
+    }
+
+    // 8. FUZZY SEARCH (Tolerância a erros de digitação como "iboprofeno", "parasetamol", "buscopan", "dorflex")
     const allNamesToFuzzy = [normName, normActive, ...normTrades];
     allNamesToFuzzy.forEach(target => {
       queryTokens.forEach(token => {
@@ -176,42 +253,12 @@ export const searchMedicationsNLP = (rawQuery = '', database = CANONICAL_MEDICAT
       });
     });
 
-    // 4. MAPEAMENTO SEMÂNTICO DE SINTOMAS E INTENÇÃO CLÍNICA
-    normSymptoms.forEach(symp => {
-      if (symp.includes(cleanQuery) || cleanQuery.includes(symp)) {
-        score += 55;
-        matchReasons.push(`Indicação Clínica para: ${symp}`);
-      } else {
-        queryTokens.forEach(token => {
-          if (token.length >= 3 && symp.includes(token)) {
-            score += 35;
-            matchReasons.push(`Sintoma relacionado: ${symp}`);
-          }
-        });
-      }
-    });
-
-    // 5. CORRESPONDÊNCIA DE CLASSE TERAPÊUTICA (40 pts)
-    if (normClass.includes(cleanQuery)) {
-      score += 45;
-      matchReasons.push('Classe Terapêutica Correspondente');
-    }
-
-    // 6. CORRESPONDÊNCIA DIRETA DE FORMA FARMACÊUTICA (Xarope, Gotas, Spray, Pomada, Sachê, etc.)
-    const isDirectFormQuery = ['xarope', 'xaropes', 'gotas', 'spray', 'pomada', 'sache', 'saches', 'comprimido', 'comprimidos', 'solucao', 'capsula', 'capsulas', 'creme', 'colirio'].some(f => cleanQuery.includes(f));
-    
-    const hasMatchingForm = normForms.some(f => f.includes(cleanQuery) || (entities.form && f.includes(entities.form)));
-    if (hasMatchingForm) {
-      score += isDirectFormQuery ? 75 : 25;
-      matchReasons.push(`Apresentação Farmacêutica em ${cleanQuery.toUpperCase()}`);
-    }
-
     if (entities.dosage) {
       const hasDosage = (med.usualDosages || []).some(d => normalizeText(d).includes(entities.dosage)) ||
                         normForms.some(f => f.includes(entities.dosage));
       if (hasDosage) {
         score += 20;
-        matchReasons.push(`Dosagem solicitada identificada (${entities.dosage})`);
+        matchReasons.push(`Dosagem identificada (${entities.dosage})`);
       }
     }
 
@@ -228,6 +275,6 @@ export const searchMedicationsNLP = (rawQuery = '', database = CANONICAL_MEDICAT
     .filter(item => item.relevanceScore >= 25)
     .sort((a, b) => b.relevanceScore - a.relevanceScore);
 
-  const limit = options.limit || 8;
+  const limit = options.limit || 10;
   return filtered.slice(0, limit);
 };
