@@ -1971,8 +1971,14 @@ export async function renderDashboardTab(container) {
             </div>
           </div>
           
-          <div onclick="window.openDrillDownModal('encounters')" title="Clique para ver extrato detalhado de atendimentos" style="height: 250px; position: relative; cursor: pointer;">
+          <div style="height: 250px; position: relative;">
             <canvas id="weeklyAppointmentsChart"></canvas>
+          </div>
+
+          <div style="margin-top: 12px; text-align: center; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 10px;">
+            <button onclick="window.openDrillDownModal('encounters')" class="btn btn-link" style="background: none; border: none; color: #a5b4fc; font-size: 0.78rem; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+              <i class="fa-solid fa-chart-line"></i> Ver extrato detalhado de consultas e intervenções
+            </button>
           </div>
         </div>
 
