@@ -197,21 +197,21 @@ export const searchMedicationsNLP = (rawQuery = '', database = CANONICAL_MEDICAT
       matchReasons.push('Classe Terapêutica Correspondente');
     }
 
-    // 6. BÔNUS POR EXTRAÇÃO DE ENTIDADE (Dosagem e Forma coincidente)
+    // 6. CORRESPONDÊNCIA DIRETA DE FORMA FARMACÊUTICA (Xarope, Gotas, Spray, Pomada, Sachê, etc.)
+    const isDirectFormQuery = ['xarope', 'xaropes', 'gotas', 'spray', 'pomada', 'sache', 'saches', 'comprimido', 'comprimidos', 'solucao', 'capsula', 'capsulas', 'creme', 'colirio'].some(f => cleanQuery.includes(f));
+    
+    const hasMatchingForm = normForms.some(f => f.includes(cleanQuery) || (entities.form && f.includes(entities.form)));
+    if (hasMatchingForm) {
+      score += isDirectFormQuery ? 75 : 25;
+      matchReasons.push(`Apresentação Farmacêutica em ${cleanQuery.toUpperCase()}`);
+    }
+
     if (entities.dosage) {
       const hasDosage = (med.usualDosages || []).some(d => normalizeText(d).includes(entities.dosage)) ||
                         normForms.some(f => f.includes(entities.dosage));
       if (hasDosage) {
         score += 20;
         matchReasons.push(`Dosagem solicitada identificada (${entities.dosage})`);
-      }
-    }
-
-    if (entities.form) {
-      const hasForm = normForms.some(f => f.includes(entities.form));
-      if (hasForm) {
-        score += 15;
-        matchReasons.push(`Forma farmacêutica (${entities.form})`);
       }
     }
 
