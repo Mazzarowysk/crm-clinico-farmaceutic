@@ -131,6 +131,25 @@ const CLINICAL_SYNONYMS = {
 // Matriz de Ações Rápidas & Intenções Inteligentes
 export const SYSTEM_INTENTS = [
   {
+    id: 'intent_precificacao',
+    title: '🏷️ Precificação Farmacêutica Inteligente & Formação de Preço',
+    subtitle: 'Calcular Markup, Margem de Contribuição, Impostos, Ponto de Equilíbrio e Trava Anvisa/CMED',
+    category: 'Ações Rápidas',
+    keywords: ['precificacao', 'precificar', 'formacao de preco', 'preco de venda', 'markup', 'margem de lucro', 'margem', 'calcular preco', 'custo de aquisicao', 'pmc', 'anvisa preco', 'dre produto'],
+    badge: 'Módulo Precificação',
+    badgeColor: '#f59e0b',
+    icon: 'fa-calculator',
+    iconColor: '#fbbf24',
+    execute: () => {
+      if (typeof window.openPricingCalculatorModal === 'function') {
+        window.openPricingCalculatorModal();
+      } else {
+        if (window.switchTab) window.switchTab('estoque');
+        showToast('🏷️ Abrindo Calculadora de Precificação...');
+      }
+    }
+  },
+  {
     id: 'intent_compras',
     title: '🛒 Histórico de Compras & Adesão Terapêutica dos Pacientes',
     subtitle: 'Consultar medicamentos adquiridos, dispensações no balcão e alertas de recompra (refill)',

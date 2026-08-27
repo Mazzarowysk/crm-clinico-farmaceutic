@@ -37,9 +37,11 @@ import { openVaccinationModal, printVaccinationDsf } from './modules/vaccination
 import { openPatientPortalModal } from './modules/patientPortal.js';
 import { openPatientPurchasesModal } from './modules/patientPurchasesModal.js';
 import { openNFeImporterModal } from './modules/nfeImporter.js';
+import { openPricingCalculatorModal } from './modules/pricingCalculatorModal.js';
 import { renderSmartFlowGuide, updateFlowGuideStep, completeFlow } from './modules/smartFlowGuide.js';
 import { searchSystemWithPLN, SYSTEM_INTENTS } from './modules/universalSearch.js';
 
+window.openPricingCalculatorModal = openPricingCalculatorModal;
 window.searchSystemWithPLN = searchSystemWithPLN;
 window.SYSTEM_INTENTS = SYSTEM_INTENTS;
 

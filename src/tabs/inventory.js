@@ -11,6 +11,7 @@ import { analyzeExpiryRisk, analyzeReplenishmentNeeds, openPromoDiscountModal, o
 import { openCashRegisterModal } from '../modules/cashRegister.js';
 import { openSngpcBookModal, openSngpcDispensationModal } from '../modules/sngpc.js';
 import { openNFeImporterModal } from '../modules/nfeImporter.js';
+import { openPricingCalculatorModal } from '../modules/pricingCalculatorModal.js';
 
 export function renderInventoryTab(contentArea) {
   const currentUser = state.user || {};
@@ -30,6 +31,9 @@ export function renderInventoryTab(contentArea) {
         </div>
 
         <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+          <button id="btn-quick-pricing-calc" class="btn" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; border: none; padding: 9px 14px; border-radius: 10px; font-weight: 700; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);" title="Calculadora de Formação do Preço de Venda, Margem & Markup">
+            <i class="fa-solid fa-calculator"></i> Precificação &amp; Markup
+          </button>
           <button id="btn-quick-import-nfe" class="btn" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border: none; padding: 9px 14px; border-radius: 10px; font-weight: 700; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);" title="Importar arquivo XML de Nota Fiscal de Distribuidora">
             <i class="fa-solid fa-file-invoice-dollar"></i> Importar NF-e (XML)
           </button>
@@ -563,6 +567,9 @@ export function renderInventoryTab(contentArea) {
                 </td>
                 <td style="padding: 12px 10px; text-align: right;">
                   <div style="display: inline-flex; gap: 6px;">
+                    <button class="btn btn-sm btn-price-product" data-id="${p.id}" title="Precificar Produto (Markup & Margem)" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.35); padding: 5px 9px; border-radius: 6px; cursor: pointer;">
+                      <i class="fa-solid fa-calculator"></i>
+                    </button>
                     <button class="btn btn-sm btn-edit-product" data-id="${p.id}" title="Editar Produto" style="background: rgba(255,255,255,0.06); color: #38bdf8; border: 1px solid rgba(255,255,255,0.1); padding: 5px 9px; border-radius: 6px; cursor: pointer;">
                       <i class="fa-solid fa-pen-to-square"></i>
                     </button>
@@ -582,6 +589,12 @@ export function renderInventoryTab(contentArea) {
     `;
 
     // Event listeners da tabela
+    container.querySelectorAll('.btn-price-product').forEach(btn => {
+      btn.addEventListener('click', () => {
+        openPricingCalculatorModal(btn.dataset.id, loadInventoryData);
+      });
+    });
+
     container.querySelectorAll('.btn-edit-product').forEach(btn => {
       btn.addEventListener('click', () => {
         const prod = (localDB.list('products') || []).find(p => p.id === btn.dataset.id);
@@ -926,6 +939,12 @@ export function renderInventoryTab(contentArea) {
   });
   document.getElementById('inv-status-filter')?.addEventListener('change', () => {
     renderProductsTable(localDB.list('products') || []);
+  });
+
+  document.getElementById('btn-quick-pricing-calc')?.addEventListener('click', () => {
+    openPricingCalculatorModal(null, () => {
+      loadInventoryData();
+    });
   });
 
   document.getElementById('btn-quick-import-nfe')?.addEventListener('click', () => {
