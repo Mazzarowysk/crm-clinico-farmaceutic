@@ -5886,3 +5886,63 @@ select.form-input option {
   padding: 10px 14px;
   font-size: 0.95rem;
 }
+
+/* === REGRAS GLOBAIS DE IMPRESSÃO LIMPA (ISOLAÇÃO DE LAUDOS E DSF) === */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #1e293b !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Ocultar todos os elementos de navegação, cabeçalhos do CRM e botões */
+  .app-header,
+  #sidebar,
+  .sidebar,
+  .pharmacy-glass-panel,
+  .pharmacy-subnav-container,
+  .pharmacy-step-navigator,
+  .btn,
+  button,
+  .toast-container,
+  #cockpit-farmaceutico,
+  .cockpit-container,
+  .nav-tabs,
+  .floating-widget,
+  .modal-footer {
+    display: none !important;
+  }
+
+  /* Deixar o conteúdo limpo e ocupar 100% da folha A4 */
+  #main-content,
+  #content-area,
+  .tab-section,
+  .pharmacy-crm-root {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border: none !important;
+  }
+
+  .pharmacy-declaration-print {
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    background: #ffffff !important;
+  }
+
+  @page {
+    size: A4 portrait;
+    margin: 8mm 10mm;
+  }
+}
+

@@ -6,6 +6,7 @@ import {
   runRealtimeClinicalCrosscheck,
   generatePharmacistDeclarationHTML
 } from '../modules/pharmacyCDSS.js';
+import { downloadDeclarationPDF, printIsolatedClinicalDocument } from '../modules/documentPrint.js';
 import { CANONICAL_MEDICATIONS_DB } from '../modules/medicationsDB.js';
 import { searchMedicationsNLP } from '../modules/medicationNLP.js';
 import { openQuickCheckoutModal } from '../modules/quickCheckoutModal.js';
@@ -623,8 +624,11 @@ function renderBalcaoStepContent(step, patient, allPatients, activeMeds) {
             <button type="button" id="btn-open-checkout-step5" class="btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4); cursor: pointer;">
               <i class="fa-solid fa-cash-register"></i> Finalizar Venda no Caixa
             </button>
-            <button type="button" id="btn-print-declaration" class="btn btn-secondary" style="background: rgba(30, 41, 59, 0.6); color: #38bdf8; font-weight: 600;">
-              <i class="fa-solid fa-print"></i> Imprimir DSF (PDF)
+            <button type="button" id="btn-download-declaration-pdf" class="btn" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border: none; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4); cursor: pointer;" title="Baixar arquivo PDF da Declaração Farmacêutica diretamente">
+              <i class="fa-solid fa-file-arrow-down"></i> Baixar DSF (PDF)
+            </button>
+            <button type="button" id="btn-print-declaration" class="btn btn-secondary" style="background: rgba(30, 41, 59, 0.6); color: #38bdf8; font-weight: 600;" title="Imprimir apenas o laudo formatado em folha A4">
+              <i class="fa-solid fa-print"></i> Imprimir Laudo
             </button>
             <button type="button" id="btn-send-whatsapp-declaration" class="btn btn-secondary" style="background: rgba(16, 185, 129, 0.15); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.4); font-weight: 600;">
               <i class="fa-brands fa-whatsapp"></i> Enviar via WhatsApp
@@ -987,8 +991,20 @@ function setupBalcaoStepListeners(step, allPatients) {
       }
     });
 
+    document.getElementById('btn-download-declaration-pdf')?.addEventListener('click', () => {
+      const pName = (currentClinicalEncounter.patient?.name || currentClinicalEncounter.patient?.fullName || 'Paciente').replace(/\s+/g, '_');
+      const safeFilename = `DSF_${pName}_${new Date().toISOString().split('T')[0]}.pdf`;
+      downloadDeclarationPDF('declaration-print-wrapper', safeFilename);
+    });
+
     document.getElementById('btn-print-declaration')?.addEventListener('click', () => {
-      window.print();
+      const wrapper = document.getElementById('declaration-print-wrapper');
+      const pName = currentClinicalEncounter.patient?.name || 'Paciente';
+      if (wrapper) {
+        printIsolatedClinicalDocument(wrapper.innerHTML, `Declaração Farmacêutica - ${pName}`);
+      } else {
+        window.print();
+      }
     });
 
     document.getElementById('btn-send-whatsapp-declaration')?.addEventListener('click', () => {
