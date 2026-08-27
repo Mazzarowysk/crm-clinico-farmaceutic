@@ -38,6 +38,10 @@ import { openPatientPortalModal } from './modules/patientPortal.js';
 import { openPatientPurchasesModal } from './modules/patientPurchasesModal.js';
 import { openNFeImporterModal } from './modules/nfeImporter.js';
 import { renderSmartFlowGuide, updateFlowGuideStep, completeFlow } from './modules/smartFlowGuide.js';
+import { searchSystemWithPLN, SYSTEM_INTENTS } from './modules/universalSearch.js';
+
+window.searchSystemWithPLN = searchSystemWithPLN;
+window.SYSTEM_INTENTS = SYSTEM_INTENTS;
 
 window.setActivePatientContext = setActivePatientContext;
 window.renderPatientJourneyStepper = renderPatientJourneyStepper;
@@ -1893,15 +1897,24 @@ function renderAppStructure() {
   renderSmartFlowGuide();
 }
 
-// ─── MECANISMO DE BUSCA GLOBAL DO SISTEMA (SPOTLIGHT / COMMAND K) ──────────────
+// ─── MECANISMO DE BUSCA GLOBAL DO SISTEMA (SPOTLIGHT PLN & COMMAND PALETTE) ──────────────
 function initGlobalSystemSearch() {
   const searchInput = document.getElementById('global-system-search');
   const searchResultsContainer = document.getElementById('global-search-results');
   if (!searchInput || !searchResultsContainer) return;
 
-  const normalizeStr = (str) => {
+  const escapeHtml = (str) => {
     if (!str) return '';
-    return String(str).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  };
+
+  const highlightMatch = (text, query) => {
+    if (!text || !query) return escapeHtml(text);
+    const escaped = escapeHtml(text);
+    const qClean = query.trim().replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+    if (!qClean) return escaped;
+    const regex = new RegExp(`(${qClean})`, 'gi');
+    return escaped.replace(regex, '<mark style="background: rgba(251, 191, 36, 0.35); color: #fef08a; padding: 0 2px; border-radius: 3px; font-weight: 700;">$1</mark>');
   };
 
   const performSearch = () => {
@@ -1912,86 +1925,226 @@ function initGlobalSystemSearch() {
       return;
     }
 
-    const qNorm = normalizeStr(rawQuery);
-    const queryTokens = qNorm.split(/\s+/).filter(Boolean);
-
-    // Abas oficiais do CRM Clínico Farmacêutico
-    const allNavItems = [
-      { id: 'dashboard', label: 'Métricas do Consultório', icon: 'fa-chart-line', tabColor: '#06b6d4' },
-      { id: 'farmacia', label: 'CRM Farmacêutico & Balcão', icon: 'fa-prescription-bottle-medical', tabColor: '#10b981' },
-      { id: 'pacientes', label: 'Prontuário & Pacientes', icon: 'fa-user-nurse', tabColor: '#38bdf8' },
-      { id: 'estoque', label: 'Estoque & Produtos', icon: 'fa-boxes-stacked', tabColor: '#10b981' },
-      { id: 'relatorios', label: 'Declarações (DSF) & Relatórios', icon: 'fa-file-signature', tabColor: '#f59e0b' },
-      { id: 'configuracoes', label: 'Configurações & Gestão', icon: 'fa-sliders', tabColor: '#a855f7' }
-    ];
-
-    const tabMatches = allNavItems.filter(item => {
-      const lbl = normalizeStr(item.label);
-      const id = normalizeStr(item.id);
-      return lbl.includes(qNorm) || id.includes(qNorm) || queryTokens.every(t => lbl.includes(t));
-    });
-
-    // Pesquisar Pacientes cadastrados
-    const patientMatches = [];
-    if (state.patients && Array.isArray(state.patients)) {
-      state.patients.forEach(p => {
-        const pName = normalizeStr(p.name);
-        const pCpf = (p.cpf || '').replace(/\D/g, '');
-        const qDigits = rawQuery.replace(/\D/g, '');
-
-        if (pName.includes(qNorm) || queryTokens.every(t => pName.includes(t)) || (qDigits && pCpf.includes(qDigits))) {
-          patientMatches.push(p);
-        }
-      });
-    }
+    const { intents, patients, products, attendances, sales } = searchSystemWithPLN(rawQuery);
+    const totalFound = intents.length + patients.length + products.length + attendances.length + sales.length;
 
     let html = '';
 
-    // Renderizar Abas Encontradas
-    if (tabMatches.length > 0) {
-      html += `<div style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: #818cf8; letter-spacing: 0.5px; padding: 10px 8px 4px 8px;">📌 Módulos do CRM (${tabMatches.length})</div>`;
-      tabMatches.forEach(t => {
+    // Barra de contagem rápida e status PLN
+    html += `
+      <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 10px 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.08); margin-bottom: 8px;">
+        <span style="font-size: 0.72rem; color: #94a3b8; font-weight: 600;">
+          <i class="fa-solid fa-wand-magic-sparkles" style="color: #818cf8;"></i> Busca Inteligente (PLN): <strong style="color: #f8fafc;">${totalFound} resultado${totalFound !== 1 ? 's' : ''}</strong>
+        </span>
+        <span style="font-size: 0.68rem; background: rgba(99, 102, 241, 0.2); color: #a5b4fc; padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(129, 140, 248, 0.3);">
+          ESC para fechar
+        </span>
+      </div>
+    `;
+
+    // 1. SEÇÃO: INTENÇÕES RECONHECIDAS & AÇÕES RÁPIDAS (PLN)
+    if (intents.length > 0) {
+      html += `
+        <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #38bdf8; letter-spacing: 0.6px; padding: 6px 8px 4px 8px; display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-bolt"></i> Ações Rápidas & Intenções Clínicas (${intents.length})
+        </div>
+      `;
+      intents.forEach((item, idx) => {
         html += `
-          <div class="search-result-item" data-type="tab" data-tab-id="${t.id}" style="
-            display: flex; align-items: center; justify-content: space-between;
+          <div class="search-pln-item search-intent-item" data-intent-id="${item.id}" style="
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
             padding: 9px 12px; border-radius: 10px; cursor: pointer; transition: all 0.2s;
-            background: rgba(255,255,255,0.03); margin-bottom: 5px; border: 1px solid rgba(255,255,255,0.05);
-          " onmouseover="this.style.background='rgba(99, 102, 241, 0.25)'; this.style.borderColor='rgba(129, 140, 248, 0.5)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'; this.style.borderColor='rgba(255,255,255,0.05)'">
-            <div style="display: flex; align-items: center; gap: 10px;">
-              <i class="fa-solid ${t.icon}" style="color: ${t.tabColor}; font-size: 0.95rem;"></i>
-              <span style="font-weight: 700; color: #f8fafc; font-size: 0.86rem;">${t.label}</span>
+            background: rgba(255,255,255,0.03); margin-bottom: 5px; border: 1px solid rgba(255,255,255,0.06);
+          " onmouseover="this.style.background='rgba(56, 189, 248, 0.15)'; this.style.borderColor='rgba(56, 189, 248, 0.4)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'; this.style.borderColor='rgba(255,255,255,0.06)'">
+            <div style="display: flex; align-items: flex-start; gap: 10px; flex: 1;">
+              <div style="width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;">
+                <i class="fa-solid ${item.icon}" style="color: ${item.iconColor}; font-size: 1rem;"></i>
+              </div>
+              <div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
+                  <strong style="color: #f8fafc; font-size: 0.86rem;">${highlightMatch(item.title, rawQuery)}</strong>
+                  <span style="font-size: 0.64rem; font-weight: 700; background: rgba(56, 189, 248, 0.15); color: ${item.badgeColor}; padding: 1px 6px; border-radius: 4px; border: 1px solid ${item.badgeColor}40;">${item.badge}</span>
+                </div>
+                <span style="font-size: 0.74rem; color: #94a3b8; display: block; line-height: 1.3;">${item.subtitle}</span>
+              </div>
             </div>
-            <span style="font-size: 0.68rem; background: rgba(99, 102, 241, 0.2); color: #a5b4fc; padding: 3px 9px; border-radius: 10px; font-weight: 700;">Navegar ➔</span>
+            <button type="button" class="btn" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border: none; padding: 6px 12px; border-radius: 8px; font-weight: 700; font-size: 0.72rem; cursor: pointer; white-space: nowrap; flex-shrink: 0; display: flex; align-items: center; gap: 5px;">
+              Executar <i class="fa-solid fa-arrow-right"></i>
+            </button>
           </div>
         `;
       });
     }
 
-    // Renderizar Pacientes Encontrados
-    if (patientMatches.length > 0) {
-      html += `<div style="font-size: 0.72rem; font-weight: 800; text-transform: uppercase; color: #38bdf8; letter-spacing: 0.5px; padding: 10px 8px 4px 8px;">👤 Pacientes Encontrados (${patientMatches.length})</div>`;
-      patientMatches.slice(0, 5).forEach(p => {
+    // 2. SEÇÃO: PACIENTES & HISTÓRICOS ENCONTRADOS
+    if (patients.length > 0) {
+      html += `
+        <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #34d399; letter-spacing: 0.6px; padding: 10px 8px 4px 8px; display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-user-nurse"></i> Pacientes Cadastrados (${patients.length})
+        </div>
+      `;
+      patients.slice(0, 5).forEach(p => {
+        const pName = p.fullName || p.name || 'Paciente';
+        const pId = p.id || 'PAT-DEMO';
+        const chronic = p.chronicConditions || p.chronic_conditions || p.comorbidities || '';
+        const meds = p.continuousMedications || p.continuous_meds || '';
+
         html += `
-          <div class="search-result-item" data-type="patient" data-patient-id="${p.id}" style="
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 9px 12px; border-radius: 10px; cursor: pointer; transition: all 0.2s;
-            background: rgba(255,255,255,0.03); margin-bottom: 5px; border: 1px solid rgba(255,255,255,0.05);
-          " onmouseover="this.style.background='rgba(56, 189, 248, 0.2)'; this.style.borderColor='rgba(56, 189, 248, 0.5)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'; this.style.borderColor='rgba(255,255,255,0.05)'">
-            <div>
-              <strong style="color: #f8fafc; font-size: 0.86rem; display: block;">${p.name}</strong>
-              <small style="color: #94a3b8; font-size: 0.75rem;">CPF: ${p.cpf || 'Não informado'} | Tel: ${p.phone || 'N/A'}</small>
+          <div class="search-pln-item" style="
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            padding: 9px 12px; border-radius: 10px; transition: all 0.2s;
+            background: rgba(255,255,255,0.03); margin-bottom: 5px; border: 1px solid rgba(255,255,255,0.06);
+          " onmouseover="this.style.background='rgba(16, 185, 129, 0.12)'; this.style.borderColor='rgba(16, 185, 129, 0.4)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'; this.style.borderColor='rgba(255,255,255,0.06)'">
+            <div style="flex: 1;">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
+                <strong style="color: #f8fafc; font-size: 0.86rem;">${highlightMatch(pName, rawQuery)}</strong>
+                ${p.cpf ? `<span style="font-size: 0.7rem; color: #94a3b8; font-family: monospace;">CPF: ${highlightMatch(p.cpf, rawQuery)}</span>` : ''}
+              </div>
+              <div style="font-size: 0.74rem; color: #94a3b8;">
+                ${p.phone ? `<span><i class="fa-solid fa-phone" style="font-size: 0.68rem;"></i> ${p.phone}</span> • ` : ''}
+                ${chronic ? `<span style="color: #fbbf24;"><i class="fa-solid fa-heart-pulse"></i> ${highlightMatch(chronic, rawQuery)}</span>` : '<span style="color: #64748b;">Sem comorbidades registradas</span>'}
+              </div>
+              ${meds ? `<div style="font-size: 0.7rem; color: #a78bfa; margin-top: 2px;"><i class="fa-solid fa-pills"></i> Uso Contínuo: ${highlightMatch(meds, rawQuery)}</div>` : ''}
             </div>
-            <span style="font-size: 0.68rem; background: rgba(56, 189, 248, 0.2); color: #38bdf8; padding: 3px 9px; border-radius: 10px; font-weight: 700;">Ver Prontuário ➔</span>
+
+            <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+              <button type="button" class="btn-search-purchases" data-patient-id="${pId}" data-patient-name="${escapeHtml(pName)}" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); padding: 5px 9px; border-radius: 6px; font-weight: 700; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Ver Histórico de Compras e Dispensações">
+                <i class="fa-solid fa-cart-shopping"></i> Compras
+              </button>
+              <button type="button" class="btn-search-prontuario" data-patient-id="${pId}" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.4); padding: 5px 9px; border-radius: 6px; font-weight: 700; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Abrir Prontuário">
+                <i class="fa-solid fa-user-circle"></i> Prontuário
+              </button>
+            </div>
           </div>
         `;
       });
     }
 
-    if (tabMatches.length === 0 && patientMatches.length === 0) {
+    // 3. SEÇÃO: MEDICAMENTOS & ESTOQUE
+    if (products.length > 0) {
+      html += `
+        <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #fbbf24; letter-spacing: 0.6px; padding: 10px 8px 4px 8px; display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-pills"></i> Medicamentos & Produtos no Estoque (${products.length})
+        </div>
+      `;
+      products.slice(0, 4).forEach(prod => {
+        const prodName = prod.name || 'Produto';
+        const dcb = prod.dcb || prod.active_ingredient || '';
+        const price = parseFloat(prod.sale_price || prod.price || 0).toFixed(2).replace('.', ',');
+        const stock = parseInt(prod.current_stock || prod.stock || 0, 10);
+        const ean = prod.ean || prod.barcode || '';
+
+        html += `
+          <div class="search-pln-item" style="
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            padding: 9px 12px; border-radius: 10px; transition: all 0.2s;
+            background: rgba(255,255,255,0.03); margin-bottom: 5px; border: 1px solid rgba(255,255,255,0.06);
+          " onmouseover="this.style.background='rgba(245, 158, 11, 0.12)'; this.style.borderColor='rgba(245, 158, 11, 0.4)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'; this.style.borderColor='rgba(255,255,255,0.06)'">
+            <div style="flex: 1;">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
+                <strong style="color: #f8fafc; font-size: 0.86rem;">${highlightMatch(prodName, rawQuery)}</strong>
+                <span style="font-size: 0.72rem; color: #34d399; font-weight: 700;">R$ ${price}</span>
+              </div>
+              <div style="font-size: 0.74rem; color: #94a3b8;">
+                ${dcb ? `<span>DCB: ${highlightMatch(dcb, rawQuery)}</span> • ` : ''}
+                <span>Estoque: <strong style="color: ${stock <= 5 ? '#f87171' : '#34d399'};">${stock} un</strong></span>
+                ${ean ? ` • <span style="font-family: monospace;">EAN: ${highlightMatch(ean, rawQuery)}</span>` : ''}
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 6px; flex-shrink: 0;">
+              <button type="button" class="btn-search-stock" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.4); padding: 5px 9px; border-radius: 6px; font-weight: 700; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Ver no Estoque">
+                <i class="fa-solid fa-boxes-stacked"></i> Estoque
+              </button>
+              <button type="button" class="btn-search-pdv-add" data-prod-id="${prod.id}" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; padding: 5px 9px; border-radius: 6px; font-weight: 700; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Lançar no Caixa / PDV">
+                <i class="fa-solid fa-cart-plus"></i> PDV
+              </button>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    // 4. SEÇÃO: ATENDIMENTOS CLÍNICOS & TRIAGENS
+    if (attendances.length > 0) {
+      html += `
+        <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #a78bfa; letter-spacing: 0.6px; padding: 10px 8px 4px 8px; display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-notes-medical"></i> Atendimentos & Prescrições Clínicas (${attendances.length})
+        </div>
+      `;
+      attendances.slice(0, 3).forEach(att => {
+        const proto = att.protocol || att.attendance_id || att.id || 'ATT';
+        const client = att.patient_name || att.patientName || 'Paciente';
+        const queixa = att.queixa_triagem || att.complaint || att.chief_complaint || 'Atendimento Balcão';
+        const dt = new Date(att.created_at || Date.now()).toLocaleDateString('pt-BR');
+
+        html += `
+          <div class="search-pln-item" style="
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            padding: 9px 12px; border-radius: 10px; transition: all 0.2s;
+            background: rgba(255,255,255,0.03); margin-bottom: 5px; border: 1px solid rgba(255,255,255,0.06);
+          " onmouseover="this.style.background='rgba(167, 139, 250, 0.12)'; this.style.borderColor='rgba(167, 139, 250, 0.4)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'; this.style.borderColor='rgba(255,255,255,0.06)'">
+            <div style="flex: 1;">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
+                <strong style="color: #f8fafc; font-size: 0.84rem;">#${highlightMatch(proto, rawQuery)} — ${highlightMatch(client, rawQuery)}</strong>
+                <span style="font-size: 0.68rem; color: #94a3b8;">${dt}</span>
+              </div>
+              <div style="font-size: 0.74rem; color: #cbd5e1;">
+                Queixa: <span style="color: #a78bfa;">${highlightMatch(queixa, rawQuery)}</span>
+              </div>
+            </div>
+            <button type="button" class="btn-search-dsf" style="background: rgba(167, 139, 250, 0.2); color: #c084fc; border: 1px solid rgba(167, 139, 250, 0.4); padding: 5px 9px; border-radius: 6px; font-weight: 700; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+              <i class="fa-solid fa-file-signature"></i> Ver DSF
+            </button>
+          </div>
+        `;
+      });
+    }
+
+    // 5. SEÇÃO: VENDAS, CUPONS & COMPRAS REALIZADAS
+    if (sales.length > 0) {
+      html += `
+        <div style="font-size: 0.7rem; font-weight: 800; text-transform: uppercase; color: #34d399; letter-spacing: 0.6px; padding: 10px 8px 4px 8px; display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-receipt"></i> Vendas, Cupons & Compras Realizadas (${sales.length})
+        </div>
+      `;
+      sales.slice(0, 3).forEach(s => {
+        const proto = s.protocol || s.id || 'VD';
+        const client = s.clientName || s.patient_name || 'Consumidor';
+        const total = parseFloat(s.totalSale || s.total_price || 0).toFixed(2).replace('.', ',');
+        const pay = s.paymentMethod || 'Dinheiro';
+
+        html += `
+          <div class="search-pln-item" style="
+            display: flex; align-items: center; justify-content: space-between; gap: 10px;
+            padding: 9px 12px; border-radius: 10px; transition: all 0.2s;
+            background: rgba(255,255,255,0.03); margin-bottom: 5px; border: 1px solid rgba(255,255,255,0.06);
+          " onmouseover="this.style.background='rgba(16, 185, 129, 0.12)'; this.style.borderColor='rgba(16, 185, 129, 0.4)'" onmouseout="this.style.background='rgba(255,255,255,0.03)'; this.style.borderColor='rgba(255,255,255,0.06)'">
+            <div style="flex: 1;">
+              <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
+                <strong style="color: #f8fafc; font-size: 0.84rem;">Cupom #${highlightMatch(proto, rawQuery)}</strong>
+                <span style="font-size: 0.72rem; color: #34d399; font-weight: 700;">R$ ${total}</span>
+              </div>
+              <div style="font-size: 0.74rem; color: #94a3b8;">
+                Cliente: <strong style="color: #f1f5f9;">${highlightMatch(client, rawQuery)}</strong> • Pagto: ${highlightMatch(pay, rawQuery)}
+              </div>
+            </div>
+            <button type="button" class="btn-search-receipt" data-sale-proto="${proto}" style="background: rgba(254, 240, 138, 0.15); color: #fef08a; border: 1px solid rgba(254, 240, 138, 0.4); padding: 5px 9px; border-radius: 6px; font-weight: 700; font-size: 0.7rem; cursor: pointer; display: flex; align-items: center; gap: 4px;" title="Reemitir Cupom Térmico">
+              <i class="fa-solid fa-print"></i> Reemitir
+            </button>
+          </div>
+        `;
+      });
+    }
+
+    if (totalFound === 0) {
       html = `
-        <div style="padding: 16px; text-align: center; color: #94a3b8; font-size: 0.84rem;">
-          <i class="fa-solid fa-magnifying-glass" style="font-size: 1.5rem; margin-bottom: 8px; opacity: 0.5; display: block;"></i>
-          Nenhum paciente ou módulo encontrado para <strong>"${rawQuery}"</strong>.
+        <div style="padding: 24px 16px; text-align: center; color: #94a3b8; font-size: 0.86rem;">
+          <i class="fa-solid fa-wand-magic-sparkles" style="font-size: 2rem; margin-bottom: 10px; color: #818cf8; opacity: 0.6; display: block;"></i>
+          Nenhum resultado direto encontrado para <strong>"${escapeHtml(rawQuery)}"</strong>.<br>
+          <span style="font-size: 0.76rem; color: #64748b; margin-top: 6px; display: block;">
+            💡 Dica: Experimente termos como <strong>"compras"</strong>, <strong>"caixa"</strong>, <strong>"gripe"</strong>, <strong>"pressão"</strong>, <strong>"estoque"</strong> ou o nome de um paciente.
+          </span>
         </div>
       `;
     }
@@ -1999,14 +2152,89 @@ function initGlobalSystemSearch() {
     searchResultsContainer.innerHTML = html;
     searchResultsContainer.style.display = 'block';
 
-    // Click handlers
-    searchResultsContainer.querySelectorAll('.search-result-item').forEach(item => {
+    // ── CLICK HANDLERS DINÂMICOS ──
+    // Executar Intenções Inteligentes
+    searchResultsContainer.querySelectorAll('.search-intent-item').forEach(item => {
       item.addEventListener('click', () => {
-        const itemType = item.dataset.type;
-        if (itemType === 'tab') {
-          switchTab(item.dataset.tabId);
-        } else if (itemType === 'patient') {
-          switchTab('pacientes');
+        const intentId = item.dataset.intentId;
+        const targetIntent = SYSTEM_INTENTS.find(i => i.id === intentId);
+        if (targetIntent && typeof targetIntent.execute === 'function') {
+          targetIntent.execute();
+        }
+        searchResultsContainer.style.display = 'none';
+        searchInput.value = '';
+      });
+    });
+
+    // Abrir Histórico de Compras do Paciente
+    searchResultsContainer.querySelectorAll('.btn-search-purchases').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const pId = btn.dataset.patientId;
+        const pName = btn.dataset.patientName;
+        if (window.switchTab) window.switchTab('pacientes');
+        if (typeof window.openPatientPurchasesModal === 'function') {
+          window.openPatientPurchasesModal(pId, pName);
+        }
+        searchResultsContainer.style.display = 'none';
+        searchInput.value = '';
+      });
+    });
+
+    // Abrir Prontuário do Paciente
+    searchResultsContainer.querySelectorAll('.btn-search-prontuario').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (window.switchTab) window.switchTab('pacientes');
+        searchResultsContainer.style.display = 'none';
+        searchInput.value = '';
+      });
+    });
+
+    // Navegar para o Estoque
+    searchResultsContainer.querySelectorAll('.btn-search-stock').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (window.switchTab) window.switchTab('estoque');
+        searchResultsContainer.style.display = 'none';
+        searchInput.value = '';
+      });
+    });
+
+    // Lançar no PDV / Caixa
+    searchResultsContainer.querySelectorAll('.btn-search-pdv-add').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (typeof window.openQuickCheckoutModal === 'function') {
+          window.openQuickCheckoutModal();
+        }
+        searchResultsContainer.style.display = 'none';
+        searchInput.value = '';
+      });
+    });
+
+    // Ver DSF / Relatórios
+    searchResultsContainer.querySelectorAll('.btn-search-dsf').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (window.switchTab) window.switchTab('relatorios');
+        searchResultsContainer.style.display = 'none';
+        searchInput.value = '';
+      });
+    });
+
+    // Reemitir Cupom Térmico
+    searchResultsContainer.querySelectorAll('.btn-search-receipt').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const proto = btn.dataset.saleProto;
+        const allSalesList = localDB.list('sales') || [];
+        const found = allSalesList.find(s => s.protocol === proto || s.id === proto);
+        if (found && typeof window.printThermalReceipt === 'function') {
+          window.printThermalReceipt(found);
+        } else {
+          showToast(`🧾 Reemitindo cupom #${proto}...`);
+          if (typeof window.openQuickCheckoutModal === 'function') window.openQuickCheckoutModal();
         }
         searchResultsContainer.style.display = 'none';
         searchInput.value = '';
@@ -2019,15 +2247,18 @@ function initGlobalSystemSearch() {
     if (searchInput.value.trim()) performSearch();
   });
 
-  // Fechar dropdown ao clicar fora
+  // Fechar dropdown ao clicar fora ou tecla ESC
   document.addEventListener('click', (e) => {
     if (!e.target.closest('.global-search-wrapper')) {
       searchResultsContainer.style.display = 'none';
     }
   });
 
-  // Tecla Atalho Ctrl + K ou Cmd + K para focar na busca
   document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      searchResultsContainer.style.display = 'none';
+    }
+    // Atalho Ctrl + K ou Cmd + K
     if ((e.ctrlKey || e.metaKey) && (e.key === 'k' || e.key === 'K')) {
       e.preventDefault();
       searchInput.focus();
