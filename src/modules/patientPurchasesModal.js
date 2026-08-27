@@ -1,10 +1,10 @@
 // src/modules/patientPurchasesModal.js
-// MODAL EXCLUSIVO DE HISTÓRICO DE COMPRAS, DISPENSAÇÕES E RECOMPRAS DO PACIENTE
+// MODAL EXCLUSIVO DE HISTÓRICO DE COMPRAS AGRUPADO POR COMPRA / VENDA & ADESÃO TERAPÊUTICA
 
 import * as localDB from '../localDB.js';
 import { showToast, showCustomAlert } from './ui.js';
 import { openQuickCheckoutModal } from './quickCheckoutModal.js';
-import { printThermalReceipt } from './thermalReceipt.js';
+import { printThermalReceipt, exportThermalReceiptPDF } from './thermalReceipt.js';
 
 export function openPatientPurchasesModal(patientId, patientName = 'Cliente') {
   try {
@@ -26,8 +26,17 @@ export function openPatientPurchasesModal(patientId, patientName = 'Cliente') {
     const pId = patient.id || patientId;
     const pPhone = (patient.phone || patient.cellphone || '').replace(/\D/g, '');
 
-    // Buscar compras do paciente
-    let allPurchases = (localDB.list('patient_purchases') || []).filter(pur => 
+    // 1. Obter registros de vendas gerais (sales) e de compras unitárias (patient_purchases)
+    const allSales = (localDB.list('sales') || []).filter(s =>
+      s && (
+        String(s.patient_id) === String(pId) ||
+        (s.clientName && pName && s.clientName.toLowerCase().includes(pName.toLowerCase())) ||
+        (pName && s.clientName && pName.toLowerCase().includes(s.clientName.toLowerCase())) ||
+        (s.clientCpf && patient.cpf && s.clientCpf.replace(/\D/g, '') === patient.cpf.replace(/\D/g, ''))
+      )
+    );
+
+    let allPurchasesRaw = (localDB.list('patient_purchases') || []).filter(pur => 
       pur && (
         String(pur.patient_id) === String(pId) ||
         (pur.patient_name && pName && pur.patient_name.toLowerCase().includes(pName.toLowerCase())) ||
@@ -35,8 +44,8 @@ export function openPatientPurchasesModal(patientId, patientName = 'Cliente') {
       )
     );
 
-    // Se o paciente for simulado e não tiver compras ainda, cria compras simuladas ricas
-    if (allPurchases.length === 0 && (patient.isSimulation || String(pId).startsWith('SIM-') || pName.includes('[SIMULADO]'))) {
+    // Se o paciente for simulado e não tiver compras ainda, cria compras simuladas agrupadas
+    if (allPurchasesRaw.length === 0 && allSales.length === 0 && (patient.isSimulation || String(pId).startsWith('SIM-') || pName.includes('[SIMULADO]'))) {
       const mockItems = [
         {
           id: localDB.generateId('PURCH'),
@@ -51,7 +60,7 @@ export function openPatientPurchasesModal(patientId, patientName = 'Cliente') {
           days_supply: 30,
           refill_date: new Date(Date.now() + 6 * 86400000).toISOString().split('T')[0],
           batch: 'L-77621',
-          attendance_id: 'ATT-DEMO-1',
+          attendance_id: 'VD-DEMO-01',
           pharmacist_name: 'Marcelo Mazaro',
           created_at: new Date(Date.now() - 24 * 86400000).toISOString()
         },
@@ -68,17 +77,87 @@ export function openPatientPurchasesModal(patientId, patientName = 'Cliente') {
           days_supply: null,
           refill_date: null,
           batch: 'L-98412',
-          attendance_id: 'ATT-DEMO-2',
-          pharmacist_name: 'Dr. Lucas Ferreira',
-          created_at: new Date(Date.now() - 5 * 86400000).toISOString()
+          attendance_id: 'VD-DEMO-01',
+          pharmacist_name: 'Marcelo Mazaro',
+          created_at: new Date(Date.now() - 24 * 86400000).toISOString()
         }
       ];
 
       mockItems.forEach(item => localDB.insert('patient_purchases', item));
-      allPurchases = mockItems;
+      allPurchasesRaw = mockItems;
     }
 
-    const totalSpent = allPurchases.reduce((acc, cur) => acc + (parseFloat(cur.total_price || cur.unit_price || 0) * (parseInt(cur.quantity || 1, 10))), 0);
+    // 2. AGRUPAMENTO ESTRUTURADO POR COMPRA (Venda / Protocolo)
+    const purchasesMap = new Map();
+
+    // Primeiro indexa vendas registradas em 'sales'
+    allSales.forEach(sale => {
+      const proto = sale.protocol || `VD-${Date.now().toString().slice(-6)}`;
+      const items = (sale.items || []).map(i => ({
+        product_name: i.product?.name || i.name || 'Produto',
+        quantity: parseInt(i.quantity || 1, 10),
+        unit_price: parseFloat(i.unitPrice || 0),
+        total_price: parseFloat(i.subtotal || (i.quantity * i.unitPrice) || 0),
+        batch: i.product?.batch || 'L-DISP-2026',
+        is_continuous: (i.product?.category && i.product.category.includes('Contínuo')) || false,
+        refill_date: null
+      }));
+
+      purchasesMap.set(proto, {
+        protocol: proto,
+        created_at: sale.created_at || new Date().toISOString(),
+        pharmacist_name: sale.operatorName || 'Farmacêutico Responsável',
+        paymentMethod: sale.paymentMethod || 'Dinheiro / Balcão',
+        subtotalGross: parseFloat(sale.subtotalGross || sale.totalSale || 0),
+        discount: parseFloat(sale.discount || 0),
+        totalSale: parseFloat(sale.totalSale || 0),
+        items: items,
+        fromSalesTable: true
+      });
+    });
+
+    // Depois agrupa itens de 'patient_purchases'
+    allPurchasesRaw.forEach(pur => {
+      const proto = pur.attendance_id || pur.protocol || (pur.created_at ? `COMPRA-${pur.created_at.slice(0, 16)}` : 'COMPRA-AVULSA');
+      
+      if (!purchasesMap.has(proto)) {
+        purchasesMap.set(proto, {
+          protocol: proto.startsWith('VD-') || proto.startsWith('ATT-') ? proto : `VD-${proto.replace(/\D/g, '').slice(-6) || '782910'}`,
+          created_at: pur.created_at || new Date().toISOString(),
+          pharmacist_name: pur.pharmacist_name || 'Farmacêutico Responsável',
+          paymentMethod: 'Balcão / Caixa',
+          subtotalGross: 0,
+          discount: 0,
+          totalSale: 0,
+          items: [],
+          fromSalesTable: false
+        });
+      }
+
+      const purchaseGroup = purchasesMap.get(proto);
+      if (!purchaseGroup.fromSalesTable) {
+        const itemPrice = parseFloat(pur.total_price || (pur.unit_price * (pur.quantity || 1)) || 0);
+        purchaseGroup.items.push({
+          product_name: pur.product_name || 'Medicamento Dispensado',
+          quantity: parseInt(pur.quantity || 1, 10),
+          unit_price: parseFloat(pur.unit_price || itemPrice),
+          total_price: itemPrice,
+          batch: pur.batch || 'L-DISP-2026',
+          is_continuous: pur.is_continuous || false,
+          refill_date: pur.refill_date || null
+        });
+        purchaseGroup.totalSale += itemPrice;
+        purchaseGroup.subtotalGross += itemPrice;
+      }
+    });
+
+    // Lista final de compras agrupadas
+    const groupedPurchases = Array.from(purchasesMap.values()).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+    // Totais consolidados
+    const totalPurchasesCount = groupedPurchases.length;
+    const totalItemsCount = groupedPurchases.reduce((acc, p) => acc + p.items.reduce((s, i) => s + (i.quantity || 1), 0), 0);
+    const totalSpent = groupedPurchases.reduce((acc, p) => acc + (parseFloat(p.totalSale || 0)), 0);
 
     const modal = document.createElement('div');
     modal.id = 'patient-purchases-modal';
@@ -102,7 +181,7 @@ export function openPatientPurchasesModal(patientId, patientName = 'Cliente') {
     `;
 
     modal.innerHTML = `
-      <div style="max-width: 820px; width: 100%; max-height: 90vh; display: flex; flex-direction: column; background: #0f172a; border: 1.5px solid rgba(16, 185, 129, 0.4); border-radius: 20px; box-shadow: 0 25px 70px rgba(0,0,0,0.9), 0 0 30px rgba(16, 185, 129, 0.15); overflow: hidden;">
+      <div style="max-width: 860px; width: 100%; max-height: 92vh; display: flex; flex-direction: column; background: #0f172a; border: 1.5px solid rgba(16, 185, 129, 0.4); border-radius: 20px; box-shadow: 0 25px 70px rgba(0,0,0,0.9), 0 0 30px rgba(16, 185, 129, 0.15); overflow: hidden;">
         
         <!-- Modal Header -->
         <div style="padding: 16px 22px; background: linear-gradient(135deg, #064e3b, #042f2e); border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between; align-items: center;">
@@ -126,24 +205,28 @@ export function openPatientPurchasesModal(patientId, patientName = 'Cliente') {
 
         <!-- Banner de Métricas Rápidas -->
         <div style="background: rgba(15, 23, 42, 0.95); padding: 12px 22px; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-          <div style="display: flex; gap: 20px;">
+          <div style="display: flex; gap: 24px;">
             <div>
-              <small style="color: #94a3b8; font-size: 0.72rem; text-transform: uppercase;">Total de Compras</small>
-              <div style="color: #fff; font-size: 1.1rem; font-weight: 800; font-family: 'Outfit';">${allPurchases.length} aquisição(ões)</div>
+              <small style="color: #94a3b8; font-size: 0.72rem; text-transform: uppercase; font-weight: 600;">Total de Compras</small>
+              <div style="color: #fff; font-size: 1.15rem; font-weight: 800; font-family: 'Outfit';">${totalPurchasesCount} compra${totalPurchasesCount !== 1 ? 's' : ''}</div>
             </div>
             <div>
-              <small style="color: #94a3b8; font-size: 0.72rem; text-transform: uppercase;">Valor Acumulado</small>
-              <div style="color: #34d399; font-size: 1.1rem; font-weight: 800; font-family: 'Outfit';">R$ ${totalSpent.toFixed(2).replace('.', ',')}</div>
+              <small style="color: #94a3b8; font-size: 0.72rem; text-transform: uppercase; font-weight: 600;">Itens Dispensados</small>
+              <div style="color: #38bdf8; font-size: 1.15rem; font-weight: 800; font-family: 'Outfit';">${totalItemsCount} produto${totalItemsCount !== 1 ? 's' : ''}</div>
+            </div>
+            <div>
+              <small style="color: #94a3b8; font-size: 0.72rem; text-transform: uppercase; font-weight: 600;">Valor Total Acumulado</small>
+              <div style="color: #34d399; font-size: 1.15rem; font-weight: 800; font-family: 'Outfit';">R$ ${totalSpent.toFixed(2).replace('.', ',')}</div>
             </div>
           </div>
-          <button type="button" id="btn-new-sale-for-patient" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; padding: 7px 14px; border-radius: 8px; font-weight: 700; font-size: 0.82rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);">
+          <button type="button" id="btn-new-sale-for-patient" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 0.82rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);">
             <i class="fa-solid fa-cash-register"></i> + Nova Venda / Dispensação no Caixa
           </button>
         </div>
 
-        <!-- Conteúdo Scrollável -->
-        <div style="padding: 20px 22px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 12px;">
-          ${allPurchases.length === 0 ? `
+        <!-- Conteúdo Scrollável Agrupado por Compra -->
+        <div style="padding: 20px 22px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 14px;">
+          ${groupedPurchases.length === 0 ? `
             <div style="text-align: center; padding: 40px 20px; background: rgba(30, 41, 59, 0.5); border: 1.5px dashed rgba(255,255,255,0.12); border-radius: 14px;">
               <i class="fa-solid fa-bag-shopping" style="font-size: 2.5rem; color: #64748b; margin-bottom: 12px; display: block;"></i>
               <strong style="color: #fff; font-size: 1rem; display: block; margin-bottom: 4px;">Nenhuma compra registrada para este cliente ainda</strong>
@@ -155,66 +238,120 @@ export function openPatientPurchasesModal(patientId, patientName = 'Cliente') {
               </button>
             </div>
           ` : `
-            <div style="display: flex; flex-direction: column; gap: 10px;">
-              ${allPurchases.map(pur => {
-                const dt = pur.created_at ? new Date(pur.created_at).toLocaleDateString('pt-BR') : 'Data não informada';
-                const isContinuous = pur.is_continuous;
-                let refillBanner = '';
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              ${groupedPurchases.map((purchase, index) => {
+                const dt = purchase.created_at ? new Date(purchase.created_at).toLocaleString('pt-BR') : 'Data não informada';
+                const totalPurchaseVal = parseFloat(purchase.totalSale || 0).toFixed(2).replace('.', ',');
                 
-                if (isContinuous && pur.refill_date) {
-                  const daysToRefill = Math.ceil((new Date(pur.refill_date) - new Date()) / (1000 * 60 * 60 * 24));
+                // Checar se algum item tem alerta de uso contínuo
+                const continuousItem = purchase.items.find(i => i.is_continuous);
+                let refillBanner = '';
+                if (continuousItem && continuousItem.refill_date) {
+                  const daysToRefill = Math.ceil((new Date(continuousItem.refill_date) - new Date()) / (1000 * 60 * 60 * 24));
                   const isLate = daysToRefill <= 0;
                   refillBanner = `
-                    <div style="margin-top: 8px; background: ${isLate ? 'rgba(239, 68, 68, 0.12)' : 'rgba(56, 189, 248, 0.1)'}; border: 1px solid ${isLate ? 'rgba(239, 68, 68, 0.35)' : 'rgba(56, 189, 248, 0.3)'}; border-radius: 8px; padding: 6px 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                    <div style="margin-top: 10px; background: ${isLate ? 'rgba(239, 68, 68, 0.12)' : 'rgba(56, 189, 248, 0.1)'}; border: 1px solid ${isLate ? 'rgba(239, 68, 68, 0.35)' : 'rgba(56, 189, 248, 0.3)'}; border-radius: 8px; padding: 8px 12px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
                       <span style="font-size: 0.76rem; color: ${isLate ? '#f87171' : '#38bdf8'}; font-weight: 600;">
-                        <i class="fa-solid fa-clock-rotate-left"></i> Uso Contínuo: Previsão de Recompra em <strong>${pur.refill_date.split('-').reverse().join('/')} (${isLate ? 'Tratamento Vencido / Repor Imediatamente' : `faltam ${daysToRefill} dias`})</strong>
+                        <i class="fa-solid fa-clock-rotate-left"></i> Uso Contínuo (${continuousItem.product_name}): Previsão de Recompra em <strong>${continuousItem.refill_date.split('-').reverse().join('/')} (${isLate ? 'Tratamento Vencido / Repor Imediatamente' : `faltam ${daysToRefill} dias`})</strong>
                       </span>
-                      <button type="button" class="btn-whatsapp-refill" data-med="${pur.product_name}" data-date="${pur.refill_date}" style="background: #25d366; color: #000; font-size: 0.72rem; font-weight: 800; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
+                      <button type="button" class="btn-whatsapp-refill" data-med="${continuousItem.product_name}" data-date="${continuousItem.refill_date}" style="background: #25d366; color: #000; font-size: 0.72rem; font-weight: 800; border: none; padding: 4px 10px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; gap: 4px;">
                         <i class="fa-brands fa-whatsapp"></i> Lembrar Recompra
                       </button>
                     </div>
                   `;
                 }
 
+                // Objeto de dados serializado para emissão do cupom
+                const saleDataForPrint = {
+                  protocol: purchase.protocol,
+                  clientName: pName,
+                  clientCpf: patient.cpf || '',
+                  items: purchase.items.map(it => ({
+                    product: { name: it.product_name, batch: it.batch },
+                    name: it.product_name,
+                    quantity: it.quantity,
+                    unitPrice: it.unit_price,
+                    subtotal: it.total_price
+                  })),
+                  subtotalGross: purchase.subtotalGross || purchase.totalSale,
+                  discount: purchase.discount || 0,
+                  totalSale: purchase.totalSale,
+                  paymentMethod: purchase.paymentMethod,
+                  operatorName: purchase.pharmacist_name,
+                  created_at: purchase.created_at
+                };
+
                 return `
-                  <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px 14px;">
-                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
-                      <div>
-                        <div style="display: flex; align-items: center; gap: 8px;">
-                          <strong style="color: #fff; font-size: 0.92rem; font-family: 'Outfit';">${pur.product_name}</strong>
-                          ${isContinuous ? '<span style="font-size: 0.65rem; background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56,189,248,0.4); padding: 1px 6px; border-radius: 6px; font-weight: 700;">USO CONTÍNUO</span>' : ''}
-                        </div>
-                        <div style="font-size: 0.76rem; color: #94a3b8; margin-top: 3px;">
-                          📅 Data: <strong style="color: #cbd5e1;">${dt}</strong> &bull; Lote: <code style="color: #34d399;">${pur.batch || 'L-DISP'}</code> &bull; Farmacêutico: ${pur.pharmacist_name || 'Farmacêutico Responsável'}
-                        </div>
+                  <!-- CARD DA COMPRA CONSOLIDADA -->
+                  <div class="purchase-order-card" style="background: rgba(30, 41, 59, 0.7); border: 1.5px solid rgba(255,255,255,0.09); border-radius: 14px; padding: 14px 16px; box-shadow: 0 4px 14px rgba(0,0,0,0.2);">
+                    
+                    <!-- Topo da Compra -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px; margin-bottom: 10px; flex-wrap: wrap; gap: 8px;">
+                      <div style="display: flex; align-items: center; gap: 10px;">
+                        <span style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); padding: 3px 8px; border-radius: 6px; font-weight: 800; font-size: 0.78rem; font-family: monospace;">
+                          #${purchase.protocol}
+                        </span>
+                        <span style="font-size: 0.8rem; color: #cbd5e1; font-weight: 600;">
+                          📅 ${dt}
+                        </span>
+                        <span style="font-size: 0.74rem; background: rgba(255,255,255,0.06); color: #94a3b8; padding: 2px 8px; border-radius: 6px;">
+                          💳 ${purchase.paymentMethod}
+                        </span>
                       </div>
-                      <div style="text-align: right;">
-                        <div style="color: #34d399; font-weight: 800; font-size: 0.95rem; font-family: 'Outfit';">
-                          R$ ${parseFloat(pur.total_price || pur.unit_price || 0).toFixed(2).replace('.', ',')}
-                        </div>
-                        <small style="color: #64748b; font-size: 0.7rem;">Qtd: ${pur.quantity || 1} un</small>
+
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="font-size: 0.74rem; color: #94a3b8;">Total da Compra:</span>
+                        <span style="color: #34d399; font-weight: 900; font-size: 1.15rem; font-family: 'Outfit';">
+                          R$ ${totalPurchaseVal}
+                        </span>
                       </div>
                     </div>
-                    
-                    <div style="display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px;">
-                      <button type="button" 
-                        onclick="window.emitThermalReceiptFromPurchase(this)" 
-                        class="btn-print-purchase-receipt" 
-                        data-purch-id="${pur.id}" 
-                        data-med="${pur.product_name}" 
-                        data-price="${pur.total_price || pur.unit_price || 0}" 
-                        data-qty="${pur.quantity || 1}" 
-                        data-batch="${pur.batch || 'L-DISP'}" 
-                        data-resp="${pur.pharmacist_name || 'Farmacêutico Responsável'}" 
-                        data-proto="${pur.attendance_id || ''}" 
-                        data-patient="${pName}" 
-                        data-cpf="${patient.cpf || ''}" 
-                        style="background: rgba(56, 189, 248, 0.2); border: 1.5px solid #38bdf8; color: #ffffff; font-size: 0.76rem; font-weight: 800; padding: 6px 14px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(56, 189, 248, 0.35); transition: 0.2s;">
-                        <i class="fa-solid fa-receipt"></i> Emitir Cupom Térmico (80mm)
-                      </button>
+
+                    <!-- Lista de Produtos Comprados nesta Compra -->
+                    <div style="display: flex; flex-direction: column; gap: 6px; background: rgba(15, 23, 42, 0.6); border-radius: 10px; padding: 10px 12px; border: 1px solid rgba(255,255,255,0.04);">
+                      <div style="font-size: 0.7rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 2px; display: flex; justify-content: space-between;">
+                        <span>PRODUTO DISPENSADO (${purchase.items.length} item${purchase.items.length !== 1 ? 's' : ''})</span>
+                        <span>VALOR</span>
+                      </div>
+                      ${purchase.items.map((it, idx) => `
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.84rem; padding: 4px 0; ${idx !== purchase.items.length - 1 ? 'border-bottom: 1px dashed rgba(255,255,255,0.06);' : ''}">
+                          <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-weight: 700; color: #38bdf8; font-size: 0.78rem;">${it.quantity}x</span>
+                            <span style="color: #f8fafc; font-weight: 600;">${it.product_name}</span>
+                            ${it.batch ? `<code style="font-size: 0.68rem; color: #94a3b8; background: rgba(255,255,255,0.05); padding: 1px 4px; border-radius: 4px;">Lote: ${it.batch}</code>` : ''}
+                            ${it.is_continuous ? '<span style="font-size: 0.62rem; background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56,189,248,0.4); padding: 1px 5px; border-radius: 4px; font-weight: 700;">CONTÍNUO</span>' : ''}
+                          </div>
+                          <div style="font-weight: 700; color: #f1f5f9;">
+                            R$ ${parseFloat(it.total_price || (it.unit_price * it.quantity) || 0).toFixed(2).replace('.', ',')}
+                          </div>
+                        </div>
+                      `).join('')}
                     </div>
 
                     ${refillBanner}
+
+                    <!-- Ações da Compra (Cupom Térmico e PDF) -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 12px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06); flex-wrap: wrap; gap: 8px;">
+                      <div style="font-size: 0.74rem; color: #94a3b8;">
+                        <i class="fa-solid fa-user-doctor"></i> Responsável: <strong style="color: #cbd5e1;">${purchase.pharmacist_name}</strong>
+                      </div>
+
+                      <div style="display: flex; align-items: center; gap: 8px;">
+                        <button type="button" 
+                          class="btn-print-full-purchase-receipt" 
+                          data-sale-json="${encodeURIComponent(JSON.stringify(saleDataForPrint))}"
+                          style="background: rgba(254, 240, 138, 0.15); border: 1.5px solid #fef08a; color: #fef08a; font-size: 0.76rem; font-weight: 800; padding: 6px 14px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(254, 240, 138, 0.2); transition: 0.2s;">
+                          <i class="fa-solid fa-receipt"></i> 🖨️ Emitir Cupom Térmico (80mm)
+                        </button>
+                        <button type="button" 
+                          class="btn-download-full-purchase-pdf" 
+                          data-sale-json="${encodeURIComponent(JSON.stringify(saleDataForPrint))}"
+                          style="background: linear-gradient(135deg, #10b981, #059669); border: none; color: #ffffff; font-size: 0.76rem; font-weight: 800; padding: 6px 14px; border-radius: 8px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35); transition: 0.2s;">
+                          <i class="fa-solid fa-file-pdf"></i> 📥 Baixar PDF
+                        </button>
+                      </div>
+                    </div>
+
                   </div>
                 `;
               }).join('')}
@@ -250,6 +387,40 @@ export function openPatientPurchasesModal(patientId, patientName = 'Cliente') {
     document.getElementById('btn-new-sale-for-patient')?.addEventListener('click', openCheckout);
     document.getElementById('btn-first-sale-for-patient')?.addEventListener('click', openCheckout);
 
+    // Botões de Emissão de Cupom Térmico e Download PDF da Compra
+    modal.querySelectorAll('.btn-print-full-purchase-receipt').forEach(btn => {
+      btn.addEventListener('click', () => {
+        try {
+          const raw = btn.getAttribute('data-sale-json');
+          const saleObj = JSON.parse(decodeURIComponent(raw));
+          showToast('🖨️ Emitindo Cupom Térmico da compra...');
+          if (typeof printThermalReceipt === 'function') {
+            printThermalReceipt(saleObj, '80mm');
+          } else if (window.printThermalReceipt) {
+            window.printThermalReceipt(saleObj, '80mm');
+          }
+        } catch(e) {
+          console.error('Erro ao emitir cupom térmico:', e);
+        }
+      });
+    });
+
+    modal.querySelectorAll('.btn-download-full-purchase-pdf').forEach(btn => {
+      btn.addEventListener('click', () => {
+        try {
+          const raw = btn.getAttribute('data-sale-json');
+          const saleObj = JSON.parse(decodeURIComponent(raw));
+          if (typeof exportThermalReceiptPDF === 'function') {
+            exportThermalReceiptPDF(saleObj, '80mm');
+          } else if (window.exportThermalReceiptPDF) {
+            window.exportThermalReceiptPDF(saleObj, '80mm');
+          }
+        } catch(e) {
+          console.error('Erro ao baixar PDF:', e);
+        }
+      });
+    });
+
     // Botão WhatsApp Lembrar Recompra
     modal.querySelectorAll('.btn-whatsapp-refill').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -267,54 +438,7 @@ export function openPatientPurchasesModal(patientId, patientName = 'Cliente') {
   }
 }
 
-// Exportação global da função de emissão de cupom térmico a partir de compras
+// Exportação global da função
 if (typeof window !== 'undefined') {
   window.openPatientPurchasesModal = openPatientPurchasesModal;
-
-  window.emitThermalReceiptFromPurchase = function(btn) {
-    let saleData = null;
-    try {
-      if (!btn) return;
-      const medName = btn.getAttribute('data-med') || 'Medicamento Dispensado';
-      const price = parseFloat(btn.getAttribute('data-price') || 0);
-      const qty = parseInt(btn.getAttribute('data-qty') || 1, 10);
-      const batch = btn.getAttribute('data-batch') || 'L-DISP';
-      const resp = btn.getAttribute('data-resp') || 'Farmacêutico Responsável';
-      const proto = btn.getAttribute('data-proto') || `VD-${Math.floor(100000 + Math.random()*900000)}`;
-      const patientName = btn.getAttribute('data-patient') || 'Cliente';
-      const patientCpf = btn.getAttribute('data-cpf') || '';
-
-      saleData = {
-        protocol: proto,
-        clientName: patientName,
-        clientCpf: patientCpf,
-        items: [
-          {
-            product: { name: medName, ean: '', batch: batch },
-            quantity: qty,
-            unitPrice: price,
-            subtotal: qty * price
-          }
-        ],
-        subtotalGross: qty * price,
-        discount: 0,
-        totalSale: qty * price,
-        paymentMethod: 'Balcão / Caixa',
-        operatorName: resp,
-        created_at: new Date().toISOString()
-      };
-
-      showToast('🖨️ Gerando Cupom Térmico (80mm)...');
-      if (typeof printThermalReceipt === 'function') {
-        printThermalReceipt(saleData, '80mm');
-      } else if (window.printThermalReceipt) {
-        window.printThermalReceipt(saleData, '80mm');
-      }
-    } catch (err) {
-      console.error('Erro ao emitir cupom térmico:', err);
-      if (saleData && window.printThermalReceipt) {
-        window.printThermalReceipt(saleData, '80mm');
-      }
-    }
-  };
 }
