@@ -468,7 +468,16 @@ function renderServicesChart(ChartClass, data) {
       responsive: true,
       maintainAspectRatio: false,
       animation: { duration: 750, easing: 'easeOutQuart' },
-      onClick: (event, elements) => {
+      onClick: (event, elements, chart) => {
+        if (!chart || chart._justClickedLegend) return;
+        const chartArea = chart.chartArea;
+        if (chartArea) {
+          const x = typeof event.x === 'number' ? event.x : (event.native ? event.native.offsetX : 0);
+          const y = typeof event.y === 'number' ? event.y : (event.native ? event.native.offsetY : 0);
+          if (y < chartArea.top || y > chartArea.bottom || x < chartArea.left || x > chartArea.right) {
+            return;
+          }
+        }
         if (elements && elements.length > 0 && !isZero) {
           const idx = elements[0].index;
           const sLabel = services[idx]?.label;
@@ -482,9 +491,10 @@ function renderServicesChart(ChartClass, data) {
           display: chartType !== 'bar' && !isZero,
           position: 'bottom',
           onClick: (e, legendItem, legend) => {
-            // Apenas alterna visualmente no gráfico (mostrar/ocultar), SEM abrir janela
-            const index = legendItem.index;
             const ci = legend.chart;
+            ci._justClickedLegend = true;
+            setTimeout(() => { ci._justClickedLegend = false; }, 400);
+            const index = legendItem.index;
             if (typeof ci.toggleDataVisibility === 'function') {
               ci.toggleDataVisibility(index);
             } else if (ci.getDatasetMeta(0)?.data[index]) {
@@ -627,7 +637,16 @@ function renderCdssChart(ChartClass, data) {
       animation: { duration: 750, easing: 'easeOutQuart' },
       layout: { padding: 6 },
       scales: scalesConfig,
-      onClick: (event, elements) => {
+      onClick: (event, elements, chart) => {
+        if (!chart || chart._justClickedLegend) return;
+        const chartArea = chart.chartArea;
+        if (chartArea) {
+          const x = typeof event.x === 'number' ? event.x : (event.native ? event.native.offsetX : 0);
+          const y = typeof event.y === 'number' ? event.y : (event.native ? event.native.offsetY : 0);
+          if (y < chartArea.top || y > chartArea.bottom || x < chartArea.left || x > chartArea.right) {
+            return;
+          }
+        }
         if (elements && elements.length > 0) {
           const firstElement = elements[0];
           const dataIndex = firstElement.index;
@@ -643,9 +662,10 @@ function renderCdssChart(ChartClass, data) {
           display: chartType !== 'bar' && chartType !== 'radar',
           position: 'bottom',
           onClick: (e, legendItem, legend) => {
-            // Apenas alterna visualmente no gráfico (mostrar/ocultar), SEM abrir janela
-            const index = legendItem.index;
             const ci = legend.chart;
+            ci._justClickedLegend = true;
+            setTimeout(() => { ci._justClickedLegend = false; }, 400);
+            const index = legendItem.index;
             if (typeof ci.toggleDataVisibility === 'function') {
               ci.toggleDataVisibility(index);
             } else if (ci.getDatasetMeta(0)?.data[index]) {
@@ -803,7 +823,16 @@ function renderWeeklyChart(ChartClass, data) {
       animation: { duration: 750, easing: 'easeOutQuart' },
       layout: { padding: 4 },
       scales: scalesConfig,
-      onClick: (event, elements) => {
+      onClick: (event, elements, chart) => {
+        if (!chart || chart._justClickedLegend) return;
+        const chartArea = chart.chartArea;
+        if (chartArea) {
+          const x = typeof event.x === 'number' ? event.x : (event.native ? event.native.offsetX : 0);
+          const y = typeof event.y === 'number' ? event.y : (event.native ? event.native.offsetY : 0);
+          if (y < chartArea.top || y > chartArea.bottom || x < chartArea.left || x > chartArea.right) {
+            return;
+          }
+        }
         if (elements && elements.length > 0) {
           if (window.openDrillDownModal) {
             window.openDrillDownModal('encounters');
@@ -814,9 +843,10 @@ function renderWeeklyChart(ChartClass, data) {
         legend: {
           position: 'top',
           onClick: (e, legendItem, legend) => {
-            // Apenas alterna visualmente no gráfico (mostrar/ocultar), SEM abrir janela
-            const index = legendItem.datasetIndex;
             const ci = legend.chart;
+            ci._justClickedLegend = true;
+            setTimeout(() => { ci._justClickedLegend = false; }, 400);
+            const index = legendItem.datasetIndex;
             ci.setDatasetVisibility(index, !ci.isDatasetVisible(index));
             ci.update();
           },
