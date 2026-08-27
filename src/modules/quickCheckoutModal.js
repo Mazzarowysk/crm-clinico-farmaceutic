@@ -139,8 +139,11 @@ export function openQuickCheckoutModal(onFinished = null, initialData = null) {
               <button type="button" class="btn-pay-tab" data-pay="credito" style="padding: 8px 4px; border-radius: 8px; font-size: 0.76rem; font-weight: 700; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: #cbd5e1; text-align: center;">
                 <i class="fa-solid fa-receipt"></i> Crédito
               </button>
+              <button type="button" class="btn-pay-tab" data-pay="boleto" style="padding: 8px 4px; border-radius: 8px; font-size: 0.76rem; font-weight: 700; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: #cbd5e1; text-align: center;">
+                <i class="fa-solid fa-barcode" style="color: #fbbf24;"></i> Boleto
+              </button>
               <button type="button" class="btn-pay-tab" data-pay="convenio" style="padding: 8px 4px; border-radius: 8px; font-size: 0.76rem; font-weight: 700; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.04); color: #cbd5e1; text-align: center;">
-                <i class="fa-solid fa-hospital-user"></i> Convênio / A Prazo
+                <i class="fa-solid fa-hospital-user"></i> Convênio / Prazo
               </button>
             </div>
 
@@ -305,6 +308,20 @@ export function openQuickCheckoutModal(onFinished = null, initialData = null) {
         <div style="font-size: 0.78rem; color: #cbd5e1; display: flex; align-items: center; gap: 8px;">
           <i class="fa-solid fa-credit-card" style="color: #38bdf8; font-size: 1.2rem;"></i>
           <span>Insira ou aproxime o cartão de débito na maquininha TEF/POS. Total: <strong>R$ ${net.toFixed(2).replace('.', ',')}</strong></span>
+        </div>
+      `;
+    } else if (selectedPayment === 'boleto') {
+      payPanel.innerHTML = `
+        <div style="font-size: 0.78rem; color: #cbd5e1; display: flex; flex-direction: column; gap: 6px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div style="color: #fbbf24; font-weight: 700; display: flex; align-items: center; gap: 6px;">
+              <i class="fa-solid fa-barcode"></i> Boleto Bancário Registrado
+            </div>
+            <span style="font-size: 0.7rem; background: rgba(245, 158, 11, 0.15); color: #fbbf24; padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(245, 158, 11, 0.3);">Vencimento em 3 dias úteis</span>
+          </div>
+          <div style="font-size: 0.74rem; color: #94a3b8;">
+            Emissão de cobrança bancária com código de barras. Total: <strong style="color: #34d399;">R$ ${net.toFixed(2).replace('.', ',')}</strong>
+          </div>
         </div>
       `;
     } else if (selectedPayment === 'convenio') {
@@ -605,6 +622,7 @@ export function openQuickCheckoutModal(onFinished = null, initialData = null) {
       pix: 'PIX Instantâneo',
       debito: 'Cartão de Débito',
       credito: `Cartão de Crédito (${installments}x)`,
+      boleto: 'Boleto Bancário',
       convenio: 'Convênio / A Prazo'
     };
 

@@ -55,82 +55,80 @@ export function printThermalReceipt(saleData, paperWidth = '80mm') {
   const totalNet = parseFloat(saleData.totalSale || 0).toFixed(2).replace('.', ',');
   const paidVal = parseFloat(saleData.paidAmount || saleData.totalSale || 0).toFixed(2).replace('.', ',');
   const changeVal = parseFloat(saleData.change || 0).toFixed(2).replace('.', ',');
-  const paymentMethod = saleData.paymentMethod || 'Dinheiro';
-
   const receiptBodyHtml = `
-    <div id="thermal-receipt-sheet" style="background: #ffffff; color: #000000; font-family: 'Courier New', Courier, monospace; width: 100%; max-width: ${widthPx}; margin: 0 auto; padding: 12px 10px; line-height: 1.3; font-size: ${fontSize}; box-sizing: border-box;">
+    <div id="thermal-receipt-sheet" style="background: #fef08a; color: #000000; font-family: 'Courier New', Courier, monospace; width: 100%; max-width: ${widthPx}; margin: 0 auto; padding: 14px 12px; line-height: 1.3; font-size: ${fontSize}; box-sizing: border-box; box-shadow: 0 4px 14px rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.08);">
       <div style="text-align: center; margin-bottom: 6px;">
-        <div style="font-weight: 900; font-size: ${is58mm ? '13px' : '15px'}; text-transform: uppercase; letter-spacing: 0.5px;">${pharmacyName}</div>
-        <div style="font-size: ${is58mm ? '9px' : '10.5px'}; color: #333;">${address}</div>
-        <div style="font-size: ${is58mm ? '9px' : '10.5px'}; color: #333;">CNPJ: ${cnpj} • Tel: ${phone}</div>
-        <div style="font-size: ${is58mm ? '8.5px' : '10px'}; color: #444; margin-top: 2px;">RT: ${rtName} • ${crf}</div>
+        <div style="font-weight: 900; font-size: ${is58mm ? '13px' : '15px'}; text-transform: uppercase; letter-spacing: 0.5px; color: #000;">${pharmacyName}</div>
+        <div style="font-size: ${is58mm ? '9px' : '10.5px'}; color: #111;">${address}</div>
+        <div style="font-size: ${is58mm ? '9px' : '10.5px'}; color: #111;">CNPJ: ${cnpj} • Tel: ${phone}</div>
+        <div style="font-size: ${is58mm ? '8.5px' : '10px'}; color: #222; margin-top: 2px;">RT: ${rtName} • ${crf}</div>
       </div>
 
       <div style="border-top: 1.5px dashed #000; margin: 6px 0;"></div>
-      <div style="text-align: center; font-weight: 800; font-size: ${is58mm ? '11px' : '13px'}; letter-spacing: 0.5px;">
+      <div style="text-align: center; font-weight: 800; font-size: ${is58mm ? '11px' : '13px'}; letter-spacing: 0.5px; color: #000;">
         COMPROVANTE DE DISPENSAÇÃO &amp; VENDA
       </div>
-      <div style="text-align: center; font-size: ${is58mm ? '8.5px' : '10px'}; color: #555;">
+      <div style="text-align: center; font-size: ${is58mm ? '8.5px' : '10px'}; color: #333;">
         (DOCUMENTO AUXILIAR NÃO FISCAL)
       </div>
       <div style="border-top: 1.5px dashed #000; margin: 6px 0;"></div>
 
-      <div style="display: flex; justify-content: space-between; margin: 2px 0;">
+      <div style="display: flex; justify-content: space-between; margin: 2px 0; color: #000;">
         <span>Protocolo: <strong>#${saleId}</strong></span>
         <span>${dateStr.split(' ')[0]}</span>
       </div>
-      <div style="display: flex; justify-content: space-between; margin: 2px 0;">
+      <div style="display: flex; justify-content: space-between; margin: 2px 0; color: #000;">
         <span>Hora: ${dateStr.split(' ')[1] || ''}</span>
         <span>Operador: ${operator.split(' ')[0]}</span>
       </div>
-      <div style="margin: 2px 0;">
+      <div style="margin: 2px 0; color: #000;">
         <span>Cliente: <strong>${clientName}</strong></span>
       </div>
-      ${clientCpf ? `<div style="margin: 2px 0;"><span>${clientCpf}</span></div>` : ''}
+      ${clientCpf ? `<div style="margin: 2px 0; color: #000;"><span>${clientCpf}</span></div>` : ''}
 
       <div style="border-top: 1.5px dashed #000; margin: 6px 0;"></div>
-      <div style="font-weight: bold; margin-bottom: 6px; font-size: ${is58mm ? '10px' : '11.5px'};">ITENS DISPENSADOS / PRODUTOS:</div>
+      <div style="font-weight: bold; margin-bottom: 6px; font-size: ${is58mm ? '10px' : '11.5px'}; color: #000;">ITENS DISPENSADOS / PRODUTOS:</div>
       ${itemsHtml}
 
       <div style="border-top: 1.5px dashed #000; margin: 6px 0;"></div>
-      <div style="display: flex; justify-content: space-between; margin: 3px 0;">
+      <div style="display: flex; justify-content: space-between; margin: 3px 0; color: #000;">
         <span>SUBTOTAL:</span>
         <span>R$ ${subtotalGross}</span>
       </div>
       ${parseFloat(saleData.discount || 0) > 0 ? `
-        <div style="display: flex; justify-content: space-between; margin: 3px 0;">
+        <div style="display: flex; justify-content: space-between; margin: 3px 0; color: #000;">
           <span>DESCONTO:</span>
           <span>- R$ ${discountVal}</span>
         </div>
       ` : ''}
-      <div style="display: flex; justify-content: space-between; font-weight: 900; font-size: ${is58mm ? '13px' : '15px'}; margin: 6px 0; border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 4px 0;">
+      <div style="display: flex; justify-content: space-between; font-weight: 900; font-size: ${is58mm ? '13px' : '15px'}; margin: 6px 0; border-top: 1.5px solid #000; border-bottom: 1.5px solid #000; padding: 4px 0; color: #000;">
         <span>TOTAL A PAGAR:</span>
         <span>R$ ${totalNet}</span>
       </div>
 
-      <div style="display: flex; justify-content: space-between; margin: 3px 0;">
+      <div style="display: flex; justify-content: space-between; margin: 3px 0; color: #000;">
         <span>Forma Pagto:</span>
         <strong style="text-transform: uppercase;">${paymentMethod}</strong>
       </div>
       ${saleData.paymentMethod === 'Dinheiro' ? `
-        <div style="display: flex; justify-content: space-between; margin: 3px 0;">
+        <div style="display: flex; justify-content: space-between; margin: 3px 0; color: #000;">
           <span>Valor Recebido:</span>
           <span>R$ ${paidVal}</span>
         </div>
-        <div style="display: flex; justify-content: space-between; margin: 3px 0;">
+        <div style="display: flex; justify-content: space-between; margin: 3px 0; color: #000;">
           <span>Troco:</span>
           <strong>R$ ${changeVal}</strong>
         </div>
       ` : ''}
 
       <div style="border-top: 1.5px dashed #000; margin: 8px 0 6px 0;"></div>
-      <div style="font-size: ${is58mm ? '8.5px' : '10px'}; text-align: center; color: #222; line-height: 1.35;">
+      <div style="font-size: ${is58mm ? '8.5px' : '10px'}; text-align: center; color: #111; line-height: 1.35;">
         Farmacêutico: Promovendo o Uso Racional de Medicamentos.<br>
         Em caso de reações adversas, procure o farmacêutico.<br>
         <strong>Agradecemos a preferência!</strong>
       </div>
       <div style="border-top: 1.5px dashed #000; margin: 6px 0;"></div>
-      <div style="text-align: center; font-size: 8.5px; color: #666;">
+      <div style="text-align: center; font-size: 8.5px; color: #333;">
         CRM Clínico Farmacêutico v3.0 • Sistema Autorizado
       </div>
     </div>
@@ -140,7 +138,7 @@ export function printThermalReceipt(saleData, paperWidth = '80mm') {
   openReceiptPreviewModal(receiptBodyHtml, saleData, widthPx);
 
   // 2. Dispara a impressão imediatamente
-  triggerPrintDocument(receiptBodyHtml, `Cupom_${saleId}`, paperWidth);
+  triggerPrintDocument(receiptBodyHtml, `Cupom_${saleId}`, paperWidth, saleData);
 }
 
 // Dispara o comando de impressão de forma confiável com barra de ferramentas
@@ -157,11 +155,11 @@ function triggerPrintDocument(receiptHtml, title = 'Cupom', paperWidth = '80mm',
         <style>
           @page { margin: 0; size: ${paperWidth} auto; }
           body { margin: 0; padding: 0; background: #334155; font-family: 'Courier New', Courier, monospace; display: flex; flex-direction: column; align-items: center; }
-          .receipt-container { background: #fff; box-shadow: 0 4px 14px rgba(0,0,0,0.3); margin: 15px 0; border-radius: 4px; }
+          .receipt-container { background: #fef08a !important; box-shadow: 0 4px 14px rgba(0,0,0,0.3); margin: 15px 0; border-radius: 4px; border: 1px solid #eab308; }
           @media print {
-            body { background: #fff; }
+            body { background: #fef08a !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
             .no-print { display: none !important; }
-            .receipt-container { box-shadow: none; margin: 0; }
+            .receipt-container { background: #fef08a !important; box-shadow: none; margin: 0; border: none; }
           }
         </style>
       </head>
@@ -199,7 +197,7 @@ function triggerPrintDocument(receiptHtml, title = 'Cupom', paperWidth = '80mm',
   }
 }
 
-// GERAÇÃO E DOWNLOAD DIRETO DO CUPOM EM ARQUIVO PDF
+// GERAÇÃO E DOWNLOAD DIRETO DO CUPOM EM ARQUIVO PDF (PAPEL AMARELO PADRÃO)
 export function exportThermalReceiptPDF(saleData, paperWidth = '80mm') {
   if (!window.jspdf) {
     showToast('⚠️ jsPDF não disponível.');
@@ -238,6 +236,11 @@ export function exportThermalReceiptPDF(saleData, paperWidth = '80mm') {
     unit: 'mm',
     format: [widthMm, estimatedHeight]
   });
+
+  // Fundo Amarelo Padrão do Cupom Térmico (Papel Bobina Amarela)
+  doc.setFillColor(254, 240, 138); // RGB #fef08a amarelo canário / bobina térmica
+  doc.rect(0, 0, widthMm, estimatedHeight, 'F');
+  doc.setTextColor(0, 0, 0);
 
   const center = widthMm / 2;
   let y = 6;
@@ -358,16 +361,16 @@ function openReceiptPreviewModal(receiptHtml, saleData, widthPx) {
       
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 10px;">
         <h4 style="margin: 0; color: #fff; font-family: 'Outfit', sans-serif; font-size: 1.15rem; font-weight: 700; display: flex; align-items: center; gap: 8px;">
-          <i class="fa-solid fa-receipt" style="color: #38bdf8;"></i> Visualização do Cupom Térmico
+          <i class="fa-solid fa-receipt" style="color: #fbbf24;"></i> Cupom Térmico (Bobina Amarela)
         </h4>
         <button id="btn-close-receipt-preview" style="background: none; border: none; color: #94a3b8; font-size: 1.3rem; cursor: pointer; padding: 4px;">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
 
-      <!-- Papel do Cupom com Efeito Realista -->
-      <div style="flex: 1; overflow-y: auto; background: #334155; border-radius: 12px; padding: 16px; display: flex; justify-content: center;">
-        <div style="background: #ffffff; box-shadow: 0 8px 24px rgba(0,0,0,0.4); border-radius: 4px; padding: 8px; width: 100%; max-width: ${widthPx};">
+      <!-- Papel do Cupom com Efeito Realista de Bobina Amarela -->
+      <div style="flex: 1; overflow-y: auto; background: #1e293b; border-radius: 12px; padding: 16px; display: flex; justify-content: center;">
+        <div style="background: #fef08a; box-shadow: 0 8px 24px rgba(0,0,0,0.4); border-radius: 4px; padding: 4px; width: 100%; max-width: ${widthPx}; border: 1px solid #eab308;">
           ${receiptHtml}
         </div>
       </div>
