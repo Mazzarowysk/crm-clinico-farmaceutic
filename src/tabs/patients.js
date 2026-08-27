@@ -362,6 +362,7 @@ export function renderPatientsTab(contentArea) {
                         <i class="fa-solid fa-heart" style="color: #f87171;"></i> Pressão (PA):
                       </label>
                       <input type="text" id="vitalBloodPressure" class="form-input" placeholder="120/80 mmHg" style="padding: 8px 10px; font-size: 0.84rem; font-family: monospace;">
+                      <div id="vital-pa-badge" style="display: none; font-size: 0.68rem; font-weight: 700; margin-top: 4px; border-radius: 4px; padding: 2px 6px; text-align: center;"></div>
                     </div>
 
                     <!-- 2. Batimento Cardíaco / Frequência Cardíaca (FC) -->
@@ -1147,6 +1148,60 @@ export function renderPatientsTab(contentArea) {
       el.addEventListener('change', recomputeLiveCDSSAndSuggestions);
     }
   });
+
+  const paInputEl = document.getElementById('vitalBloodPressure');
+  if (paInputEl) {
+    const updatePaClassification = () => {
+      const val = (paInputEl.value || '').trim();
+      const badge = document.getElementById('vital-pa-badge');
+      if (!badge) return;
+      if (!val || !val.includes('/')) {
+        badge.style.display = 'none';
+        return;
+      }
+      const parts = val.replace(/[^0-9/]/g, '').split('/');
+      if (parts.length === 2 && parts[0] && parts[1]) {
+        const sys = parseInt(parts[0], 10);
+        const dia = parseInt(parts[1], 10);
+        if (!isNaN(sys) && !isNaN(dia)) {
+          badge.style.display = 'block';
+          if (sys >= 180 || dia >= 120) {
+            badge.style.background = 'rgba(239, 68, 68, 0.25)';
+            badge.style.color = '#fca5a5';
+            badge.style.border = '1px solid #ef4444';
+            badge.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> 🚨 Crise Hipertensiva (Urgência)';
+          } else if (sys >= 140 || dia >= 90) {
+            badge.style.background = 'rgba(249, 115, 22, 0.25)';
+            badge.style.color = '#fdba74';
+            badge.style.border = '1px solid #f97316';
+            badge.innerHTML = '⚠️ Hipertensão Estágio 2';
+          } else if (sys >= 130 || dia >= 80) {
+            badge.style.background = 'rgba(234, 179, 8, 0.25)';
+            badge.style.color = '#fef08a';
+            badge.style.border = '1px solid #eab308';
+            badge.innerHTML = '⚠️ Hipertensão Estágio 1';
+          } else if (sys >= 120 && dia < 80) {
+            badge.style.background = 'rgba(56, 189, 248, 0.2)';
+            badge.style.color = '#bae6fd';
+            badge.style.border = '1px solid #38bdf8';
+            badge.innerHTML = 'ℹ️ Pressão Elevada / Pré-HTA';
+          } else if (sys < 90 || dia < 60) {
+            badge.style.background = 'rgba(168, 85, 247, 0.2)';
+            badge.style.color = '#e9d5ff';
+            badge.style.border = '1px solid #a855f7';
+            badge.innerHTML = 'ℹ️ Hipotensão Arterial';
+          } else {
+            badge.style.background = 'rgba(16, 185, 129, 0.2)';
+            badge.style.color = '#86efac';
+            badge.style.border = '1px solid #10b981';
+            badge.innerHTML = '✓ Pressão Ótima / Normal';
+          }
+        }
+      }
+    };
+    paInputEl.addEventListener('input', updatePaClassification);
+    paInputEl.addEventListener('change', updatePaClassification);
+  }
 
   const complaintSelectEl = document.getElementById('complaintProtocol');
   if (complaintSelectEl) {

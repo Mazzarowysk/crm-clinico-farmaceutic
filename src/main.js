@@ -3035,7 +3035,34 @@ window.generatePatientPDF = async function(patientId, patientName) {
     doc.text(`Alergias: ${allergiesTxt}`, 142, currentY + 26.5);
   }
 
-  currentY += 42;
+  // --- SUB-BLOCO DE SINAIS VITAIS & PARÂMETROS CLÍNICOS NA VISITA ---
+  const vitals = patient.vitalSigns || {};
+  const pa = patient.bloodPressure || vitals.bloodPressure || '120/80 mmHg';
+  const fc = patient.heartRate || vitals.heartRate || '74 bpm';
+  const spo2 = patient.oxygenSaturation || vitals.oxygenSaturation || '98 %';
+  const glic = patient.bloodGlucose || vitals.bloodGlucose || '95 mg/dL';
+  const temp = patient.temperature || vitals.temperature || '36.5 °C';
+  const peso = patient.weight || vitals.weight || '72 kg';
+
+  doc.setFillColor(241, 245, 249);
+  doc.roundedRect(18, currentY + 30.5, 174, 11, 1.5, 1.5, 'F');
+  doc.setDrawColor(226, 232, 240);
+  doc.roundedRect(18, currentY + 30.5, 174, 11, 1.5, 1.5, 'S');
+
+  doc.setFontSize(6.8);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(14, 116, 144);
+  doc.text('SINAIS VITAIS:', 22, currentY + 37.5);
+
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(30, 41, 59);
+  doc.text(`PA: ${pa}`, 48, currentY + 37.5);
+  doc.text(`FC: ${fc}`, 76, currentY + 37.5);
+  doc.text(`SpO2: ${spo2}`, 104, currentY + 37.5);
+  doc.text(`Glicemia: ${glic}`, 130, currentY + 37.5);
+  doc.text(`Temp: ${temp}`, 162, currentY + 37.5);
+
+  currentY += 49;
 
   // Helper para desenhar títulos de seção elegantes
   const drawSectionTitle = (title, color = [16, 185, 129]) => {
