@@ -21,10 +21,10 @@ export function renderPatientsTab(contentArea) {
             <button id="btn-new-patient" class="btn btn-primary" style="padding: 7px 14px; font-size: 0.85rem; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px;">
               <i class="fa-solid fa-user-plus"></i> Novo Cliente / Queixa
             </button>
-            <button id="btn-quick-vaccine-header" onclick="window.openVaccinationModal && window.openVaccinationModal()" class="btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; padding: 7px 14px; font-size: 0.85rem; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
+            <button id="btn-quick-vaccine-header" type="button" class="btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; padding: 7px 14px; font-size: 0.85rem; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
               <i class="fa-solid fa-syringe"></i> Vacinação
             </button>
-            <button id="btn-quick-portal-header" onclick="window.openPatientPortalModal && window.openPatientPortalModal()" class="btn" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border: none; padding: 7px 14px; font-size: 0.85rem; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);">
+            <button id="btn-quick-portal-header" type="button" class="btn" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border: none; padding: 7px 14px; font-size: 0.85rem; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);">
               <i class="fa-solid fa-mobile-screen-button"></i> Portal do Paciente PWA
             </button>
           </div>
@@ -578,13 +578,25 @@ export function renderPatientsTab(contentArea) {
     });
   };
 
-  document.getElementById('btn-quick-vaccine-header')?.addEventListener('click', () => {
-    openVaccinationModal();
-  });
+  const vacHeaderBtn = document.getElementById('btn-quick-vaccine-header');
+  if (vacHeaderBtn) {
+    vacHeaderBtn.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (typeof openVaccinationModal === 'function') openVaccinationModal();
+      else if (window.openVaccinationModal) window.openVaccinationModal();
+    };
+  }
 
-  document.getElementById('btn-quick-portal-header')?.addEventListener('click', () => {
-    openPatientPortalModal();
-  });
+  const portalHeaderBtn = document.getElementById('btn-quick-portal-header');
+  if (portalHeaderBtn) {
+    portalHeaderBtn.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (typeof openPatientPortalModal === 'function') openPatientPortalModal();
+      else if (window.openPatientPortalModal) window.openPatientPortalModal();
+    };
+  }
 
   // Ação de cadastrar novo Programa / Convênio PBM
   const handleAddNewPBM = () => {
