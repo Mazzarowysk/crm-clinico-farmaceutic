@@ -444,6 +444,45 @@ export const manualData = [
       { q: 'O sistema continua funcionando se a internet cair?', a: 'Sim! Graças à arquitetura Offline-First, o CRM Clínico Farmacêutico armazena tudo no banco local e faz a sincronização em segundo plano assim que a conexão retornar.' },
       { q: 'Como limpar dados de simulação sem apagar meus clientes reais?', a: 'No Agrupamento 6, clique em "Limpar Dados de Simulação" e digite sua senha. Somente registros com a tag [SIMULADO] serão removidos.' }
     ]
+  },
+  {
+    id: 'simulacao',
+    title: 'Simulações Clínicas & Roteiro Guiado',
+    icon: 'fa-graduation-cap',
+    color: '#14b8a6',
+    summary: 'Roteiros práticos de simulação clínica de alta fidelidade: Caso Real de Balcão SOAP com Dona Carmem e Simulação Multiprofissional com Escore MEWS e Telemedicina.',
+    roles: ['Master', 'Farmacêutico RT', 'Farmacêutico', 'Atendente', 'Administrador'],
+    buttons: [
+      {
+        icon: 'fa-stethoscope',
+        name: '🩺 Simulação 1: Balcão SOAP (< 60s) - Dona Carmem',
+        type: 'Caso Prático Balcão',
+        color: '#10b981',
+        description: 'Passo a passo completo: Seleção da cliente Dona Carmem (hipertensa), queixa de cefaleia/astenia há 2 dias, semáforo Red Flags desmarcado (verde), prescrição de Paracetamol 750mg + Soro de Reidratação e finalização com DSF no WhatsApp e PDV a R$ 17,90.',
+        shortcut: 'Aba Balcão -> Etapa 1 a 5',
+        rules: 'Exibe como o CDSS 4D cruza a hipertensão da paciente e autoriza a prescrição de MIPs sem incompatibilidades.',
+        keywords: ['simulacao balcao', 'caso clinico', 'dona carmem', 'cefaleia', 'astenia', 'paracetamol', 'soro', 'pdv']
+      },
+      {
+        icon: 'fa-user-doctor',
+        name: '👨‍⚕️ Simulação 2: Atendimento Multiprofissional & MEWS',
+        type: 'Interconsulta Médica',
+        color: '#9333ea',
+        description: 'Simula 5 cenários críticos: Crise Hipertensiva (PA 190/115 mmHg, MEWS 4), Broncoespasmo (SpO2 89%), Interação Severa Sildenafila+Nitrato, Hiperglicemia Aguda (Glicose 395) e Cefaleia em Trovoada com Telemedicina e Guia Médica em PDF.',
+        shortcut: 'Aba Profissionais -> Botão "✨ Simulação de Atendimento Clínico"',
+        rules: 'Gera guia oficial com CRF e CRM, integrando à timeline do prontuário.',
+        keywords: ['simulador multiprofissional', 'mews', 'teleconsulta', 'crise hipertensiva', 'interacao severa', 'guia medica']
+      }
+    ],
+    workflow: [
+      { step: 1, title: 'Simulação no Balcão', desc: 'Abra a aba Balcão, selecione o cliente, preencha o SOAP, valide os Red Flags e prescreva.' },
+      { step: 2, title: 'Finalização & Caixa', desc: 'Emita a DSF com QR Code, envie para o WhatsApp e abra o PDV para cobrança rápida.' },
+      { step: 3, title: 'Simulação Multiprofissional', desc: 'Na aba Profissionais, acione o simulador, teste o escore MEWS e emita a guia médica.' }
+    ],
+    faq: [
+      { q: 'Por que o Semáforo Red Flags deve ficar desmarcado na simulação de balcão?', a: 'Porque manter o semáforo desmarcado atesta a ausência de sinais de gravidade (sinal verde), autorizando a prescrição farmacêutica de MIPs. Se for marcado como grave, o sistema bloqueia os medicamentos e gera Guia Médica imediata.' },
+      { q: 'Onde encontro o PDF completo do Manual?', a: 'Você pode baixar o Manual em PDF no botão oficial no topo deste modal ou na aba de Configurações.' }
+    ]
   }
 ];
 
@@ -624,13 +663,24 @@ export const showInteractiveManualModal = (initialTabId = 'dashboard') => {
             </div>
           </div>
 
-          <button id="manual-modal-close" style="
-            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
-            color: #94a3b8; width: 34px; height: 34px; border-radius: 8px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
-          " onmouseover="this.style.color='#fff'; this.style.background='rgba(239, 68, 68, 0.25)'" onmouseout="this.style.color='#94a3b8'; this.style.background='rgba(255,255,255,0.06)'">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <a href="/Manual_do_Usuario_CRM_Clinico_Farmaceutico.pdf" download="Manual_do_Usuario_CRM_Clinico_Farmaceutico.pdf" target="_blank" style="
+              display: inline-flex; align-items: center; gap: 7px; background: rgba(45, 212, 191, 0.15);
+              border: 1px solid rgba(45, 212, 191, 0.45); color: #2dd4bf; padding: 6px 14px;
+              border-radius: 8px; font-size: 0.8rem; font-weight: 700; text-decoration: none;
+              box-shadow: 0 2px 8px rgba(0,0,0,0.3); transition: all 0.2s;
+            " onmouseover="this.style.background='rgba(45, 212, 191, 0.3)'; this.style.transform='translateY(-1px)'" onmouseout="this.style.background='rgba(45, 212, 191, 0.15)'; this.style.transform='none'">
+              <i class="fa-solid fa-file-pdf"></i> Baixar Manual PDF (v3.0)
+            </a>
+
+            <button id="manual-modal-close" style="
+              background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+              color: #94a3b8; width: 34px; height: 34px; border-radius: 8px; cursor: pointer;
+              display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+            " onmouseover="this.style.color='#fff'; this.style.background='rgba(239, 68, 68, 0.25)'" onmouseout="this.style.color='#94a3b8'; this.style.background='rgba(255,255,255,0.06)'">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          </div>
         </div>
 
         <!-- BARRA DE ABAS -->
