@@ -319,22 +319,25 @@ function renderBalcaoStepContent(step, patient, allPatients, activeMeds) {
         </div>
 
         <!-- Duração, Intensidade e Observações com Botões de Ajuda (?) -->
-        <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 18px; margin-bottom: 20px;">
-          <div style="display: grid; grid-template-columns: 1fr 1.2fr 2fr; gap: 18px;">
+        <div style="background: rgba(15, 23, 42, 0.85); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 22px 24px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.35);">
+          <div style="display: grid; grid-template-columns: 180px 1.4fr 2fr; gap: 22px; align-items: flex-start;">
             <div>
-              <label style="display: flex; align-items: center; justify-content: space-between; font-size: 0.84rem; color: #cbd5e1; margin-bottom: 8px; font-weight: 700;">
-                <span>Tempo de Evolução (Dias)</span>
-                <button type="button" onclick="window.showClinicalFieldHelp && window.showClinicalFieldHelp('tempo_evolucao')" title="Entenda o que é o Tempo de Evolução" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; border-radius: 50%; width: 20px; height: 20px; font-size: 0.72rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; transition: all 0.2s;">?</button>
+              <label style="display: flex; align-items: center; justify-content: space-between; font-size: 0.88rem; color: #e2e8f0; margin-bottom: 10px; font-weight: 700; letter-spacing: -0.2px;">
+                <span>Tempo de Evolução</span>
+                <button type="button" onclick="window.showClinicalFieldHelp && window.showClinicalFieldHelp('tempo_evolucao')" title="Entenda o que é o Tempo de Evolução" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; border-radius: 50%; width: 22px; height: 22px; font-size: 0.75rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; transition: all 0.2s;">?</button>
               </label>
-              <input type="number" id="input-symptom-days" class="form-input" min="1" max="90" value="${currentClinicalEncounter.symptomDurationDays || 1}" style="width: 100%; height: 42px; font-size: 0.95rem; font-weight: 700; color: #38bdf8;">
+              <div style="position: relative; display: flex; align-items: center;">
+                <input type="number" id="input-symptom-days" class="form-input" min="1" max="90" value="${currentClinicalEncounter.symptomDurationDays || 1}" style="width: 100%; min-height: 48px; height: 48px; font-size: 1.05rem; font-weight: 800; color: #38bdf8; background: #0b1120; border: 1.5px solid rgba(255,255,255,0.18); border-radius: 10px; padding: 8px 50px 8px 16px; box-sizing: border-box; line-height: 1.4;">
+                <span style="position: absolute; right: 14px; color: #94a3b8; font-size: 0.85rem; font-weight: 700; pointer-events: none;">dias</span>
+              </div>
             </div>
 
             <div>
-              <label style="display: flex; align-items: center; justify-content: space-between; font-size: 0.84rem; color: #cbd5e1; margin-bottom: 8px; font-weight: 700;">
+              <label style="display: flex; align-items: center; justify-content: space-between; font-size: 0.88rem; color: #e2e8f0; margin-bottom: 10px; font-weight: 700; letter-spacing: -0.2px;">
                 <span>Intensidade Relatada</span>
-                <button type="button" onclick="window.showClinicalFieldHelp && window.showClinicalFieldHelp('intensidade_relatada')" title="Entenda a Escala de Intensidade" style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); color: #fbbf24; border-radius: 50%; width: 20px; height: 20px; font-size: 0.72rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; transition: all 0.2s;">?</button>
+                <button type="button" onclick="window.showClinicalFieldHelp && window.showClinicalFieldHelp('intensidade_relatada')" title="Entenda a Escala de Intensidade" style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); color: #fbbf24; border-radius: 50%; width: 22px; height: 22px; font-size: 0.75rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; transition: all 0.2s;">?</button>
               </label>
-              <select id="select-symptom-intensity" class="form-input" style="width: 100%; height: 42px; font-size: 0.92rem; font-weight: 600; color: #f8fafc;">
+              <select id="select-symptom-intensity" class="form-input" style="width: 100%; min-height: 48px; height: 48px; font-size: 0.93rem; font-weight: 600; color: #f8fafc; background: #0b1120; border: 1.5px solid rgba(255,255,255,0.18); border-radius: 10px; padding: 6px 14px; line-height: 1.4; box-sizing: border-box; cursor: pointer;">
                 <option value="Leve" ${currentClinicalEncounter.symptomSeverity === 'Leve' ? 'selected' : ''}>🟢 Leve (Incômodo suportável)</option>
                 <option value="Leve a Moderado" ${currentClinicalEncounter.symptomSeverity === 'Leve a Moderado' ? 'selected' : ''}>🟡 Leve a Moderado (Afeta atividades parciais)</option>
                 <option value="Moderado a Forte" ${currentClinicalEncounter.symptomSeverity === 'Moderado a Forte' ? 'selected' : ''}>🟠 Moderado a Forte (Dificulta rotina/sono)</option>
@@ -343,11 +346,11 @@ function renderBalcaoStepContent(step, patient, allPatients, activeMeds) {
             </div>
 
             <div>
-              <label style="display: flex; align-items: center; justify-content: space-between; font-size: 0.84rem; color: #cbd5e1; margin-bottom: 8px; font-weight: 700;">
+              <label style="display: flex; align-items: center; justify-content: space-between; font-size: 0.88rem; color: #e2e8f0; margin-bottom: 10px; font-weight: 700; letter-spacing: -0.2px;">
                 <span>Observações Adicionais da Queixa</span>
-                <button type="button" onclick="window.showClinicalFieldHelp && window.showClinicalFieldHelp('observacoes_queixa')" title="Entenda o campo de Observações" style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; border-radius: 50%; width: 20px; height: 20px; font-size: 0.72rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; transition: all 0.2s;">?</button>
+                <button type="button" onclick="window.showClinicalFieldHelp && window.showClinicalFieldHelp('observacoes_queixa')" title="Entenda o campo de Observações" style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); color: #c084fc; border-radius: 50%; width: 22px; height: 22px; font-size: 0.75rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; transition: all 0.2s;">?</button>
               </label>
-              <input type="text" id="input-complaint-notes" class="form-input" placeholder="Ex.: Piora à noite, dor latejante, tomou chá em casa..." value="${currentClinicalEncounter.customComplaintNotes || ''}" style="width: 100%; height: 42px; font-size: 0.92rem;">
+              <input type="text" id="input-complaint-notes" class="form-input" placeholder="Ex.: Piora à noite, dor latejante, tomou chá em casa..." value="${currentClinicalEncounter.customComplaintNotes || ''}" style="width: 100%; min-height: 48px; height: 48px; font-size: 0.93rem; color: #f8fafc; background: #0b1120; border: 1.5px solid rgba(255,255,255,0.18); border-radius: 10px; padding: 8px 16px; box-sizing: border-box; line-height: 1.4;">
             </div>
           </div>
         </div>

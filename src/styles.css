@@ -5869,5 +5869,20 @@ body.compact-mode .modal-content {
   backdrop-filter: blur(12px);
 }
 
+/* === REGRAS GLOBAIS DE FORMULÁRIO E SELECT PARA MÁXIMA LEGIBILIDADE === */
+select.form-input,
+input.form-input,
+.form-input {
+  min-height: 46px;
+  line-height: 1.45;
+  font-family: inherit;
+  box-sizing: border-box;
+  vertical-align: middle;
+}
 
-
+select.form-input option {
+  background: #0f172a;
+  color: #f8fafc;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+}
