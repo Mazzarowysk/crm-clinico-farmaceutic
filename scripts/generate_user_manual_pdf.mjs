@@ -784,7 +784,73 @@ async function generateCompleteUserManualPDF() {
 
   <div class="page-break"></div>
 
-  <!-- PÁGINA 8: ABA CONFIGURAÇÕES (7 AGRUPAMENTOS E HARD RESET SEGURO) -->
+  <!-- PÁGINA 8: ABA PROFISSIONAIS, ESCALA DE PLANTÃO E SIMULADOR MULTIPROFISSIONAL -->
+  <div class="tab-header" style="background: linear-gradient(135deg, #2e1065, #0f172a); border-left: 4px solid #a855f7;">
+    <h2 class="tab-title" style="color: #c084fc;"><i class="fa-solid fa-user-doctor"></i> Aba 6: Profissionais, Médicos &amp; Equipe Multidisciplinar</h2>
+    <span class="tab-tag" style="background: #9333ea; color: #fff;">Corpo Clínico &amp; Plantão</span>
+  </div>
+
+  <div class="section-card">
+    <div class="section-header"><i class="fa-solid fa-users-gear"></i> Gestão do Corpo Clínico &amp; Escala de Plantão</div>
+    <div class="steps-list">
+      <div class="step-item">
+        <div class="step-num"><i class="fa-solid fa-address-card"></i></div>
+        <div class="step-text"><strong>Cadastro Multiprofissional &amp; Validação CFM:</strong> Cadastre Médicos, Enfermeiros, Fisioterapeutas e Nutricionistas. O botão <em>"Verificar CFM"</em> valida o registro profissional em tempo real.</div>
+      </div>
+      <div class="step-item">
+        <div class="step-num"><i class="fa-solid fa-calendar-check"></i></div>
+        <div class="step-text"><strong>Escala de Plantão do Dia:</strong> O painel superior exibe os profissionais escalados para o plantão, facilitando o acionamento imediato em caso de emergência ou encaminhamento.</div>
+      </div>
+      <div class="step-item">
+        <div class="step-num"><i class="fa-solid fa-timeline"></i></div>
+        <div class="step-text"><strong>Histórico Longitudinal de Visitas:</strong> O prontuário do paciente integra todas as queixas triadas no balcão e os atendimentos médicos em uma timeline única.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GUIA DO SIMULADOR CLÍNICO MULTIPROFISSIONAL -->
+  <div class="example-box" style="border: 2px solid #9333ea; background: #faf5ff; margin-top: 6px;">
+    <div class="example-badge" style="background: #9333ea; color: #fff; font-size: 11.5px;">
+      <i class="fa-solid fa-wand-magic-sparkles"></i> Simulador de Atendimento Clínico, Protocolo MEWS &amp; Encaminhamento
+    </div>
+    <div class="example-title" style="color: #6b21a8; margin-top: 6px;">
+      Como operar o Simulador Clínico de Alta Fidelidade (Botão "✨ Simulação de Atendimento Clínico")
+    </div>
+    <div class="steps-list" style="margin-top: 8px;">
+      <div class="step-item">
+        <div class="step-num" style="background: #9333ea;">1</div>
+        <div class="step-text"><strong>Acesso Rápido:</strong> No topo da aba <em>Profissionais &amp; Equipe</em>, clique no botão roxo <strong>[✨ Simulação de Atendimento Clínico]</strong>.</div>
+      </div>
+      <div class="step-item">
+        <div class="step-num" style="background: #9333ea;">2</div>
+        <div class="step-text"><strong>Seleção do Cenário Clínico:</strong> Escolha entre 5 cenários reais: <em>🫀 Crise Hipertensiva (MEWS 4), 🫁 Broncoespasmo/Asma (SpO2 89%), 💊 Interação Severa Sildenafila+Nitrato, 🩸 Hiperglicemia Aguda (Glicose 395) ou 🧠 Cefaleia em Trovoada (Red Flag)</em>.</div>
+      </div>
+      <div class="step-item">
+        <div class="step-num" style="background: #9333ea;">3</div>
+        <div class="step-text"><strong>Cálculo Automático MEWS:</strong> O sistema avalia PA, FC, FR, Temp e SpO₂ calculando o escore de risco fisiológico de acordo com as diretrizes do CFF/CFM.</div>
+      </div>
+      <div class="step-item">
+        <div class="step-num" style="background: #9333ea;">4</div>
+        <div class="step-text"><strong>Ações Multiprofissionais Imediatas:</strong>
+          <ul>
+            <li><strong>📹 Iniciar Teleconsulta:</strong> Abre a sala de Telemedicina WebRTC com IA para consulta ao vivo.</li>
+            <li><strong>📲 WhatsApp do Paciente:</strong> Envia a mensagem formatada de encaminhamento e orientações de preparo.</li>
+            <li><strong>📄 Gerar Guia Médica (PDF):</strong> Emite a Guia Oficial de Encaminhamento com campos para CRF do Farmacêutico e CRM do Médico.</li>
+            <li><strong>💾 Salvar no Prontuário:</strong> Grava o episódio simulado na linha do cuidado longitudinal.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer-page">
+    <div>CRM Clínico Farmacêutico &bull; Manual do Usuário v3.0</div>
+    <div>Página 8</div>
+  </div>
+
+  <div class="page-break"></div>
+
+  <!-- PÁGINA 9: ABA CONFIGURAÇÕES (7 AGRUPAMENTOS E HARD RESET SEGURO) -->
   <div class="tab-header">
     <h2 class="tab-title"><i class="fa-solid fa-sliders"></i> Aba 7: Central de Configurações em 7 Agrupamentos</h2>
     <span class="tab-tag">Administração &amp; Nuvem</span>
@@ -866,7 +932,7 @@ async function generateCompleteUserManualPDF() {
 
   <div class="footer-page">
     <div>CRM Clínico Farmacêutico &bull; Manual do Usuário v3.0</div>
-    <div>Página 8</div>
+    <div>Página 9</div>
   </div>
 
 </body>
