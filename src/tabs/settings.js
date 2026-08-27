@@ -411,9 +411,14 @@ export function renderSettingsTab(contentArea) {
                   Abra a central com guias passo a passo, busca de termos médicos, fluxogramas interativos e orientações de segurança para a consulta farmacêutica.
                 </p>
               </div>
-              <button id="btn-open-manual-from-settings" class="btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; padding: 11px 22px; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);">
-                <i class="fa-solid fa-book-medical"></i> Abrir Manual Interativo em Tela Cheia
-              </button>
+              <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <a href="/Manual_do_Usuario_CRM_Clinico_Farmaceutico.pdf" download="Manual_do_Usuario_CRM_Clinico_Farmaceutico.pdf" target="_blank" class="btn" style="background: rgba(45, 212, 191, 0.2); color: #2dd4bf; border: 1.5px solid rgba(45, 212, 191, 0.5); padding: 11px 18px; border-radius: 10px; font-weight: 700; font-size: 0.88rem; text-decoration: none; display: flex; align-items: center; gap: 8px;">
+                  <i class="fa-solid fa-file-pdf"></i> Baixar Manual PDF Oficial
+                </a>
+                <button id="btn-open-manual-from-settings" class="btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; padding: 11px 22px; border-radius: 10px; font-weight: 700; font-size: 0.9rem; cursor: pointer; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);">
+                  <i class="fa-solid fa-book-medical"></i> Abrir Manual Interativo
+                </button>
+              </div>
             </div>
 
             <!-- Grade com os 6 Protocolos Clínicos Embutidos -->

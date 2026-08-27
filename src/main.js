@@ -1637,6 +1637,9 @@ function renderAppStructure() {
               <i class="fa-solid fa-user-clock"></i> <span>${pendingApprovalsCount} Pendência${pendingApprovalsCount > 1 ? 's' : ''}</span>
             </button>
           ` : ''}
+          <a href="/Manual_do_Usuario_CRM_Clinico_Farmaceutico.pdf" download="Manual_do_Usuario_CRM_Clinico_Farmaceutico.pdf" target="_blank" class="btn" style="background: linear-gradient(135deg, rgba(45, 212, 191, 0.22), rgba(13, 148, 136, 0.35)); border: 1px solid rgba(45, 212, 191, 0.55); color: #2dd4bf; text-decoration: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0 14px; height: 40px; border-radius: 20px; font-size: 0.82rem; font-weight: 700; gap: 6px; transition: all 0.2s ease; box-shadow: 0 2px 10px rgba(20, 184, 166, 0.25);" title="Baixar Manual do Usuário Completo em PDF (v3.0)">
+            <i class="fa-solid fa-file-pdf"></i> <span>Manual PDF</span>
+          </a>
           <button id="btn-header-manual" class="btn" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.22), rgba(13, 148, 136, 0.32)); border: 1px solid rgba(16, 185, 129, 0.5); color: #34d399; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0 14px; height: 40px; border-radius: 20px; font-size: 0.82rem; font-weight: 700; gap: 6px; transition: all 0.2s ease; box-shadow: 0 2px 10px rgba(16, 185, 129, 0.2);" title="Abrir Manual Interativo do CRM Farmacêutico (Protocolos e Guia Rápido)">
             <i class="fa-solid fa-book-medical"></i> <span>Manual Interativo</span>
           </button>
