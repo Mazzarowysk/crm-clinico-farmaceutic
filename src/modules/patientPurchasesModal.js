@@ -384,14 +384,17 @@ export function openPatientPurchasesModal(patientId, patientName = 'Cliente') {
         patientName: patientName
       };
 
+      const handleSaleFinished = () => {
+        showToast(`🛒 Venda vinculada com sucesso a ${patientName}!`);
+        setTimeout(() => {
+          openPatientPurchasesModal(patientId, patientName);
+        }, 300);
+      };
+
       if (typeof openQuickCheckoutModal === 'function') {
-        openQuickCheckoutModal(() => {
-          showToast('🛒 Venda registrada e vinculada com sucesso!');
-        }, initData);
+        openQuickCheckoutModal(handleSaleFinished, initData);
       } else if (window.openQuickCheckoutModal) {
-        window.openQuickCheckoutModal(() => {
-          showToast('🛒 Venda registrada e vinculada com sucesso!');
-        }, initData);
+        window.openQuickCheckoutModal(handleSaleFinished, initData);
       }
     };
 

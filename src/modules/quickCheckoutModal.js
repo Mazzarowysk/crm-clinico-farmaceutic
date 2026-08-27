@@ -73,10 +73,15 @@ export function openQuickCheckoutModal(onFinished = null, initialData = null) {
         <div style="display: flex; flex-direction: column; gap: 12px; overflow-y: auto; padding-right: 6px;">
           
           <!-- Identificação do Cliente -->
-          <div style="background: rgba(30, 41, 59, 0.45); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px;">
-            <label style="display: block; font-size: 0.78rem; color: #cbd5e1; font-weight: 700; margin-bottom: 5px;">
-              <i class="fa-solid fa-user" style="color: #38bdf8;"></i> Cliente / Paciente:
-            </label>
+          <div id="checkout-patient-container" style="background: rgba(30, 41, 59, 0.45); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px; transition: all 0.3s ease;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+              <label style="display: block; font-size: 0.78rem; color: #cbd5e1; font-weight: 700;">
+                <i class="fa-solid fa-user" style="color: #38bdf8;"></i> Cliente / Paciente da Venda:
+              </label>
+              <span id="checkout-patient-badge-bound" style="display: none; font-size: 0.68rem; color: #34d399; font-weight: 700; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); border-radius: 6px; padding: 2px 8px;">
+                <i class="fa-solid fa-link"></i> Vinculado ao Prontuário
+              </span>
+            </div>
             <select id="checkout-patient-select" class="form-input" style="width: 100%; background: #1e293b; color: #fff; font-size: 0.84rem; height: 38px;">
               <option value="">👤 Venda Avulsa / Consumidor Balcão</option>
               ${allPatients.map(p => `<option value="${p.id}" data-phone="${p.phone || ''}" data-cpf="${p.cpf || ''}">${p.name || p.fullName} (CPF: ${p.cpf || 'N/A'})</option>`).join('')}
@@ -563,6 +568,24 @@ export function openQuickCheckoutModal(onFinished = null, initialData = null) {
         }
       }
     }
+
+    // Atualiza estado visual do vínculo do paciente
+    const updatePatientBadgeState = () => {
+      const pSel = document.getElementById('checkout-patient-select');
+      const badge = document.getElementById('checkout-patient-badge-bound');
+      const container = document.getElementById('checkout-patient-container');
+      if (pSel && badge) {
+        if (pSel.value) {
+          badge.style.display = 'inline-flex';
+          if (container) container.style.borderColor = 'rgba(16, 185, 129, 0.4)';
+        } else {
+          badge.style.display = 'none';
+          if (container) container.style.borderColor = 'rgba(255, 255, 255, 0.08)';
+        }
+      }
+    };
+    updatePatientBadgeState();
+    document.getElementById('checkout-patient-select')?.addEventListener('change', updatePatientBadgeState);
 
     if (initialData.items && Array.isArray(initialData.items) && initialData.items.length > 0) {
       const allProds = localDB.list('products') || [];
