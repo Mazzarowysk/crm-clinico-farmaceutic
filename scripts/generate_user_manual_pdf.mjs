@@ -14,26 +14,36 @@ async function generateCompleteUserManualPDF() {
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    @page {
+      size: A4 portrait;
+      margin: 0;
+    }
+
     body {
       font-family: 'Inter', sans-serif;
       color: #1e293b;
       background: #ffffff;
-      font-size: 9px;
-      line-height: 1.36;
+      font-size: 8.8px;
+      line-height: 1.34;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
-    
-    @page {
-      size: A4;
-      margin: 7mm 9mm 7mm 9mm;
-    }
 
     .page {
+      width: 210mm;
+      height: 297mm;
+      max-height: 297mm;
+      padding: 10mm 12mm 8mm 12mm;
       page-break-after: always;
       break-after: page;
-      padding: 2px 0;
       box-sizing: border-box;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      background: #ffffff;
     }
 
     .page:last-child {
@@ -45,11 +55,11 @@ async function generateCompleteUserManualPDF() {
     .cover-container {
       background: linear-gradient(145deg, #042f2e 0%, #0f172a 50%, #064e3b 100%);
       color: #ffffff;
-      padding: 30px 26px;
+      padding: 28px 24px;
       border-radius: 12px;
       border: 2px solid #14b8a6;
       box-sizing: border-box;
-      min-height: 265mm;
+      height: 100%;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
@@ -134,7 +144,7 @@ async function generateCompleteUserManualPDF() {
     .tab-header {
       background: linear-gradient(135deg, #0f172a, #134e4a);
       color: #ffffff;
-      padding: 5px 11px;
+      padding: 5px 10px;
       border-radius: 6px;
       margin-bottom: 5px;
       display: flex;
@@ -168,7 +178,7 @@ async function generateCompleteUserManualPDF() {
       border: 1px solid #cbd5e1;
       border-radius: 5px;
       padding: 5px 8px;
-      margin-bottom: 5px;
+      margin-bottom: 4px;
       box-shadow: 0 1px 2px rgba(0,0,0,0.02);
     }
     .section-header {
@@ -178,12 +188,12 @@ async function generateCompleteUserManualPDF() {
       margin-bottom: 3px;
       font-family: 'Outfit', sans-serif;
       font-weight: 800;
-      font-size: 9.8px;
+      font-size: 9.6px;
       color: #0f172a;
     }
     .section-header i {
       color: #0d9488;
-      font-size: 10.5px;
+      font-size: 10px;
     }
 
     /* BOX DE EXEMPLO PRÁTICO */
@@ -191,7 +201,7 @@ async function generateCompleteUserManualPDF() {
       background: #f8fafc;
       border: 1.5px solid #0284c7;
       border-radius: 5px;
-      padding: 6px 8px;
+      padding: 5px 8px;
       margin-bottom: 4px;
     }
     .example-badge {
@@ -210,7 +220,7 @@ async function generateCompleteUserManualPDF() {
     }
     .example-title {
       font-family: 'Outfit', sans-serif;
-      font-size: 9.2px;
+      font-size: 9px;
       font-weight: 800;
       color: #0c4a6e;
       margin-bottom: 3px;
@@ -220,24 +230,24 @@ async function generateCompleteUserManualPDF() {
     .steps-list {
       display: flex;
       flex-direction: column;
-      gap: 3px;
+      gap: 2.5px;
       margin: 2px 0;
     }
     .step-item {
       display: flex;
       align-items: flex-start;
       gap: 5px;
-      font-size: 8.5px;
+      font-size: 8.3px;
       color: #334155;
-      line-height: 1.3;
+      line-height: 1.28;
     }
     .step-num {
-      width: 14px;
-      height: 14px;
+      width: 13px;
+      height: 13px;
       border-radius: 50%;
       background: #0f766e;
       color: #ffffff;
-      font-size: 7.5px;
+      font-size: 7px;
       font-weight: 800;
       display: flex;
       align-items: center;
@@ -249,30 +259,35 @@ async function generateCompleteUserManualPDF() {
       color: #0f172a;
     }
 
-    .btn-badge {
+    .btn-pill {
       display: inline-block;
       background: #0284c7;
       color: #ffffff;
-      padding: 1px 5px;
+      padding: 1px 4px;
       border-radius: 3px;
       font-weight: 700;
-      font-size: 7.8px;
+      font-size: 7.5px;
+      vertical-align: middle;
     }
-    .btn-badge-green {
+    .btn-pill-green {
+      display: inline-block;
       background: #10b981;
       color: #ffffff;
-      padding: 1px 5px;
+      padding: 1px 4px;
       border-radius: 3px;
       font-weight: 700;
-      font-size: 7.8px;
+      font-size: 7.5px;
+      vertical-align: middle;
     }
-    .btn-badge-purple {
+    .btn-pill-purple {
+      display: inline-block;
       background: #9333ea;
       color: #ffffff;
-      padding: 1px 5px;
+      padding: 1px 4px;
       border-radius: 3px;
       font-weight: 700;
-      font-size: 7.8px;
+      font-size: 7.5px;
+      vertical-align: middle;
     }
 
     /* CAIXA DE OBSERVAÇÃO CLÍNICA / EXPLICAÇÃO */
@@ -281,16 +296,16 @@ async function generateCompleteUserManualPDF() {
       border: 1px solid #86efac;
       border-left: 3.5px solid #10b981;
       border-radius: 4px;
-      padding: 4px 7px;
+      padding: 4px 6px;
       margin-top: 3px;
-      font-size: 8.2px;
+      font-size: 8px;
       color: #14532d;
-      line-height: 1.28;
+      line-height: 1.26;
     }
     .obs-card strong {
       color: #047857;
       display: block;
-      margin-bottom: 2px;
+      margin-bottom: 1px;
     }
 
     .key-badge {
@@ -299,7 +314,7 @@ async function generateCompleteUserManualPDF() {
       border: 1px solid #cbd5e1;
       padding: 1px 3px;
       border-radius: 3px;
-      font-size: 7.5px;
+      font-size: 7.2px;
       color: #0f766e;
       font-weight: 700;
     }
@@ -308,8 +323,8 @@ async function generateCompleteUserManualPDF() {
     table {
       width: 100%;
       border-collapse: collapse;
-      margin: 3px 0;
-      font-size: 8.2px;
+      margin: 2px 0;
+      font-size: 8px;
     }
     th {
       background: #0f172a;
@@ -318,11 +333,11 @@ async function generateCompleteUserManualPDF() {
       font-weight: 700;
       text-align: left;
       padding: 2.5px 4px;
-      font-size: 7.8px;
+      font-size: 7.5px;
       text-transform: uppercase;
     }
     td {
-      padding: 2.2px 4px;
+      padding: 2px 4px;
       border-bottom: 1px solid #e2e8f0;
       color: #334155;
     }
@@ -333,8 +348,8 @@ async function generateCompleteUserManualPDF() {
     .footer-page {
       border-top: 1px solid #e2e8f0;
       padding-top: 2px;
-      margin-top: 3px;
-      font-size: 7.2px;
+      margin-top: 2px;
+      font-size: 7px;
       color: #94a3b8;
       display: flex;
       justify-content: space-between;
@@ -536,10 +551,10 @@ async function generateCompleteUserManualPDF() {
 
       <div class="section-card" style="border-left: 3.5px solid #0d9488;">
         <div class="section-header"><i class="fa-solid fa-shield-halved"></i> Matriz de Decisão do Motor CDSS 4D</div>
-        <p style="font-size: 8.8px; color: #475569; margin-bottom: 3px;">
+        <p style="font-size: 8.5px; color: #475569; margin-bottom: 2px;">
           Durante a Etapa 4, o sistema executa 4 camadas simultâneas de checagem farmacológica antes de permitir a prescrição:
         </p>
-        <ul style="padding-left: 14px; font-size: 8.2px; color: #334155; line-height: 1.32;">
+        <ul style="padding-left: 12px; font-size: 8px; color: #334155; line-height: 1.3;">
           <li><strong>1D - Checagem de Alergias Declaradas:</strong> Bloqueia princípios ativos alergênicos (ex: Dipirona em pacientes hipersensíveis).</li>
           <li><strong>2D - Interações Medicamentosas Medicamento-Medicamento:</strong> Alerta sobre duplicidade de classe ou risco de sangramento/hipotensão.</li>
           <li><strong>3D - Contraindicações Clínicas Patologia-Fármaco:</strong> Avisa sobre hipertensão não controlada, úlcera péptica ou insuficiência renal.</li>
@@ -555,7 +570,7 @@ async function generateCompleteUserManualPDF() {
   </div>
 
   <!-- ========================================================================= -->
-  <!-- PÁGINA 4: GUIA PRÁTICO DE SIMULAÇÃO CLÍNICA REAL DE BALCÃO (PASSO A PASSO) -->
+  <!-- PÁGINA 4: GUIA PRÁTICO DE SIMULAÇÃO CLÍNICA REAL DE BALCÃO (COMPLETO) -->
   <!-- ========================================================================= -->
   <div class="page">
     <div>
@@ -577,7 +592,7 @@ async function generateCompleteUserManualPDF() {
             <div class="step-num" style="background: #0d9488;">1</div>
             <div class="step-text">
               <strong>Passo 1 — Acessar a Aba Balcão e Selecionar o Paciente:</strong><br>
-              Clique na aba <strong>Balcão</strong> na barra superior. No campo de busca, digite <code>Carmem</code> ou o CPF. Dê <strong>1 clique no card do paciente</strong> (<em>Dona Carmem Silva Silveira</em>). O sistema toca um <em>bip sonoro</em>, pré-carrega o histórico de comorbidades (Hipertensa) e alergias, e avança sozinho para a Etapa 2.
+              Clique na aba <strong>Balcão</strong> na barra superior. No campo de busca, digite <code>Carmem</code> ou o CPF. Dê <strong>1 clique no card do paciente</strong> (<em>Dona Carmem Silva Silveira</em>). O sistema toca um bip sonoro, pré-carrega o histórico de comorbidades (Hipertensa) e alergias, e avança sozinho para a Etapa 2.
             </div>
           </div>
 
@@ -585,7 +600,7 @@ async function generateCompleteUserManualPDF() {
             <div class="step-num" style="background: #0d9488;">2</div>
             <div class="step-text">
               <strong>Passo 2 — Relatar Queixas, Sintomas e Tempo de Evolução:</strong><br>
-              Na Etapa 2, clique no card do protocolo <strong>Gripe, Resfriado e Sintomas Sistêmicos</strong> (ou <strong>Cefaleia Tensional</strong>). No seletor de evolução, ajuste para <strong>2 dias</strong> e no seletor de intensidade marque <strong>🟡 Leve a Moderado</strong>. Em seguida, clique no botão azul <span class="btn-badge">Checar Sinais de Alerta ➔</span>.
+              Na Etapa 2, clique no card do protocolo <strong>Gripe, Resfriado e Sintomas Sistêmicos</strong> (ou <strong>Cefaleia Tensional</strong>). No seletor de evolução, ajuste para <strong>2 dias</strong> e no seletor de intensidade marque <strong>Leve a Moderado</strong>. Em seguida, clique no botão azul <span class="btn-pill">Checar Sinais de Alerta &rarr;</span>.
             </div>
           </div>
 
@@ -593,7 +608,7 @@ async function generateCompleteUserManualPDF() {
             <div class="step-num" style="background: #0d9488;">3</div>
             <div class="step-text">
               <strong>Passo 3 — Validação Sanitária do Semáforo Red Flags:</strong><br>
-              O sistema apresenta as perguntas de segurança sanitária do CFF (febre persistente > 39°C, rigidez de nuca, dor torácica ou falta de ar). Como a paciente está estável, <strong>deixe as caixas desmarcadas</strong> (mantendo o sinal verde ativo). Clique no botão <span class="btn-badge">Avançar para Prescrição &amp; Cruzamento ➔</span>.
+              O sistema apresenta as perguntas de segurança sanitária do CFF (febre persistente > 39°C, rigidez de nuca, dor torácica ou falta de ar). Como a paciente está estável, <strong>deixe as caixas desmarcadas</strong> (mantendo o sinal verde ativo). Clique no botão <span class="btn-pill">Avançar para Prescrição &amp; Cruzamento &rarr;</span>.
             </div>
           </div>
 
@@ -601,10 +616,10 @@ async function generateCompleteUserManualPDF() {
             <div class="step-num" style="background: #0d9488;">4</div>
             <div class="step-text">
               <strong>Passo 4 — Prescrição dos Medicamentos &amp; Busca Inteligente por PLN:</strong><br>
-              &bull; Clique no botão azul <span class="btn-badge">+ Prescrever</span> ao lado de <em>Paracetamol 750mg</em> (analgésico seguro para a dor e febre).<br>
-              &bull; No campo de <strong>Busca Dinâmica PLN</strong>, digite <code>soro</code> e clique em <span class="btn-badge">+ Prescrever</span> nos <em>Sais para Reidratação Oral</em> para repor eletrólitos e combater a moleza/inapetência.<br>
+              &bull; Clique no botão azul <span class="btn-pill">+ Prescrever</span> ao lado de <em>Paracetamol 750mg</em> (analgésico seguro para a dor e febre).<br>
+              &bull; No campo de <strong>Busca Dinâmica PLN</strong>, digite <code>soro</code> e clique em <span class="btn-pill">+ Prescrever</span> nos <em>Sais para Reidratação Oral</em> para repor eletrólitos e combater a moleza/inapetência.<br>
               &bull; Se houver queixa de tosse, digite <code>xarope</code> no campo de busca para exibir <em>Dropropizina, Acebrofilina, Guaifenesina e Hedera Helix</em>.<br>
-              &bull; O painel CDSS 4D à direita exibe: <span style="color:#059669; font-weight:700;">✓ Nenhuma Incompatibilidade Crítica Detectada</span>.
+              &bull; O painel CDSS 4D à direita exibe: <strong style="color:#059669;">&check; Nenhuma Incompatibilidade Crítica Detectada</strong>.
             </div>
           </div>
 
@@ -612,7 +627,7 @@ async function generateCompleteUserManualPDF() {
             <div class="step-num" style="background: #0d9488;">5</div>
             <div class="step-text">
               <strong>Passo 5 — Emissão da DSF, Disparo de WhatsApp &amp; Faturamento no Caixa:</strong><br>
-              Clique no botão azul <span class="btn-badge">Concluir &amp; Gerar Declaração Farmacêutica ➔</span>. A <strong>Declaração de Serviço Farmacêutico (DSF)</strong> é gerada na tela com QR Code, assinatura digital e orientações de hidratação (2 a 3L de água/dia). Clique no botão <span class="btn-badge-green">📲 WhatsApp</span> para enviar a receita digital no celular da cliente. Em seguida, clique no botão verde <span class="btn-badge-green">🛒 Finalizar Venda no Caixa</span>: a Frente de Caixa (PDV Rápido) abre com o Paracetamol e os Sais no carrinho (Total: R$ 17,90), dá baixa no lote do estoque e lança no DRE financeiro!
+              Clique no botão azul <span class="btn-pill">Concluir &amp; Gerar Declaração Farmacêutica &rarr;</span>. A <strong>Declaração de Serviço Farmacêutico (DSF)</strong> é gerada na tela com QR Code, assinatura digital e orientações de hidratação (2 a 3L de água/dia). Clique no botão <span class="btn-pill-green"><i class="fa-brands fa-whatsapp"></i> WhatsApp</span> para enviar a receita digital no celular da cliente. Em seguida, clique no botão verde <span class="btn-pill-green"><i class="fa-solid fa-cart-shopping"></i> Finalizar Venda no Caixa</span>: a Frente de Caixa (PDV Rápido) abre com o Paracetamol e os Sais no carrinho (Total: R$ 17,90), dá baixa no lote do estoque e lança no DRE financeiro!
             </div>
           </div>
         </div>
@@ -621,9 +636,9 @@ async function generateCompleteUserManualPDF() {
       <!-- OBSERVAÇÕES E EXPLICAÇÕES TÉCNICAS DA SIMULAÇÃO -->
       <div class="obs-card">
         <strong>💡 Observações Clínicas &amp; Racional Farmacoterapêutico Deste Caso:</strong>
-        <p><strong>• Racional do Paracetamol 750mg:</strong> É o analgésico de 1ª escolha para cefaleia leve/moderada em hipertensos, sem interferência na pressão arterial nem risco de sangramento gástrico de AINEs.</p>
-        <p><strong>• Racional dos Sais de Reidratação Oral (Soro):</strong> Mais de 65% das queixas de fraqueza no corpo e inapetência aguda são causadas por depleção eletrolítica leve. A reidratação oral acelera a recuperação celular em até 3x.</p>
-        <p><strong>• Função do Semáforo Red Flags:</strong> Se houver sinal grave marcado, o sistema bloqueia os MIPs e emite Guia de Encaminhamento Médico imediata.</p>
+        <p><strong>&bull; Racional do Paracetamol 750mg:</strong> É o analgésico de 1ª escolha para cefaleia leve/moderada em hipertensos, sem interferência na pressão arterial nem risco de sangramento gástrico de AINEs.</p>
+        <p><strong>&bull; Racional dos Sais de Reidratação Oral (Soro):</strong> Mais de 65% das queixas de fraqueza no corpo e inapetência aguda são causadas por depleção eletrolítica leve. A reidratação oral acelera a recuperação celular em até 3x.</p>
+        <p><strong>&bull; Função do Semáforo Red Flags:</strong> Se houver sinal grave marcado, o sistema bloqueia os MIPs e emite Guia de Encaminhamento Médico imediata.</p>
       </div>
     </div>
 
@@ -701,7 +716,7 @@ async function generateCompleteUserManualPDF() {
           </div>
           <div class="step-item">
             <div class="step-num">4</div>
-            <div class="step-text">Clique no botão verde <span class="btn-badge-green">📲 Lembrar Recompra</span>. O sistema abre o WhatsApp com a mensagem avisando a cliente para garantir a continuidade do tratamento.</div>
+            <div class="step-text">Clique no botão verde <span class="btn-pill-green"><i class="fa-brands fa-whatsapp"></i> Lembrar Recompra</span>. O sistema abre o WhatsApp com a mensagem avisando a cliente para garantir a continuidade do tratamento.</div>
           </div>
         </div>
       </div>
@@ -728,7 +743,7 @@ async function generateCompleteUserManualPDF() {
         <div class="steps-list">
           <div class="step-item">
             <div class="step-num">1</div>
-            <div class="step-text"><strong>Scanner por Câmera / Webcam:</strong> Clique em <span class="btn-badge">Leitor de Código de Barras</span> e aponte para a caixa. O sistema bipa e carrega o produto.</div>
+            <div class="step-text"><strong>Scanner por Câmera / Webcam:</strong> Clique em <span class="btn-pill">Leitor de Código de Barras</span> e aponte para a caixa. O sistema bipa e carrega o produto.</div>
           </div>
           <div class="step-item">
             <div class="step-num">2</div>
@@ -736,7 +751,7 @@ async function generateCompleteUserManualPDF() {
           </div>
           <div class="step-item">
             <div class="step-num">3</div>
-            <div class="step-text"><strong>Importação de XML de NF-e:</strong> Clique em <span class="btn-badge">Importar NF-e (XML)</span> para lançar dezenas de itens de uma só vez com seus respectivos lotes.</div>
+            <div class="step-text"><strong>Importação de XML de NF-e:</strong> Clique em <span class="btn-pill">Importar NF-e (XML)</span> para lançar dezenas de itens de uma só vez com seus respectivos lotes.</div>
           </div>
         </div>
       </div>
@@ -747,7 +762,7 @@ async function generateCompleteUserManualPDF() {
         <div class="steps-list">
           <div class="step-item">
             <div class="step-num">1</div>
-            <div class="step-text">Na aba <strong>Estoque</strong>, clique no botão azul <span class="btn-badge">+ Novo Produto / Medicamento</span>.</div>
+            <div class="step-text">Na aba <strong>Estoque</strong>, clique no botão azul <span class="btn-pill">+ Novo Produto / Medicamento</span>.</div>
           </div>
           <div class="step-item">
             <div class="step-num">2</div>
@@ -763,7 +778,7 @@ async function generateCompleteUserManualPDF() {
           </div>
           <div class="step-item">
             <div class="step-num">5</div>
-            <div class="step-text">Clique em <span class="btn-badge">Salvar Produto &amp; Movimentar Entrada</span>. O produto passa a constar no inventário e alimenta a Curva ABC.</div>
+            <div class="step-text">Clique em <span class="btn-pill">Salvar Produto &amp; Movimentar Entrada</span>. O produto passa a constar no inventário e alimenta a Curva ABC.</div>
           </div>
         </div>
       </div>
@@ -813,7 +828,7 @@ async function generateCompleteUserManualPDF() {
         <div class="steps-list">
           <div class="step-item">
             <div class="step-num">1</div>
-            <div class="step-text">Acesse a aba <strong>Financeiro</strong> e clique no botão <span class="btn-badge">+ Novo Lançamento</span>.</div>
+            <div class="step-text">Acesse a aba <strong>Financeiro</strong> e clique no botão <span class="btn-pill">+ Novo Lançamento</span>.</div>
           </div>
           <div class="step-item">
             <div class="step-num">2</div>
@@ -829,7 +844,7 @@ async function generateCompleteUserManualPDF() {
           </div>
           <div class="step-item">
             <div class="step-num">5</div>
-            <div class="step-text">Clique em <span class="btn-badge">Exportar DRE em PDF</span> para gerar o Demonstrativo de Resultados consolidado.</div>
+            <div class="step-text">Clique em <span class="btn-pill">Exportar DRE em PDF</span> para gerar o Demonstrativo de Resultados consolidado.</div>
           </div>
         </div>
       </div>
@@ -880,7 +895,7 @@ async function generateCompleteUserManualPDF() {
         <div class="steps-list">
           <div class="step-item">
             <div class="step-num" style="background: #9333ea;">1</div>
-            <div class="step-text"><strong>Acesso Rápido:</strong> No topo da aba <em>Profissionais &amp; Equipe</em>, clique no botão roxo <span class="btn-badge-purple">✨ Simulação de Atendimento Clínico</span>.</div>
+            <div class="step-text"><strong>Acesso Rápido:</strong> No topo da aba <em>Profissionais &amp; Equipe</em>, clique no botão roxo <span class="btn-pill-purple">✨ Simulação de Atendimento Clínico</span>.</div>
           </div>
           <div class="step-item">
             <div class="step-num" style="background: #9333ea;">2</div>
@@ -906,8 +921,8 @@ async function generateCompleteUserManualPDF() {
 
       <div class="obs-card" style="background: #fdf4ff; border-color: #f0abfc; border-left-color: #c026d3; color: #701a75;">
         <strong>💡 Observações sobre o Escore MEWS &amp; Integração Interdisciplinar:</strong>
-        <p><strong>• Escore MEWS &ge; 5 (Alto Risco):</strong> Exige encaminhamento médico imediato ou acionamento de SAMU/Emergência.</p>
-        <p><strong>• Bloqueio por Interação Medicamentosa Severa:</strong> O Farmacêutico atua como barreira final de segurança antes que o paciente administre combinações letais (ex: Nitratos + Inibidores de PDE-5).</p>
+        <p><strong>&bull; Escore MEWS &ge; 5 (Alto Risco):</strong> Exige encaminhamento médico imediato ou acionamento de SAMU/Emergência.</p>
+        <p><strong>&bull; Bloqueio por Interação Medicamentosa Severa:</strong> O Farmacêutico atua como barreira final de segurança antes que o paciente administre combinações letais (ex: Nitratos + Inibidores de PDE-5).</p>
       </div>
     </div>
 
@@ -987,7 +1002,7 @@ async function generateCompleteUserManualPDF() {
           </div>
           <div class="step-item">
             <div class="step-num">2</div>
-            <div class="step-text">Clique no botão vermelho <span class="btn-badge" style="background:#dc2626;">⚠️ Hard Reset Total</span>.</div>
+            <div class="step-text">Clique no botão vermelho <span class="btn-pill" style="background:#dc2626;">⚠️ Hard Reset Total</span>.</div>
           </div>
           <div class="step-item">
             <div class="step-num">3</div>
@@ -1020,7 +1035,7 @@ async function generateCompleteUserManualPDF() {
     await page.pdf({
       path: outputPath,
       format: 'A4',
-      margin: { top: '7mm', right: '9mm', bottom: '7mm', left: '9mm' },
+      margin: { top: '0mm', right: '0mm', bottom: '0mm', left: '0mm' },
       printBackground: true
     });
     await browser.close();
