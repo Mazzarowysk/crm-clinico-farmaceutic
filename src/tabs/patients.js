@@ -27,6 +27,9 @@ export function renderPatientsTab(contentArea) {
             <button id="btn-quick-portal-header" type="button" class="btn" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border: none; padding: 7px 14px; font-size: 0.85rem; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.3);">
               <i class="fa-solid fa-mobile-screen-button"></i> Portal do Paciente PWA
             </button>
+            <button id="btn-quick-purchases-header" type="button" class="btn" style="background: linear-gradient(135deg, #059669, #047857); color: #fff; border: none; padding: 7px 14px; font-size: 0.85rem; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);">
+              <i class="fa-solid fa-cart-shopping"></i> Compras &amp; Adesão
+            </button>
           </div>
           <button id="patients-trash-btn" class="btn" style="background-color: rgba(239, 68, 68, 0.1); color: var(--danger-color); border: 1px solid rgba(239, 68, 68, 0.3); padding: 6px 12px; font-size: 0.85rem; font-weight: 600; border-radius: 8px; transition: all 0.2s;">
             <i class="fa-solid fa-trash-can" style="margin-right: 6px;"></i> Lixeira
@@ -428,7 +431,10 @@ export function renderPatientsTab(contentArea) {
               <button class="btn-icon btn-icon-portal" data-portal-id="${p.id}" style="color: #38bdf8; background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.3);" title="Abrir Portal Minha Saúde (Visão do Paciente PWA)">
                 <i class="fa-solid fa-mobile-screen-button"></i>
               </button>
-              <button class="btn-icon btn-icon-history" onclick="window.openPatientHistoryModal('${p.id}', '${(p.fullName||p.name||'').replace(/'/g, "\\'")}')" title="Ver Histórico de Visitas, Queixas e Prescrições">
+              <button class="btn-icon btn-icon-purchases" onclick="window.openPatientPurchasesModal('${p.id}', '${(p.fullName||p.name||'').replace(/'/g, "\\'")}')" style="color: #34d399; background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.45);" title="Ver Histórico de Compras & Previsão de Recompra (Refill)">
+                <i class="fa-solid fa-cart-shopping"></i>
+              </button>
+              <button class="btn-icon btn-icon-history" onclick="window.openPatientHistoryModal('${p.id}', '${(p.fullName||p.name||'').replace(/'/g, "\\'")}')" title="Ver Prontuário Completo & Histórico Clínico">
                 <i class="fa-solid fa-timeline"></i>
               </button>
               <button class="btn-icon btn-icon-pdf" onclick="window.generatePatientPDF('${p.id}', '${(p.fullName||p.name||'').replace(/'/g, "\\'")}')" title="Gerar Ficha & Prontuário do Cliente em PDF">
@@ -595,6 +601,19 @@ export function renderPatientsTab(contentArea) {
       e.stopPropagation();
       if (typeof openPatientPortalModal === 'function') openPatientPortalModal();
       else if (window.openPatientPortalModal) window.openPatientPortalModal();
+    };
+  }
+
+  const purchasesHeaderBtn = document.getElementById('btn-quick-purchases-header');
+  if (purchasesHeaderBtn) {
+    purchasesHeaderBtn.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const firstPatient = (patientsToRender || [])[0] || (localDB.list('patients') || [])[0];
+      const pId = firstPatient ? firstPatient.id : 'demo';
+      const pName = firstPatient ? (firstPatient.fullName || firstPatient.name) : 'Cliente';
+      if (typeof openPatientPurchasesModal === 'function') openPatientPurchasesModal(pId, pName);
+      else if (window.openPatientPurchasesModal) window.openPatientPurchasesModal(pId, pName);
     };
   }
 

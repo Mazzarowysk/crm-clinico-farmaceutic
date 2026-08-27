@@ -35,6 +35,7 @@ import { openCashRegisterModal, printCashRegisterReceipt, getActiveCashRegister 
 import { openSngpcBookModal, openSngpcDispensationModal } from './modules/sngpc.js';
 import { openVaccinationModal, printVaccinationDsf } from './modules/vaccination.js';
 import { openPatientPortalModal } from './modules/patientPortal.js';
+import { openPatientPurchasesModal } from './modules/patientPurchasesModal.js';
 import { openNFeImporterModal } from './modules/nfeImporter.js';
 import { renderSmartFlowGuide, updateFlowGuideStep, completeFlow } from './modules/smartFlowGuide.js';
 
@@ -68,6 +69,7 @@ window.openSngpcDispensationModal = openSngpcDispensationModal;
 window.openVaccinationModal = openVaccinationModal;
 window.printVaccinationDsf = printVaccinationDsf;
 window.openPatientPortalModal = openPatientPortalModal;
+window.openPatientPurchasesModal = openPatientPurchasesModal;
 window.openNFeImporterModal = openNFeImporterModal;
 window.renderSmartFlowGuide = renderSmartFlowGuide;
 window.updateFlowGuideStep = updateFlowGuideStep;
