@@ -257,17 +257,12 @@ ESTRUTURA DE NAVEGAÇÃO DA PLATAFORMA (7 MÓDULOS INTEGRADOS)
   * Gráfico de Queixas Clínicas Mais Recorrentes (Cefaleia, Sintomas Gripais, Dispepsia, Rinite, Hipertensão).
   * Lista de Pacientes em Observação Clínica no Consultório.
 * **Pontos Fortes:**
-  * Cards clicáveis que já filtram e redirecionam o operador para a ação correspondente.
-  * Renderização instantânea utilizando dados agregados em memória cache com TTL de 30 segundos.
-
----
-
 ### 5.2. CRM Farmacêutico & Balcão de Atendimento (`src/tabs/pharmacy.js` + `src/modules/pharmacyCDSS.js` + `src/modules/clinicalAI.js`)
-* **Função Principal:** O coração operacional do sistema. Triagem rápida de queixas, validação de segurança CDSS 4D, cálculo de escore MEWS, prescrição de MIPs, registro de vacinação e controle de medicamentos especiais.
+* **Função Principal:** O coração operacional do consultório. Triagem rápida de queixas, validação de segurança CDSS 4D, cálculo de escore MEWS, prescrição de MIPs, registro de vacinação e controle de medicamentos especiais.
 * **Componentes & Fluxo:**
   1. *Seleção do Paciente e Anamnese Rápida (< 60s):* Seleção por nome ou CPF com carregamento automático de alergias e comorbidades prévias.
-  2. *Árvore de Decisão por Queixa:* Protocolos prontos para Gripe/Resfriado, Azia/Refluxo, Dor/Febre, Alergias Cutâneas, Diarreia e Lombalgia.
-  3. *Mapeamento de Red Flags:* Se o paciente relata febre > 39°C há mais de 4 dias ou sangue nas fezes, o sistema bloqueia os MIPs e emite a Guia de Encaminhamento Médico.
+  2. *Árvore de Decisão por Queixa:* Protocolos estruturados para Gripe/Resfriado, Azia/Refluxo, Dor/Febre, Alergias Cutâneas, Diarreia e Lombalgia.
+  3. *Mapeamento de Red Flags:* Se o paciente relata febre > 39°C há mais de 4 dias ou sinais de gravidade, o sistema bloqueia os MIPs e emite a Guia de Encaminhamento Médico.
   4. *Prescrição Farmacêutica Segura:* Adição de MIPs com conferência em tempo real de dosagens, interações com a medicação crônica do paciente e alertas de Critérios de Beers para idosos.
   5. *Vacinação & Injetáveis (CFF 654/2018):* Registro de via de administração, lote, validade, músculo (deltóide D/E, vasto lateral) e emissão de carteirinha.
   6. *Livro SNGPC (Portaria 344/98):* Módulo para retenção de receita e controle de substâncias das listas A1, A2, B1, B2 e C1.
@@ -292,12 +287,21 @@ ESTRUTURA DE NAVEGAÇÃO DA PLATAFORMA (7 MÓDULOS INTEGRADOS)
 
 ---
 
-### 5.4. Declarações (DSF) & Relatórios Regulatórios (`src/tabs/reports.js`)
-* **Função Principal:** Central de emissão de documentos oficiais e relatórios analíticos em PDF e Excel.
-* **Componentes & Fluxo:**
-  * *Declaração de Serviço Farmacêutico (DSF):* Documento oficial exigido pelo CFF contendo identificação da farmácia, farmacêutico com CRF, dados do paciente, procedimento realizado, valores aferidos, orientações e hash criptográfico de autenticação.
-  * *Encaminhamento Médico Formal:* Laudo estruturado para o médico assistente explicando os motivos do encaminhamento e os sinais de alarme detectados.
-  * *Relatório de Procedimentos e Faturamento Clínico:* Extrato exportável em PDF e XLSX com totalização de consultas e procedimentos por período.
+### 5.4. Central de Relatórios Regulatórios & Exportação em PDF A4 (`src/tabs/reports.js`)
+* **Função Principal:** Hub corporativo de inteligência analítica, auditoria e emissão de documentos regulatórios e assistenciais com fidelidade visual 1:1.
+* **Componentes & Módulos Integrados:**
+  * *6 Abas Especializadas de Relatórios:*
+    1. **Atendimentos Clínicos:** Histórico de consultas, triagens SOAP, procedimentos e evoluções clínicas.
+    2. **Pacientes Cadastrados:** Listagem demográfica, contatos, faturamento acumulado e dados regulatórios com proteção LGPD.
+    3. **Procedimentos Farmacêuticos:** Registro analítico de aferições de PA, testes rápidos (TLR/RDC 786), vacinação e injetáveis.
+    4. **Estoque & Validades:** Posição física, ponto de reposição, curva ABC e lotes em vencimento.
+    5. **Vendas & PDV:** Histórico consolidado de cupons emitidos, faturamento por operador e formas de pagamento.
+    6. **Títulos Financeiros & DRE:** Extrato de contas a pagar, receber, liquidadas e inadimplência com indicadores de saldo apurado.
+  * *Motor de Download Direto de PDF (Sem Tela de Impressão):* Integração nativa com a engine `html2pdf.js` acionada em 1 clique via botão `📥 Baixar PDF Direto`, salvando o arquivo `.pdf` diretamente na pasta de Downloads do dispositivo sem exibir caixas de diálogo nativas do navegador.
+  * *Diagramação Table-Based de Alta Definição:* Arquitetura estrutural 100% baseada em tabelas HTML nativas para cabeçalhos, banners, listagens e blocos de assinatura, eliminando distorções de flexbox e garantindo renderização nítida em qualquer leitor de PDF.
+  * *Proporção Oficial A4 Retrato (`210mm × 297mm`):* Pré-visualização na tela e arquivo baixado estritamente calibrados no padrão vertical da ABNT e normas de papelaria clínica.
+  * *Chancela de Autenticidade & Rastreabilidade Digital:* Cada documento emitido recebe código hash criptográfico único, data/hora da emissão, enquadramento nas Resoluções CFM nº 1.821/2007, CFF nº 586/2013 e LGPD (Lei nº 13.709/2018), além da assinatura digital do Farmacêutico Responsável Técnico Dr. Marcelo Mazaro (CRF-SP 54180).
+  * *Privacidade PEP / Anonimização LGPD:* Alternador de visão confidencial que anonimiza nomes e CPFs para operadores sem perfil assistencial autorizado.
 
 ---
 
@@ -313,16 +317,13 @@ ESTRUTURA DE NAVEGAÇÃO DA PLATAFORMA (7 MÓDULOS INTEGRADOS)
 ---
 
 ### 5.6. Controle Financeiro, PDV Rápido & DRE (`src/tabs/financial.js` + `src/modules/cashRegister.js` + `src/modules/quickCheckoutModal.js`)
-* **Função Principal:** Gestão financeira completa do consultório e do balcão de vendas.
+* **Função Principal:** Gestão econômico-financeira completa do consultório e do balcão de vendas.
 * **Componentes & Fluxo:**
-  * *Caixa Rápido / Nova Venda (`F10`):*
-    * Vinculação visual imediata do paciente ativo selecionado no prontuário.
-    * Campo pesquisável de clientes para troca rápida de comprador.
-    * Persistência do registro de compra com atualização instantânea do histórico do paciente.
-  * *Fechamento de Caixa Cego:* O operador informa o valor em dinheiro sem ver o saldo do sistema; o sistema calcula e aponta eventuais quebras ou sobras de caixa.
-  * *Emissão de Cupom Térmico (58mm / 80mm):* Impressão direta de recibo não-fiscal para impressoras térmicas padrão ESC/POS.
-  * *DRE Gerencial Executivo:* Demonstração do Resultado do Exercício com Receita Bruta, Custos Variáveis (CMV), Despesas Fixas e Lucro Líquido Real.
-  * *Gestão Dinâmica de Parâmetros com Botões `+`:* Adição de novas categorias de receita/despesa e bandeiras de cartão no ato do lançamento.
+  * *Sub-abas Neon Especializadas:* Visão Geral, Contas a Pagar/Receber, DRE Gerencial, Boletos FEBRABAN e Parâmetros.
+  * *Boletos Bancários Padrão FEBRABAN:* Geração instantânea de boleto bancário com código de barras, linha digitável validada, cálculo de juros/multa parametrizados e exportação direta em PDF A4.
+  * *Modal de Baixa de Títulos e Parcelamento:* Registro de pagamentos parciais ou totais com suporte a PIX, Cartão de Crédito/Débito, Dinheiro e Convênio.
+  * *DRE Gerencial Automatizado:* Apuração de Receita Bruta, Deduções, Custo dos Produtos Vendidos (CPV), Lucro Bruto, Despesas Operacionais e Lucro Líquido Real.
+  * *PDV de Venda Rápida Integrado (`F10`):* Realização de vendas com atalhos de teclado, cupom térmico e integração automática com o histórico de compras do prontuário do cliente.
 
 ---
 
