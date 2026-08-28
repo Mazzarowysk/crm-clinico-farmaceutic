@@ -2157,8 +2157,11 @@ function renderReportsTab(contentArea) {
             <span class="screen-toolbar-badge">Visualização de Impressão & Exportação</span>
           </div>
           <div class="screen-toolbar-actions">
-            <button onclick="window.print()" class="btn-action btn-action-print">
-              🖨️ Imprimir / Salvar PDF
+            <button id="btn-dl-pdf" onclick="downloadDirectPDF()" class="btn-action btn-action-download" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35); border: none;">
+              📥 Baixar PDF Direto
+            </button>
+            <button onclick="window.print()" class="btn-action btn-action-print" style="background: rgba(255, 255, 255, 0.12); color: #f1f5f9; border: 1px solid rgba(255, 255, 255, 0.2);">
+              🖨️ Imprimir
             </button>
             <button onclick="window.close()" class="btn-action btn-action-close">
               ✖️ Fechar Aba
@@ -2258,11 +2261,45 @@ function renderReportsTab(contentArea) {
         </div>
 
         <script>
-          window.addEventListener('DOMContentLoaded', () => {
-            setTimeout(() => {
+          function downloadDirectPDF() {
+            const btn = document.getElementById('btn-dl-pdf');
+            const origHtml = btn ? btn.innerHTML : '';
+            if (btn) {
+              btn.disabled = true;
+              btn.innerHTML = '⏳ Gerando PDF...';
+            }
+            const element = document.querySelector('.report-sheet-container');
+            const isLandscape = ${columns.length > 6};
+            const opt = {
+              margin: [8, 8, 8, 8],
+              filename: '${filename}.pdf',
+              image: { type: 'jpeg', quality: 0.98 },
+              html2canvas: { scale: 2, useCORS: true, letterRendering: true, logging: false },
+              jsPDF: { unit: 'mm', format: 'a4', orientation: isLandscape ? 'landscape' : 'portrait' }
+            };
+            if (window.html2pdf) {
+              window.html2pdf().set(opt).from(element).save().then(() => {
+                if (btn) {
+                  btn.disabled = false;
+                  btn.innerHTML = '✅ PDF Baixado com Sucesso!';
+                  setTimeout(() => { btn.innerHTML = origHtml; }, 3500);
+                }
+              }).catch(err => {
+                console.error('Erro ao baixar PDF:', err);
+                window.print();
+                if (btn) {
+                  btn.disabled = false;
+                  btn.innerHTML = origHtml;
+                }
+              });
+            } else {
               window.print();
-            }, 600);
-          });
+              if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = origHtml;
+              }
+            }
+          }
         </script>
       </body>
       </html>
@@ -3208,17 +3245,89 @@ function renderReportsTab(contentArea) {
           <meta charset="UTF-8">
           <title>Boleto Bancário FEBRABAN — Título ${t.id}</title>
           <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+          <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
           <style>
-            @page { size: A4 portrait; margin: 10mm; }
-            body { font-family: Arial, sans-serif; padding: 15px; color: #000; background: #fff; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            @page { size: A4 portrait; margin: 8mm; }
+            * { box-sizing: border-box; }
+            body { font-family: Arial, sans-serif; color: #000; background: #fff; margin: 0; padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            @media screen {
+              body { background: #0f172a; min-height: 100vh; padding: 60px 16px 40px 16px; }
+              .screen-toolbar { position: fixed; top: 0; left: 0; right: 0; height: 54px; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 99999; }
+              .screen-toolbar-title { display: flex; align-items: center; gap: 10px; color: #f8fafc; font-weight: 700; font-size: 0.95rem; }
+              .screen-toolbar-actions { display: flex; align-items: center; gap: 10px; }
+              .btn-action { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.2s; border: none; }
+              .btn-action-download { background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35); }
+              .btn-action-print { background: rgba(255, 255, 255, 0.12); color: #f1f5f9; border: 1px solid rgba(255, 255, 255, 0.2); }
+              .btn-action-close { background: rgba(255, 255, 255, 0.1); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.15); }
+              .sheet-box-boleto { max-width: 210mm; margin: 0 auto; background: #ffffff; padding: 8mm; border-radius: 8px; box-shadow: 0 12px 36px rgba(0,0,0,0.45); }
+            }
+            @media print {
+              .screen-toolbar { display: none !important; }
+              body { background: #ffffff !important; padding: 0 !important; }
+              .sheet-box-boleto { max-width: 100% !important; margin: 0 !important; padding: 0 !important; box-shadow: none !important; border-radius: 0 !important; }
+            }
           </style>
         </head>
         <body>
-          <div style="max-width: 800px; margin: 0 auto;">
+          <div class="screen-toolbar">
+            <div class="screen-toolbar-title">
+              <span>📄 Boleto Bancário FEBRABAN</span>
+              <span style="background:rgba(13,148,136,0.2);border:1px solid #0d9488;color:#2dd4bf;font-size:0.72rem;font-weight:600;padding:2px 8px;border-radius:20px;">Título #${t.id}</span>
+            </div>
+            <div class="screen-toolbar-actions">
+              <button id="btn-bol-dl-pdf" onclick="downloadBoletoPDF()" class="btn-action btn-action-download">
+                📥 Baixar PDF Direto
+              </button>
+              <button onclick="window.print()" class="btn-action btn-action-print">
+                🖨️ Imprimir
+              </button>
+              <button onclick="window.close()" class="btn-action btn-action-close">
+                ✖️ Fechar Aba
+              </button>
+            </div>
+          </div>
+          <div class="sheet-box-boleto">
             ${boletoHTML}
           </div>
           <script>
-            window.onload = function() { window.print(); };
+            function downloadBoletoPDF() {
+              const btn = document.getElementById('btn-bol-dl-pdf');
+              const origHtml = btn ? btn.innerHTML : '';
+              if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '⏳ Gerando PDF...';
+              }
+              const element = document.querySelector('.sheet-box-boleto');
+              const opt = {
+                margin: [6, 6, 6, 6],
+                filename: 'Boleto_FEBRABAN_${t.id}_${(t.client || 'Cliente').replace(/\\s+/g, '_')}.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true, letterRendering: true, logging: false },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+              };
+              if (window.html2pdf) {
+                window.html2pdf().set(opt).from(element).save().then(() => {
+                  if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = '✅ PDF Baixado com Sucesso!';
+                    setTimeout(() => { btn.innerHTML = origHtml; }, 3500);
+                  }
+                }).catch(err => {
+                  console.error('Erro ao baixar PDF do boleto:', err);
+                  window.print();
+                  if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = origHtml;
+                  }
+                });
+              } else {
+                window.print();
+                if (btn) {
+                  btn.disabled = false;
+                  btn.innerHTML = origHtml;
+                }
+              }
+            }
           </script>
         </body>
         </html>
@@ -4102,7 +4211,12 @@ async function openEncounterReportDetail(encId) {
           <span style="background:rgba(13,148,136,0.2);border:1px solid #0d9488;color:#2dd4bf;font-size:0.72rem;font-weight:600;padding:2px 8px;border-radius:20px;">Resumo do Atendimento</span>
         </div>
         <div class="screen-toolbar-actions">
-          <button onclick="window.print()" class="btn-action btn-action-print">🖨️ Imprimir / Salvar PDF</button>
+          <button id="btn-enc-dl-pdf" onclick="downloadDirectEncounterPDF()" class="btn-action btn-action-download" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35); border: none;">
+            📥 Baixar PDF Direto
+          </button>
+          <button onclick="window.print()" class="btn-action btn-action-print" style="background: rgba(255, 255, 255, 0.12); color: #f1f5f9; border: 1px solid rgba(255, 255, 255, 0.2);">
+            🖨️ Imprimir
+          </button>
           <button onclick="window.close()" class="btn-action btn-action-close">✖️ Fechar Aba</button>
         </div>
       </div>
@@ -4150,7 +4264,47 @@ async function openEncounterReportDetail(encId) {
         <span>Gerado eletronicamente em ${new Date().toLocaleString('pt-BR')}</span>
       </div>
       </div>
-      <script>window.addEventListener('DOMContentLoaded', () => { setTimeout(() => window.print(), 500); });</script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+      <script>
+        function downloadDirectEncounterPDF() {
+          const btn = document.getElementById('btn-enc-dl-pdf');
+          const origHtml = btn ? btn.innerHTML : '';
+          if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Gerando PDF...';
+          }
+          const element = document.querySelector('.sheet-box');
+          const opt = {
+            margin: [8, 8, 8, 8],
+            filename: 'Atendimento_${enc.patientName ? enc.patientName.replace(/\s+/g, '_') : 'Paciente'}_${encId.substring(0,8)}.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true, letterRendering: true, logging: false },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+          };
+          if (window.html2pdf) {
+            window.html2pdf().set(opt).from(element).save().then(() => {
+              if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '✅ PDF Baixado com Sucesso!';
+                setTimeout(() => { btn.innerHTML = origHtml; }, 3500);
+              }
+            }).catch(err => {
+              console.error('Erro ao baixar PDF:', err);
+              window.print();
+              if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = origHtml;
+              }
+            });
+          } else {
+            window.print();
+            if (btn) {
+              btn.disabled = false;
+              btn.innerHTML = origHtml;
+            }
+          }
+        }
+      </script>
       </body></html>`;
     };
 
