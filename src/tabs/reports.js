@@ -2095,25 +2095,27 @@ function renderReportsTab(contentArea) {
             justify-content: space-between;
             align-items: center;
           }
-          table { width: 100%; border-collapse: collapse; margin-top: 8px; page-break-inside: auto; }
+          table { width: 100%; border-collapse: collapse; margin-top: 10px; background-color: #ffffff; }
           tr { page-break-inside: avoid; page-break-after: auto; }
           th { 
-            background-color: #0f172a; 
-            color: #ffffff; 
+            background-color: #0f2738 !important; 
+            color: #ffffff !important; 
             text-align: left; 
-            padding: 6px 8px; 
-            font-size: 7.5pt; 
+            padding: 8px 10px; 
+            font-size: 8pt; 
             text-transform: uppercase; 
             letter-spacing: 0.5px;
-            font-weight: 700;
+            font-weight: 800;
+            border: 1px solid #0f2738 !important;
           }
           td { 
-            padding: 5.5px 8px; 
-            border-bottom: 1px solid #e2e8f0; 
-            font-size: 8pt; 
-            color: #1e293b;
+            padding: 7px 10px; 
+            border: 1px solid #cbd5e1 !important; 
+            font-size: 8.5pt; 
+            color: #0f172a !important;
+            background-color: #ffffff;
           }
-          tr:nth-child(even) td { background-color: #f8fafc; }
+          tr:nth-child(even) td { background-color: #f8fafc !important; }
           .badge { 
             display: inline-block; 
             padding: 2px 6px; 
@@ -2172,42 +2174,42 @@ function renderReportsTab(contentArea) {
         <!-- FOLHA DO RELATÓRIO FORMATO A4 -->
         <div class="report-sheet-container">
           <!-- CABEÇALHO OFICIAL CRM CLÍNICO FARMACÊUTICO -->
-          <div class="header-box">
+          <div class="header-box" style="border-bottom: 2.5px solid #0f766e; padding-bottom: 12px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
             <div style="display: flex; align-items: center; gap: 12px;">
               <div style="background: #ffffff; padding: 4px 8px; border-radius: 8px; border: 1.5px solid #0f766e; display: flex; align-items: center; justify-content: center;">
-                <img src="/assets/crm-logo.png?v=2" alt="Logo CRM" style="height: 38px; width: auto; object-fit: contain;">
+                <img src="/assets/crm-logo.png?v=2" alt="Logo CRM" style="height: 40px; width: auto; object-fit: contain;">
               </div>
               <div>
-                <div style="font-family: 'Outfit', sans-serif; font-size: 14pt; font-weight: 800; color: #0f172a; margin: 0; line-height: 1.1; letter-spacing: -0.3px;">
+                <div style="font-family: 'Outfit', sans-serif; font-size: 15pt; font-weight: 800; color: #0f172a; margin: 0; line-height: 1.1; letter-spacing: -0.3px;">
                   CRM CLÍNICO FARMACÊUTICO
                 </div>
-                <div style="font-size: 8pt; color: #0f766e; font-weight: 700; margin-top: 2px;">
+                <div style="font-size: 8.5pt; color: #0f766e; font-weight: 700; margin-top: 2px;">
                   Consultório Farmacêutico · Prescrição Clínica · Farmacovigilância CDSS 4D
                 </div>
-                <div style="font-size: 7pt; color: #64748b; margin-top: 1px;">
+                <div style="font-size: 7.5pt; color: #475569; margin-top: 1px;">
                   Conforme Resoluções CFF nº 585/2013 e nº 586/2013 · RDC ANVISA nº 44/2009
                 </div>
               </div>
             </div>
             
-            <div style="text-align: right; font-size: 7.5pt; color: #475569; line-height: 1.35;">
-              <div>Emissão: <strong>${dateNow}</strong></div>
-              <div>Autenticador: <span style="font-family: monospace; font-weight: 700; color: #0f766e;">${docHash}</span></div>
-              <div>RT: <strong>Dr. Marcelo Mazaro</strong> (CRF-SP 54180)</div>
+            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 12px; text-align: right; font-size: 7.5pt; color: #334155; line-height: 1.4;">
+              <div>Emissão: <strong style="color: #0f172a;">${dateNow}</strong></div>
+              <div>Chave: <span style="font-family: monospace; font-weight: 700; color: #0f766e;">${docHash}</span></div>
+              <div>RT: <strong style="color: #0f172a;">Dr. Marcelo Mazaro</strong> (CRF-SP 54180)</div>
             </div>
           </div>
 
           <!-- BANNER DE IDENTIFICAÇÃO DO RELATÓRIO -->
-          <div class="title-banner">
+          <div class="title-banner" style="background: #f0fdfa; border: 1.5px solid #99f6e4; border-left: 5px solid #0f766e; border-radius: 6px; padding: 10px 14px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
             <div>
-              <h1 style="font-size: 12pt; color: #0f766e; margin: 0; font-family: 'Outfit', sans-serif; font-weight: 800; text-transform: uppercase;">
+              <h1 style="font-size: 12.5pt; color: #0f766e; margin: 0; font-family: 'Outfit', sans-serif; font-weight: 800; text-transform: uppercase;">
                 ${title}
               </h1>
               <div style="font-size: 7.5pt; color: #475569; margin-top: 2px;">
                 Documento gerencial e assistencial oficial emitido pelo CRM Clínico Farmacêutico
               </div>
             </div>
-            <div style="text-align: right; font-size: 8pt; color: #0f766e; font-weight: 700;">
+            <div style="background: #0f766e; color: #ffffff; padding: 4px 12px; border-radius: 20px; font-size: 8pt; font-weight: 700;">
               Total: <strong>${rows.length}</strong> registro(s)
             </div>
           </div>
@@ -2216,22 +2218,22 @@ function renderReportsTab(contentArea) {
           ${summaryBlock}
 
           <!-- TABELA DE REGISTROS -->
-          <table>
+          <table style="width: 100%; border-collapse: collapse; margin-top: 10px; background-color: #ffffff; border: 1px solid #cbd5e1;">
             <thead>
               <tr>
-                ${columns.map(col => `<th>${col}</th>`).join('')}
+                ${columns.map(col => `<th style="background-color: #0f2738 !important; color: #ffffff !important; padding: 8px 10px; font-size: 8pt; font-weight: 800; text-transform: uppercase; border: 1px solid #0f2738; letter-spacing: 0.4px;">${col}</th>`).join('')}
               </tr>
             </thead>
             <tbody>
-              ${rows.map(row => `
-                <tr>
+              ${rows.map((row, rIdx) => `
+                <tr style="background-color: ${rIdx % 2 === 0 ? '#ffffff' : '#f8fafc'};">
                   ${row.map((cell, idx) => {
                     const colName = (columns[idx] || '').toLowerCase();
                     if (colName.includes('status') || colName.includes('situa') || colName.includes('severidade')) {
                       const s = String(cell).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
-                      return `<td><span class="badge badge-${s}">${cell}</span></td>`;
+                      return `<td style="padding: 7px 10px; border: 1px solid #cbd5e1; font-size: 8.5pt; color: #0f172a;"><span class="badge badge-${s}">${cell}</span></td>`;
                     }
-                    return `<td>${cell}</td>`;
+                    return `<td style="padding: 7px 10px; border: 1px solid #cbd5e1; font-size: 8.5pt; color: #0f172a; font-weight: ${idx === 0 ? '700' : '500'};">${cell}</td>`;
                   }).join('')}
                 </tr>
               `).join('')}
