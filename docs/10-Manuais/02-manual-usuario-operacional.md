@@ -91,11 +91,28 @@ Clique no ícone de carrinho para visualizar todas as compras e medicamentos já
 
 ---
 
+### 2.3. Ditado Clínico por Voz (Web Speech API)
+- Em qualquer campo de texto livre do prontuário (Observações da Queixa, Parecer Farmacêutico, Justificativa Técnica), clique no botão **`🎙️ Ditado por Voz`**.
+- O botão passará para o estado pulsante **`🎙️ Ouvindo...`** em vermelho.
+- Fale pausadamente no microfone do dispositivo; o sistema transcreverá a anamnese em tempo real em Português (*pt-BR*).
+- Clique novamente no botão para finalizar a captura ou pause a fala por alguns instantes.
+
+### 2.4. Sala de Teleconsulta Farmacêutica WebRTC
+1. No topo da aba de atendimento clínico, clique em **`📹 Teleconsulta`**.
+2. O sistema abrirá a sala de teleatendimento com vídeo HD e áudio ponto a ponto criptografado.
+3. Clique em **`🔗 Copiar Link do Paciente`** para enviar o link direto da chamada para o WhatsApp ou e-mail do paciente.
+4. Utilize a barra inferior para mutar microfone, desligar câmera ou **compartilhar a tela** para apresentar laudos ou receitas.
+5. Preencha a evolução clínica no painel **SOAP Lateral** e clique em **`Salvar no Prontuário`** sem sair da chamada.
+
+---
+
 ## 6. Gestão Financeira, PDV Rápido & Boletos FEBRABAN
 
-### 6.1. PDV / Caixa Rápido (`F10`)
+### 6.1. PDV / Caixa Rápido (`F10`) & PIX Dinâmico BACEN
 - Selecione o cliente e os itens/serviços farmacêuticos.
-- Escolha a forma de pagamento (PIX, Cartão de Crédito/Débito, Dinheiro, Convênio).
+- Ao selecionar a opção **`PIX`**, o sistema gera instantaneamente o **QR Code oficial padrão BACEN (BR Code / EMV QRCPS-MPM)** com o valor exato da venda e cálculo de CRC16.
+- Clique em **`📋 Copiar Código PIX`** para enviar a linha Copia e Cola ao cliente ou permita que ele aponte a câmera do aplicativo bancário para a tela.
+- Escolha outras formas de pagamento (Cartão de Crédito/Débito, Dinheiro, Convênio) conforme a preferência do cliente.
 - Imprima o comprovante térmico (58mm/80mm) ou envie por mensagem eletrônica.
 
 ### 6.2. Emissão de Boletos FEBRABAN
@@ -115,7 +132,11 @@ Clique no ícone de carrinho para visualizar todas as compras e medicamentos já
 5. **Vendas:** Movimentação do PDV por período e operador.
 6. **Financeiro:** Demonstrativo de contas a pagar, receber e liquidadas com resumo executivo.
 
-### 7.2. Exportação Direta em PDF sem Caixa de Diálogo
+### 7.2. Gráficos 3D Dinâmicos com Alternador de Estilo (`🔄 Estilo`)
+- Todos os gráficos da central de relatórios possuem um botão **`🔄 Estilo`** e um *badge* visual do formato atual.
+- Clique no botão para alternar dinamicamente entre **Rosca 3D Glossy**, **Barras 3D Volumétricas**, **Pizza 3D Cristalina**, **Esfera Polar 3D** e **Linha Suave Neon**, permitindo apresentações executivas personalizadas.
+
+### 7.3. Exportação Direta em PDF sem Caixa de Diálogo
 - Clique em **`📥 Baixar PDF Direto`** na barra superior da janela do relatório.
 - O sistema processa a folha A4 em formato retrato (`210mm × 297mm`) com diagramação estruturada em alta definição e salva o arquivo `.pdf` diretamente na pasta de Downloads do dispositivo.
 

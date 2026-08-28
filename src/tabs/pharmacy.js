@@ -63,6 +63,9 @@ export async function renderPharmacyTab() {
           <a href="/Manual_do_Usuario_CRM_Clinico_Farmaceutico.pdf" download="Manual_do_Usuario_CRM_Clinico_Farmaceutico.pdf" target="_blank" class="btn" style="background: linear-gradient(135deg, rgba(45, 212, 191, 0.22), rgba(13, 148, 136, 0.35)); border: 1px solid rgba(45, 212, 191, 0.55); color: #0d9488; text-decoration: none; font-weight: 700; padding: 9px 15px; border-radius: 10px; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(20, 184, 166, 0.25);" title="Baixar Manual do Usuário Completo em PDF (v3.0)">
             <i class="fa-solid fa-file-pdf"></i> Manual PDF
           </a>
+          <button id="btn-teleconsultation-pharm" onclick="window.openTeleconsultationModal ? window.openTeleconsultationModal(currentClinicalEncounter.patient) : null" class="btn" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border: none; font-weight: 700; padding: 9px 16px; border-radius: 10px; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35); cursor: pointer;" title="Iniciar Sala de Teleconsulta WebRTC com Paciente">
+            <i class="fa-solid fa-video"></i> Teleconsulta
+          </button>
           <button id="btn-quick-checkout-pharm" class="btn" style="background: linear-gradient(135deg, #38bdf8, #0284c7); color: #fff; border: none; font-weight: 700; padding: 9px 16px; border-radius: 10px; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(56, 189, 248, 0.35); cursor: pointer;">
             <i class="fa-solid fa-cash-register"></i> Saída / Venda (PDV)
           </button>
@@ -395,7 +398,12 @@ function renderBalcaoStepContent(step, patient, allPatients, activeMeds) {
             <div>
               <label style="display: flex; align-items: center; justify-content: space-between; font-size: 0.88rem; margin-bottom: 10px; font-weight: 700; letter-spacing: -0.2px;">
                 <span>Observações Adicionais da Queixa</span>
-                <button type="button" onclick="window.showClinicalFieldHelp && window.showClinicalFieldHelp('observacoes_queixa')" title="Entenda o campo de Observações" style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); color: #7c3aed; border-radius: 50%; width: 22px; height: 22px; font-size: 0.75rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; transition: all 0.2s;">?</button>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <button type="button" onclick="window.toggleVoiceDictation('#input-complaint-notes', this)" style="background: rgba(14, 165, 233, 0.15); border: 1px solid rgba(14, 165, 233, 0.35); color: #38bdf8; padding: 2px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s;" title="Clique para ditar observações por voz em português">
+                    <i class="fa-solid fa-microphone"></i> Ditado por Voz
+                  </button>
+                  <button type="button" onclick="window.showClinicalFieldHelp && window.showClinicalFieldHelp('observacoes_queixa')" title="Entenda o campo de Observações" style="background: rgba(168, 85, 247, 0.15); border: 1px solid rgba(168, 85, 247, 0.4); color: #7c3aed; border-radius: 50%; width: 22px; height: 22px; font-size: 0.75rem; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; transition: all 0.2s;">?</button>
+                </div>
               </label>
               <input type="text" id="input-complaint-notes" class="form-input" placeholder="Ex.: Piora à noite, dor latejante, tomou chá em casa..." value="${currentClinicalEncounter.customComplaintNotes || ''}" style="width: 100%; min-height: 48px; height: 48px; font-size: 0.93rem; border-radius: 10px; padding: 8px 16px; box-sizing: border-box; line-height: 1.4;">
             </div>
@@ -617,9 +625,14 @@ function renderBalcaoStepContent(step, patient, allPatients, activeMeds) {
                 <div style="color: #e11d48; font-weight: 700; font-size: 0.9rem; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
                   <i class="fa-solid fa-lock"></i> TRAVA DE SEGURANÇA ATIVADA (RESOLUÇÃO CFF)
                 </div>
-                <p style="color: #be123c; font-size: 0.82rem; margin: 0 0 10px 0;">
-                  Para prosseguir com dispensação em caso de contraindicação crítica, é mandatório registrar a justificativa técnica com o CRF do farmacêutico responsável:
-                </p>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                  <p style="color: #be123c; font-size: 0.82rem; margin: 0; font-weight: 600;">
+                    Para prosseguir com dispensação em caso de contraindicação crítica, registre a justificativa técnica com o CRF:
+                  </p>
+                  <button type="button" onclick="window.toggleVoiceDictation('#textarea-override-justification', this)" style="background: rgba(225, 29, 72, 0.2); border: 1px solid rgba(225, 29, 72, 0.4); color: #f43f5e; padding: 2px 10px; border-radius: 20px; font-size: 0.72rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; transition: all 0.2s;" title="Clique para ditar parecer por voz em português">
+                    <i class="fa-solid fa-microphone"></i> Ditado por Voz
+                  </button>
+                </div>
                 <textarea id="textarea-override-justification" class="form-input" rows="2" placeholder="Descreva a fundamentação farmacológica e a conduta de monitoramento adotada..." style="width: 100%; font-size: 0.85rem;"></textarea>
                 <button type="button" id="btn-unlock-cdss-override" class="btn btn-danger" style="margin-top: 8px; width: 100%; font-weight: 700; font-size: 0.85rem;">
                   <i class="fa-solid fa-signature"></i> Registrar Parecer e Desbloquear Trava

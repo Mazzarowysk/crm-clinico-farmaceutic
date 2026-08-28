@@ -1,0 +1,31 @@
+name: CRM Clínico Farmacêutico CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-and-build:
+    name: Testes Automatizados & Build de Produção
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout do Repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Instalar Dependências
+        run: npm ci
+
+      - name: Executar Testes Unitários Vitest (CDSS 4D, MEWS, PIX, Financeiro)
+        run: npm test
+
+      - name: Executar Build de Produção Vite
+        run: npm run build

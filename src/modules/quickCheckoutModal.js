@@ -8,6 +8,7 @@ import { syncManager } from './sync.js';
 import { playBeepSound, openCameraBarcodeScanner } from './barcodeScanner.js';
 import { printThermalReceipt, generateWhatsAppSaleText } from './thermalReceipt.js';
 import { getActiveCashRegister, openCashRegisterModal } from './cashRegister.js';
+import { generatePixPayload, getPixQRCodeUrl } from './pixGenerator.js';
 
 export function openQuickCheckoutModal(onFinished = null, initialData = null) {
   const existing = document.getElementById('quick-checkout-modal');
@@ -275,20 +276,47 @@ export function openQuickCheckoutModal(onFinished = null, initialData = null) {
       updateChange();
 
     } else if (selectedPayment === 'pix') {
+      const pixPayload = generatePixPayload({
+        amount: net,
+        txid: 'PDV' + Date.now().toString().slice(-6),
+        description: 'Venda Balcao Farmacia'
+      });
+      const qrUrl = getPixQRCodeUrl(pixPayload, 140);
+
       payPanel.innerHTML = `
-        <div style="display: flex; gap: 12px; align-items: center;">
-          <div style="width: 54px; height: 54px; background: #fff; border-radius: 6px; display: flex; align-items: center; justify-content: center; color: #000; font-size: 1.8rem;">
-            <i class="fa-solid fa-qrcode"></i>
+        <div style="display: flex; gap: 14px; align-items: center; background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.3); border-radius: 12px; padding: 10px;">
+          <div style="width: 70px; height: 70px; background: #fff; border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 4px 12px rgba(0,0,0,0.3);">
+            <img src="${qrUrl}" alt="QR Code PIX" style="width: 100%; height: 100%; object-fit: contain;" />
           </div>
-          <div style="flex: 1;">
-            <div style="font-size: 0.78rem; font-weight: 700; color: #06b6d4;">Chave PIX Dinâmica Gerada</div>
-            <div style="font-size: 0.7rem; color: #94a3b8; font-family: monospace; word-break: break-all;">pix@farmaciaclinica.com.br • R$ ${net.toFixed(2).replace('.', ',')}</div>
-            <span style="display: inline-block; font-size: 0.68rem; background: rgba(6, 182, 212, 0.2); color: #38bdf8; padding: 2px 6px; border-radius: 4px; margin-top: 3px;">
-              <i class="fa-solid fa-clock"></i> Aguardando confirmação do app bancário
-            </span>
+          <div style="flex: 1; min-width: 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div style="font-size: 0.82rem; font-weight: 800; color: #06b6d4; display: flex; align-items: center; gap: 6px;">
+                <i class="fa-brands fa-pix"></i> PIX Dinâmico BACEN
+              </div>
+              <strong style="font-size: 0.95rem; color: #34d399;">R$ ${net.toFixed(2).replace('.', ',')}</strong>
+            </div>
+            <div style="font-size: 0.68rem; color: #94a3b8; margin: 3px 0 6px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: monospace;">
+              ${pixPayload}
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button type="button" id="btn-copy-pix-payload" class="btn" style="background: linear-gradient(135deg, #06b6d4, #0284c7); border: none; color: #fff; font-size: 0.72rem; font-weight: 700; padding: 4px 10px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px;">
+                <i class="fa-solid fa-copy"></i> Copiar Código PIX
+              </button>
+              <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 0.68rem; color: #38bdf8;">
+                <i class="fa-solid fa-circle-notch fa-spin"></i> Aguardando PIX
+              </span>
+            </div>
           </div>
         </div>
       `;
+
+      document.getElementById('btn-copy-pix-payload')?.addEventListener('click', () => {
+        navigator.clipboard.writeText(pixPayload).then(() => {
+          showToast('📋 Código PIX Copia e Cola copiado com sucesso!');
+        }).catch(() => {
+          prompt('Copie o código PIX:', pixPayload);
+        });
+      });
     } else if (selectedPayment === 'credito') {
       payPanel.innerHTML = `
         <div style="display: flex; gap: 10px; align-items: center;">

@@ -24,6 +24,8 @@ flowchart TD
 
 ### 1. 🩺 Balcão de Atendimento, Triagem SOAP & CDSS 4D (< 60s)
 - **Triagem Farmacêutica Guiada**: Árvores de decisão clínica para as queixas mais comuns do balcão (Gripe, Azia, Cefaleia, Rinite, Lombalgia, Diarreia).
+- **🎙️ Ditado Clínico por Voz (Web Speech API)**: Transcrição contínua e em tempo real em Português (*pt-BR*) nos campos livres da anamnese e parecer técnico.
+- **📹 Teleconsulta Farmacêutica WebRTC**: Sala de teleatendimento com vídeo/áudio HD ponto a ponto, compartilhamento de tela e preenchimento de prontuário SOAP simultâneo.
 - **Motor CDSS 4D Multidimensional**:
   - *Fármaco x Fármaco*: Detecção em tempo real de contraindicações graves (ex.: Sinvastatina + Claritromicina, Varfarina + AINEs).
   - *Fármaco x Alergias*: Alertas de reatividade cruzada (Penicilinas, Dipirona, AINEs, Sulfas).
@@ -35,9 +37,10 @@ flowchart TD
 
 ---
 
-### 2. 💰 Controle Financeiro, Fluxo de Caixa & DRE em Tempo Real
+### 2. 💰 Controle Financeiro, PDV Rápido & PIX Dinâmico BACEN
+- **⚡ PIX Dinâmico com QR Code Oficial BACEN**: Geração do payload oficial EMV (BR Code) com valor exato, cálculo de CRC16 e botão "PIX Copia e Cola" no PDV e na baixa de títulos.
 - **Abas Neon de Alto Contraste**: Navegação rápida e visual entre `Todos os Lançamentos`, `⬇️ Receitas & Faturamento Clínico` e `⬆️ Despesas & Custos Operacionais`.
-- **Botões de Cadastro Rápido `+`**: Cadastre novas categorias e formas de pagamento no ato do lançamento, com propagação automática para o Agrupamento 7 de Configurações.
+- **Boletos Bancários FEBRABAN**: Emissão e download direto em PDF sem descaracterização.
 - **DRE Executivo & Extrato**: Acompanhamento de receitas brutas, custos de insumos/distribuidoras, despesas fixas e margem líquida com exportação em PDF.
 
 ---

@@ -411,29 +411,31 @@ gantt
     Testes unitários automatizados Vitest :done, 2026-08, 15d
     Sinais vitais vivos & Vínculo no PDV  :done, 2026-08, 15d
     Tema Solar Anti-Reflexo & Modo Compacto:done, 2026-08, 15d
+    Ditado Clínico por Voz Web Speech API :done, 2026-08, 15d
+    PIX Dinâmico com QR Code BACEN EMV    :done, 2026-08, 15d
+    Teleconsulta Farmacêutica WebRTC      :done, 2026-08, 15d
+    Pipeline CI/CD GitHub Actions Vitest  :done, 2026-08, 15d
     section Curto / Médio Prazo
     API Oficial Meta WhatsApp Cloud       :2026-09, 45d
-    Teleconsulta Farmacêutica WebRTC      :2026-10, 40d
-    Integração de Bulário ANVISA API      :2026-11, 30d
+    Integração de Bulário ANVISA API      :2026-10, 30d
     section Longo Prazo (Escala & Redes)
-    Módulo Multi-Filiais para Redes       :2026-12, 60d
-    PIX Dinâmico com Webhook no Balcão    :2027-01, 30d
-    Assinatura ICP-Brasil em Nuvem (BirdID):2027-02, 30d
+    Módulo Multi-Filiais para Redes       :2026-11, 60d
+    Assinatura ICP-Brasil em Nuvem (BirdID):2026-12, 30d
 ```
 
 ### 8.1. Evolução de Usabilidade & Experiência
-1. **Ditado Clínico por Voz:** Expansão da Web Speech API para preenchimento de campos livres do SOAP durante a consulta clínica.
-2. **Guia Interativo Contextual de Balcão:** Assistente inteligente em tempo real orientando o passo seguinte do atendimento.
+1. **Ditado Clínico por Voz (Concluído):** Integração da Web Speech API nos campos livres do SOAP (Subjetivo, Objetivo, Avaliação, Plano, Justificativa Farmacêutica), permitindo transcrição contínua em Português (*pt-BR*).
+2. **Guia Interativo Contextual de Balcão (Concluído):** Assistente inteligente de triagem orientando em tempo real o passo seguinte do atendimento clínico.
 
 ### 8.2. Engenharia de Software & Confiabilidade
-1. **Expansão da Cobertura de Testes Vitest:** Criação de suítes de testes para o módulo financeiro, importador NF-e e sincronização Turso Cloud.
-2. **Pipeline de Integração Contínua (CI/CD):** Execução automática de `npm test` e `npm run build` a cada commit/pull request.
+1. **Expansão da Cobertura de Testes Vitest (Concluído):** Suítes de testes unitários automatizados para o motor CDSS 4D, escore MEWS, módulo financeiro/DRE e gerador de PIX BACEN EMV.
+2. **Pipeline de Integração Contínua (CI/CD GitHub Actions) (Concluído):** Workflow automatizado em `.github/workflows/ci.yml` executando `npm test` e `npm run build` a cada push/PR.
 
 ### 8.3. Expansão Comercial & Conectividade
-1. **WhatsApp Cloud API Oficial:** Envio automatizado em background de avisos de Refill, laudos e receitas digitais.
-2. **Teleconsulta Farmacêutica WebRTC:** Realização de atendimentos remotos e acompanhamento domiciliar seguro com prontuário unificado.
-3. **PIX Dinâmico com Baixa Instantânea:** Integração de gateway bancário para geração de QR Code e confirmação automática no caixa.
-4. **Módulo Multi-Filiais:** Suporte para redes de farmácias com sincronização centralizada de estoque, clientes e operadores.
+1. **PIX Dinâmico com QR Code BACEN EMV (Concluído):** Geração automática de QR Code oficial e linha "PIX Copia e Cola" com cálculo de CRC16 no PDV e na baixa de títulos.
+2. **Teleconsulta Farmacêutica WebRTC (Concluído):** Sala de teleatendimento com vídeo/áudio ponto a ponto, controle de mídia, compartilhamento de tela e prontuário SOAP integrado.
+3. **WhatsApp Cloud API Oficial (Planejado):** Envio automatizado em background de avisos de Refill, laudos e receitas digitais.
+4. **Módulo Multi-Filiais (Planejado):** Suporte para redes de farmácias com sincronização centralizada de estoque, clientes e operadores.
 
 ---
 

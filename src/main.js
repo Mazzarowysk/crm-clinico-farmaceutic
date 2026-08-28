@@ -43,6 +43,15 @@ import { searchSystemWithPLN, SYSTEM_INTENTS } from './modules/universalSearch.j
 import { initGlobalKeyboardShortcuts, openHelpShortcutsModal, KEYBOARD_SHORTCUTS } from './modules/shortcuts.js';
 import { cycleTheme } from './modules/ui.js';
 
+import { openTeleconsultationModal } from './modules/teleconsultationModal.js';
+import { generatePixPayload, getPixQRCodeUrl } from './modules/pixGenerator.js';
+import { toggleVoiceDictation } from './modules/voiceDictation.js';
+
+window.openTeleconsultationModal = openTeleconsultationModal;
+window.generatePixPayload = generatePixPayload;
+window.getPixQRCodeUrl = getPixQRCodeUrl;
+window.toggleVoiceDictation = toggleVoiceDictation;
+
 window.openHelpShortcutsModal = openHelpShortcutsModal;
 window.KEYBOARD_SHORTCUTS = KEYBOARD_SHORTCUTS;
 window.cycleTheme = cycleTheme;
