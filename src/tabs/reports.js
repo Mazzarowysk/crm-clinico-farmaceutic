@@ -1887,16 +1887,6 @@ function renderReportsTab(contentArea) {
   }
 
   async function exportHtmlPDF(columns, rows, title, filename, financialSummary) {
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-      if (typeof showCustomAlert === 'function') {
-        showCustomAlert({ title: 'Pop-up Bloqueado', message: 'Por favor, habilite pop-ups para este site nas configurações do navegador e tente novamente.', type: 'warning' });
-      } else {
-        alert('Por favor, habilite pop-ups para gerar a impressão/visualização em PDF.');
-      }
-      return;
-    }
-
     const dateNow = new Date().toLocaleString('pt-BR');
     const docHash = 'CFF-' + Math.random().toString(36).substring(2, 9).toUpperCase() + '-' + Date.now().toString().slice(-4);
     const fmt = v => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
@@ -1965,12 +1955,14 @@ function renderReportsTab(contentArea) {
       <html lang="pt-BR">
       <head>
         <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>${title} - CRM Clínico Farmacêutico</title>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
         <style>
           @page { size: A4 portrait; margin: 12mm 14mm 14mm 14mm; }
+          * { box-sizing: border-box; }
           body { 
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
             color: #0f172a; 
@@ -1981,6 +1973,109 @@ function renderReportsTab(contentArea) {
             -webkit-print-color-adjust: exact; 
             print-color-adjust: exact; 
           }
+          
+          /* Visualização de Impressão na Tela */
+          @media screen {
+            body {
+              background: #0f172a;
+              background: linear-gradient(135deg, #0b0f19 0%, #1e293b 100%);
+              min-height: 100vh;
+              padding: 60px 16px 40px 16px;
+            }
+            .screen-toolbar {
+              position: fixed;
+              top: 0;
+              left: 0;
+              right: 0;
+              height: 54px;
+              background: rgba(15, 23, 42, 0.95);
+              backdrop-filter: blur(12px);
+              -webkit-backdrop-filter: blur(12px);
+              border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              padding: 0 20px;
+              z-index: 99999;
+              box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            }
+            .screen-toolbar-title {
+              display: flex;
+              align-items: center;
+              gap: 10px;
+              color: #f8fafc;
+              font-family: 'Outfit', sans-serif;
+              font-weight: 700;
+              font-size: 0.95rem;
+            }
+            .screen-toolbar-badge {
+              background: rgba(13, 148, 136, 0.2);
+              border: 1px solid #0d9488;
+              color: #2dd4bf;
+              font-size: 0.72rem;
+              font-weight: 600;
+              padding: 2px 8px;
+              border-radius: 20px;
+            }
+            .screen-toolbar-actions {
+              display: flex;
+              align-items: center;
+              gap: 10px;
+            }
+            .btn-action {
+              display: inline-flex;
+              align-items: center;
+              gap: 6px;
+              padding: 8px 16px;
+              border-radius: 8px;
+              font-size: 0.82rem;
+              font-weight: 700;
+              cursor: pointer;
+              transition: all 0.2s;
+              border: none;
+            }
+            .btn-action-print {
+              background: linear-gradient(135deg, #0d9488, #0f766e);
+              color: #ffffff;
+              box-shadow: 0 2px 10px rgba(13, 148, 136, 0.4);
+            }
+            .btn-action-print:hover {
+              background: linear-gradient(135deg, #0f766e, #115e59);
+              transform: translateY(-1px);
+            }
+            .btn-action-close {
+              background: rgba(255, 255, 255, 0.1);
+              color: #cbd5e1;
+              border: 1px solid rgba(255, 255, 255, 0.15);
+            }
+            .btn-action-close:hover {
+              background: rgba(255, 255, 255, 0.18);
+              color: #ffffff;
+            }
+            .report-sheet-container {
+              max-width: 210mm;
+              margin: 0 auto;
+              background: #ffffff;
+              padding: 14mm 14mm 16mm 14mm;
+              border-radius: 8px;
+              box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+              min-height: 297mm;
+            }
+          }
+
+          @media print {
+            .screen-toolbar { display: none !important; }
+            body { background: #ffffff !important; padding: 0 !important; }
+            .report-sheet-container { 
+              max-width: 100% !important; 
+              margin: 0 !important; 
+              padding: 0 !important; 
+              border-radius: 0 !important; 
+              box-shadow: none !important; 
+              min-height: auto !important;
+            }
+          }
+
           .header-box {
             border-bottom: 2px solid #0f766e;
             padding-bottom: 12px;
@@ -2055,109 +2150,140 @@ function renderReportsTab(contentArea) {
         </style>
       </head>
       <body>
-        <!-- CABEÇALHO OFICIAL CRM CLÍNICO FARMACÊUTICO -->
-        <div class="header-box">
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <div style="background: #ffffff; padding: 4px 8px; border-radius: 8px; border: 1.5px solid #0f766e; display: flex; align-items: center; justify-content: center;">
-              <img src="/assets/crm-logo.png?v=2" alt="Logo CRM" style="height: 38px; width: auto; object-fit: contain;">
+        <!-- BARRA FLUTUANTE DE AÇÕES NA TELA (Oculta na Impressão) -->
+        <div class="screen-toolbar">
+          <div class="screen-toolbar-title">
+            <span>📄 CRM Clínico Farmacêutico</span>
+            <span class="screen-toolbar-badge">Visualização de Impressão & Exportação</span>
+          </div>
+          <div class="screen-toolbar-actions">
+            <button onclick="window.print()" class="btn-action btn-action-print">
+              🖨️ Imprimir / Salvar PDF
+            </button>
+            <button onclick="window.close()" class="btn-action btn-action-close">
+              ✖️ Fechar Aba
+            </button>
+          </div>
+        </div>
+
+        <!-- FOLHA DO RELATÓRIO FORMATO A4 -->
+        <div class="report-sheet-container">
+          <!-- CABEÇALHO OFICIAL CRM CLÍNICO FARMACÊUTICO -->
+          <div class="header-box">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="background: #ffffff; padding: 4px 8px; border-radius: 8px; border: 1.5px solid #0f766e; display: flex; align-items: center; justify-content: center;">
+                <img src="/assets/crm-logo.png?v=2" alt="Logo CRM" style="height: 38px; width: auto; object-fit: contain;">
+              </div>
+              <div>
+                <div style="font-family: 'Outfit', sans-serif; font-size: 14pt; font-weight: 800; color: #0f172a; margin: 0; line-height: 1.1; letter-spacing: -0.3px;">
+                  CRM CLÍNICO FARMACÊUTICO
+                </div>
+                <div style="font-size: 8pt; color: #0f766e; font-weight: 700; margin-top: 2px;">
+                  Consultório Farmacêutico · Prescrição Clínica · Farmacovigilância CDSS 4D
+                </div>
+                <div style="font-size: 7pt; color: #64748b; margin-top: 1px;">
+                  Conforme Resoluções CFF nº 585/2013 e nº 586/2013 · RDC ANVISA nº 44/2009
+                </div>
+              </div>
             </div>
+            
+            <div style="text-align: right; font-size: 7.5pt; color: #475569; line-height: 1.35;">
+              <div>Emissão: <strong>${dateNow}</strong></div>
+              <div>Autenticador: <span style="font-family: monospace; font-weight: 700; color: #0f766e;">${docHash}</span></div>
+              <div>RT: <strong>Dr. Marcelo Mazaro</strong> (CRF-SP 54180)</div>
+            </div>
+          </div>
+
+          <!-- BANNER DE IDENTIFICAÇÃO DO RELATÓRIO -->
+          <div class="title-banner">
             <div>
-              <div style="font-family: 'Outfit', sans-serif; font-size: 14pt; font-weight: 800; color: #0f172a; margin: 0; line-height: 1.1; letter-spacing: -0.3px;">
-                CRM CLÍNICO FARMACÊUTICO
-              </div>
-              <div style="font-size: 8pt; color: #0f766e; font-weight: 700; margin-top: 2px;">
-                Consultório Farmacêutico · Prescrição Clínica · Farmacovigilância CDSS 4D
-              </div>
-              <div style="font-size: 7pt; color: #64748b; margin-top: 1px;">
-                Conforme Resoluções CFF nº 585/2013 e nº 586/2013 · RDC ANVISA nº 44/2009
+              <h1 style="font-size: 12pt; color: #0f766e; margin: 0; font-family: 'Outfit', sans-serif; font-weight: 800; text-transform: uppercase;">
+                ${title}
+              </h1>
+              <div style="font-size: 7.5pt; color: #475569; margin-top: 2px;">
+                Documento gerencial e assistencial oficial emitido pelo CRM Clínico Farmacêutico
               </div>
             </div>
-          </div>
-          
-          <div style="text-align: right; font-size: 7.5pt; color: #475569; line-height: 1.35;">
-            <div>Emissão: <strong>${dateNow}</strong></div>
-            <div>Autenticador: <span style="font-family: monospace; font-weight: 700; color: #0f766e;">${docHash}</span></div>
-            <div>RT: <strong>Dr. Marcelo Mazaro</strong> (CRF-SP 54180)</div>
-          </div>
-        </div>
-
-        <!-- BANNER DE IDENTIFICAÇÃO DO RELATÓRIO -->
-        <div class="title-banner">
-          <div>
-            <h1 style="font-size: 12pt; color: #0f766e; margin: 0; font-family: 'Outfit', sans-serif; font-weight: 800; text-transform: uppercase;">
-              ${title}
-            </h1>
-            <div style="font-size: 7.5pt; color: #475569; margin-top: 2px;">
-              Documento gerencial e assistencial oficial emitido pelo CRM Clínico Farmacêutico
+            <div style="text-align: right; font-size: 8pt; color: #0f766e; font-weight: 700;">
+              Total: <strong>${rows.length}</strong> registro(s)
             </div>
           </div>
-          <div style="text-align: right; font-size: 8pt; color: #0f766e; font-weight: 700;">
-            Total: <strong>${rows.length}</strong> registro(s)
-          </div>
-        </div>
 
-        <!-- BLOCO DE KPIs (SE HOUVER) -->
-        ${summaryBlock}
+          <!-- BLOCO DE KPIs (SE HOUVER) -->
+          ${summaryBlock}
 
-        <!-- TABELA DE REGISTROS -->
-        <table>
-          <thead>
-            <tr>
-              ${columns.map(col => `<th>${col}</th>`).join('')}
-            </tr>
-          </thead>
-          <tbody>
-            ${rows.map(row => `
+          <!-- TABELA DE REGISTROS -->
+          <table>
+            <thead>
               <tr>
-                ${row.map((cell, idx) => {
-                  const colName = (columns[idx] || '').toLowerCase();
-                  if (colName.includes('status') || colName.includes('situa') || colName.includes('severidade')) {
-                    const s = String(cell).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
-                    return `<td><span class="badge badge-${s}">${cell}</span></td>`;
-                  }
-                  return `<td>${cell}</td>`;
-                }).join('')}
+                ${columns.map(col => `<th>${col}</th>`).join('')}
               </tr>
-            `).join('')}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              ${rows.map(row => `
+                <tr>
+                  ${row.map((cell, idx) => {
+                    const colName = (columns[idx] || '').toLowerCase();
+                    if (colName.includes('status') || colName.includes('situa') || colName.includes('severidade')) {
+                      const s = String(cell).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
+                      return `<td><span class="badge badge-${s}">${cell}</span></td>`;
+                    }
+                    return `<td>${cell}</td>`;
+                  }).join('')}
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
 
-        <!-- TERMO DE AUTENTICIDADE E ASSINATURA DIGITAL -->
-        <div class="sig-card">
-          <div style="font-size: 7.2pt; color: #64748b; line-height: 1.35; max-width: 60%;">
-            <div style="font-weight: 700; color: #0f172a; margin-bottom: 2px;">AUTENTICIDADE E RASTREABILIDADE DIGITAL (CFM nº 1.821/2007 · CFF nº 586/2013)</div>
-            <div>Este relatório possui validade legal e probatória em conformidade com as diretrizes do Conselho Federal de Farmácia e LGPD (Lei nº 13.709/2018).</div>
-          </div>
-          <div style="text-align: right;">
-            <div style="border-top: 1.5px solid #0f172a; width: 220px; padding-top: 3px; text-align: center;">
-              <div style="font-size: 8.5pt; font-weight: 800; color: #0f172a;">Dr. Marcelo Mazaro</div>
-              <div style="font-size: 7pt; color: #0f766e; font-weight: 600;">Farmacêutico Responsável Técnico · CRF-SP 54180</div>
-              <div style="font-size: 6.8pt; color: #16a34a; font-weight: 700; margin-top: 1px;">✓ Assinatura Digital ICP-Brasil / CFF</div>
+          <!-- TERMO DE AUTENTICIDADE E ASSINATURA DIGITAL -->
+          <div class="sig-card">
+            <div style="font-size: 7.2pt; color: #64748b; line-height: 1.35; max-width: 60%;">
+              <div style="font-weight: 700; color: #0f172a; margin-bottom: 2px;">AUTENTICIDADE E RASTREABILIDADE DIGITAL (CFM nº 1.821/2007 · CFF nº 586/2013)</div>
+              <div>Este relatório possui validade legal e probatória em conformidade com as diretrizes do Conselho Federal de Farmácia e LGPD (Lei nº 13.709/2018).</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="border-top: 1.5px solid #0f172a; width: 220px; padding-top: 3px; text-align: center;">
+                <div style="font-size: 8.5pt; font-weight: 800; color: #0f172a;">Dr. Marcelo Mazaro</div>
+                <div style="font-size: 7pt; color: #0f766e; font-weight: 600;">Farmacêutico Responsável Técnico · CRF-SP 54180</div>
+                <div style="font-size: 6.8pt; color: #16a34a; font-weight: 700; margin-top: 1px;">✓ Assinatura Digital ICP-Brasil / CFF</div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- RODAPÉ -->
-        <div class="footer">
-          <div>CRM Clínico Farmacêutico · Dr. Marcelo Mazaro (CRF-SP 54180) · Sistema Integrado</div>
-          <div>Gerado em ${dateNow} · Chave: ${docHash}</div>
+          <!-- RODAPÉ -->
+          <div class="footer">
+            <div>CRM Clínico Farmacêutico · Dr. Marcelo Mazaro (CRF-SP 54180) · Sistema Integrado</div>
+            <div>Gerado em ${dateNow} · Chave: ${docHash}</div>
+          </div>
         </div>
 
         <script>
-          window.onload = function() {
-            setTimeout(function() { window.print(); }, 400);
-          };
+          window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+              window.print();
+            }, 600);
+          });
         </script>
       </body>
       </html>
     `;
 
-    printWindow.document.open();
-    printWindow.document.write(htmlContent);
-    printWindow.document.close();
-    printWindow.focus();
+    // Gerar Blob URL para abertura garantida em NOVA ABA isolada
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    const blobUrl = URL.createObjectURL(blob);
+    const newTab = window.open(blobUrl, '_blank');
 
-    if (typeof showToast === 'function') showToast(`Visualização para impressão PDF aberta com sucesso!`);
+    if (!newTab || newTab.closed || typeof newTab.closed === 'undefined') {
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    if (typeof showToast === 'function') showToast(`Relatório aberto em nova aba para visualização e impressão!`);
   }
 
   function openPayInstallmentModal(installment, onComplete) {
@@ -3075,13 +3201,8 @@ function renderReportsTab(contentArea) {
     document.getElementById('btn-copy-pix-banner')?.addEventListener('click', handleCopyPix);
 
     const handlePrint = () => {
-      const printWin = window.open('', '_blank');
-      if (!printWin) {
-        alert('Por favor, habilite janelas pop-up no seu navegador para imprimir o boleto.');
-        return;
-      }
       const boletoHTML = document.getElementById('printable-boleto-area').innerHTML;
-      printWin.document.write(`
+      const htmlContent = `
         <!DOCTYPE html>
         <html lang="pt-BR">
         <head>
@@ -3102,8 +3223,19 @@ function renderReportsTab(contentArea) {
           </script>
         </body>
         </html>
-      `);
-      printWin.document.close();
+      `;
+      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+      const blobUrl = URL.createObjectURL(blob);
+      const newWin = window.open(blobUrl, '_blank');
+      if (!newWin) {
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
     };
 
     document.getElementById('btn-print-boleto')?.addEventListener('click', handlePrint);
@@ -3607,7 +3739,6 @@ async function openEncounterReportDetail(encId) {
   overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.72);backdrop-filter:blur(8px);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;';
   overlay.innerHTML = `<div style="color:#818cf8;font-size:1.5rem;"><i class="fa-solid fa-spinner fa-spin"></i> Carregando atendimento...</div>`;
   document.body.appendChild(overlay);
-  // Fechar apenas pelo botão fechar da interface
 
   try {
     const [encRes, triageRes, patRes, noteRes] = await Promise.all([
@@ -3657,8 +3788,8 @@ async function openEncounterReportDetail(encId) {
       const ranges = { hr: { low:60, high:100 }, temp: { low:36.0, high:37.5 }, spo2: { low:95, high:100 }, pain: { low:0, high:3 } };
       const r = ranges[type];
       if (!r) return '';
-      if (v < r.low) return `<div style="font-size:0.58rem;background:#38bdf820;color:#38bdf8;padding:1px 5px;border-radius:4px;margin-top:3px;">â†“ Baixo</div>`;
-      if (v > r.high) return `<div style="font-size:0.58rem;background:#ef444420;color:#ef4444;padding:1px 5px;border-radius:4px;margin-top:3px;">â†‘ Alto</div>`;
+      if (v < r.low) return `<div style="font-size:0.58rem;background:#38bdf820;color:#38bdf8;padding:1px 5px;border-radius:4px;margin-top:3px;">↓ Baixo</div>`;
+      if (v > r.high) return `<div style="font-size:0.58rem;background:#ef444420;color:#ef4444;padding:1px 5px;border-radius:4px;margin-top:3px;">↑ Alto</div>`;
       return `<div style="font-size:0.58rem;background:#34d39920;color:#34d399;padding:1px 5px;border-radius:4px;margin-top:3px;">✓ Normal</div>`;
     };
 
@@ -3670,20 +3801,20 @@ async function openEncounterReportDetail(encId) {
     const vCard = (icon, label, value, unit, color, alertType) => `
       <div style="background:rgba(0,0,0,0.25);border:1px solid ${color}1e;border-radius:12px;padding:12px 8px;text-align:center;transition:border-color .2s,box-shadow .2s;cursor:help;" title="${vitalDesc(alertType)}"
         onmouseenter="this.style.borderColor='${color}55';this.style.boxShadow='0 0 14px ${color}1a';"
-        onmouseleave="this.style.borderColor='${color}1e';this.style.boxShadow='';">
+        onmouseleave="this.style.borderColor='${color}1e';this.style.boxShadow='';" >
         <i class="fa-solid ${icon}" style="color:${color};font-size:1rem;display:block;margin-bottom:5px;"></i>
         <div style="font-size:1.1rem;font-weight:900;font-family:'Outfit';color:${color};line-height:1.1;">${value}<span style="font-size:0.58rem;color:#475569;margin-left:1px;">${unit}</span></div>
         <div style="font-size:0.6rem;text-transform:uppercase;letter-spacing:.05em;color:#475569;margin-top:3px;">${label}</div>
         ${vitalAlert(alertType, value)}
       </div>`;
 
-    const sBlock = (letter, title, content, color) => content ? `
+    const sBlock = (letter, title, text, color) => text ? `
       <div style="background:rgba(0,0,0,0.15);border-left:3px solid ${color};border-radius:0 10px 10px 0;padding:12px 15px;margin-bottom:9px;">
         <div style="display:flex;align-items:center;gap:7px;margin-bottom:6px;">
           <span style="background:${color};color:#000;font-size:0.65rem;font-weight:900;width:17px;height:17px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;">${letter}</span>
           <span style="font-size:0.7rem;font-weight:800;color:${color};text-transform:uppercase;letter-spacing:.06em;">${title}</span>
         </div>
-        <div style="font-size:0.85rem;color:#cbd5e1;line-height:1.65;">${content}</div>
+        <div style="font-size:0.85rem;color:#cbd5e1;line-height:1.65;">${text}</div>
       </div>` : '';
 
     const isClinical = state?.user && (state.user.role === 'Médico' || state.user.role === 'Enfermeiro');
@@ -3785,7 +3916,7 @@ async function openEncounterReportDetail(encId) {
               <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:13px;padding:13px;">
                 <div style="font-size:0.65rem;font-weight:700;color:#38bdf8;text-transform:uppercase;letter-spacing:.06em;margin-bottom:9px;display:flex;align-items:center;gap:5px;"><i class="fa-solid fa-hospital"></i> Atendimento</div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-                  ${infoRow('Tipo', enc.type === 'Urgencia' ? '🚨 Urgência' : 'ðŸ¥ Ambulatório')}
+                  ${infoRow('Tipo', enc.type === 'Urgencia' ? '🚨 Urgência' : '🩺 Ambulatório')}
                   ${infoRow('Médico', enc.doctorName)}
                   ${infoRow('Sala / Leito', enc.room || enc.bed)}
                   ${infoRow('CID-10', cid)}
@@ -3827,7 +3958,7 @@ async function openEncounterReportDetail(encId) {
                   <span style="font-size:0.8rem;font-weight:700;color:#e2e8f0;">Nota Clínica SOAP</span>
                   ${note.isClosed
                     ? '<span style="font-size:0.67rem;padding:2px 9px;border-radius:20px;background:rgba(52,211,153,0.14);color:#34d399;border:1px solid rgba(52,211,153,0.28);">✓ Assinada e Fechada</span>'
-                    : '<span style="font-size:0.67rem;padding:2px 9px;border-radius:20px;background:rgba(251,191,36,0.12);color:#fbbf24;border:1px solid rgba(251,191,36,0.28);">âœï¸ Rascunho</span>'}
+                    : '<span style="font-size:0.67rem;padding:2px 9px;border-radius:20px;background:rgba(251,191,36,0.12);color:#fbbf24;border:1px solid rgba(251,191,36,0.28);">✍️ Rascunho</span>'}
                 </div>
                 ${sBlock('S','Subjetivo — queixas e história',note.subjective,'#818cf8')}
                 ${sBlock('O','Objetivo — exame físico e dados',note.objective,'#38bdf8')}
@@ -3850,7 +3981,7 @@ async function openEncounterReportDetail(encId) {
               <!-- PDF -->
               <div style="background:rgba(239,68,68,0.05);border:1px solid rgba(239,68,68,0.18);border-radius:16px;padding:20px;text-align:center;transition:all .2s;"
                 onmouseenter="this.style.background='rgba(239,68,68,0.09)';this.style.borderColor='rgba(239,68,68,0.35)';"
-                onmouseleave="this.style.background='rgba(239,68,68,0.05)';this.style.borderColor='rgba(239,68,68,0.18)';">
+                onmouseleave="this.style.background='rgba(239,68,68,0.05)';this.style.borderColor='rgba(239,68,68,0.18)';" >
                 <div style="width:48px;height:48px;border-radius:13px;background:rgba(239,68,68,0.14);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:1.4rem;color:#ef4444;"><i class="fa-solid fa-file-pdf"></i></div>
                 <div style="font-size:0.88rem;font-weight:700;color:#f1f5f9;margin-bottom:4px;">Resumo em PDF</div>
                 <div style="font-size:0.73rem;color:#475569;margin-bottom:13px;line-height:1.5;">Exporta dados do paciente, vitais, queixa e nota SOAP com layout para impressão A4</div>
@@ -3861,7 +3992,7 @@ async function openEncounterReportDetail(encId) {
               <!-- Imprimir -->
               <div style="background:rgba(56,189,248,0.05);border:1px solid rgba(56,189,248,0.18);border-radius:16px;padding:20px;text-align:center;transition:all .2s;"
                 onmouseenter="this.style.background='rgba(56,189,248,0.09)';this.style.borderColor='rgba(56,189,248,0.35)';"
-                onmouseleave="this.style.background='rgba(56,189,248,0.05)';this.style.borderColor='rgba(56,189,248,0.18)';">
+                onmouseleave="this.style.background='rgba(56,189,248,0.05)';this.style.borderColor='rgba(56,189,248,0.18)';" >
                 <div style="width:48px;height:48px;border-radius:13px;background:rgba(56,189,248,0.14);display:flex;align-items:center;justify-content:center;margin:0 auto 10px;font-size:1.4rem;color:#38bdf8;"><i class="fa-solid fa-print"></i></div>
                 <div style="font-size:0.88rem;font-weight:700;color:#f1f5f9;margin-bottom:4px;">Impressão Direta</div>
                 <div style="font-size:0.73rem;color:#475569;margin-bottom:13px;line-height:1.5;">Abre diálogo de impressão do navegador com layout otimizado para papel</div>
@@ -3878,10 +4009,10 @@ async function openEncounterReportDetail(encId) {
                 ['✓','Identificação do paciente (nome, idade, CPF)','#34d399',true],
                 ['✓','Dados do atendimento (ID, data, médico, tipo)','#34d399',true],
                 ['✓','Classificação de risco Manchester','#34d399',true],
-                [triage?'✓':'â—‹','Sinais vitais da triagem',triage?'#34d399':'#334155',!!triage],
-                [complaint?'✓':'â—‹','Queixa principal',complaint?'#34d399':'#334155',!!complaint],
-                [note?'✓':'â—‹','Nota clínica SOAP',note?'#34d399':'#334155',!!note],
-                ['â—‹','Assinatura digital (disponível no PEP)','#334155',false],
+                [triage?'✓':'○','Sinais vitais da triagem',triage?'#34d399':'#334155',!!triage],
+                [complaint?'✓':'○','Queixa principal',complaint?'#34d399':'#334155',!!complaint],
+                [note?'✓':'○','Nota clínica SOAP',note?'#34d399':'#334155',!!note],
+                ['○','Assinatura digital (disponível no PEP)','#334155',false],
               ].map(([ic,label,c]) => `<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.03);">
                 <span style="color:${c};font-size:0.72rem;width:14px;text-align:center;">${ic}</span>
                 <span style="font-size:0.76rem;color:${c === '#34d399' ? '#94a3b8' : '#334155'};">${label}</span>
@@ -3922,7 +4053,23 @@ async function openEncounterReportDetail(encId) {
       <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
       <style>
       @page{size:A4 portrait;margin:12mm 14mm 14mm 14mm;}
+      * { box-sizing: border-box; }
       body{font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:#0f172a;margin:0;padding:0;font-size:8.5pt;line-height:1.4;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+      @media screen {
+        body { background: linear-gradient(135deg, #0b0f19 0%, #1e293b 100%); min-height: 100vh; padding: 60px 16px 40px 16px; }
+        .screen-toolbar { position: fixed; top: 0; left: 0; right: 0; height: 54px; background: rgba(15, 23, 42, 0.95); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255, 255, 255, 0.1); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; z-index: 99999; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
+        .screen-toolbar-title { display: flex; align-items: center; gap: 10px; color: #f8fafc; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.95rem; }
+        .screen-toolbar-actions { display: flex; align-items: center; gap: 10px; }
+        .btn-action { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border-radius: 8px; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: all 0.2s; border: none; }
+        .btn-action-print { background: linear-gradient(135deg, #0d9488, #0f766e); color: #ffffff; }
+        .btn-action-close { background: rgba(255, 255, 255, 0.1); color: #cbd5e1; border: 1px solid rgba(255, 255, 255, 0.15); }
+        .sheet-box { max-width: 210mm; margin: 0 auto; background: #ffffff; padding: 14mm; border-radius: 8px; box-shadow: 0 12px 36px rgba(0,0,0,0.45); }
+      }
+      @media print {
+        .screen-toolbar { display: none !important; }
+        body { background: #ffffff !important; padding: 0 !important; }
+        .sheet-box { max-width: 100% !important; margin: 0 !important; padding: 0 !important; border-radius: 0 !important; box-shadow: none !important; }
+      }
       .hdr{display:flex;gap:14px;align-items:center;padding-bottom:12px;border-bottom:2px solid #0f766e;margin-bottom:14px;}
       .badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:7.5pt;font-weight:700;margin-right:4px;}
       .sec{font-size:8.5pt;font-weight:800;color:#0f766e;text-transform:uppercase;letter-spacing:.04em;margin:12px 0 6px;padding-bottom:3px;border-bottom:1.5px solid #0f766e;}
@@ -3934,7 +4081,18 @@ async function openEncounterReportDetail(encId) {
       .sl{font-size:7.5pt;font-weight:800;color:#0f766e;text-transform:uppercase;margin-bottom:2px;}
       .sc{font-size:8.2pt;color:#1e293b;line-height:1.45;}
       .ftr{margin-top:16px;padding-top:8px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;font-size:7pt;color:#64748b;}
-      @media print{body{padding:0;}}</style></head><body>
+      </style></head><body>
+      <div class="screen-toolbar">
+        <div class="screen-toolbar-title">
+          <span>📄 CRM Clínico Farmacêutico</span>
+          <span style="background:rgba(13,148,136,0.2);border:1px solid #0d9488;color:#2dd4bf;font-size:0.72rem;font-weight:600;padding:2px 8px;border-radius:20px;">Resumo do Atendimento</span>
+        </div>
+        <div class="screen-toolbar-actions">
+          <button onclick="window.print()" class="btn-action btn-action-print">🖨️ Imprimir / Salvar PDF</button>
+          <button onclick="window.close()" class="btn-action btn-action-close">✖️ Fechar Aba</button>
+        </div>
+      </div>
+      <div class="sheet-box">
       <div class="hdr">
         <div style="background:#ffffff;padding:4px 8px;border-radius:8px;border:1.5px solid #0f766e;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
           <img src="/assets/crm-logo.png?v=2" alt="CRM Clínico Farmacêutico" style="height:36px;width:auto;object-fit:contain;">
@@ -3943,7 +4101,7 @@ async function openEncounterReportDetail(encId) {
           <div style="font-size:7.5pt;color:#0f766e;font-weight:800;text-transform:uppercase;letter-spacing:.04em;">CRM Clínico Farmacêutico · Resumo do Atendimento Clínico</div>
           <h1 style="font-size:13pt;font-weight:800;color:#0f172a;margin:2px 0;font-family:'Outfit',sans-serif;">${enc.patientName||'Paciente'}</h1>
           <div style="margin-top:3px;display:flex;align-items:center;gap:6px;">
-            ${mc?`<span class="badge" style="background:${manchColor}18;color:${manchColor};border:1px solid ${manchColor}40;">Triagem: ${mc.toUpperCase()}</span>`:''}
+            ${mc?`<span class="badge" style="background:${manchesterHex[mc]||'#818cf8'}18;color:${manchesterHex[mc]||'#818cf8'};border:1px solid ${manchesterHex[mc]||'#818cf8'}40;">Triagem: ${mc.toUpperCase()}</span>`:''}
             <span class="badge" style="background:#f0fdf4;color:#15803d;border:1px solid #86efac;">${statusMap[enc.status]||enc.status}</span>
             <span style="font-size:7.5pt;color:#64748b;">Data: ${dateStr}</span>
           </div>
@@ -3977,24 +4135,30 @@ async function openEncounterReportDetail(encId) {
         <span>CRM Clínico Farmacêutico · Dr. Marcelo Mazaro (CRF-SP 54180) · Sistema Integrado</span>
         <span>Gerado eletronicamente em ${new Date().toLocaleString('pt-BR')}</span>
       </div>
-      <script>window.onload = function(){ setTimeout(function(){ window.print(); }, 400); };</script>
+      </div>
+      <script>window.addEventListener('DOMContentLoaded', () => { setTimeout(() => window.print(), 500); });</script>
       </body></html>`;
     };
 
-    overlay.querySelector('#btn-enc-pdf')?.addEventListener('click', () => {
-      const w = window.open('','_blank','width=900,height=700');
-      if (!w) { if(typeof showToast==='function') showToast('Habilite pop-ups para gerar PDF'); return; }
-      w.document.write(genDoc());
-      w.document.close();
-      setTimeout(()=>{ w.focus(); w.print(); }, 700);
-    });
-    overlay.querySelector('#btn-enc-print')?.addEventListener('click', () => {
-      const w = window.open('','_blank','width=900,height=700');
-      if (!w) { if(typeof showToast==='function') showToast('Habilite pop-ups para imprimir'); return; }
-      w.document.write(genDoc());
-      w.document.close();
-      setTimeout(()=>{ w.focus(); w.print(); }, 700);
-    });
+    const openEncounterPrint = () => {
+      const docHtml = genDoc();
+      const blob = new Blob([docHtml], { type: 'text/html;charset=utf-8' });
+      const blobUrl = URL.createObjectURL(blob);
+      const newWin = window.open(blobUrl, '_blank');
+      if (!newWin) {
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+      if (typeof showToast === 'function') showToast('Relatório de atendimento aberto em nova aba!');
+    };
+
+    overlay.querySelector('#btn-enc-pdf')?.addEventListener('click', openEncounterPrint);
+    overlay.querySelector('#btn-enc-print')?.addEventListener('click', openEncounterPrint);
 
   } catch (err) {
     overlay.innerHTML = `
@@ -4007,4 +4171,3 @@ async function openEncounterReportDetail(encId) {
   }
 }
 window.openEncounterReportDetail = openEncounterReportDetail;
-
