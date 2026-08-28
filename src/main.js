@@ -1497,13 +1497,28 @@ function renderAppStructure() {
     <div class="app-container">
       <!-- Sidebar de Navegação -->
       <aside class="app-sidebar">
-        <div class="brand-logo" style="padding: 16px 12px 12px; display: flex; align-items: center; gap: 12px;">
-          <div class="system-sidebar-logo-box">
-            <img src="/assets/crm_logo_v10.png" alt="PharmaCRM Logo" class="system-sidebar-logo-img">
-          </div>
-          <div>
-            <div style="font-family: 'Outfit', sans-serif; font-weight: 700; color: #f8fafc; font-size: 1.05rem; line-height: 1.1;">PharmaCRM</div>
-            <div style="font-size: 0.72rem; color: #14b8a6; font-weight: 600;">Clínico &amp; CDSS</div>
+        <div class="brand-logo" style="padding: 14px 14px 8px; width: 100%; box-sizing: border-box;">
+          <div class="system-sidebar-logo-banner" style="
+            width: 100%;
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 8px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45), 0 0 16px rgba(20, 184, 166, 0.28);
+            border: 1.5px solid rgba(20, 184, 166, 0.5);
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-sizing: border-box;
+          " onclick="window.switchTab && window.switchTab('dashboard')" title="CRM Clínico Farmacêutico — Ir para Métricas">
+            <img src="/assets/crm_logo_v10.png" alt="CRM Clínico Farmacêutico" style="
+              width: 100%;
+              max-height: 80px;
+              object-fit: contain;
+              display: block;
+              border-radius: 8px;
+            ">
           </div>
         </div>
 
@@ -1557,7 +1572,7 @@ function renderAppStructure() {
             <i class="fa-solid fa-arrow-left"></i>
             <span id="global-back-label">Voltar</span>
           </button>
-          <img src="/assets/crm_logo_v10.png" alt="PharmaCRM" class="header-brand-logo-img">
+          <img src="/assets/crm_logo_v10.png" alt="CRM Clínico Farmacêutico" class="header-brand-logo-img">
           <div>
             <h1 class="page-title" id="page-title-label" style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.25rem; line-height: 1.2;">CRM Clínico Farmacêutico</h1>
             <div class="header-brand-text" style="margin: 0; font-size: 0.76rem; color: #94a3b8;">
