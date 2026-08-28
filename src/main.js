@@ -1503,17 +1503,23 @@ function renderAppStructure() {
           </div>
         </div>
 
-        <!-- Seletor de Divisão / Ambiente: Frente vs Suprimentos -->
-        <div class="sidebar-mode-switcher-container" style="padding: 0 10px 10px;">
-          <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 3px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px;">
-            <button type="button" class="btn-sidebar-mode-switch ${state.systemViewMode === 'frente' ? 'active' : ''}" data-mode="frente" style="background: ${state.systemViewMode === 'frente' ? 'linear-gradient(135deg, #0d9488, #0f766e)' : 'transparent'}; color: ${state.systemViewMode === 'frente' ? '#fff' : '#94a3b8'}; border: none; padding: 5px 2px; border-radius: 6px; font-size: 0.68rem; font-weight: 700; cursor: pointer; text-align: center; transition: all 0.2s;" title="Frente de Loja, Atendimento ao Cliente e Consultório Clínico">
-              🩺 Frente
+        <!-- Seletor de Divisão / Ambiente: Frente vs Gestão vs Todos -->
+        <div class="sidebar-mode-switcher-container">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; padding: 0 2px;">
+            <span style="font-size: 0.63rem; font-weight: 800; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.8px; display: flex; align-items: center; gap: 5px;">
+              <i class="fa-solid fa-layer-group" style="color: #14b8a6; font-size: 0.72rem;"></i> Ambiente
+            </span>
+            <span style="font-size: 0.60rem; color: #64748b; font-weight: 600;">Filtrar Módulos</span>
+          </div>
+          <div class="sidebar-mode-box">
+            <button type="button" class="btn-sidebar-mode-switch ${state.systemViewMode === 'frente' ? 'active' : ''}" data-mode="frente" title="Frente de Loja, Atendimento ao Cliente, Prontuário e Consultório Clínico (4 Módulos)">
+              <i class="fa-solid fa-stethoscope" style="font-size: 0.76rem; color: ${state.systemViewMode === 'frente' ? '#fff' : '#2dd4bf'};"></i> Frente
             </button>
-            <button type="button" class="btn-sidebar-mode-switch ${state.systemViewMode === 'suprimentos' ? 'active' : ''}" data-mode="suprimentos" style="background: ${state.systemViewMode === 'suprimentos' ? 'linear-gradient(135deg, #0284c7, #0369a1)' : 'transparent'}; color: ${state.systemViewMode === 'suprimentos' ? '#fff' : '#94a3b8'}; border: none; padding: 5px 2px; border-radius: 6px; font-size: 0.68rem; font-weight: 700; cursor: pointer; text-align: center; transition: all 0.2s;" title="Cadeia de Suprimentos, Estoque, SNGPC e Gestão Operacional">
-              🏢 Gestão
+            <button type="button" class="btn-sidebar-mode-switch ${state.systemViewMode === 'suprimentos' ? 'active' : ''}" data-mode="suprimentos" title="Cadeia de Suprimentos, Estoque, Financeiro e Gestão de Operadores (3 Módulos)">
+              <i class="fa-solid fa-boxes-packing" style="font-size: 0.76rem; color: ${state.systemViewMode === 'suprimentos' ? '#fff' : '#38bdf8'};"></i> Gestão
             </button>
-            <button type="button" class="btn-sidebar-mode-switch ${state.systemViewMode === 'todos' ? 'active' : ''}" data-mode="todos" style="background: ${state.systemViewMode === 'todos' ? 'rgba(255,255,255,0.14)' : 'transparent'}; color: ${state.systemViewMode === 'todos' ? '#fff' : '#94a3b8'}; border: none; padding: 5px 2px; border-radius: 6px; font-size: 0.68rem; font-weight: 700; cursor: pointer; text-align: center; transition: all 0.2s;" title="Visão Completa de Todos os Módulos">
-              🌐 Todos
+            <button type="button" class="btn-sidebar-mode-switch ${state.systemViewMode === 'todos' ? 'active' : ''}" data-mode="todos" title="Visão Completa com Todos os Módulos Clínicos e Administrativos">
+              <i class="fa-solid fa-globe" style="font-size: 0.76rem; color: ${state.systemViewMode === 'todos' ? '#fff' : '#a78bfa'};"></i> Todos
             </button>
           </div>
         </div>
@@ -1761,6 +1767,48 @@ function renderAppStructure() {
       switchTab(targetTab);
     });
   });
+
+  // Filtro de Ambiente / Modo de Exibição da Sidebar (Frente vs Gestão vs Todos)
+  document.querySelectorAll('.btn-sidebar-mode-switch').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const mode = btn.getAttribute('data-mode');
+      if (mode && mode !== state.systemViewMode) {
+        state.systemViewMode = mode;
+        localStorage.setItem('system_view_mode', mode);
+
+        // Se a aba atual não pertencer ao novo modo, redireciona para a primeira aba válida
+        const activeNav = allNavItems.find(i => i.id === state.activeTab);
+        if (mode === 'frente' && activeNav && activeNav.group !== 'frente') {
+          state.activeTab = 'dashboard';
+        } else if (mode === 'suprimentos' && activeNav && activeNav.group !== 'suprimentos') {
+          state.activeTab = 'estoque';
+        }
+
+        const modeLabels = {
+          frente: '🩺 Frente & Balcão Clínico',
+          suprimentos: '🏢 Suprimentos & Gestão',
+          todos: '🌐 Visão Completa (Todos os Módulos)'
+        };
+        if (typeof showToast === 'function') {
+          showToast(`Filtro ativado: ${modeLabels[mode] || mode}`);
+        }
+
+        renderAppStructure();
+      }
+    });
+  });
+
+  const logoutBtn = document.getElementById('btn-logout');
+  if (logoutBtn) {
+    logoutBtn.addEventListener('click', () => {
+      if (typeof handleLogout === 'function') handleLogout();
+      else {
+        localStorage.removeItem('hn_user');
+        window.location.reload();
+      }
+    });
+  }
 
   const themeToggle = document.getElementById('btn-theme-toggle');
   if (themeToggle) {
