@@ -1886,7 +1886,7 @@ function renderReportsTab(contentArea) {
     if (typeof showToast === 'function') showToast(`Relatório Excel '${filename}.xls' gerado e baixado!`);
   }
 
-  async function exportHtmlPDF(columns, rows, title, filename, financialSummary) {
+  async function exportHtmlPDF(columns, rows, title, filename, financialSummary, targetWin) {
     const dateNow = new Date().toLocaleString('pt-BR');
     const docHash = 'CFF-' + Math.random().toString(36).substring(2, 9).toUpperCase() + '-' + Date.now().toString().slice(-4);
     const fmt = v => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v || 0);
@@ -2268,22 +2268,21 @@ function renderReportsTab(contentArea) {
       </html>
     `;
 
-    // Gerar Blob URL para abertura garantida em NOVA ABA isolada
-    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-    const blobUrl = URL.createObjectURL(blob);
-    const newTab = window.open(blobUrl, '_blank');
-
-    if (!newTab || newTab.closed || typeof newTab.closed === 'undefined') {
-      const link = document.createElement('a');
-      link.href = blobUrl;
-      link.target = '_blank';
-      link.rel = 'noopener noreferrer';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+    // Escrever diretamente na nova janela / aba aberta
+    let win = (targetWin && !targetWin.closed) ? targetWin : window.open('', '_blank');
+    if (win) {
+      try {
+        win.document.open();
+        win.document.write(htmlContent);
+        win.document.close();
+        win.focus();
+      } catch (errWin) {
+        console.error('Erro ao escrever na aba do relatório:', errWin);
+      }
+      if (typeof showToast === 'function') showToast('Relatório aberto em nova aba com sucesso!');
+    } else {
+      if (typeof showToast === 'function') showToast('⚠️ Habilite pop-ups no navegador para abrir o relatório em nova aba.');
     }
-
-    if (typeof showToast === 'function') showToast(`Relatório aberto em nova aba para visualização e impressão!`);
   }
 
   function openPayInstallmentModal(installment, onComplete) {
@@ -3224,17 +3223,14 @@ function renderReportsTab(contentArea) {
         </body>
         </html>
       `;
-      const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
-      const blobUrl = URL.createObjectURL(blob);
-      const newWin = window.open(blobUrl, '_blank');
-      if (!newWin) {
-        const link = document.createElement('a');
-        link.href = blobUrl;
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+      const printWin = window.open('', '_blank');
+      if (printWin) {
+        printWin.document.open();
+        printWin.document.write(htmlContent);
+        printWin.document.close();
+        printWin.focus();
+      } else {
+        if (typeof showToast === 'function') showToast('⚠️ Habilite pop-ups para abrir o boleto em nova aba.');
       }
     };
 
@@ -3242,7 +3238,7 @@ function renderReportsTab(contentArea) {
     document.getElementById('btn-print-boleto-foot')?.addEventListener('click', handlePrint);
   }
 
-  const processExport = async (format) => {
+  const processExport = async (format, targetWin) => {
     try {
       if (typeof showToast === 'function') showToast(`Gerando ${format.toUpperCase()}...`);
     let recordsToExport = [];
@@ -3392,7 +3388,7 @@ function renderReportsTab(contentArea) {
     filename = `${filename}_${timestamp}`;
 
     if (format === 'pdf') {
-      await exportHtmlPDF(columns, rows, title, filename, activeTab === 'financial' ? financialSummary : undefined);
+      await exportHtmlPDF(columns, rows, title, filename, activeTab === 'financial' ? financialSummary : undefined, targetWin);
     } else if (format === 'xls') {
       exportHtmlXLS(columns, rows, filename);
     } else if (format === 'csv') {
@@ -3404,7 +3400,17 @@ function renderReportsTab(contentArea) {
   }
 };
 
-  btnPdf.addEventListener('click', () => processExport('pdf'));
+  btnPdf.addEventListener('click', () => {
+    const printWin = window.open('', '_blank');
+    if (printWin) {
+      try {
+        printWin.document.open();
+        printWin.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Gerando Relatório...</title><style>body{background:#0b0f19;color:#94a3b8;font-family:'Segoe UI',sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;}</style></head><body><div style="text-align:center;"><div style="font-size:2.2rem;margin-bottom:12px;">📄</div><h3 style="color:#f8fafc;margin:0 0 6px;">CRM Clínico Farmacêutico</h3><p style="margin:0;font-size:0.88rem;">Processando visualização do relatório para impressão e exportação...</p></div></body></html>`);
+        printWin.document.close();
+      } catch(e){}
+    }
+    processExport('pdf', printWin);
+  });
   btnXls.addEventListener('click', () => processExport('xls'));
   btnCsv.addEventListener('click', () => processExport('csv'));
 
@@ -3687,9 +3693,17 @@ function renderReportsTab(contentArea) {
         }
       }, 50);
 
-      document.getElementById('btn-doc-export-pdf')?.addEventListener('click', async () => {
+      document.getElementById('btn-doc-export-pdf')?.addEventListener('click', () => {
         const ts = new Date().toISOString().slice(0,10);
-        await exportToPDF(['Médico','Especialidade','CRM','Status','Total','Hoje','Em Atend.','Concluídos'], rows, 'Relatório de Atividades por Médico', `relatorio_medicos_${ts}`);
+        const printWin = window.open('', '_blank');
+        if (printWin) {
+          try {
+            printWin.document.open();
+            printWin.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Gerando Relatório...</title><style>body{background:#0b0f19;color:#94a3b8;font-family:'Segoe UI',sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;}</style></head><body><div style="text-align:center;"><div style="font-size:2.2rem;margin-bottom:12px;">📄</div><h3 style="color:#f8fafc;margin:0 0 6px;">CRM Clínico Farmacêutico</h3><p style="margin:0;font-size:0.88rem;">Processando visualização do relatório para impressão e exportação...</p></div></body></html>`);
+            printWin.document.close();
+          } catch(e){}
+        }
+        exportHtmlPDF(['Médico','Especialidade','CRM','Status','Total','Hoje','Em Atend.','Concluídos'], rows, 'Relatório de Atividades por Médico', `relatorio_medicos_${ts}`, undefined, printWin);
       });
       document.getElementById('btn-doc-export-csv')?.addEventListener('click', () => {
         const ts = new Date().toISOString().slice(0,10);
@@ -4142,19 +4156,16 @@ async function openEncounterReportDetail(encId) {
 
     const openEncounterPrint = () => {
       const docHtml = genDoc();
-      const blob = new Blob([docHtml], { type: 'text/html;charset=utf-8' });
-      const blobUrl = URL.createObjectURL(blob);
-      const newWin = window.open(blobUrl, '_blank');
-      if (!newWin) {
-        const link = document.createElement('a');
-        link.href = blobUrl;
-        link.target = '_blank';
-        link.rel = 'noopener noreferrer';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+      const printWin = window.open('', '_blank');
+      if (printWin) {
+        printWin.document.open();
+        printWin.document.write(docHtml);
+        printWin.document.close();
+        printWin.focus();
+        if (typeof showToast === 'function') showToast('Relatório de atendimento aberto em nova aba!');
+      } else {
+        if (typeof showToast === 'function') showToast('⚠️ Habilite pop-ups para abrir o relatório de atendimento em nova aba.');
       }
-      if (typeof showToast === 'function') showToast('Relatório de atendimento aberto em nova aba!');
     };
 
     overlay.querySelector('#btn-enc-pdf')?.addEventListener('click', openEncounterPrint);
