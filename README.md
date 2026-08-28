@@ -24,6 +24,7 @@ flowchart TD
 
 ### 1. 🩺 Balcão de Atendimento, Triagem SOAP & CDSS 4D (< 60s)
 - **Triagem Farmacêutica Guiada**: Árvores de decisão clínica para as queixas mais comuns do balcão (Gripe, Azia, Cefaleia, Rinite, Lombalgia, Diarreia).
+- **🚨 Rastreio Precoce de Sepse (*Surviving Sepsis Campaign* / qSOFA)**: Avaliação em tempo real dos critérios da SCCM/ESICM (PAS $\le$ 100 mmHg, FR $\ge$ 22 irpm, alteração de consciência e temperatura) com bloqueio automático de MIPs e geração de Guia de Encaminhamento de Urgência (CFF nº 585/2013).
 - **🎙️ Ditado Clínico por Voz (Web Speech API)**: Transcrição contínua e em tempo real em Português (*pt-BR*) nos campos livres da anamnese e parecer técnico.
 - **📹 Teleconsulta Farmacêutica WebRTC**: Sala de teleatendimento com vídeo/áudio HD ponto a ponto, compartilhamento de tela e preenchimento de prontuário SOAP simultâneo.
 - **Motor CDSS 4D Multidimensional**:

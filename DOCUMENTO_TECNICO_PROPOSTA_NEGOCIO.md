@@ -414,6 +414,7 @@ gantt
     Ditado Clínico por Voz Web Speech API :done, 2026-08, 15d
     PIX Dinâmico com QR Code BACEN EMV    :done, 2026-08, 15d
     Teleconsulta Farmacêutica WebRTC      :done, 2026-08, 15d
+    Rastreio qSOFA / Surviving Sepsis (SSC):done, 2026-08, 15d
     Pipeline CI/CD GitHub Actions Vitest  :done, 2026-08, 15d
     section Curto / Médio Prazo
     API Oficial Meta WhatsApp Cloud       :2026-09, 45d
@@ -426,10 +427,14 @@ gantt
 ### 8.1. Evolução de Usabilidade & Experiência
 1. **Ditado Clínico por Voz (Concluído):** Integração da Web Speech API nos campos livres do SOAP (Subjetivo, Objetivo, Avaliação, Plano, Justificativa Farmacêutica), permitindo transcrição contínua em Português (*pt-BR*).
 2. **Guia Interativo Contextual de Balcão (Concluído):** Assistente inteligente de triagem orientando em tempo real o passo seguinte do atendimento clínico.
+3. **Filtro de Ambiente da Barra Lateral (Concluído):** Seletor de visualização rápida (`🩺 Frente`, `🏢 Gestão` e `🌐 Todos`) com design ergonômico, persistência local e transições fluidas.
+4. **Modal Unificado de Paciente & Queixa (Concluído):** Formulário completo inteligente padronizado em todas as telas com endereço por CEP, convênio PBM e queixa clínica com IA.
 
-### 8.2. Engenharia de Software & Confiabilidade
-1. **Expansão da Cobertura de Testes Vitest (Concluído):** Suítes de testes unitários automatizados para o motor CDSS 4D, escore MEWS, módulo financeiro/DRE e gerador de PIX BACEN EMV.
-2. **Pipeline de Integração Contínua (CI/CD GitHub Actions) (Concluído):** Workflow automatizado em `.github/workflows/ci.yml` executando `npm test` e `npm run build` a cada push/PR.
+### 8.2. Engenharia de Software, Confiabilidade & Excelência Clínica
+1. **Rastreio Precoce de Sepse (*Surviving Sepsis Campaign* / qSOFA) (Concluído):** Implementação do módulo `sepsisScreener.js` com avaliação automática dos critérios internacionais da SCCM/ESICM (PAS $\le$ 100 mmHg, FR $\ge$ 22 irpm, alteração mental e sinais inflamatórios), disparando travas no CDSS 4D e emitindo a Guia de Encaminhamento de Urgência (CFF nº 585/2013).
+2. **Expansão da Cobertura de Testes Vitest (Concluído):** Suítes de testes unitários automatizados para o motor CDSS 4D, escore MEWS, módulo de sepse qSOFA, módulo financeiro/DRE e gerador de PIX BACEN EMV (5 suítes / 12 testes aprovados).
+3. **Pipeline de Integração Contínua (CI/CD GitHub Actions) (Concluído):** Workflow automatizado em `.github/workflows/ci.yml` executando `npm test` e `npm run build` a cada push/PR.
+4. **Exportação Direta em PDF sem Diálogo Poluído (Concluído):** Barra de ações superior nos relatórios impressos do Dashboard com motor `html2pdf.js` integrado e proporção A4 retrato em alta resolução.
 
 ### 8.3. Expansão Comercial & Conectividade
 1. **PIX Dinâmico com QR Code BACEN EMV (Concluído):** Geração automática de QR Code oficial e linha "PIX Copia e Cola" com cálculo de CRC16 no PDV e na baixa de títulos.
@@ -441,7 +446,8 @@ gantt
 
 ### 📝 CONCLUSÃO & PARECER EXECUTIVO
 
-O **CRM Clínico Farmacêutico v3.0** consolida-se como a plataforma mais completa, ágil e segura do setor farmacêutico brasileiro. Ao unir **suporte à decisão clínica em menos de 60 segundos**, **aferição de sinais vitais ao vivo com MEWS**, **navegação ergonômica 100% por teclado**, **PDV integrado ao histórico de compras do paciente**, **resiliência offline** e **fidelização ativa por Refill programado**, o sistema estabelece o novo padrão de referência para a farmácia clínica moderna.
+O **CRM Clínico Farmacêutico v3.0** consolida-se como a plataforma mais completa, ágil e segura do setor farmacêutico brasileiro. Ao unir **suporte à decisão clínica em menos de 60 segundos**, **rastreio de sepse qSOFA (Surviving Sepsis Campaign)**, **aferição de sinais vitais ao vivo com MEWS**, **navegação ergonômica 100% por teclado**, **PDV integrado ao histórico de compras do paciente**, **resiliência offline** e **fidelização ativa por Refill programado**, o sistema estabelece o novo padrão de referência para a farmácia clínica moderna.
 
 ---
 *Documento homologado para publicação, auditoria e implantação corporativa.*
+

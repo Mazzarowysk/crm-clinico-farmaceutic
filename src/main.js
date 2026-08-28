@@ -28,6 +28,10 @@ import { openTelemedicineModal } from './modules/telemedicina.js';
 import { startVoiceDictation, stopVoiceDictation, calculateMEWS, checkDrugInteractions, generateWhatsAppClinicalMessage, sendToWhatsApp } from './modules/clinicalAI.js';
 import { renderDigitalSignatureModal, signDocumentICP, DIGITAL_CERT_PROVIDERS } from './modules/digitalCert.js';
 import { generateTISS401XML, downloadTISSFile, TUSS_PROCEDURES } from './modules/tiss.js';
+import { evaluateSepsisRisk, renderSepsisAlertCard } from './modules/sepsisScreener.js';
+
+window.evaluateSepsisRisk = evaluateSepsisRisk;
+window.renderSepsisAlertCard = renderSepsisAlertCard;
 import { openCameraBarcodeScanner, playBeepSound } from './modules/barcodeScanner.js';
 import { openQuickCheckoutModal } from './modules/quickCheckoutModal.js';
 import { printThermalReceipt, generateWhatsAppSaleText } from './modules/thermalReceipt.js';

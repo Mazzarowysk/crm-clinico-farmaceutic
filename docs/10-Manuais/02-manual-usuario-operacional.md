@@ -53,13 +53,17 @@ Para garantir que o farmacêutico não precise tirar as mãos do teclado durante
 ### 3.1. Passo a Passo do Atendimento em Menos de 60 Segundos
 1. **Identificação do Paciente:** Digite o nome ou CPF no campo de busca. O sistema carrega o histórico clínico, alergias e medicamentos crônicos.
 2. **Seleção da Queixa Principal:** Escolha o protocolo rápido (Ex: *Gripe/Resfriado*, *Dor/Febre*, *Azia/Refluxo*, *Alergia*, *Diarreia*).
-3. **Avaliação dos Red Flags (Sinais de Alarme):** Se o paciente apresentar febre prolongada ou sinais graves, o sistema alerta e prepara a *Guia de Encaminhamento Médico*.
+3. **Avaliação dos Red Flags & Rastreio de Sepse (qSOFA / SSC):** Se o paciente apresentar sinais de gravidade, febre alta persistente, taquipneia ou hipotensão, o sistema emite o **Card de Alerta de Sepse (Surviving Sepsis Campaign)** e prepara a *Guia de Encaminhamento Médico de Urgência*.
 4. **Prescrição Farmacêutica Segura (CDSS 4D):** Adicione os MIPs recomendados. O motor 4D valida:
    - Interações medicamento x medicamento.
    - Alergias declaradas do paciente.
    - Critérios de Beers para idosos.
    - Dosagem e posologia segura.
 5. **Finalização & Envio:** Clique em **`Finalizar Atendimento`**. O sistema emite a **Declaração de Serviço Farmacêutico (DSF)** com QR Code e possibilita envio instantâneo da receita para o **WhatsApp** do paciente.
+
+### 3.2. Rastreio Precoce de Sepse (Consenso Internacional SSC / qSOFA)
+- O sistema analisa continuamente os critérios de corte do *Quick SOFA* (PAS $\le$ 100 mmHg, FR $\ge$ 22 irpm, alteração mental/Glasgow e temperatura fora da faixa).
+- **qSOFA $\ge$ 2:** A recomendação de MIPs é **bloqueada imediatamente**, emitindo o alerta vermelho de suspeita de infecção com disfunção orgânica para acionamento do SAMU 192 ou encaminhamento prioritário à UPA/Hospital (CFF nº 585/2013).
 
 ---
 

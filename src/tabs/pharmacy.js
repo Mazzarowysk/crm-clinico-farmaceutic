@@ -10,6 +10,7 @@ import { downloadDeclarationPDF, printIsolatedClinicalDocument } from '../module
 import { CANONICAL_MEDICATIONS_DB } from '../modules/medicationsDB.js';
 import { searchMedicationsNLP } from '../modules/medicationNLP.js';
 import { openQuickCheckoutModal } from '../modules/quickCheckoutModal.js';
+import { evaluateSepsisRisk, renderSepsisAlertCard } from '../modules/sepsisScreener.js';
 import { syncManager } from '../modules/sync.js';
 
 const API_URL = '/api';
@@ -452,6 +453,12 @@ function renderBalcaoStepContent(step, patient, allPatients, activeMeds) {
         </div>
 
         ${hasRedFlags ? `
+          ${renderSepsisAlertCard(evaluateSepsisRisk({
+            bloodPressure: currentClinicalEncounter.patient?.vitalSigns?.bloodPressure || (currentClinicalEncounter.selectedRedFlags.some(r => /pressão baixa|hipotens/i.test(r)) ? '90/60' : '120/80'),
+            respiratoryRate: currentClinicalEncounter.selectedRedFlags.some(r => /falta de ar|respirat|taquipneia|chiado|dispneia/i.test(r)) ? 24 : 18,
+            temperature: currentClinicalEncounter.selectedRedFlags.some(r => /febre alta|38|39|calafrio|frio intenso/i.test(r)) ? 39.0 : 36.8,
+            mentalState: currentClinicalEncounter.selectedRedFlags.some(r => /confus|sonolên|desmai|rebaixad/i.test(r)) ? 'confuso' : 'alerta'
+          }))}
           <div class="red-flag-banner">
             <div style="display: flex; align-items: center; gap: 14px;">
               <i class="fa-solid fa-triangle-exclamation" style="color: #e11d48; font-size: 1.8rem;"></i>
@@ -460,7 +467,7 @@ function renderBalcaoStepContent(step, patient, allPatients, activeMeds) {
                   ALERTA CLÍNICO CRÍTICO — RECOMENDAÇÃO DE MIPs BLOQUEADA
                 </h4>
                 <p style="margin: 3px 0 0 0; color: #fda4af; font-size: 0.85rem;">
-                  Sinais de gravidade identificados. Conforme resolução do CFF, o paciente deve ser encaminhado imediatamente para avaliação médica ambulatorial ou hospitalar.
+                  Sinais de gravidade identificados (Consenso Surviving Sepsis Campaign & Diretrizes CFF 585/2013). O paciente deve ser encaminhado imediatamente para avaliação médica ambulatorial ou hospitalar com prioridade.
                 </p>
               </div>
             </div>
