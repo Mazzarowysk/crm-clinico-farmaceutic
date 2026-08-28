@@ -1455,14 +1455,46 @@ window.printClinicalDrillDownReport = function (topic) {
     notesHtml = `Relatório gerado automaticamente pelo CRM Clínico Farmacêutico.`;
   }
 
+  const safeFileName = (repTitle || 'Relatorio_Clinico_Farmaceutico')
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-zA-Z0-9_-]/g, '_');
+
   const printDoc = `<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
   <title>${repTitle}</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <style>
-    @page { size: A4 portrait; margin: 12mm; }
-    body { font-family: sans-serif; color: #0f172a; font-size: 9pt; }
+    * { box-sizing: border-box; }
+    @page { size: A4 portrait; margin: 10mm; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #0f172a; font-size: 9pt; margin: 0; padding: 0; background: #f8fafc; }
+    
+    .no-print-toolbar {
+      position: sticky;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: #0f172a;
+      border-bottom: 2px solid #0d9488;
+      padding: 12px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+      z-index: 999999;
+    }
+    
+    .report-paper-container {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 20px auto;
+      background: #ffffff;
+      padding: 14mm 16mm;
+      box-shadow: 0 4px 25px rgba(0,0,0,0.12);
+      border-radius: 4px;
+    }
+
     .header-table { width: 100%; border-bottom: 2px solid #0f766e; padding-bottom: 10px; margin-bottom: 14px; }
     .inst-title { font-size: 12pt; font-weight: 800; color: #0f766e; }
     .inst-sub { font-size: 7.5pt; color: #475569; }
@@ -1485,53 +1517,125 @@ window.printClinicalDrillDownReport = function (topic) {
     .sign-title { font-weight: 700; font-size: 8.5pt; color: #0f172a; text-align: center; }
     .sign-sub { font-size: 7.2pt; color: #64748b; text-align: center; }
     .footer-doc { margin-top: 18px; border-top: 1px solid #e2e8f0; padding-top: 6px; display: flex; justify-content: space-between; font-size: 6.8pt; color: #94a3b8; }
+
+    @media print {
+      body { background: #ffffff; }
+      .no-print-toolbar { display: none !important; }
+      .report-paper-container {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+      }
+    }
   </style>
 </head>
 <body>
-  <table class="header-table">
-    <tr>
-      <td style="width: 55px;"><svg width="55" height="55" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="48" fill="#0f766e"/><path d="M50 20 V80 M20 50 H80" stroke="#ffffff" stroke-width="12" stroke-linecap="round"/><circle cx="50" cy="50" r="14" fill="#14b8a6"/></svg></td>
-      <td class="header-info" style="padding-left:12px;">
-        <div class="inst-title">CRM Clínico Farmacêutico</div>
-        <div class="inst-sub">Consultório &amp; Cuidado Farmacêutico Especializado &bull; CNPJ: 42.109.843/0001-90</div>
-        <div class="inst-sub" style="color: #0f766e; font-weight: 600;">Diretrizes CFF nº 585/2013 &amp; nº 586/2013 &bull; RDC ANVISA nº 44/2009</div>
-      </td>
-      <td class="header-meta">
-        <div><strong>Emissão:</strong> ${now}</div>
-        <div><strong>Controle:</strong> ${hash}</div>
-        <div><strong>Pág:</strong> 01 de 01</div>
-      </td>
-    </tr>
-  </table>
-  <div class="doc-banner">
-    <div class="doc-title">${repTitle}</div>
-    <div class="doc-subtitle">${repSubtitle}</div>
+
+  <!-- BARRA DE FERRAMENTAS SUPERIOR -->
+  <div class="no-print-toolbar">
+    <div style="display: flex; align-items: center; gap: 10px; color: #fff; font-weight: 700; font-size: 0.9rem;">
+      <span style="background: linear-gradient(135deg, #0d9488, #0f766e); padding: 4px 10px; border-radius: 6px; font-size: 0.76rem;">CRM Clínico</span>
+      <span>${repTitle}</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <button id="btn-dl-pdf" onclick="executeDirectPDFDownload()" style="background: linear-gradient(135deg, #059669, #047857); color: #fff; border: 1px solid #10b981; padding: 7px 18px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 10px rgba(5,150,105,0.4); transition: all 0.2s;">
+        📥 Baixar PDF Direto
+      </button>
+      <button onclick="window.print()" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border: 1px solid #38bdf8; padding: 7px 16px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+        🖨️ Imprimir
+      </button>
+      <button onclick="window.close()" style="background: #334155; color: #cbd5e1; border: 1px solid #475569; padding: 7px 12px; border-radius: 8px; font-weight: 700; font-size: 0.85rem; cursor: pointer;">
+        ✕ Fechar
+      </button>
+    </div>
   </div>
-  <div class="kpi-row">${kpisHtml}</div>
-  <table class="data-table">${tableHtml}</table>
-  <div class="notes-box"><strong>Declaração de Responsabilidade Técnica:</strong> ${notesHtml}</div>
-  <table class="sign-table">
-    <tr>
-      <td style="width: 50%; text-align: center;">
-        <div class="sign-line"></div>
-        <div class="sign-title">Dr. Marcelo Mazaro, CRF-SP 54.180</div>
-        <div class="sign-sub">Farmacêutico Responsável Técnico &bull; Especialista em Farmacologia Clínica</div>
-      </td>
-      <td style="width: 50%; text-align: center;">
-        <div class="sign-line"></div>
-        <div class="sign-title">CRM Clínico Farmacêutico — Sistema de Gestão</div>
-        <div class="sign-sub">Validação Digital ICP-Brasil Padrão SHA-256 &bull; ${hash}</div>
-      </td>
-    </tr>
-  </table>
-  <div class="footer-doc">
-    <div>CRM Clínico Farmacêutico &bull; Software Clínico de Alta Fidelidade</div>
-    <div>Documento Informativo e Regulatório emitido para controle técnico do consultório farmacêutico.</div>
+
+  <div class="report-paper-container" id="printable-report-card">
+    <table class="header-table">
+      <tr>
+        <td style="width: 55px;"><svg width="55" height="55" viewBox="0 0 100 100" fill="none"><circle cx="50" cy="50" r="48" fill="#0f766e"/><path d="M50 20 V80 M20 50 H80" stroke="#ffffff" stroke-width="12" stroke-linecap="round"/><circle cx="50" cy="50" r="14" fill="#14b8a6"/></svg></td>
+        <td class="header-info" style="padding-left:12px;">
+          <div class="inst-title">CRM Clínico Farmacêutico</div>
+          <div class="inst-sub">Consultório &amp; Cuidado Farmacêutico Especializado &bull; CNPJ: 42.109.843/0001-90</div>
+          <div class="inst-sub" style="color: #0f766e; font-weight: 600;">Diretrizes CFF nº 585/2013 &amp; nº 586/2013 &bull; RDC ANVISA nº 44/2009</div>
+        </td>
+        <td class="header-meta">
+          <div><strong>Emissão:</strong> ${now}</div>
+          <div><strong>Controle:</strong> ${hash}</div>
+          <div><strong>Pág:</strong> 01 de 01</div>
+        </td>
+      </tr>
+    </table>
+    <div class="doc-banner">
+      <div class="doc-title">${repTitle}</div>
+      <div class="doc-subtitle">${repSubtitle}</div>
+    </div>
+    <div class="kpi-row">${kpisHtml}</div>
+    <table class="data-table">${tableHtml}</table>
+    <div class="notes-box"><strong>Declaração de Responsabilidade Técnica:</strong> ${notesHtml}</div>
+    <table class="sign-table">
+      <tr>
+        <td style="width: 50%; text-align: center;">
+          <div class="sign-line"></div>
+          <div class="sign-title">Dr. Marcelo Mazaro, CRF-SP 54.180</div>
+          <div class="sign-sub">Farmacêutico Responsável Técnico &bull; Especialista em Farmacologia Clínica</div>
+        </td>
+        <td style="width: 50%; text-align: center;">
+          <div class="sign-line"></div>
+          <div class="sign-title">CRM Clínico Farmacêutico — Sistema de Gestão</div>
+          <div class="sign-sub">Validação Digital ICP-Brasil Padrão SHA-256 &bull; ${hash}</div>
+        </td>
+      </tr>
+    </table>
+    <div class="footer-doc">
+      <div>CRM Clínico Farmacêutico &bull; Software Clínico de Alta Fidelidade</div>
+      <div>Documento Informativo e Regulatório emitido para controle técnico do consultório farmacêutico.</div>
+    </div>
   </div>
+
+  <script>
+    function executeDirectPDFDownload() {
+      const btn = document.getElementById('btn-dl-pdf');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '⏳ Gerando PDF...';
+      }
+
+      const element = document.getElementById('printable-report-card');
+      const opt = {
+        margin: [6, 6, 6, 6],
+        filename: '${safeFileName}.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, letterRendering: true, logging: false },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
+      if (window.html2pdf) {
+        window.html2pdf().set(opt).from(element).save().then(() => {
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '✅ PDF Baixado!';
+            setTimeout(() => { btn.innerHTML = '📥 Baixar PDF Direto'; }, 2000);
+          }
+        }).catch((err) => {
+          console.error(err);
+          if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '📥 Baixar PDF Direto';
+          }
+          window.print();
+        });
+      } else {
+        window.print();
+      }
+    }
+  </script>
 </body>
 </html>`;
 
-  const printWin = window.open('', '_blank', 'width=900,height=750');
+  const printWin = window.open('', '_blank', 'width=980,height=800');
   if (!printWin) {
     if (typeof showToast === 'function') showToast('Bloqueador de pop-ups ativado! Permita a abertura para imprimir.', 'warning');
     return;
@@ -1539,7 +1643,6 @@ window.printClinicalDrillDownReport = function (topic) {
   printWin.document.open();
   printWin.document.write(printDoc);
   printWin.document.close();
-  setTimeout(() => { printWin.focus(); printWin.print(); }, 450);
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
