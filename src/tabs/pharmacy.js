@@ -1575,134 +1575,18 @@ function renderEstoqueCentralView(container) {
 }
 
 // ============================================================================
-// MODAL: CADASTRO DE NOVO PACIENTE CLÍNICO
+// MODAL: CADASTRO UNIFICADO DE CLIENTE & PRONTUÁRIO COMPLETO
 // ============================================================================
 function openAddClinicalPatientModal() {
-  const existingModal = document.getElementById('modal-add-clinical-patient-overlay');
-  if (existingModal) existingModal.remove();
-
-  const modalHtml = `
-    <div id="modal-add-clinical-patient-overlay" style="position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(10, 15, 29, 0.85); backdrop-filter: blur(16px); display: flex; justify-content: center; align-items: center; z-index: 10000; padding: 16px;">
-      <div class="pharmacy-glass-panel" style="width: 100%; max-width: 600px; padding: 24px; border: 1px solid rgba(13,148,136,0.3); border-radius: 16px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 12px;">
-          <h3 style="margin: 0; color: #f8fafc; font-family: 'Outfit', sans-serif; font-size: 1.25rem; display: flex; align-items: center; gap: 8px;">
-            <i class="fa-solid fa-user-plus" style="color: #14b8a6;"></i> Novo Paciente Clínico Farmacêutico
-          </h3>
-          <button type="button" id="btn-close-new-patient-modal" style="background: transparent; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer;">
-            <i class="fa-solid fa-xmark"></i>
-          </button>
-        </div>
-
-        <form id="form-new-clinical-patient">
-          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 14px; margin-bottom: 14px;">
-            <div>
-              <label style="display: block; font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 4px;">Nome Completo *</label>
-              <input type="text" id="cp-name" class="form-input" required style="width: 100%;">
-            </div>
-            <div>
-              <label style="display: block; font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 4px;">CPF *</label>
-              <input type="text" id="cp-cpf" class="form-input" required placeholder="000.000.000-00" style="width: 100%;">
-            </div>
-          </div>
-
-          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 14px;">
-            <div>
-              <label style="display: block; font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 4px;">Data de Nascimento</label>
-              <input type="date" id="cp-birth" class="form-input" style="width: 100%;">
-            </div>
-            <div>
-              <label style="display: block; font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 4px;">Sexo Biológico</label>
-              <select id="cp-gender" class="form-input" style="width: 100%;">
-                <option value="Feminino">Feminino</option>
-                <option value="Masculino">Masculino</option>
-                <option value="Outro">Outro</option>
-              </select>
-            </div>
-            <div>
-              <label style="display: block; font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 4px;">Telefone / WhatsApp</label>
-              <input type="text" id="cp-phone" class="form-input" placeholder="(00) 00000-0000" style="width: 100%;">
-            </div>
-          </div>
-
-          <div style="margin-bottom: 14px;">
-            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #f472b6; font-size: 0.88rem; font-weight: 600;">
-              <input type="checkbox" id="cp-pregnant" style="width: 16px; height: 16px; accent-color: #f472b6;">
-              Paciente Gestante ou Lactante (Ativar travas de segurança teratogênica)
-            </label>
-          </div>
-
-          <div style="margin-bottom: 14px;">
-            <label style="display: block; font-size: 0.82rem; color: #f87171; margin-bottom: 4px; font-weight: 600;">
-              Alergias &amp; Hipersensibilidades Fármaco-Alimentares
-            </label>
-            <input type="text" id="cp-allergies" class="form-input" placeholder="Ex.: Dipirona, Penicilinas, AAS, Frutos do Mar..." style="width: 100%;">
-          </div>
-
-          <div style="margin-bottom: 20px;">
-            <label style="display: block; font-size: 0.82rem; color: #38bdf8; margin-bottom: 4px; font-weight: 600;">
-              Condições Crônicas / Comorbidades
-            </label>
-            <input type="text" id="cp-conditions" class="form-input" placeholder="Ex.: Hipertensão Arterial, Diabetes Mellitus Tipo 2, Insuficiência Renal..." style="width: 100%;">
-          </div>
-
-          <div style="display: flex; justify-content: flex-end; gap: 10px;">
-            <button type="button" id="btn-cancel-new-patient" class="btn btn-secondary">Cancelar</button>
-            <button type="submit" class="btn btn-primary" style="background: #0d9488; border: none; font-weight: 700;">
-              Salvar Paciente Clínico
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  `;
-
-  document.body.insertAdjacentHTML('beforeend', modalHtml);
-
-  const overlay = document.getElementById('modal-add-clinical-patient-overlay');
-  const closeModal = () => overlay?.remove();
-
-  document.getElementById('btn-close-new-patient-modal')?.addEventListener('click', closeModal);
-  document.getElementById('btn-cancel-new-patient')?.addEventListener('click', closeModal);
-
-  document.getElementById('form-new-clinical-patient')?.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const name = document.getElementById('cp-name')?.value?.trim();
-    const cpf = document.getElementById('cp-cpf')?.value?.trim();
-    const birthDate = document.getElementById('cp-birth')?.value;
-    const gender = document.getElementById('cp-gender')?.value;
-    const phone = document.getElementById('cp-phone')?.value?.trim();
-    const isPregnant = document.getElementById('cp-pregnant')?.checked;
-    const allergies = document.getElementById('cp-allergies')?.value?.trim();
-    const chronicConditions = document.getElementById('cp-conditions')?.value?.trim();
-
-    let age = 30;
-    if (birthDate) {
-      const birth = new Date(birthDate);
-      const diff = Date.now() - birth.getTime();
-      age = Math.floor(diff / (1000 * 60 * 60 * 24 * 365.25));
-    }
-
-    const newPat = {
-      id: localDB.generateId('PHARM-PAT'),
-      name,
-      cpf,
-      birthDate: birthDate || '1990-01-01',
-      age,
-      gender,
-      phone,
-      isPregnantOrLactating: isPregnant,
-      allergies,
-      chronicConditions,
-      created_at: new Date().toISOString()
-    };
-
-    localDB.insert('pharmacy_patients', newPat);
-    closeModal();
-    showToast(`✅ Paciente ${name} cadastrado com sucesso no CRM Clínico!`);
-    currentClinicalEncounter.patient = newPat;
-    currentClinicalEncounter.step = 2;
-    renderCurrentSubTab();
-  });
+  if (typeof window.openFullPatientModal === 'function') {
+    window.openFullPatientModal();
+  } else if (typeof window.switchTab === 'function') {
+    window.switchTab('pacientes');
+    setTimeout(() => {
+      const btn = document.getElementById('btn-new-patient');
+      if (btn) btn.click();
+    }, 150);
+  }
 }
 
 // ============================================================================

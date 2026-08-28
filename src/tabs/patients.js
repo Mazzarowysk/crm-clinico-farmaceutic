@@ -1833,4 +1833,26 @@ function detectComplaintFromNotes(notes = '') {
   loadAndRenderTable();
 }
 
+window.openFullPatientModal = function(patientData = null) {
+  const modalOverlay = document.getElementById('patient-modal-overlay');
+  if (!modalOverlay) {
+    if (typeof window.switchTab === 'function') {
+      window.switchTab('pacientes');
+      setTimeout(() => {
+        const overlay = document.getElementById('patient-modal-overlay');
+        if (overlay) {
+          overlay.style.display = 'flex';
+          if (typeof window.applyInputMasks === 'function') window.applyInputMasks();
+          document.getElementById('modal-quick-search-client')?.focus();
+        }
+      }, 180);
+    }
+    return;
+  }
+
+  modalOverlay.style.display = 'flex';
+  if (typeof window.applyInputMasks === 'function') window.applyInputMasks();
+  document.getElementById('modal-quick-search-client')?.focus();
+};
+
 window.renderPatientsTab = renderPatientsTab;
