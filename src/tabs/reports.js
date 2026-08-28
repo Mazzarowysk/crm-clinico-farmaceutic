@@ -4,6 +4,49 @@ import { state, dataCache, dataCacheTimestamps } from '../state.js';
 // API_URL is not exported from main.js, define it locally
 const API_URL = '/api';
 
+// ─── ESTADO E HELPERS DE GRÁFICOS 3D DINÂMICOS NA ABA RELATÓRIOS (MESMO PADRÃO DO DASHBOARD) ───
+const reportChartModes = {
+  patientCity: ['doughnut', 'bar', 'pie', 'polarArea'],
+  patientCityIdx: 0,
+  patientBilling: ['bar', 'line', 'polarArea', 'doughnut'],
+  patientBillingIdx: 0,
+  encManchester: ['doughnut', 'polarArea', 'bar', 'pie'],
+  encManchesterIdx: 0,
+  finCat: ['doughnut', 'pie', 'polarArea', 'bar'],
+  finCatIdx: 0,
+  finBar: ['bar', 'line', 'doughnut'],
+  finBarIdx: 0
+};
+
+function createReportPlasticGradient(ctx2d, hexColor, vertical = true, height = 260) {
+  const hex = (hexColor || '#10b981').replace('#', '');
+  const r = parseInt(hex.substring(0, 2), 16) || 16;
+  const g = parseInt(hex.substring(2, 4), 16) || 185;
+  const b = parseInt(hex.substring(4, 6), 16) || 129;
+
+  const grad = vertical
+    ? ctx2d.createLinearGradient(0, 0, 0, height)
+    : ctx2d.createLinearGradient(0, 0, 360, 0);
+
+  grad.addColorStop(0, `rgba(${Math.min(255, r + 110)}, ${Math.min(255, g + 110)}, ${Math.min(255, b + 110)}, 0.98)`);
+  grad.addColorStop(0.16, `rgba(${r}, ${g}, ${b}, 0.92)`);
+  grad.addColorStop(0.55, `rgba(${Math.max(0, r - 50)}, ${Math.max(0, g - 50)}, ${Math.max(0, b - 50)}, 0.96)`);
+  grad.addColorStop(0.86, `rgba(${Math.min(255, r + 65)}, ${Math.min(255, g + 65)}, ${Math.min(255, b + 65)}, 0.88)`);
+  grad.addColorStop(1, `rgba(${Math.max(0, r - 90)}, ${Math.max(0, g - 90)}, ${Math.max(0, b - 90)}, 0.98)`);
+
+  return grad;
+}
+
+let lastReportCityCounts = {};
+let lastReportBillingByCity = {};
+let lastReportManchesterCounts = {};
+let lastReportTotalEncounters = 0;
+let lastReportFinQuantities = [];
+let lastReportFinValuesR$ = [];
+let lastReportFinLabels = [];
+let lastReportFinColors = [];
+
+
 function renderReportsTab(contentArea) {
   contentArea.innerHTML = `
     <div class="tab-section active" style="padding: 28px 36px; width: 100%; max-width: 100%; box-sizing: border-box;">
@@ -666,6 +709,11 @@ function renderReportsTab(contentArea) {
       });
     }, 80);
 
+    lastReportFinQuantities = quantities;
+    lastReportFinValuesR$ = valuesR$;
+    lastReportFinLabels = labels;
+    lastReportFinColors = colors;
+
     // 1. Gráfico de Rosca Neon Glass (Sem legenda interna pois a lista lateral atua como legenda ativa)
     finPieChartInstance = new ChartClass(pieCtx.getContext('2d'), {
       type: 'doughnut',
@@ -938,15 +986,23 @@ function renderReportsTab(contentArea) {
           </div>
         </div>
 
-        <!-- COMPONENTE HÃBRIDO (ANEL NEON + BARRAS POR CATEGORIA) -->
-        <div class="chart-card tilt-card-3d" style="margin-top: 20px; padding: 22px;">
+        <!-- COMPONENTE HÍBRIDO (ANEL NEON + BARRAS POR CATEGORIA) -->
+        <div class="chart-card tilt-card-3d glass-card" style="margin-top: 20px; padding: 22px; border-radius: 16px; border: 1px solid rgba(0, 242, 254, 0.25); background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(10px); box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
           <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; flex-wrap: wrap; gap: 10px;">
             <h4 style="margin:0; font-size:1.05rem; font-weight:700; color:var(--text-primary); display:flex; align-items:center; gap:8px;">
               <i class="fa-solid fa-chart-pie" style="color: #00f2fe;"></i> Distribuição Financeira por Status
             </h4>
-            <span class="badge-occupancy-status" style="border: 1px solid #34d399; background: rgba(52,211,153,0.12); color: #34d399; padding: 5px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">
-              <i class="fa-solid fa-circle-check"></i> ${pctPagasCount}% Pagas (${pagasCount} parcelas)
-            </span>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span id="badge-fin-pie-chart-type" style="font-size: 0.7rem; font-weight: 600; color: #00f2fe; background: rgba(0,242,254,0.12); border: 1px solid rgba(0,242,254,0.3); padding: 2px 8px; border-radius: 12px;">
+                🔮 Rosca 3D Glossy
+              </span>
+              <button onclick="window.toggleReportFinPieChart(event)" class="btn-sm" style="background: linear-gradient(135deg, #00f2fe, #0284c7); color: #0f172a; border: none; border-radius: 8px; padding: 4px 10px; font-size: 0.75rem; font-weight: 800; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; box-shadow: 0 2px 8px rgba(0,242,254,0.35); transition: all 0.2s;" title="Alternar estilo visual do gráfico">
+                <i class="fa-solid fa-rotate"></i> Estilo
+              </button>
+              <span class="badge-occupancy-status" style="border: 1px solid #34d399; background: rgba(52,211,153,0.12); color: #34d399; padding: 5px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700;">
+                <i class="fa-solid fa-circle-check"></i> ${pctPagasCount}% Pagas (${pagasCount} parcelas)
+              </span>
+            </div>
           </div>
 
           <div style="display: grid; grid-template-columns: 240px 1fr; gap: 24px; align-items: center;">
@@ -1493,58 +1549,57 @@ function renderReportsTab(contentArea) {
           </div>
         </div>
 
-        <!-- Gráficos -->
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-          <div class="glass-card" style="padding:18px;border-radius:14px;border:1px solid var(--border-color);">
-            <h4 style="margin:0 0 14px;font-size:0.9rem;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:8px;">
-              <i class="fa-solid fa-city" style="color:#818cf8;"></i> Pacientes por Cidade
-            </h4>
-            <div style="position:relative;height:210px;"><canvas id="chart-patients-city"></canvas></div>
+        <!-- Gráficos com Alternância de Estilo 3D Cyber-Clinical -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:18px;">
+          <div class="glass-card" style="padding:18px;border-radius:14px;border:1px solid rgba(129,140,248,0.25);background:rgba(15,23,42,0.65);backdrop-filter:blur(10px);box-shadow:0 8px 32px rgba(0,0,0,0.3);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+              <h4 style="margin:0;font-size:0.9rem;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:8px;">
+                <i class="fa-solid fa-city" style="color:#818cf8;"></i> Pacientes por Cidade
+              </h4>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span id="badge-patient-city-chart-type" style="font-size:0.7rem;font-weight:600;color:#818cf8;background:rgba(129,140,248,0.12);border:1px solid rgba(129,140,248,0.3);padding:2px 8px;border-radius:12px;">
+                  🔮 Rosca 3D Glossy
+                </span>
+                <button onclick="window.toggleReportPatientCityChart(event)" class="btn-sm" style="background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;border:none;border-radius:8px;padding:4px 10px;font-size:0.75rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(99,102,241,0.35);transition:all 0.2s;" title="Alternar estilo visual do gráfico">
+                  <i class="fa-solid fa-rotate"></i> Estilo
+                </button>
+              </div>
+            </div>
+            <div style="position:relative;height:230px;"><canvas id="chart-patients-city"></canvas></div>
           </div>
-          <div class="glass-card" style="padding:18px;border-radius:14px;border:1px solid var(--border-color);">
-            <h4 style="margin:0 0 14px;font-size:0.9rem;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:8px;">
-              <i class="fa-solid fa-sack-dollar" style="color:#34d399;"></i> Faturamento por Cidade (R$)
-            </h4>
-            <div style="position:relative;height:210px;"><canvas id="chart-patients-billing"></canvas></div>
+
+          <div class="glass-card" style="padding:18px;border-radius:14px;border:1px solid rgba(52,211,153,0.25);background:rgba(15,23,42,0.65);backdrop-filter:blur(10px);box-shadow:0 8px 32px rgba(0,0,0,0.3);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+              <h4 style="margin:0;font-size:0.9rem;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:8px;">
+                <i class="fa-solid fa-sack-dollar" style="color:#34d399;"></i> Faturamento por Cidade (R$)
+              </h4>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span id="badge-patient-billing-chart-type" style="font-size:0.7rem;font-weight:600;color:#34d399;background:rgba(52,211,153,0.12);border:1px solid rgba(52,211,153,0.3);padding:2px 8px;border-radius:12px;">
+                  🧪 Barras 3D Volumétricas
+                </span>
+                <button onclick="window.toggleReportPatientBillingChart(event)" class="btn-sm" style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;border:none;border-radius:8px;padding:4px 10px;font-size:0.75rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(16,185,129,0.35);transition:all 0.2s;" title="Alternar estilo visual do gráfico">
+                  <i class="fa-solid fa-rotate"></i> Estilo
+                </button>
+              </div>
+            </div>
+            <div style="position:relative;height:230px;"><canvas id="chart-patients-billing"></canvas></div>
           </div>
         </div>
       `;
 
       if (ChartClass) {
+        lastReportCityCounts = cityCounts;
+        const billingByCity = {};
+        currentFilteredList.forEach(p => {
+          const city = p.city || 'N/D';
+          const v = parseFloat((p.billingValue || '').replace(/[^\d,]/g, '').replace(',', '.')) || 0;
+          billingByCity[city] = (billingByCity[city] || 0) + v;
+        });
+        lastReportBillingByCity = billingByCity;
+
         setTimeout(() => {
-          const cityLabels = Object.keys(cityCounts).slice(0, 8);
-          const cityVals = cityLabels.map(c => cityCounts[c]);
-          const palette = ['#818cf8','#34d399','#fbbf24','#00f2fe','#f472b6','#a78bfa','#6ee7b7','#fcd34d'];
-
-          const ctxCity = document.getElementById('chart-patients-city');
-          if (ctxCity) new ChartClass(ctxCity.getContext('2d'), {
-            type: 'doughnut',
-            data: { labels: cityLabels, datasets: [{ data: cityVals, backgroundColor: palette, borderWidth: 2, borderColor: 'rgba(0,0,0,0.2)' }] },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8', font: { size: 10 }, boxWidth: 12, padding: 10 } } } }
-          });
-
-          const billingByCity = {};
-          currentFilteredList.forEach(p => {
-            const city = p.city || 'N/D';
-            const v = parseFloat((p.billingValue || '').replace(/[^\d,]/g, '').replace(',', '.')) || 0;
-            billingByCity[city] = (billingByCity[city] || 0) + v;
-          });
-          const billingLabels = Object.keys(billingByCity).slice(0, 8);
-          const billingVals = billingLabels.map(c => billingByCity[c]);
-
-          const ctxBilling = document.getElementById('chart-patients-billing');
-          if (ctxBilling) new ChartClass(ctxBilling.getContext('2d'), {
-            type: 'bar',
-            data: { labels: billingLabels, datasets: [{ label: 'R$', data: billingVals, backgroundColor: palette.map(c => c + '99'), borderColor: palette, borderWidth: 1.5, borderRadius: 6 }] },
-            options: {
-              responsive: true, maintainAspectRatio: false,
-              plugins: { legend: { display: false } },
-              scales: {
-                x: { ticks: { color: '#94a3b8', font: { size: 10 } }, grid: { color: 'rgba(255,255,255,0.04)' } },
-                y: { ticks: { color: '#94a3b8', font: { size: 10 }, callback: v => 'R$ ' + v.toLocaleString('pt-BR') }, grid: { color: 'rgba(255,255,255,0.04)' } }
-              }
-            }
-          });
+          renderReportPatientCityChart(ChartClass, lastReportCityCounts);
+          renderReportPatientBillingChart(ChartClass, lastReportBillingByCity);
         }, 60);
       }
 
@@ -1600,18 +1655,23 @@ function renderReportsTab(contentArea) {
         <!-- Charts row -->
         <div style="display:grid;grid-template-columns:300px 1fr;gap:16px;margin-bottom:20px;">
 
-          <!-- DONUT — Classificação Manchester -->
-          <div class="chart-card" style="padding:20px;border-radius:16px;border:1px solid #1e293b;background:#111827;">
-            <h4 style="margin:0 0 14px;font-size:0.88rem;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:8px;">
-              <i class="fa-solid fa-shield-halved" style="color:#0284c7;"></i> Classificação Manchester
-              <span style="margin-left:auto;font-size:0.68rem;color:var(--text-muted);font-weight:400;">Clique para filtrar</span>
-            </h4>
-            <div style="position:relative;width:180px;height:180px;margin:0 auto 14px;">
-              <canvas id="chart-enc-manchester"></canvas>
-              <div id="manch-donut-kpi" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;pointer-events:none;">
-                <span style="font-family:'Outfit';font-size:2rem;font-weight:900;color:#ffffff;display:block;line-height:1;">${total}</span>
-                <span style="font-size:0.6rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">TOTAL</span>
+          <!-- GRÁFICO 3D — Classificação Manchester com Alternância -->
+          <div class="chart-card glass-card" style="padding:20px;border-radius:16px;border:1px solid rgba(14,165,233,0.25);background:rgba(15,23,42,0.65);backdrop-filter:blur(10px);box-shadow:0 8px 32px rgba(0,0,0,0.3);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+              <h4 style="margin:0;font-size:0.88rem;font-weight:700;color:var(--text-primary);display:flex;align-items:center;gap:8px;">
+                <i class="fa-solid fa-shield-halved" style="color:#0284c7;"></i> Classificação Manchester
+              </h4>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span id="badge-enc-manch-chart-type" style="font-size:0.7rem;font-weight:600;color:#38bdf8;background:rgba(56,189,248,0.12);border:1px solid rgba(56,189,248,0.3);padding:2px 8px;border-radius:12px;">
+                  🔮 Rosca 3D Glossy
+                </span>
+                <button onclick="window.toggleReportManchesterChart(event)" class="btn-sm" style="background:linear-gradient(135deg,#0284c7,#0369a1);color:#fff;border:none;border-radius:8px;padding:4px 10px;font-size:0.75rem;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;box-shadow:0 2px 8px rgba(2,132,199,0.35);transition:all 0.2s;" title="Alternar estilo visual do gráfico">
+                  <i class="fa-solid fa-rotate"></i> Estilo
+                </button>
               </div>
+            </div>
+            <div style="position:relative;width:100%;height:200px;margin:0 auto 12px;">
+              <canvas id="chart-enc-manchester"></canvas>
             </div>
             <div id="manch-legend" style="display:flex;flex-direction:column;gap:6px;"></div>
           </div>
@@ -4304,3 +4364,446 @@ async function openEncounterReportDetail(encId) {
   }
 }
 window.openEncounterReportDetail = openEncounterReportDetail;
+
+// ─────────────────────────────────────────────────────────────────────────────
+// RENDERIZADORES DE GRÁFICOS 3D E ALTERNADORES DE ESTILO (ABA RELATÓRIOS)
+// ─────────────────────────────────────────────────────────────────────────────
+
+function renderReportPatientCityChart(ChartClass, cityCounts) {
+  const canvas = document.getElementById('chart-patients-city');
+  if (!canvas) return;
+  if (canvas._chartInstance) {
+    try { canvas._chartInstance.destroy(); } catch(e) {}
+  }
+
+  const ctx2d = canvas.getContext('2d');
+  const cityLabels = Object.keys(cityCounts).slice(0, 8);
+  const cityVals = cityLabels.map(c => cityCounts[c]);
+  const palette = ['#818cf8', '#34d399', '#fbbf24', '#00f2fe', '#f472b6', '#a78bfa', '#6ee7b7', '#fcd34d'];
+
+  const currentTypeKey = reportChartModes.patientCity[reportChartModes.patientCityIdx % reportChartModes.patientCity.length];
+  const chartType = currentTypeKey;
+
+  const badgeEl = document.getElementById('badge-patient-city-chart-type');
+  if (badgeEl) {
+    const names = {
+      'doughnut': '🔮 Rosca 3D Glossy',
+      'bar': '🧪 Barras 3D Volumétricas',
+      'pie': '💎 Pizza 3D Cristalina',
+      'polarArea': '🪐 Esfera Polar 3D Esmaltada'
+    };
+    badgeEl.textContent = names[currentTypeKey] || currentTypeKey;
+  }
+
+  const backgroundGradients = palette.slice(0, cityLabels.length).map(c => createReportPlasticGradient(ctx2d, c, chartType !== 'bar', 240));
+
+  let customScales = {};
+  if (chartType === 'bar') {
+    customScales = {
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10, family: 'Outfit', weight: '600' } } },
+        y: { grid: { color: 'rgba(255,255,255,0.06)', borderDash: [4, 4] }, ticks: { color: '#94a3b8', font: { family: 'Inter' }, precision: 0 } }
+      }
+    };
+  } else if (chartType === 'polarArea') {
+    customScales = {
+      scales: {
+        r: {
+          grid: { color: 'rgba(255, 255, 255, 0.12)', borderDash: [3, 3] },
+          angleLines: { color: 'rgba(255, 255, 255, 0.15)' },
+          pointLabels: { color: '#f8fafc', font: { size: 10, family: 'Outfit', weight: '700' } },
+          ticks: { display: false, backdropColor: 'transparent' }
+        }
+      }
+    };
+  }
+
+  canvas._chartInstance = new ChartClass(ctx2d, {
+    type: chartType,
+    data: {
+      labels: cityLabels,
+      datasets: [{
+        data: cityVals,
+        backgroundColor: backgroundGradients,
+        borderColor: palette.slice(0, cityLabels.length),
+        borderWidth: 2,
+        borderRadius: chartType === 'bar' ? 8 : (chartType === 'doughnut' ? 6 : 0),
+        spacing: chartType === 'doughnut' ? 4 : 2,
+        hoverOffset: 12
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 750, easing: 'easeOutQuart' },
+      cutout: chartType === 'doughnut' ? '65%' : '0%',
+      plugins: {
+        legend: {
+          display: chartType !== 'bar',
+          position: 'bottom',
+          labels: { color: '#cbd5e1', font: { size: 10, family: 'Inter', weight: '600' }, boxWidth: 10, padding: 10 }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(15, 23, 42, 0.96)',
+          titleColor: '#818cf8',
+          bodyColor: '#f8fafc',
+          borderColor: 'rgba(129, 140, 248, 0.4)',
+          borderWidth: 1.5,
+          cornerRadius: 10,
+          padding: 10
+        }
+      },
+      ...customScales
+    }
+  });
+}
+
+function renderReportPatientBillingChart(ChartClass, billingByCity) {
+  const canvas = document.getElementById('chart-patients-billing');
+  if (!canvas) return;
+  if (canvas._chartInstance) {
+    try { canvas._chartInstance.destroy(); } catch(e) {}
+  }
+
+  const ctx2d = canvas.getContext('2d');
+  const billingLabels = Object.keys(billingByCity).slice(0, 8);
+  const billingVals = billingLabels.map(c => billingByCity[c]);
+  const palette = ['#34d399', '#818cf8', '#fbbf24', '#00f2fe', '#f472b6', '#a78bfa', '#6ee7b7', '#fcd34d'];
+
+  const currentTypeKey = reportChartModes.patientBilling[reportChartModes.patientBillingIdx % reportChartModes.patientBilling.length];
+  const chartType = currentTypeKey;
+
+  const badgeEl = document.getElementById('badge-patient-billing-chart-type');
+  if (badgeEl) {
+    const names = {
+      'bar': '🧪 Barras 3D Volumétricas',
+      'line': '📈 Linha Suave Neon 3D',
+      'polarArea': '🪐 Esfera Polar 3D',
+      'doughnut': '🔮 Rosca 3D Faturamento'
+    };
+    badgeEl.textContent = names[currentTypeKey] || currentTypeKey;
+  }
+
+  const backgroundGradients = palette.slice(0, billingLabels.length).map(c => createReportPlasticGradient(ctx2d, c, true, 240));
+
+  let customScales = {};
+  if (chartType === 'bar' || chartType === 'line') {
+    customScales = {
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10, family: 'Outfit', weight: '600' } } },
+        y: {
+          grid: { color: 'rgba(255,255,255,0.06)', borderDash: [4, 4] },
+          ticks: {
+            color: '#94a3b8',
+            font: { family: 'Inter', size: 10 },
+            callback: v => 'R$ ' + Number(v).toLocaleString('pt-BR')
+          }
+        }
+      }
+    };
+  }
+
+  canvas._chartInstance = new ChartClass(ctx2d, {
+    type: chartType,
+    data: {
+      labels: billingLabels,
+      datasets: [{
+        label: 'Faturamento (R$)',
+        data: billingVals,
+        backgroundColor: chartType === 'line' ? 'rgba(52, 211, 153, 0.25)' : backgroundGradients,
+        borderColor: chartType === 'line' ? '#34d399' : palette.slice(0, billingLabels.length),
+        borderWidth: chartType === 'line' ? 3 : 2,
+        fill: chartType === 'line',
+        tension: 0.4,
+        pointBackgroundColor: '#34d399',
+        pointBorderColor: '#ffffff',
+        pointRadius: chartType === 'line' ? 5 : 0,
+        borderRadius: chartType === 'bar' ? 8 : (chartType === 'doughnut' ? 6 : 0),
+        hoverOffset: 12
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 750, easing: 'easeOutQuart' },
+      cutout: chartType === 'doughnut' ? '65%' : '0%',
+      plugins: {
+        legend: {
+          display: chartType !== 'bar' && chartType !== 'line',
+          position: 'bottom',
+          labels: { color: '#cbd5e1', font: { size: 10, family: 'Inter', weight: '600' }, boxWidth: 10, padding: 10 }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(15, 23, 42, 0.96)',
+          titleColor: '#34d399',
+          bodyColor: '#f8fafc',
+          borderColor: 'rgba(52, 211, 153, 0.4)',
+          borderWidth: 1.5,
+          cornerRadius: 10,
+          padding: 10,
+          callbacks: {
+            label: ctx => ` Faturamento: R$ ${Number(ctx.raw || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
+          }
+        }
+      },
+      ...customScales
+    }
+  });
+}
+
+function renderReportManchesterChart(ChartClass, manchesterCounts) {
+  const canvas = document.getElementById('chart-enc-manchester');
+  if (!canvas) return;
+  if (canvas._chartInstance) {
+    try { canvas._chartInstance.destroy(); } catch(e) {}
+  }
+
+  const ctx2d = canvas.getContext('2d');
+  const mLabels = Object.keys(manchesterCounts);
+  const mVals = mLabels.map(k => manchesterCounts[k]);
+  const manchColors = { Vermelho: '#ef4444', Laranja: '#f97316', Amarelo: '#eab308', Verde: '#22c55e', Azul: '#3b82f6', 'Não Classificado': '#64748b' };
+  const mColors = mLabels.map(k => manchColors[k] || '#a78bfa');
+
+  const currentTypeKey = reportChartModes.encManchester[reportChartModes.encManchesterIdx % reportChartModes.encManchester.length];
+  const chartType = currentTypeKey;
+
+  const badgeEl = document.getElementById('badge-enc-manch-chart-type');
+  if (badgeEl) {
+    const names = {
+      'doughnut': '🔮 Rosca 3D Glossy',
+      'polarArea': '🪐 Esfera Polar 3D Esmaltada',
+      'bar': '🧪 Barras 3D Volumétricas',
+      'pie': '🍰 Pizza 3D Manchester'
+    };
+    badgeEl.textContent = names[currentTypeKey] || currentTypeKey;
+  }
+
+  const backgroundGradients = mColors.map(c => createReportPlasticGradient(ctx2d, c, chartType !== 'bar', 240));
+
+  let customScales = {};
+  if (chartType === 'bar') {
+    customScales = {
+      scales: {
+        x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10, family: 'Outfit', weight: '600' } } },
+        y: { grid: { color: 'rgba(255,255,255,0.06)', borderDash: [4, 4] }, ticks: { color: '#94a3b8', font: { family: 'Inter' }, precision: 0 } }
+      }
+    };
+  } else if (chartType === 'polarArea') {
+    customScales = {
+      scales: {
+        r: {
+          grid: { color: 'rgba(255, 255, 255, 0.12)', borderDash: [3, 3] },
+          angleLines: { color: 'rgba(255, 255, 255, 0.15)' },
+          pointLabels: { color: '#f8fafc', font: { size: 10, family: 'Outfit', weight: '700' } },
+          ticks: { display: false, backdropColor: 'transparent' }
+        }
+      }
+    };
+  }
+
+  canvas._chartInstance = new ChartClass(ctx2d, {
+    type: chartType,
+    data: {
+      labels: mLabels,
+      datasets: [{
+        data: mVals,
+        backgroundColor: backgroundGradients,
+        borderColor: mColors,
+        borderWidth: 2,
+        borderRadius: chartType === 'bar' ? 8 : (chartType === 'doughnut' ? 6 : 0),
+        spacing: chartType === 'doughnut' ? 4 : 2,
+        hoverOffset: 12
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 750, easing: 'easeOutQuart' },
+      cutout: chartType === 'doughnut' ? '65%' : '0%',
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(15, 23, 42, 0.96)',
+          titleColor: '#38bdf8',
+          bodyColor: '#f8fafc',
+          borderColor: 'rgba(56, 189, 248, 0.4)',
+          borderWidth: 1.5,
+          cornerRadius: 10,
+          padding: 10
+        }
+      },
+      ...customScales
+    }
+  });
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// HANDLERS GLOBAIS DE ALTERNÂNCIA (TOGGLE)
+// ─────────────────────────────────────────────────────────────────────────────
+
+window.toggleReportPatientCityChart = function (event) {
+  if (event) event.stopPropagation();
+  reportChartModes.patientCityIdx++;
+  const ChartClass = window.Chart || (typeof Chart !== 'undefined' ? Chart : null);
+  if (ChartClass && lastReportCityCounts) {
+    renderReportPatientCityChart(ChartClass, lastReportCityCounts);
+    if (typeof showToast === 'function') {
+      showToast(`Formato do gráfico: ${reportChartModes.patientCity[reportChartModes.patientCityIdx % reportChartModes.patientCity.length].toUpperCase()}`);
+    }
+  }
+};
+
+window.toggleReportPatientBillingChart = function (event) {
+  if (event) event.stopPropagation();
+  reportChartModes.patientBillingIdx++;
+  const ChartClass = window.Chart || (typeof Chart !== 'undefined' ? Chart : null);
+  if (ChartClass && lastReportBillingByCity) {
+    renderReportPatientBillingChart(ChartClass, lastReportBillingByCity);
+    if (typeof showToast === 'function') {
+      showToast(`Formato do gráfico: ${reportChartModes.patientBilling[reportChartModes.patientBillingIdx % reportChartModes.patientBilling.length].toUpperCase()}`);
+    }
+  }
+};
+
+window.toggleReportManchesterChart = function (event) {
+  if (event) event.stopPropagation();
+  reportChartModes.encManchesterIdx++;
+  const ChartClass = window.Chart || (typeof Chart !== 'undefined' ? Chart : null);
+  if (ChartClass && lastReportManchesterCounts) {
+    renderReportManchesterChart(ChartClass, lastReportManchesterCounts);
+    if (typeof showToast === 'function') {
+      showToast(`Formato do gráfico: ${reportChartModes.encManchester[reportChartModes.encManchesterIdx % reportChartModes.encManchester.length].toUpperCase()}`);
+    }
+  }
+};
+
+window.toggleReportFinPieChart = function (event) {
+  if (event) event.stopPropagation();
+  reportChartModes.finCatIdx++;
+  const ChartClass = window.Chart || (typeof Chart !== 'undefined' ? Chart : null);
+  const pieCtx = document.getElementById('finPieChart');
+  if (ChartClass && pieCtx && lastReportFinQuantities.length > 0) {
+    const ctx2d = pieCtx.getContext('2d');
+    const currentTypeKey = reportChartModes.finCat[reportChartModes.finCatIdx % reportChartModes.finCat.length];
+    const chartType = currentTypeKey;
+    const badgeEl = document.getElementById('badge-fin-pie-chart-type');
+    if (badgeEl) {
+      const names = {
+        'doughnut': '🔮 Rosca 3D Glossy',
+        'pie': '💎 Pizza 3D Cristalina',
+        'polarArea': '🪐 Esfera Polar 3D Esmaltada',
+        'bar': '🧪 Barras 3D Volumétricas'
+      };
+      badgeEl.textContent = names[currentTypeKey] || currentTypeKey;
+    }
+    const grads = lastReportFinColors.map(c => createReportPlasticGradient(ctx2d, c, chartType !== 'bar', 240));
+    if (finPieChartInstance) {
+      try { finPieChartInstance.destroy(); } catch(e) {}
+    }
+    finPieChartInstance = new ChartClass(ctx2d, {
+      type: chartType,
+      data: {
+        labels: lastReportFinLabels,
+        datasets: [{
+          data: lastReportFinQuantities,
+          backgroundColor: grads,
+          borderColor: lastReportFinColors,
+          borderWidth: 2,
+          borderRadius: chartType === 'bar' ? 8 : 6,
+          spacing: chartType === 'doughnut' ? 3 : 2,
+          hoverOffset: 14
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: chartType === 'doughnut' ? '70%' : '0%',
+        animation: { duration: 750, easing: 'easeOutQuart' },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(18, 14, 34, 0.95)',
+            titleColor: '#00f2fe',
+            bodyColor: '#f8fafc',
+            borderColor: 'rgba(0, 242, 254, 0.35)',
+            borderWidth: 1.5,
+            padding: 12
+          }
+        }
+      }
+    });
+    if (typeof showToast === 'function') {
+      showToast(`Formato da carteira: ${chartType.toUpperCase()}`);
+    }
+  }
+};
+
+window.toggleReportFinBarChart = function (event) {
+  if (event) event.stopPropagation();
+  reportChartModes.finBarIdx++;
+  const ChartClass = window.Chart || (typeof Chart !== 'undefined' ? Chart : null);
+  const barCtx = document.getElementById('finBarChart');
+  if (ChartClass && barCtx && lastReportFinValuesR$.length > 0) {
+    const ctx2d = barCtx.getContext('2d');
+    const currentTypeKey = reportChartModes.finBar[reportChartModes.finBarIdx % reportChartModes.finBar.length];
+    const chartType = currentTypeKey;
+    const badgeEl = document.getElementById('badge-fin-bar-chart-type');
+    if (badgeEl) {
+      const names = {
+        'bar': '🧪 Barras 3D Volumétricas',
+        'line': '📈 Linha Suave Neon 3D',
+        'doughnut': '🔮 Rosca 3D Volume'
+      };
+      badgeEl.textContent = names[currentTypeKey] || currentTypeKey;
+    }
+    const grads = lastReportFinColors.map(c => createReportPlasticGradient(ctx2d, c, true, 220));
+    if (finBarChartInstance) {
+      try { finBarChartInstance.destroy(); } catch(e) {}
+    }
+    finBarChartInstance = new ChartClass(ctx2d, {
+      type: chartType,
+      data: {
+        labels: lastReportFinLabels,
+        datasets: [{
+          label: 'Valor (R$)',
+          data: lastReportFinValuesR$,
+          backgroundColor: chartType === 'line' ? 'rgba(167, 139, 250, 0.25)' : grads,
+          borderColor: chartType === 'line' ? '#a78bfa' : lastReportFinColors,
+          borderWidth: chartType === 'line' ? 3 : 2,
+          fill: chartType === 'line',
+          tension: 0.4,
+          pointBackgroundColor: '#a78bfa',
+          pointBorderColor: '#ffffff',
+          pointRadius: chartType === 'line' ? 5 : 0,
+          borderRadius: chartType === 'bar' ? 8 : 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: chartType === 'doughnut' ? '68%' : '0%',
+        animation: { duration: 750, easing: 'easeOutQuart' },
+        plugins: {
+          legend: { display: chartType === 'doughnut' },
+          tooltip: {
+            backgroundColor: 'rgba(18, 14, 34, 0.95)',
+            titleColor: '#a78bfa',
+            bodyColor: '#f8fafc',
+            borderColor: 'rgba(139, 92, 246, 0.35)',
+            borderWidth: 1.5,
+            padding: 12
+          }
+        },
+        ...(chartType === 'bar' || chartType === 'line' ? {
+          scales: {
+            x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10, family: 'Outfit', weight: '600' } } },
+            y: { grid: { color: 'rgba(255,255,255,0.06)', borderDash: [4, 4] }, ticks: { color: '#94a3b8', font: { size: 10 }, callback: v => 'R$ ' + Number(v).toLocaleString('pt-BR') } }
+          }
+        } : {})
+      }
+    });
+    if (typeof showToast === 'function') {
+      showToast(`Formato do volume: ${chartType.toUpperCase()}`);
+    }
+  }
+};
