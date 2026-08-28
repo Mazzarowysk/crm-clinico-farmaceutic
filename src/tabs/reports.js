@@ -2291,13 +2291,12 @@ function renderReportsTab(contentArea) {
           try {
             const h2p = await getHtml2Pdf();
             const element = document.querySelector('.report-sheet-container');
-            const isLandscape = ${columns.length > 6};
             const opt = {
               margin: 0,
               filename: '${filename}.pdf',
               image: { type: 'jpeg', quality: 0.98 },
               html2canvas: { scale: 2, useCORS: true, letterRendering: true, logging: false, backgroundColor: '#ffffff' },
-              jsPDF: { unit: 'mm', format: 'a4', orientation: isLandscape ? 'landscape' : 'portrait' }
+              jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
             };
             await h2p().set(opt).from(element).save();
             if (btn) {
