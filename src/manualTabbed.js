@@ -10,6 +10,14 @@ export const removeAccents = (str) => {
 export const SEMANTIC_SYNONYMS = {
   // CRM Clínico Farmacêutico & Balcão
   crm_farmacia: ['crm farmaceutico', 'crm clinico', 'atendimento farmacia', 'triagem farmaceutica', 'balcao', 'prontuario farmaceutico', 'declaracao de servico farmaceutico', 'dsf', 'cff 585', 'cff 586', 'prescricao farmaceutica', 'mips', 'medicamento isento de prescricao', 'red flags', 'sinais de alerta', 'encaminhamento medico', 'adesao', 'posologia'],
+  // Ditado Clínico por Voz & Teleconsulta WebRTC
+  teleconsulta: ['teleconsulta', 'telemedicina', 'videochamada', 'atendimento remoto', 'webrtc', 'camera', 'microfone', 'link do paciente', 'chamada'],
+  ditado_voz: ['ditado por voz', 'ditado', 'reconhecimento de voz', 'web speech', 'transcricao de voz', 'falar anamnese', 'microfone'],
+  // PIX Dinâmico BACEN & Boletos FEBRABAN
+  pix: ['pix', 'pix dinamico', 'qr code pix', 'copia e cola', 'bacen', 'br code', 'emv', 'chave pix'],
+  boletos: ['boleto', 'boletos', 'febraban', 'linha digitavel', 'codigo de barras', 'baixar boleto pdf'],
+  // Gráficos 3D Dinâmicos & BI
+  graficos_3d: ['graficos 3d', 'estilo de grafico', 'alternar grafico', 'rosca 3d', 'barras 3d', 'pizza 3d', 'polar 3d', 'bi'],
   // Motor CDSS 4D & Interações
   cdss: ['cdss', 'cdss 4d', 'motor cdss', 'interacao', 'interacoes', 'incompatibilidade', 'farmaco-farmaco', 'farmaco-alimento', 'farmaco-habito', 'duplicidade terapeutica', 'beers', 'criterios de beers', 'idosos', 'alergias cruzadas', 'bloqueio automatico', 'alerta vermelho', 'alerta amarelo', 'seguranca do paciente'],
   // Declaração de Serviço Farmacêutico (DSF)

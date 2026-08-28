@@ -451,6 +451,86 @@ export const SYSTEM_INTENTS = [
     }
   },
   {
+    id: 'intent_teleconsulta',
+    title: '📹 Teleconsulta Farmacêutica WebRTC (Sala de Vídeo)',
+    subtitle: 'Atendimento clínico remoto em tempo real com áudio/vídeo criptografado, compartilhamento de tela e prontuário SOAP integrado',
+    category: 'Ações Rápidas',
+    keywords: ['teleconsulta', 'telemedicina', 'video', 'videochamada', 'chamada de video', 'consulta online', 'atendimento remoto', 'webrtc', 'camera', 'como fazer teleconsulta'],
+    badge: 'Teleconsulta',
+    badgeColor: '#0284c7',
+    icon: 'fa-video',
+    iconColor: '#38bdf8',
+    execute: () => {
+      if (typeof window.openTeleconsultationModal === 'function') {
+        window.openTeleconsultationModal();
+      } else {
+        if (window.switchTab) window.switchTab('farmacia');
+        showToast('📹 Abrindo Teleconsulta Farmacêutica...');
+      }
+    }
+  },
+  {
+    id: 'intent_ditado_voz',
+    title: '🎙️ Ditado Clínico por Voz (Web Speech API)',
+    subtitle: 'Transcrição de anamnese, notas da queixa e parecer farmacêutico por voz em tempo real (pt-BR)',
+    category: 'Clínica & Balcão',
+    keywords: ['ditado', 'voz', 'falar', 'microfone', 'gravar voz', 'transcricao', 'ditado por voz', 'anamnese por voz', 'como ditar'],
+    badge: 'Web Speech',
+    badgeColor: '#10b981',
+    icon: 'fa-microphone',
+    iconColor: '#34d399',
+    execute: () => {
+      if (window.switchTab) window.switchTab('farmacia');
+      showToast('🎙️ Ditado por Voz disponível nos campos de texto do balcão clínico.');
+    }
+  },
+  {
+    id: 'intent_pix_dinamico',
+    title: '⚡ PIX Dinâmico com QR Code Oficial BACEN (EMV BR Code)',
+    subtitle: 'Geração instantânea de QR Code com valor da venda, cálculo de CRC16 e botão Copia e Cola',
+    category: 'Financeiro & PDV',
+    keywords: ['pix', 'pix dinamico', 'qr code pix', 'copia e cola', 'br code', 'emv', 'chave pix', 'pagamento pix', 'como gerar pix'],
+    badge: 'PIX BACEN',
+    badgeColor: '#06b6d4',
+    icon: 'fa-qrcode',
+    iconColor: '#22d3ee',
+    execute: () => {
+      if (typeof window.openQuickCheckoutModal === 'function') {
+        window.openQuickCheckoutModal();
+      }
+    }
+  },
+  {
+    id: 'intent_graficos_3d',
+    title: '📊 Gráficos 3D Dinâmicos & Alternador de Estilos',
+    subtitle: 'Alternar visualizações entre Rosca Glossy 3D, Barras Volumétricas, Pizza Cristalina e Esfera Polar',
+    category: 'Relatórios & BI',
+    keywords: ['graficos', 'grafico 3d', 'estilo grafico', 'rosca 3d', 'barras 3d', 'mudar grafico', 'graficos relatorios', 'bi'],
+    badge: 'Gráficos 3D',
+    badgeColor: '#a855f7',
+    icon: 'fa-chart-simple',
+    iconColor: '#c084fc',
+    execute: () => {
+      if (window.switchTab) window.switchTab('relatorios');
+      showToast('📊 Gráficos 3D ativos! Clique no botão 🔄 Estilo no topo de cada gráfico para alternar.');
+    }
+  },
+  {
+    id: 'intent_boletos_febraban',
+    title: '🏦 Emissão & Download Direto de Boletos FEBRABAN',
+    subtitle: 'Geração de boletos bancários com linha digitável, código de barras e exportação PDF sem descaracterização',
+    category: 'Financeiro',
+    keywords: ['boleto', 'boletos', 'febraban', 'linha digitavel', 'codigo de barras boleto', 'baixar boleto', 'pdf boleto', 'emitir boleto'],
+    badge: 'FEBRABAN',
+    badgeColor: '#f59e0b',
+    icon: 'fa-barcode',
+    iconColor: '#fbbf24',
+    execute: () => {
+      if (window.switchTab) window.switchTab('financeiro');
+      showToast('🏦 Acesse a aba de Boletos para visualizar e baixar boletos em PDF.');
+    }
+  },
+  {
     id: 'intent_manual',
     title: '📖 Manual Interativo & Guia de Protocolos Farmacêuticos',
     subtitle: 'Documentação completa com suporte a todas as rotinas clínicas e regulatórias do sistema',
