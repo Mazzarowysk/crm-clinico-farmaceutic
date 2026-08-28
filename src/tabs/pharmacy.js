@@ -207,28 +207,33 @@ function renderBalcaoAtendimentoView(container) {
   // Obter medicamentos contínuos do paciente selecionado
   const activeMeds = currentPatient ? (localDB.list('pharmacy_active_meds', m => m.patient_id === currentPatient.id) || []) : [];
 
+  window.goToPharmacyBalcaoStep = (targetStep) => {
+    currentClinicalEncounter.step = targetStep;
+    renderBalcaoAtendimentoView(document.getElementById('pharmacy-subtab-content'));
+  };
+
   container.innerHTML = `
     <!-- STEPPER DE ATENDIMENTO EM 5 ETAPAS -->
     <div class="pharmacy-stepper pharmacy-glass-card">
-      <div class="pharmacy-step-item ${step === 1 ? 'active' : (step > 1 ? 'completed' : '')}">
+      <div class="pharmacy-step-item ${step === 1 ? 'active' : (step > 1 ? 'completed' : '')}" onclick="${step > 1 ? `window.goToPharmacyBalcaoStep(1)` : ''}" style="${step > 1 ? 'cursor: pointer;' : ''}" title="${step > 1 ? 'Clique para voltar à Etapa 1' : ''}">
         <div class="pharmacy-step-badge">1</div>
         <span>Entrada &amp; Identificação</span>
       </div>
       <i class="fa-solid fa-chevron-right" style="color: rgba(255,255,255,0.15); font-size: 0.8rem;"></i>
 
-      <div class="pharmacy-step-item ${step === 2 ? 'active' : (step > 2 ? 'completed' : '')}">
+      <div class="pharmacy-step-item ${step === 2 ? 'active' : (step > 2 ? 'completed' : '')}" onclick="${step > 2 ? `window.goToPharmacyBalcaoStep(2)` : ''}" style="${step > 2 ? 'cursor: pointer;' : ''}" title="${step > 2 ? 'Clique para voltar à Etapa 2' : ''}">
         <div class="pharmacy-step-badge">2</div>
         <span>Queixas &amp; Sintomas</span>
       </div>
       <i class="fa-solid fa-chevron-right" style="color: rgba(255,255,255,0.15); font-size: 0.8rem;"></i>
 
-      <div class="pharmacy-step-item ${step === 3 ? 'active' : (step > 3 ? 'completed' : '')}">
+      <div class="pharmacy-step-item ${step === 3 ? 'active' : (step > 3 ? 'completed' : '')}" onclick="${step > 3 ? `window.goToPharmacyBalcaoStep(3)` : ''}" style="${step > 3 ? 'cursor: pointer;' : ''}" title="${step > 3 ? 'Clique para voltar à Etapa 3' : ''}">
         <div class="pharmacy-step-badge">3</div>
         <span>Validação Red Flags</span>
       </div>
       <i class="fa-solid fa-chevron-right" style="color: rgba(255,255,255,0.15); font-size: 0.8rem;"></i>
 
-      <div class="pharmacy-step-item ${step === 4 ? 'active' : (step > 4 ? 'completed' : '')}">
+      <div class="pharmacy-step-item ${step === 4 ? 'active' : (step > 4 ? 'completed' : '')}" onclick="${step > 4 ? `window.goToPharmacyBalcaoStep(4)` : ''}" style="${step > 4 ? 'cursor: pointer;' : ''}" title="${step > 4 ? 'Clique para voltar à Etapa 4' : ''}">
         <div class="pharmacy-step-badge">4</div>
         <span>Cruzamento &amp; Prescrição</span>
       </div>
@@ -515,7 +520,7 @@ function renderBalcaoStepContent(step, patient, allPatients, activeMeds) {
               Validação cruzada multidimensional automática contra medicamentos em uso, alergias e patologias pré-existentes.
             </p>
           </div>
-          <button type="button" id="btn-step4-back" class="btn btn-secondary" style="padding: 6px 14px; font-size: 0.82rem;">
+          <button type="button" id="btn-step4-back-top" class="btn btn-secondary btn-step4-back" style="padding: 6px 14px; font-size: 0.82rem; cursor: pointer;">
             <i class="fa-solid fa-arrow-left"></i> Voltar para Triagem
           </button>
         </div>
@@ -644,7 +649,7 @@ function renderBalcaoStepContent(step, patient, allPatients, activeMeds) {
 
         <!-- Botões de Navegação -->
         <div style="display: flex; justify-content: space-between; margin-top: 24px;">
-          <button type="button" id="btn-step4-back" class="btn btn-secondary" style="padding: 10px 18px;">
+          <button type="button" id="btn-step4-back-bottom" class="btn btn-secondary btn-step4-back" style="padding: 10px 18px; cursor: pointer;">
             <i class="fa-solid fa-arrow-left"></i> Voltar
           </button>
           <button type="button" id="btn-advance-to-step-5" class="btn btn-primary" ${hasBlocker ? 'disabled' : ''} style="background: ${hasBlocker ? '#475569' : 'linear-gradient(135deg, #0d9488, #0f766e)'}; border: none; padding: 12px 28px; font-weight: 700;">
@@ -814,9 +819,11 @@ function setupBalcaoStepListeners(step, allPatients) {
   }
 
   if (step === 4) {
-    document.getElementById('btn-step4-back')?.addEventListener('click', () => {
-      currentClinicalEncounter.step = 3;
-      renderBalcaoAtendimentoView(document.getElementById('pharmacy-subtab-content'));
+    document.querySelectorAll('.btn-step4-back, #btn-step4-back, #btn-step4-back-top, #btn-step4-back-bottom').forEach(btn => {
+      btn.addEventListener('click', () => {
+        currentClinicalEncounter.step = 3;
+        renderBalcaoAtendimentoView(document.getElementById('pharmacy-subtab-content'));
+      });
     });
 
     const mipBtns = document.querySelectorAll('.btn-toggle-prescribe-mip');
