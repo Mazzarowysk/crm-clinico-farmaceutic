@@ -1893,61 +1893,30 @@ function renderReportsTab(contentArea) {
 
     // ---- Bloco de Resumo Executivo / Financeiro ----
     const summaryBlock = financialSummary ? `
-      <div style="margin-bottom: 18px; page-break-inside: avoid;">
-        <div style="font-size: 9.5pt; font-weight: 700; color: #0f172a; border-bottom: 1.5px solid #0f766e; padding-bottom: 4px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between;">
-          <span>📊 RESUMO EXECUTIVO &amp; INDICADORES CONSOLIDADOS</span>
-          <span style="font-size: 8pt; color: #0f766e; font-weight: 600;">Saldo Apurado: ${fmt(financialSummary.saldo)}</span>
-        </div>
-
-        <!-- KPI CARDS em grid equilibrado -->
-        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 12px; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
-          <div style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 6px; padding: 8px 10px;">
+      <table style="width: 100%; border-collapse: separate; border-spacing: 6px; margin-bottom: 14px;">
+        <tr>
+          <td colspan="3" style="border-bottom: 2px solid #0f766e; padding: 4px 0 8px 0; font-size: 9pt; font-weight: 800; color: #0f2738;">
+            📊 RESUMO EXECUTIVO &amp; INDICADORES CONSOLIDADOS (Saldo Apurado: ${fmt(financialSummary.saldo)})
+          </td>
+        </tr>
+        <tr>
+          <td style="background: #f0fdf4; border: 1px solid #86efac; border-radius: 6px; padding: 8px 10px; width: 33.3%;">
             <div style="font-size: 7pt; color: #15803d; font-weight: 700; text-transform: uppercase;">✓ Recebidas / Pagas</div>
             <div style="font-size: 11pt; font-weight: 800; color: #16a34a;">${fmt(financialSummary.pagasVal)}</div>
             <div style="font-size: 7pt; color: #4b5563;">${financialSummary.pagasC} lançamento(s)</div>
-          </div>
-          <div style="background: #eff6ff; border: 1px solid #93c5fd; border-radius: 6px; padding: 8px 10px;">
+          </td>
+          <td style="background: #eff6ff; border: 1px solid #93c5fd; border-radius: 6px; padding: 8px 10px; width: 33.3%;">
             <div style="font-size: 7pt; color: #1d4ed8; font-weight: 700; text-transform: uppercase;">📅 A Vencer / Programadas</div>
             <div style="font-size: 11pt; font-weight: 800; color: #2563eb;">${fmt(financialSummary.aVencerVal)}</div>
             <div style="font-size: 7pt; color: #4b5563;">${financialSummary.aVencerC} lançamento(s)</div>
-          </div>
-          <div style="background: #fff1f2; border: 1px solid #fda4af; border-radius: 6px; padding: 8px 10px;">
+          </td>
+          <td style="background: #fff1f2; border: 1px solid #fda4af; border-radius: 6px; padding: 8px 10px; width: 33.3%;">
             <div style="font-size: 7pt; color: #be123c; font-weight: 700; text-transform: uppercase;">⚠️ Em Atraso / Vencidas</div>
             <div style="font-size: 11pt; font-weight: 800; color: #e11d48;">${fmt(financialSummary.vencidasVal)}</div>
             <div style="font-size: 7pt; color: #4b5563;">${financialSummary.vencidasC} lançamento(s)</div>
-          </div>
-          <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 10px;">
-            <div style="font-size: 7pt; color: #475569; font-weight: 700; text-transform: uppercase;">⚖️ Saldo Líquido Operacional</div>
-            <div style="font-size: 11pt; font-weight: 800; color: ${financialSummary.saldo >= 0 ? '#16a34a' : '#e11d48'};">${fmt(financialSummary.saldo)}</div>
-            <div style="font-size: 7pt; color: #4b5563;">Entradas - Saídas</div>
-          </div>
-          <div style="background: #fffbeb; border: 1px solid #fcd34d; border-radius: 6px; padding: 8px 10px;">
-            <div style="font-size: 7pt; color: #b45309; font-weight: 700; text-transform: uppercase;">⭐ Bonificadas / Convênios</div>
-            <div style="font-size: 11pt; font-weight: 800; color: #d97706;">${fmt(financialSummary.bonificadasVal)}</div>
-            <div style="font-size: 7pt; color: #4b5563;">${financialSummary.bonificadasC} item(ns)</div>
-          </div>
-          <div style="background: #fef2f2; border: 1px solid #fca5a5; border-radius: 6px; padding: 8px 10px;">
-            <div style="font-size: 7pt; color: #dc2626; font-weight: 700; text-transform: uppercase;">🔄 Baixas Especiais</div>
-            <div style="font-size: 11pt; font-weight: 800; color: #dc2626;">${fmt((financialSummary.suspensasVal||0)+(financialSummary.canceladasVal||0)+(financialSummary.excluidasVal||0))}</div>
-            <div style="font-size: 7pt; color: #4b5563;">Canceladas / Suspensas</div>
-          </div>
-        </div>
-
-        <!-- GRÁFICOS base64 em alta nitidez -->
-        ${(financialSummary.donutImg || financialSummary.barImg) ? `
-        <div style="display: grid; grid-template-columns: 1fr 1.5fr; gap: 10px; margin-bottom: 6px;">
-          ${financialSummary.donutImg ? `
-          <div style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px; text-align: center; background: #fafafa;">
-            <div style="font-size: 7.5pt; font-weight: 700; color: #334155; margin-bottom: 4px;">📈 Distribuição por Status</div>
-            <img src="${financialSummary.donutImg}" style="max-width: 100%; max-height: 140px; object-fit: contain;" />
-          </div>` : ''}
-          ${financialSummary.barImg ? `
-          <div style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px; text-align: center; background: #fafafa;">
-            <div style="font-size: 7.5pt; font-weight: 700; color: #334155; margin-bottom: 4px;">📊 Volume por Categoria / Forma (R$)</div>
-            <img src="${financialSummary.barImg}" style="max-width: 100%; max-height: 140px; object-fit: contain;" />
-          </div>` : ''}
-        </div>` : ''}
-      </div>
+          </td>
+        </tr>
+      </table>
     ` : '';
 
     const htmlContent = `
@@ -1959,9 +1928,11 @@ function renderReportsTab(contentArea) {
         <title>${title} - CRM Clínico Farmacêutico</title>
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
         <style>
-          @page { size: A4 portrait; margin: 12mm 14mm 14mm 14mm; }
+          @page { size: A4 portrait; margin: 10mm; }
           * { box-sizing: border-box; }
           body { 
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
@@ -1980,7 +1951,7 @@ function renderReportsTab(contentArea) {
               background: #0f172a;
               background: linear-gradient(135deg, #0b0f19 0%, #1e293b 100%);
               min-height: 100vh;
-              padding: 60px 16px 40px 16px;
+              padding: 65px 16px 40px 16px;
             }
             .screen-toolbar {
               position: fixed;
@@ -1988,16 +1959,16 @@ function renderReportsTab(contentArea) {
               left: 0;
               right: 0;
               height: 54px;
-              background: rgba(15, 23, 42, 0.95);
+              background: rgba(15, 23, 42, 0.96);
               backdrop-filter: blur(12px);
               -webkit-backdrop-filter: blur(12px);
-              border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+              border-bottom: 1px solid rgba(255, 255, 255, 0.12);
               display: flex;
               align-items: center;
               justify-content: space-between;
               padding: 0 20px;
               z-index: 99999;
-              box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+              box-shadow: 0 4px 20px rgba(0,0,0,0.5);
             }
             .screen-toolbar-title {
               display: flex;
@@ -2034,32 +2005,28 @@ function renderReportsTab(contentArea) {
               transition: all 0.2s;
               border: none;
             }
-            .btn-action-print {
-              background: linear-gradient(135deg, #0d9488, #0f766e);
+            .btn-action-download {
+              background: linear-gradient(135deg, #10b981, #059669);
               color: #ffffff;
-              box-shadow: 0 2px 10px rgba(13, 148, 136, 0.4);
+              box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
             }
-            .btn-action-print:hover {
-              background: linear-gradient(135deg, #0f766e, #115e59);
-              transform: translateY(-1px);
+            .btn-action-print {
+              background: rgba(255, 255, 255, 0.12);
+              color: #f1f5f9;
+              border: 1px solid rgba(255, 255, 255, 0.2);
             }
             .btn-action-close {
               background: rgba(255, 255, 255, 0.1);
               color: #cbd5e1;
               border: 1px solid rgba(255, 255, 255, 0.15);
             }
-            .btn-action-close:hover {
-              background: rgba(255, 255, 255, 0.18);
-              color: #ffffff;
-            }
             .report-sheet-container {
               max-width: 210mm;
               margin: 0 auto;
               background: #ffffff;
-              padding: 14mm 14mm 16mm 14mm;
+              padding: 12mm 14mm 14mm 14mm;
               border-radius: 8px;
-              box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
-              min-height: 297mm;
+              box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
             }
           }
 
@@ -2072,56 +2039,16 @@ function renderReportsTab(contentArea) {
               padding: 0 !important; 
               border-radius: 0 !important; 
               box-shadow: none !important; 
-              min-height: auto !important;
             }
           }
 
-          .header-box {
-            border-bottom: 2px solid #0f766e;
-            padding-bottom: 12px;
-            margin-bottom: 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-          }
-          .title-banner {
-            background: #f0fdfa;
-            border: 1px solid #99f6e4;
-            border-left: 4.5px solid #0f766e;
-            border-radius: 6px;
-            padding: 9px 14px;
-            margin-bottom: 14px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-          }
-          table { width: 100%; border-collapse: collapse; margin-top: 10px; background-color: #ffffff; }
-          tr { page-break-inside: avoid; page-break-after: auto; }
-          th { 
-            background-color: #0f2738 !important; 
-            color: #ffffff !important; 
-            text-align: left; 
-            padding: 8px 10px; 
-            font-size: 8pt; 
-            text-transform: uppercase; 
-            letter-spacing: 0.5px;
-            font-weight: 800;
-            border: 1px solid #0f2738 !important;
-          }
-          td { 
-            padding: 7px 10px; 
-            border: 1px solid #cbd5e1 !important; 
-            font-size: 8.5pt; 
-            color: #0f172a !important;
-            background-color: #ffffff;
-          }
-          tr:nth-child(even) td { background-color: #f8fafc !important; }
+          table { width: 100%; border-collapse: collapse; }
           .badge { 
             display: inline-block; 
-            padding: 2px 6px; 
+            padding: 2px 7px; 
             border-radius: 12px; 
             font-weight: 700; 
-            font-size: 7pt; 
+            font-size: 7.2pt; 
             letter-spacing: 0.3px;
           }
           .badge-vencidas, .badge-critica, .badge-vermelho { background: #fee2e2; color: #b91c1c; border: 1px solid #f87171; }
@@ -2129,40 +2056,20 @@ function renderReportsTab(contentArea) {
           .badge-avencer, .badge-aguardando, .badge-azul { background: #e0f2fe; color: #0369a1; border: 1px solid #7dd3fc; }
           .badge-bonificadas, .badge-laranja, .badge-amarelo { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
           .badge-suspensas, .badge-canceladas { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
-          .sig-card {
-            border: 1px solid #cbd5e1;
-            border-radius: 8px;
-            background: #fafafa;
-            padding: 10px 14px;
-            margin-top: 18px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            page-break-inside: avoid;
-          }
-          .footer { 
-            margin-top: 14px; 
-            border-top: 1px solid #e2e8f0; 
-            padding-top: 6px; 
-            font-size: 7pt; 
-            color: #64748b; 
-            display: flex; 
-            justify-content: space-between; 
-          }
         </style>
       </head>
       <body>
-        <!-- BARRA FLUTUANTE DE AÇÕES NA TELA (Oculta na Impressão) -->
+        <!-- BARRA FLUTUANTE DE AÇÕES NA TELA -->
         <div class="screen-toolbar">
           <div class="screen-toolbar-title">
             <span>📄 CRM Clínico Farmacêutico</span>
-            <span class="screen-toolbar-badge">Visualização de Impressão & Exportação</span>
+            <span class="screen-toolbar-badge">Visualização de Impressão &amp; Exportação</span>
           </div>
           <div class="screen-toolbar-actions">
-            <button id="btn-dl-pdf" onclick="downloadDirectPDF()" class="btn-action btn-action-download" style="background: linear-gradient(135deg, #10b981, #059669); color: #ffffff; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35); border: none;">
+            <button id="btn-dl-pdf" onclick="downloadDirectPDF()" class="btn-action btn-action-download">
               📥 Baixar PDF Direto
             </button>
-            <button onclick="window.print()" class="btn-action btn-action-print" style="background: rgba(255, 255, 255, 0.12); color: #f1f5f9; border: 1px solid rgba(255, 255, 255, 0.2);">
+            <button onclick="window.print()" class="btn-action btn-action-print">
               🖨️ Imprimir
             </button>
             <button onclick="window.close()" class="btn-action btn-action-close">
@@ -2173,55 +2080,62 @@ function renderReportsTab(contentArea) {
 
         <!-- FOLHA DO RELATÓRIO FORMATO A4 -->
         <div class="report-sheet-container">
-          <!-- CABEÇALHO OFICIAL CRM CLÍNICO FARMACÊUTICO -->
-          <div class="header-box" style="border-bottom: 2.5px solid #0f766e; padding-bottom: 12px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
-            <div style="display: flex; align-items: center; gap: 12px;">
-              <div style="background: #ffffff; padding: 4px 8px; border-radius: 8px; border: 1.5px solid #0f766e; display: flex; align-items: center; justify-content: center;">
-                <img src="/assets/crm-logo.png?v=2" alt="Logo CRM" style="height: 40px; width: auto; object-fit: contain;">
-              </div>
-              <div>
-                <div style="font-family: 'Outfit', sans-serif; font-size: 15pt; font-weight: 800; color: #0f172a; margin: 0; line-height: 1.1; letter-spacing: -0.3px;">
+          <!-- CABEÇALHO OFICIAL EM TABELA -->
+          <table style="width: 100%; border-bottom: 2.5px solid #0f766e; padding-bottom: 12px; margin-bottom: 14px; border-collapse: collapse;">
+            <tr>
+              <td style="width: 52px; vertical-align: middle; border: none; padding: 0 12px 0 0; background: #ffffff;">
+                <div style="background: #ffffff; padding: 4px 6px; border-radius: 8px; border: 1.5px solid #0f766e; display: inline-block;">
+                  <img src="/assets/crm-logo.png?v=2" alt="Logo CRM" style="height: 38px; width: auto; display: block;">
+                </div>
+              </td>
+              <td style="vertical-align: middle; border: none; padding: 0; background: #ffffff;">
+                <div style="font-family: 'Outfit', sans-serif; font-size: 14.5pt; font-weight: 800; color: #0f172a; margin: 0; line-height: 1.1;">
                   CRM CLÍNICO FARMACÊUTICO
                 </div>
-                <div style="font-size: 8.5pt; color: #0f766e; font-weight: 700; margin-top: 2px;">
+                <div style="font-size: 8pt; color: #0f766e; font-weight: 700; margin-top: 2px;">
                   Consultório Farmacêutico · Prescrição Clínica · Farmacovigilância CDSS 4D
                 </div>
-                <div style="font-size: 7.5pt; color: #475569; margin-top: 1px;">
+                <div style="font-size: 7pt; color: #64748b; margin-top: 1px;">
                   Conforme Resoluções CFF nº 585/2013 e nº 586/2013 · RDC ANVISA nº 44/2009
                 </div>
-              </div>
-            </div>
-            
-            <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 12px; text-align: right; font-size: 7.5pt; color: #334155; line-height: 1.4;">
-              <div>Emissão: <strong style="color: #0f172a;">${dateNow}</strong></div>
-              <div>Chave: <span style="font-family: monospace; font-weight: 700; color: #0f766e;">${docHash}</span></div>
-              <div>RT: <strong style="color: #0f172a;">Dr. Marcelo Mazaro</strong> (CRF-SP 54180)</div>
-            </div>
-          </div>
+              </td>
+              <td style="width: 210px; vertical-align: middle; text-align: right; border: none; padding: 0; background: #ffffff;">
+                <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 10px; font-size: 7.2pt; color: #334155; line-height: 1.35; display: inline-block; text-align: right;">
+                  <div>Emissão: <strong style="color: #0f172a;">${dateNow}</strong></div>
+                  <div>Chave: <span style="font-family: monospace; font-weight: 700; color: #0f766e;">${docHash}</span></div>
+                  <div>RT: <strong style="color: #0f172a;">Dr. Marcelo Mazaro</strong> (CRF-SP 54180)</div>
+                </div>
+              </td>
+            </tr>
+          </table>
 
           <!-- BANNER DE IDENTIFICAÇÃO DO RELATÓRIO -->
-          <div class="title-banner" style="background: #f0fdfa; border: 1.5px solid #99f6e4; border-left: 5px solid #0f766e; border-radius: 6px; padding: 10px 14px; margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;">
-            <div>
-              <h1 style="font-size: 12.5pt; color: #0f766e; margin: 0; font-family: 'Outfit', sans-serif; font-weight: 800; text-transform: uppercase;">
-                ${title}
-              </h1>
-              <div style="font-size: 7.5pt; color: #475569; margin-top: 2px;">
-                Documento gerencial e assistencial oficial emitido pelo CRM Clínico Farmacêutico
-              </div>
-            </div>
-            <div style="background: #0f766e; color: #ffffff; padding: 4px 12px; border-radius: 20px; font-size: 8pt; font-weight: 700;">
-              Total: <strong>${rows.length}</strong> registro(s)
-            </div>
-          </div>
+          <table style="width: 100%; background: #f0fdfa; border: 1.5px solid #99f6e4; border-left: 5px solid #0f766e; border-radius: 6px; margin-bottom: 14px; border-collapse: separate; padding: 8px 12px;">
+            <tr>
+              <td style="border: none; padding: 0; vertical-align: middle; background: transparent;">
+                <div style="font-size: 12pt; color: #0f766e; font-family: 'Outfit', sans-serif; font-weight: 800; text-transform: uppercase;">
+                  ${title}
+                </div>
+                <div style="font-size: 7.5pt; color: #475569; margin-top: 2px;">
+                  Documento gerencial e assistencial oficial emitido pelo CRM Clínico Farmacêutico
+                </div>
+              </td>
+              <td style="width: 130px; text-align: right; border: none; padding: 0; vertical-align: middle; background: transparent;">
+                <div style="background: #0f766e; color: #ffffff; padding: 4px 12px; border-radius: 20px; font-size: 8pt; font-weight: 700; display: inline-block;">
+                  Total: ${rows.length} registro(s)
+                </div>
+              </td>
+            </tr>
+          </table>
 
           <!-- BLOCO DE KPIs (SE HOUVER) -->
           ${summaryBlock}
 
           <!-- TABELA DE REGISTROS -->
-          <table style="width: 100%; border-collapse: collapse; margin-top: 10px; background-color: #ffffff; border: 1px solid #cbd5e1;">
+          <table style="width: 100%; border-collapse: collapse; margin-top: 8px; background-color: #ffffff; border: 1px solid #cbd5e1;">
             <thead>
               <tr>
-                ${columns.map(col => `<th style="background-color: #0f2738 !important; color: #ffffff !important; padding: 8px 10px; font-size: 8pt; font-weight: 800; text-transform: uppercase; border: 1px solid #0f2738; letter-spacing: 0.4px;">${col}</th>`).join('')}
+                ${columns.map(col => `<th style="background-color: #0f2738 !important; color: #ffffff !important; padding: 8px 10px; font-size: 8pt; font-weight: 800; text-transform: uppercase; border: 1px solid #0f2738; text-align: left; letter-spacing: 0.4px;">${col}</th>`).join('')}
               </tr>
             </thead>
             <tbody>
@@ -2233,37 +2147,44 @@ function renderReportsTab(contentArea) {
                       const s = String(cell).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]/g, '');
                       return `<td style="padding: 7px 10px; border: 1px solid #cbd5e1; font-size: 8.5pt; color: #0f172a;"><span class="badge badge-${s}">${cell}</span></td>`;
                     }
-                    return `<td style="padding: 7px 10px; border: 1px solid #cbd5e1; font-size: 8.5pt; color: #0f172a; font-weight: ${idx === 0 ? '700' : '500'};">${cell}</td>`;
+                    return `<td style="padding: 7px 10px; border: 1px solid #cbd5e1; font-size: 8.5pt; color: #0f172a; font-weight: ${idx === 0 ? '700' : '500'};">${cell || '-'}</td>`;
                   }).join('')}
                 </tr>
               `).join('')}
             </tbody>
           </table>
 
-          <!-- TERMO DE AUTENTICIDADE E ASSINATURA DIGITAL -->
-          <div class="sig-card">
-            <div style="font-size: 7.2pt; color: #64748b; line-height: 1.35; max-width: 60%;">
-              <div style="font-weight: 700; color: #0f172a; margin-bottom: 2px;">AUTENTICIDADE E RASTREABILIDADE DIGITAL (CFM nº 1.821/2007 · CFF nº 586/2013)</div>
-              <div>Este relatório possui validade legal e probatória em conformidade com as diretrizes do Conselho Federal de Farmácia e LGPD (Lei nº 13.709/2018).</div>
-            </div>
-            <div style="text-align: right;">
-              <div style="border-top: 1.5px solid #0f172a; width: 220px; padding-top: 3px; text-align: center;">
-                <div style="font-size: 8.5pt; font-weight: 800; color: #0f172a;">Dr. Marcelo Mazaro</div>
-                <div style="font-size: 7pt; color: #0f766e; font-weight: 600;">Farmacêutico Responsável Técnico · CRF-SP 54180</div>
-                <div style="font-size: 6.8pt; color: #16a34a; font-weight: 700; margin-top: 1px;">✓ Assinatura Digital ICP-Brasil / CFF</div>
-              </div>
-            </div>
-          </div>
+          <!-- TERMO DE AUTENTICIDADE E ASSINATURA DIGITAL EM TABELA -->
+          <table style="width: 100%; border: 1px solid #cbd5e1; border-radius: 8px; background: #fafafa; margin-top: 20px; border-collapse: separate;">
+            <tr>
+              <td style="width: 58%; vertical-align: middle; padding: 12px 14px; border: none; font-size: 7.3pt; color: #475569; background: #fafafa;">
+                <div style="font-weight: 800; color: #0f172a; margin-bottom: 3px;">AUTENTICIDADE E RASTREABILIDADE DIGITAL (CFM nº 1.821/2007 · CFF nº 586/2013)</div>
+                <div>Este relatório possui validade legal e probatória em conformidade com as diretrizes do Conselho Federal de Farmácia e LGPD (Lei nº 13.709/2018).</div>
+              </td>
+              <td style="width: 42%; vertical-align: middle; text-align: center; padding: 12px 14px; border: none; background: #fafafa;">
+                <div style="border-top: 1.5px solid #0f172a; width: 210px; margin: 0 auto; padding-top: 4px;">
+                  <div style="font-size: 8.5pt; font-weight: 800; color: #0f172a;">Dr. Marcelo Mazaro</div>
+                  <div style="font-size: 7pt; color: #0f766e; font-weight: 600;">Farmacêutico Responsável Técnico · CRF-SP 54180</div>
+                  <div style="font-size: 6.8pt; color: #16a34a; font-weight: 700; margin-top: 2px;">✓ Assinatura Digital ICP-Brasil / CFF</div>
+                </div>
+              </td>
+            </tr>
+          </table>
 
-          <!-- RODAPÉ -->
-          <div class="footer">
-            <div>CRM Clínico Farmacêutico · Dr. Marcelo Mazaro (CRF-SP 54180) · Sistema Integrado</div>
-            <div>Gerado em ${dateNow} · Chave: ${docHash}</div>
-          </div>
+          <!-- RODAPÉ EM TABELA -->
+          <table style="width: 100%; margin-top: 16px; border-top: 1.5px solid #0f766e; padding-top: 6px; border-collapse: collapse;">
+            <tr>
+              <td style="text-align: left; border: none; padding: 4px 0; font-size: 7pt; color: #64748b; background: transparent;">
+                CRM Clínico Farmacêutico · Dr. Marcelo Mazaro (CRF-SP 54180) · Sistema Integrado
+              </td>
+              <td style="text-align: right; border: none; padding: 4px 0; font-size: 7pt; color: #64748b; background: transparent;">
+                Gerado em ${dateNow} · Chave: ${docHash}
+              </td>
+            </tr>
+          </table>
         </div>
 
         <script>
-        
         async function getHtml2Pdf() {
           if (typeof window.html2pdf === 'function') return window.html2pdf;
           if (window.opener && typeof window.opener.html2pdf === 'function') return window.opener.html2pdf;
@@ -3407,8 +3328,10 @@ function renderReportsTab(contentArea) {
           formattedDate = `${d}/${m}/${y}`;
         }
         const phones = [p.phone, p.cellphone].filter(Boolean).join(' / ') || '-';
-        const name = hasPEP ? p.fullName : abbreviateName(p.fullName);
-        const cpf = hasPEP ? p.cpf : anonymizeCPF(p.cpf);
+        const fullName = p.fullName || p.name || p.patientName || 'Paciente';
+        const name = hasPEP ? fullName : abbreviateName(fullName);
+        const rawCpf = p.cpf || p.taxId || '-';
+        const cpf = hasPEP ? rawCpf : (rawCpf !== '-' ? anonymizeCPF(rawCpf) : '-');
         return [
           p.id, 
           name, 
