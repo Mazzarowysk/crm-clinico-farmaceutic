@@ -60,9 +60,6 @@ export async function renderPharmacyTab() {
         </div>
 
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-          <a href="/Manual_do_Usuario_CRM_Clinico_Farmaceutico.pdf" download="Manual_do_Usuario_CRM_Clinico_Farmaceutico.pdf" target="_blank" class="btn" style="background: linear-gradient(135deg, rgba(45, 212, 191, 0.22), rgba(13, 148, 136, 0.35)); border: 1px solid rgba(45, 212, 191, 0.55); color: #0d9488; text-decoration: none; font-weight: 700; padding: 9px 15px; border-radius: 10px; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(20, 184, 166, 0.25);" title="Baixar Manual do Usuário Completo em PDF (v3.0)">
-            <i class="fa-solid fa-file-pdf"></i> Manual PDF
-          </a>
           <button id="btn-teleconsultation-pharm" onclick="window.openTeleconsultationModal ? window.openTeleconsultationModal(currentClinicalEncounter.patient) : null" class="btn" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border: none; font-weight: 700; padding: 9px 16px; border-radius: 10px; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35); cursor: pointer;" title="Iniciar Sala de Teleconsulta WebRTC com Paciente">
             <i class="fa-solid fa-video"></i> Teleconsulta
           </button>
