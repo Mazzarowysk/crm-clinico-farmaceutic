@@ -190,7 +190,7 @@ CRM Clínico Farmacêutico/
 │   ├── state.js                 # Gerenciamento de estado global reativo
 │   ├── localDB.js               # Motor Local-First (IndexedDB / LocalStorage)
 │   ├── manualTabbed.js          # Manual Interativo em 7 Abas com busca semântica
-│   ├── aiCopilot.js             # Copilot Nexus AI com RAG clínico integrado
+│   ├── aiCopilot.js             # Copilot Clínico Farmacêutico AI com RAG clínico integrado
 │   ├── modules/
 │   │   ├── auth.js              # Autenticação, RBAC e sessões
 │   │   ├── cdssEngine.js        # Motor 4D de interações e alertas de segurança

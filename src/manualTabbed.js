@@ -1,5 +1,4 @@
-// ─── MANUAL INTERATIVO POR ABAS (CRM CLÍNICO FARMACÊUTICO v3.0) ────────────────────────
-import { getNexusAICopilotResponse } from './aiCopilot.js';
+import { getClinicalAICopilotResponse } from './aiCopilot.js';
 
 // Normalizador de strings e remoção de acentos
 export const removeAccents = (str) => {

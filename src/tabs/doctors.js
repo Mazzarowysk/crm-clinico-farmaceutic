@@ -2755,7 +2755,6 @@ window.saveHistoryEvolution = function(patientId, patientName) {
     localDB.saveFullDB(db);
   } else {
     localStorage.setItem('crmFarmaceuticoDados', JSON.stringify(db));
-    localStorage.setItem('healthNexusDados', JSON.stringify(db));
   }
   
   if (typeof window.showToast === 'function') window.showToast('Evolução clínica salva com sucesso!', 'success');
@@ -2786,7 +2785,11 @@ window.handleExamImport = function(event, patientId) {
       author: 'Anexo de Exame'
     });
     db.clinical_notes = notes;
-    localStorage.setItem('healthNexusDados', JSON.stringify(db));
+    if (typeof localDB !== 'undefined' && localDB.saveFullDB) {
+      localDB.saveFullDB(db);
+    } else {
+      localStorage.setItem('crmFarmaceuticoDados', JSON.stringify(db));
+    }
   }
 
   if (typeof window.showToast === 'function') window.showToast(`Exame "${file.name}" anexado ao prontuário!`, 'success');

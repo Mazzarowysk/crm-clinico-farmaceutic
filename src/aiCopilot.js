@@ -1,5 +1,5 @@
 // 🤖 Pharma AI Knowledge Copilot Engine v3.0 — Suporte e Assistente Clínico Farmacêutico
-export const getNexusAICopilotResponse = (q, raw) => {
+export const getClinicalAICopilotResponse = (q, raw) => {
   let qNorm = q.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   
   // Normalização de Sinônimos Comuns para expandir a compreensão da IA via PLN

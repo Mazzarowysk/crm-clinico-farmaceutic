@@ -16,7 +16,7 @@ class RealtimeHub {
 
     // Escutar eventos locais de Storage para redundância multi-abas no mesmo navegador
     window.addEventListener('storage', (e) => {
-      if (e.key === 'nexus_realtime_event' && e.newValue) {
+      if (e.key === 'crm_realtime_event' && e.newValue) {
         try {
           const { type, payload } = JSON.parse(e.newValue);
           this.emit(type, payload, false);
@@ -104,7 +104,7 @@ class RealtimeHub {
     if (broadcastLocal && typeof localStorage !== 'undefined') {
       try {
         localStorage.setItem(
-          'nexus_realtime_event',
+          'crm_realtime_event',
           JSON.stringify({ type, payload, timestamp: Date.now() })
         );
       } catch (e) {}

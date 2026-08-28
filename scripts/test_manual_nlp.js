@@ -1,6 +1,4 @@
-// Teste do Motor de PLN e Busca Semântica do Manual Interativo e Spotlight
-import { searchManualEngine } from '../src/manualTabbed.js';
-import { getNexusAICopilotResponse } from '../src/aiCopilot.js';
+import { getClinicalAICopilotResponse } from '../src/aiCopilot.js';
 
 const testQueries = [
   'telemedicina',
@@ -25,7 +23,7 @@ let passCount = 0;
 
 testQueries.forEach(query => {
   const result = searchManualEngine(query);
-  const copilot = getNexusAICopilotResponse(query, query);
+  const copilot = getClinicalAICopilotResponse(query, query);
   
   const hasButtons = result.buttonMatches && result.buttonMatches.length > 0;
   const copilotHasTarget = copilot && copilot.actionTarget && copilot.summary && !copilot.summary.includes('Analisei sua busca');

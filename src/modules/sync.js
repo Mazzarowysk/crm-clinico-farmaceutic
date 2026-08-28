@@ -365,8 +365,8 @@ export class SyncManager {
     this.syncInProgress = true;
 
     try {
-      const dados_json = localStorage.getItem('crmFarmaceuticoDados') || localStorage.getItem('healthNexusDados') || '{}';
-      const config_json = localStorage.getItem('crmFarmaceuticoConfig') || localStorage.getItem('healthNexusConfig') || '{}';
+      const dados_json = localStorage.getItem('crmFarmaceuticoDados') || '{}';
+      const config_json = localStorage.getItem('crmFarmaceuticoConfig') || '{}';
 
       let recordSummary = '';
       try {
@@ -418,7 +418,6 @@ export class SyncManager {
 
       if (success) {
         localStorage.setItem('crmFarmaceuticoUpdatedAt', newUpdatedAt.toString());
-        localStorage.setItem('healthNexusUpdatedAt', newUpdatedAt.toString());
         localStorage.setItem('ultimoSync', new Date(newUpdatedAt).toLocaleString('pt-BR'));
         this.lastLocalUpdate = newUpdatedAt;
         if (showToastMessage) {
@@ -488,9 +487,8 @@ export class SyncManager {
 
         const now = payload.updated_at || Date.now();
         localStorage.setItem('crmFarmaceuticoUpdatedAt', now.toString());
-        localStorage.setItem('healthNexusUpdatedAt', now.toString());
         localStorage.setItem('ultimoSync', new Date(now).toLocaleString('pt-BR'));
-        sessionStorage.setItem('hn_reloading_after_sync', 'true');
+        sessionStorage.setItem('crm_reloading_after_sync', 'true');
         showToast(`✅ Banco Local Atualizado da Nuvem! (${recordSummary})`);
         setTimeout(() => window.location.reload(), 700);
         return true;

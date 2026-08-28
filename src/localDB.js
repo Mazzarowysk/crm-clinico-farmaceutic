@@ -4,22 +4,10 @@ export const DB_KEY = 'crmFarmaceuticoDados';
 export const CONFIG_KEY = 'crmFarmaceuticoConfig';
 export const UPDATED_AT_KEY = 'crmFarmaceuticoUpdatedAt';
 
-// Chaves legadas para migração transparente
-const LEGACY_DB_KEY = 'healthNexusDados';
-const LEGACY_CONFIG_KEY = 'healthNexusConfig';
-const LEGACY_UPDATED_AT_KEY = 'healthNexusUpdatedAt';
-
-// Função para obter todo o banco com migração automática
+// Função para obter todo o banco
 export function getFullDB() {
   try {
-    let data = localStorage.getItem(DB_KEY);
-    if (!data) {
-      const legacyData = localStorage.getItem(LEGACY_DB_KEY);
-      if (legacyData) {
-        data = legacyData;
-        localStorage.setItem(DB_KEY, legacyData);
-      }
-    }
+    const data = localStorage.getItem(DB_KEY);
     return data ? JSON.parse(data) : {};
   } catch (e) {
     console.error('Erro ao ler DB local:', e);
@@ -41,14 +29,7 @@ export function saveFullDB(dbData, silent = false) {
 
 export function getConfig() {
   try {
-    let config = localStorage.getItem(CONFIG_KEY);
-    if (!config) {
-      const legacyConfig = localStorage.getItem(LEGACY_CONFIG_KEY);
-      if (legacyConfig) {
-        config = legacyConfig;
-        localStorage.setItem(CONFIG_KEY, legacyConfig);
-      }
-    }
+    const config = localStorage.getItem(CONFIG_KEY);
     return config ? JSON.parse(config) : {};
   } catch (e) {
     return {};

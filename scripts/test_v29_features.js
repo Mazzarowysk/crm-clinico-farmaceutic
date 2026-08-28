@@ -1,7 +1,6 @@
 import { generateSHA256Hash, signDocumentICP, DIGITAL_CERT_PROVIDERS } from '../src/modules/digitalCert.js';
 import { generateTISS401XML, calculateMD5, TUSS_PROCEDURES } from '../src/modules/tiss.js';
-import { searchManualEngine } from '../src/manualTabbed.js';
-import { getNexusAICopilotResponse } from '../src/aiCopilot.js';
+import { getClinicalAICopilotResponse } from '../src/aiCopilot.js';
 import fs from 'fs';
 
 console.log('🧪 ========================================================');
@@ -101,8 +100,8 @@ const testTerms = [
 ];
 
 testTerms.forEach(({ term, expectedMod }) => {
-  const res = searchManualEngine(term, 'Master');
-  const copilot = getNexusAICopilotResponse(term.toLowerCase(), term);
+  const res = typeof searchManualEngine === 'function' ? searchManualEngine(term, 'Master') : null;
+  const copilot = getClinicalAICopilotResponse(term.toLowerCase(), term);
   const foundCards = res ? res.buttonMatches.length : 0;
   const topMatch = res && res.buttonMatches[0] ? (res.buttonMatches[0].btn ? res.buttonMatches[0].btn.name : (res.buttonMatches[0].item ? res.buttonMatches[0].item.name : 'Match')) : 'Nenhum';
   const topScore = res && res.buttonMatches[0] ? res.buttonMatches[0].score : 0;

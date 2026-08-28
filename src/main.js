@@ -22,7 +22,7 @@ import { realtimeHub } from './modules/realtime.js';
 import { setActivePatientContext, renderPatientJourneyStepper, renderFloatingPatientHUD } from './modules/journey.js';
 import { generateMockData } from './mockDataGenerator.js';
 import { showInteractiveManualModal, manualData, searchManualEngine } from './manualTabbed.js';
-import { getNexusAICopilotResponse } from './aiCopilot.js';
+import { getClinicalAICopilotResponse } from './aiCopilot.js';
 import { inject } from '@vercel/analytics';
 import { openTelemedicineModal } from './modules/telemedicina.js';
 import { startVoiceDictation, stopVoiceDictation, calculateMEWS, checkDrugInteractions, generateWhatsAppClinicalMessage, sendToWhatsApp } from './modules/clinicalAI.js';
