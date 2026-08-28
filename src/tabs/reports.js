@@ -2261,45 +2261,59 @@ function renderReportsTab(contentArea) {
         </div>
 
         <script>
-          function downloadDirectPDF() {
-            const btn = document.getElementById('btn-dl-pdf');
-            const origHtml = btn ? btn.innerHTML : '';
-            if (btn) {
-              btn.disabled = true;
-              btn.innerHTML = '⏳ Gerando PDF...';
-            }
+        
+        async function getHtml2Pdf() {
+          if (typeof window.html2pdf === 'function') return window.html2pdf;
+          if (window.opener && typeof window.opener.html2pdf === 'function') return window.opener.html2pdf;
+          return new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+            s.onload = () => {
+              if (typeof window.html2pdf === 'function') resolve(window.html2pdf);
+              else if (window.opener && typeof window.opener.html2pdf === 'function') resolve(window.opener.html2pdf);
+              else reject(new Error('Biblioteca html2pdf não inicializada'));
+            };
+            s.onerror = () => {
+              if (window.opener && typeof window.opener.html2pdf === 'function') resolve(window.opener.html2pdf);
+              else reject(new Error('Falha ao carregar biblioteca html2pdf'));
+            };
+            document.head.appendChild(s);
+          });
+        }
+
+        async function downloadDirectPDF() {
+          const btn = document.getElementById('btn-dl-pdf');
+          const origHtml = btn ? btn.innerHTML : '';
+          if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '⏳ Gerando PDF...';
+          }
+          try {
+            const h2p = await getHtml2Pdf();
             const element = document.querySelector('.report-sheet-container');
             const isLandscape = ${columns.length > 6};
             const opt = {
-              margin: [8, 8, 8, 8],
+              margin: [6, 6, 6, 6],
               filename: '${filename}.pdf',
               image: { type: 'jpeg', quality: 0.98 },
-              html2canvas: { scale: 2, useCORS: true, letterRendering: true, logging: false },
+              html2canvas: { scale: 2, useCORS: true, letterRendering: true, logging: false, backgroundColor: '#ffffff' },
               jsPDF: { unit: 'mm', format: 'a4', orientation: isLandscape ? 'landscape' : 'portrait' }
             };
-            if (window.html2pdf) {
-              window.html2pdf().set(opt).from(element).save().then(() => {
-                if (btn) {
-                  btn.disabled = false;
-                  btn.innerHTML = '✅ PDF Baixado com Sucesso!';
-                  setTimeout(() => { btn.innerHTML = origHtml; }, 3500);
-                }
-              }).catch(err => {
-                console.error('Erro ao baixar PDF:', err);
-                window.print();
-                if (btn) {
-                  btn.disabled = false;
-                  btn.innerHTML = origHtml;
-                }
-              });
-            } else {
-              window.print();
-              if (btn) {
-                btn.disabled = false;
-                btn.innerHTML = origHtml;
-              }
+            await h2p().set(opt).from(element).save();
+            if (btn) {
+              btn.disabled = false;
+              btn.innerHTML = '✅ PDF Baixado com Sucesso!';
+              setTimeout(() => { btn.innerHTML = origHtml; }, 3500);
+            }
+          } catch (err) {
+            console.error('Erro ao gerar download de PDF:', err);
+            alert('Não foi possível gerar o arquivo PDF: ' + err.message);
+            if (btn) {
+              btn.disabled = false;
+              btn.innerHTML = origHtml;
             }
           }
+        }
         </script>
       </body>
       </html>
@@ -3290,38 +3304,52 @@ function renderReportsTab(contentArea) {
             ${boletoHTML}
           </div>
           <script>
-            function downloadBoletoPDF() {
+            
+        async function getHtml2Pdf() {
+          if (typeof window.html2pdf === 'function') return window.html2pdf;
+          if (window.opener && typeof window.opener.html2pdf === 'function') return window.opener.html2pdf;
+          return new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+            s.onload = () => {
+              if (typeof window.html2pdf === 'function') resolve(window.html2pdf);
+              else if (window.opener && typeof window.opener.html2pdf === 'function') resolve(window.opener.html2pdf);
+              else reject(new Error('Biblioteca html2pdf não inicializada'));
+            };
+            s.onerror = () => {
+              if (window.opener && typeof window.opener.html2pdf === 'function') resolve(window.opener.html2pdf);
+              else reject(new Error('Falha ao carregar biblioteca html2pdf'));
+            };
+            document.head.appendChild(s);
+          });
+        }
+
+            async function downloadBoletoPDF() {
               const btn = document.getElementById('btn-bol-dl-pdf');
               const origHtml = btn ? btn.innerHTML : '';
               if (btn) {
                 btn.disabled = true;
                 btn.innerHTML = '⏳ Gerando PDF...';
               }
-              const element = document.querySelector('.sheet-box-boleto');
-              const opt = {
-                margin: [6, 6, 6, 6],
-                filename: 'Boleto_FEBRABAN_${t.id}_${(t.client || 'Cliente').replace(/\\s+/g, '_')}.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2, useCORS: true, letterRendering: true, logging: false },
-                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-              };
-              if (window.html2pdf) {
-                window.html2pdf().set(opt).from(element).save().then(() => {
-                  if (btn) {
-                    btn.disabled = false;
-                    btn.innerHTML = '✅ PDF Baixado com Sucesso!';
-                    setTimeout(() => { btn.innerHTML = origHtml; }, 3500);
-                  }
-                }).catch(err => {
-                  console.error('Erro ao baixar PDF do boleto:', err);
-                  window.print();
-                  if (btn) {
-                    btn.disabled = false;
-                    btn.innerHTML = origHtml;
-                  }
-                });
-              } else {
-                window.print();
+              try {
+                const h2p = await getHtml2Pdf();
+                const element = document.querySelector('.sheet-box-boleto');
+                const opt = {
+                  margin: [5, 5, 5, 5],
+                  filename: 'Boleto_FEBRABAN_${t.id}_${(t.client || 'Cliente').replace(/\\s+/g, '_')}.pdf',
+                  image: { type: 'jpeg', quality: 0.98 },
+                  html2canvas: { scale: 2, useCORS: true, letterRendering: true, logging: false, backgroundColor: '#ffffff' },
+                  jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                };
+                await h2p().set(opt).from(element).save();
+                if (btn) {
+                  btn.disabled = false;
+                  btn.innerHTML = '✅ PDF Baixado com Sucesso!';
+                  setTimeout(() => { btn.innerHTML = origHtml; }, 3500);
+                }
+              } catch (err) {
+                console.error('Erro ao baixar boleto em PDF:', err);
+                alert('Erro ao gerar download do PDF: ' + err.message);
                 if (btn) {
                   btn.disabled = false;
                   btn.innerHTML = origHtml;
@@ -4264,40 +4292,52 @@ async function openEncounterReportDetail(encId) {
         <span>Gerado eletronicamente em ${new Date().toLocaleString('pt-BR')}</span>
       </div>
       </div>
-      <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
       <script>
-        function downloadDirectEncounterPDF() {
+        async function getHtml2Pdf() {
+          if (typeof window.html2pdf === 'function') return window.html2pdf;
+          if (window.opener && typeof window.opener.html2pdf === 'function') return window.opener.html2pdf;
+          return new Promise((resolve, reject) => {
+            const s = document.createElement('script');
+            s.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+            s.onload = () => {
+              if (typeof window.html2pdf === 'function') resolve(window.html2pdf);
+              else if (window.opener && typeof window.opener.html2pdf === 'function') resolve(window.opener.html2pdf);
+              else reject(new Error('Biblioteca html2pdf não inicializada'));
+            };
+            s.onerror = () => {
+              if (window.opener && typeof window.opener.html2pdf === 'function') resolve(window.opener.html2pdf);
+              else reject(new Error('Falha ao carregar biblioteca html2pdf'));
+            };
+            document.head.appendChild(s);
+          });
+        }
+
+        async function downloadDirectEncounterPDF() {
           const btn = document.getElementById('btn-enc-dl-pdf');
           const origHtml = btn ? btn.innerHTML : '';
           if (btn) {
             btn.disabled = true;
             btn.innerHTML = '⏳ Gerando PDF...';
           }
-          const element = document.querySelector('.sheet-box');
-          const opt = {
-            margin: [8, 8, 8, 8],
-            filename: 'Atendimento_${enc.patientName ? enc.patientName.replace(/\s+/g, '_') : 'Paciente'}_${encId.substring(0,8)}.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true, letterRendering: true, logging: false },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-          };
-          if (window.html2pdf) {
-            window.html2pdf().set(opt).from(element).save().then(() => {
-              if (btn) {
-                btn.disabled = false;
-                btn.innerHTML = '✅ PDF Baixado com Sucesso!';
-                setTimeout(() => { btn.innerHTML = origHtml; }, 3500);
-              }
-            }).catch(err => {
-              console.error('Erro ao baixar PDF:', err);
-              window.print();
-              if (btn) {
-                btn.disabled = false;
-                btn.innerHTML = origHtml;
-              }
-            });
-          } else {
-            window.print();
+          try {
+            const h2p = await getHtml2Pdf();
+            const element = document.querySelector('.sheet-box');
+            const opt = {
+              margin: [6, 6, 6, 6],
+              filename: 'Atendimento_${enc.patientName ? enc.patientName.replace(/\\s+/g, '_') : 'Paciente'}_${encId.substring(0,8)}.pdf',
+              image: { type: 'jpeg', quality: 0.98 },
+              html2canvas: { scale: 2, useCORS: true, letterRendering: true, logging: false, backgroundColor: '#ffffff' },
+              jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            await h2p().set(opt).from(element).save();
+            if (btn) {
+              btn.disabled = false;
+              btn.innerHTML = '✅ PDF Baixado com Sucesso!';
+              setTimeout(() => { btn.innerHTML = origHtml; }, 3500);
+            }
+          } catch (err) {
+            console.error('Erro ao baixar atendimento em PDF:', err);
+            alert('Erro ao gerar download do PDF: ' + err.message);
             if (btn) {
               btn.disabled = false;
               btn.innerHTML = origHtml;
