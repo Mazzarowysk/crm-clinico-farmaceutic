@@ -2293,7 +2293,7 @@ function renderReportsTab(contentArea) {
             const element = document.querySelector('.report-sheet-container');
             const isLandscape = ${columns.length > 6};
             const opt = {
-              margin: [6, 6, 6, 6],
+              margin: 0,
               filename: '${filename}.pdf',
               image: { type: 'jpeg', quality: 0.98 },
               html2canvas: { scale: 2, useCORS: true, letterRendering: true, logging: false, backgroundColor: '#ffffff' },
@@ -3335,7 +3335,7 @@ function renderReportsTab(contentArea) {
                 const h2p = await getHtml2Pdf();
                 const element = document.querySelector('.sheet-box-boleto');
                 const opt = {
-                  margin: [5, 5, 5, 5],
+                  margin: 0,
                   filename: 'Boleto_FEBRABAN_${t.id}_${(t.client || 'Cliente').replace(/\\s+/g, '_')}.pdf',
                   image: { type: 'jpeg', quality: 0.98 },
                   html2canvas: { scale: 2, useCORS: true, letterRendering: true, logging: false, backgroundColor: '#ffffff' },
@@ -4323,7 +4323,7 @@ async function openEncounterReportDetail(encId) {
             const h2p = await getHtml2Pdf();
             const element = document.querySelector('.sheet-box');
             const opt = {
-              margin: [6, 6, 6, 6],
+              margin: 0,
               filename: 'Atendimento_${enc.patientName ? enc.patientName.replace(/\\s+/g, '_') : 'Paciente'}_${encId.substring(0,8)}.pdf',
               image: { type: 'jpeg', quality: 0.98 },
               html2canvas: { scale: 2, useCORS: true, letterRendering: true, logging: false, backgroundColor: '#ffffff' },
