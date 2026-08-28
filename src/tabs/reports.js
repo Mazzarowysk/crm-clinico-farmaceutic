@@ -2021,12 +2021,14 @@ function renderReportsTab(contentArea) {
               border: 1px solid rgba(255, 255, 255, 0.15);
             }
             .report-sheet-container {
-              max-width: 210mm;
+              width: 210mm;
+              min-height: 297mm;
               margin: 0 auto;
               background: #ffffff;
-              padding: 12mm 14mm 14mm 14mm;
+              padding: 14mm 14mm 16mm 14mm;
               border-radius: 8px;
               box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5);
+              box-sizing: border-box;
             }
           }
 
@@ -2034,7 +2036,9 @@ function renderReportsTab(contentArea) {
             .screen-toolbar { display: none !important; }
             body { background: #ffffff !important; padding: 0 !important; }
             .report-sheet-container { 
+              width: 100% !important; 
               max-width: 100% !important; 
+              min-height: auto !important;
               margin: 0 !important; 
               padding: 0 !important; 
               border-radius: 0 !important; 
