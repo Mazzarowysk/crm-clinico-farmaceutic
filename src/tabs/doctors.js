@@ -1473,8 +1473,8 @@ window.openPatientHistoryModal = async function(patientId, patientName) {
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 0.78rem;">
                       <span style="color: #94a3b8;"><strong>Conduta:</strong> ${att.conduta_final || 'Dispensação e Cuidados Farmacêuticos'}</span>
                       <div style="display: flex; gap: 8px;">
-                        <button type="button" onclick="window.reemitirDsfPDF('${att.id || ''}', '${patientId}', '${att.data_hora || ''}')" style="background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.35); color: #38bdf8; padding: 5px 12px; border-radius: 6px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease;" title="Gerar e baixar Declaração de Serviço Farmacêutico (DSF) em PDF">
-                          <i class="fa-solid fa-file-pdf"></i> Reemitir DSF (PDF)
+                        <button type="button" onclick="window.openDsfPreviewModal('${att.id || ''}', '${patientId}', '${att.data_hora || ''}')" style="background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.35); color: #38bdf8; padding: 5px 12px; border-radius: 6px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s ease;" title="Abrir janela de consulta da DSF e exportar em PDF">
+                          <i class="fa-solid fa-file-waveform"></i> Consultar / Exportar DSF
                         </button>
                       </div>
                     </div>

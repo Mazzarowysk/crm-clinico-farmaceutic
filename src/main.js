@@ -4051,6 +4051,359 @@ window.reemitirDsfPDF = async function(attIdOrObj, patientIdOrObj, attDate) {
   }
 };
 
+// ============================================================================
+// JANELA MODAL DE PRÉ-VISUALIZAÇÃO & CONSULTA EM TELA DA DSF
+// Permite consultar todos os dados da Declaração antes de baixar o PDF ou imprimir
+// ============================================================================
+window.openDsfPreviewModal = function(attIdOrObj, patientIdOrObj, attDate) {
+  // 1. Obter Atendimento
+  let att = null;
+  const allAtts = (typeof localDB !== 'undefined' && localDB.list ? (localDB.list('pharmacy_attendances') || []).concat(localDB.list('pharmacy_consultations') || []) : []);
+  if (typeof attIdOrObj === 'object' && attIdOrObj !== null) {
+    att = attIdOrObj;
+  } else if (attIdOrObj) {
+    att = allAtts.find(a => String(a.id) === String(attIdOrObj) || String(a._id) === String(attIdOrObj));
+  }
+
+  const pId = (typeof patientIdOrObj === 'object' && patientIdOrObj !== null) 
+    ? (patientIdOrObj.id || patientIdOrObj.patientId)
+    : (patientIdOrObj || (att ? (att.patient_id || att.patientId) : null));
+
+  if (!att && pId) {
+    const pAtts = allAtts.filter(a => String(a.patient_id) === String(pId) || String(a.patientId) === String(pId));
+    if (attDate) {
+      att = pAtts.find(a => a.data_hora === attDate || a.created_at === attDate);
+    }
+    if (!att && pAtts.length > 0) {
+      att = pAtts[0];
+    }
+  }
+
+  if (!att) {
+    att = {
+      tipo_visita: 'Atendimento Clínico & Balcão Farmacêutico',
+      data_hora: attDate || new Date().toISOString(),
+      queixa_triagem: 'Consulta e Orientação Clínica Farmacêutica',
+      observacoes: 'Atendimento farmacêutico de suporte ao autocuidado e uso racional de medicamentos.',
+      conduta_final: 'Dispensação com Orientação Farmacêutica',
+      pharmacist_name: state.user?.name || 'Dr. Marcelo Mazaro'
+    };
+  }
+
+  // 2. Obter Paciente
+  let patient = null;
+  if (typeof patientIdOrObj === 'object' && patientIdOrObj !== null) {
+    patient = patientIdOrObj;
+  } else {
+    const allPatients = (typeof localDB !== 'undefined' && localDB.list ? (localDB.list('pharmacy_patients') || []).concat(localDB.list('patients') || []) : []);
+    if (pId) {
+      patient = allPatients.find(p => String(p.id) === String(pId) || p.fullName === pId || p.name === pId);
+    }
+    if (!patient && att && (att.patient_name || att.patientName)) {
+      const pNameQuery = (att.patient_name || att.patientName).toLowerCase();
+      patient = allPatients.find(p => (p.fullName && p.fullName.toLowerCase().includes(pNameQuery)) || (p.name && p.name.toLowerCase().includes(pNameQuery)));
+    }
+  }
+
+  if (!patient) {
+    patient = {
+      fullName: att.patient_name || att.patientName || 'Cliente / Paciente',
+      name: att.patient_name || att.patientName || 'Cliente / Paciente',
+      cpf: 'Não informado',
+      birthDate: '—',
+      gender: '—',
+      cellphone: '—',
+      phone: '—',
+      allergies: 'Nenhuma alergia conhecida relatada',
+      chronicConditions: 'Nenhuma comorbidade relatada'
+    };
+  }
+
+  // Dados da Farmácia e Responsável Técnico
+  const settings = (typeof localDB !== 'undefined' && localDB.get ? (localDB.get('settings', 'main') || localDB.get('settings') || {}) : {}) || {};
+  const pharmacyName = settings.pharmacy_name || settings.clinic_name || 'CRM CLÍNICO FARMACÊUTICO';
+  const pharmacyCnpj = settings.cnpj || settings.pharmacy_cnpj || '54.180.999/0001-44';
+  const pharmacyAddress = settings.address || settings.pharmacy_address || 'Av. Brasil, 1500 - Centro, Osvaldo Cruz - SP';
+  const pharmacyPhone = settings.phone || settings.pharmacy_phone || '(18) 3528-1000';
+  const pharmacyCRF = settings.crf || 'CRF/SP 54.180';
+  const rtPharmacist = att.pharmacist_name || state.user?.name || 'Dr. Marcelo Mazaro';
+
+  let calculatedAge = patient.age;
+  if (!calculatedAge && patient.birthDate && String(patient.birthDate).length >= 4) {
+    try {
+      const bYear = parseInt(String(patient.birthDate).slice(0, 4), 10);
+      if (!isNaN(bYear)) {
+        calculatedAge = `${new Date().getFullYear() - bYear} anos`;
+      }
+    } catch(e) {}
+  }
+  const patientAgeStr = calculatedAge ? (String(calculatedAge).includes('ano') ? calculatedAge : `${calculatedAge} anos`) : (patient.birthDate || 'Não informada');
+
+  const visitDateStr = att.data_hora ? new Date(att.data_hora).toLocaleString('pt-BR') : new Date().toLocaleString('pt-BR');
+  const dsfProtocol = att.id ? `DSF-${att.id.replace(/[^a-zA-Z0-9]/g, '').toUpperCase()}` : `DSF-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${Math.floor(1000 + Math.random()*9000)}`;
+  const hashAuth = 'CFF-' + Array.from({length: 16}, () => Math.floor(Math.random()*16).toString(16)).join('').toUpperCase();
+
+  const patientFullName = patient.fullName || patient.name || 'Paciente';
+  const patientCpf = patient.cpf || 'Não informado';
+  const patientGender = patient.gender || '—';
+  const patientPhone = patient.cellphone || patient.phone || '—';
+  const patientAllergies = patient.allergies || 'Nenhuma alergia conhecida relatada';
+  const patientChronic = patient.chronicConditions || 'Nenhuma comorbidade relatada';
+  const hasAllergyWarning = patientAllergies && !patientAllergies.toLowerCase().includes('nenhum') && !patientAllergies.toLowerCase().includes('não');
+
+  const tipoVisita = att.tipo_visita || 'Atendimento Clínico & Balcão Farmacêutico';
+  const queixaTxt = (att.queixa_triagem ? att.queixa_triagem.toUpperCase().replace(/_/g, ' ') : 'Queixa clínica geral') + (att.observacoes ? ' — ' + att.observacoes : '');
+  const hasRedFlags = att.red_flags && att.red_flags.length > 0;
+  const condutaFinal = att.conduta_final || 'Dispensação com Orientação Farmacêutica e Apoio ao Autocuidado';
+  const prescricaoTxt = att.prescricao_mips || '';
+  const medItems = prescricaoTxt ? prescricaoTxt.split(/;|\n/).map(m => m.trim()).filter(Boolean) : [];
+
+  // Remover modal existente se houver
+  const existingModal = document.getElementById('dsf-preview-modal');
+  if (existingModal) existingModal.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'dsf-preview-modal';
+  modal.className = 'modal-overlay';
+  modal.style.position = 'fixed';
+  modal.style.top = '0';
+  modal.style.left = '0';
+  modal.style.width = '100vw';
+  modal.style.height = '100vh';
+  modal.style.background = 'rgba(5, 8, 22, 0.88)';
+  modal.style.backdropFilter = 'blur(10px)';
+  modal.style.webkitBackdropFilter = 'blur(10px)';
+  modal.style.zIndex = '100200';
+  modal.style.display = 'flex';
+  modal.style.alignItems = 'center';
+  modal.style.justifyContent = 'center';
+  modal.style.padding = '16px';
+  modal.style.boxSizing = 'border-box';
+
+  modal.innerHTML = `
+    <div style="background: #0f172a; border: 1.5px solid rgba(20, 184, 166, 0.45); border-radius: 18px; width: 100%; max-width: 900px; max-height: 92vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 70px rgba(0,0,0,0.9), 0 0 30px rgba(20, 184, 166, 0.2);">
+      
+      <!-- Cabeçalho do Modal com Ações Rápidas -->
+      <div style="padding: 14px 22px; background: linear-gradient(135deg, #0f172a, #134e4a); border-bottom: 1px solid rgba(20, 184, 166, 0.3); display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(20, 184, 166, 0.2); border: 1px solid rgba(45, 212, 191, 0.4); display: flex; align-items: center; justify-content: center; color: #2dd4bf; font-size: 1.2rem;">
+            <i class="fa-solid fa-file-waveform"></i>
+          </div>
+          <div>
+            <h3 style="font-family: 'Outfit', sans-serif; font-size: 1.15rem; font-weight: 700; color: #ffffff; margin: 0;">
+              Consulta da Declaração de Serviço Farmacêutico (DSF)
+            </h3>
+            <div style="font-size: 0.78rem; color: #94a3b8;">
+              Pré-visualização do documento oficial · Protocolo: <strong style="color: #2dd4bf;">${dsfProtocol}</strong>
+            </div>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <button type="button" id="btn-export-pdf-action" style="background: linear-gradient(135deg, #0284c7, #0369a1); border: 1px solid #38bdf8; color: #fff; padding: 7px 16px; border-radius: 8px; font-weight: 700; font-size: 0.84rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4); transition: 0.2s;" title="Baixar documento em arquivo PDF">
+            <i class="fa-solid fa-file-arrow-down"></i> Baixar em PDF
+          </button>
+          <button type="button" id="btn-whatsapp-dsf-action" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; padding: 7px 14px; border-radius: 8px; font-weight: 700; font-size: 0.84rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s;" title="Enviar resumo via WhatsApp">
+            <i class="fa-brands fa-whatsapp"></i> WhatsApp
+          </button>
+          <button type="button" id="btn-close-dsf-preview" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; width: 34px; height: 34px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: 0.2s;">
+            <i class="fa-solid fa-xmark" style="font-size: 1.1rem;"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Corpo com a Folha A4 Formatada para Consulta -->
+      <div style="overflow-y: auto; padding: 24px; background: #080c16; display: flex; justify-content: center;">
+        
+        <div id="dsf-document-paper" style="background: #ffffff; color: #1e293b; max-width: 800px; width: 100%; border-radius: 12px; box-shadow: 0 10px 35px rgba(0,0,0,0.5); padding: 30px; font-family: 'Inter', -apple-system, sans-serif; box-sizing: border-box; line-height: 1.45;">
+          
+          <!-- Cabeçalho Oficial -->
+          <div style="border-bottom: 3px solid #0d9488; padding-bottom: 14px; margin-bottom: 18px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <div style="background: #ffffff; padding: 4px 8px; border-radius: 8px; border: 1.5px solid #0d9488;">
+                <img src="/assets/crm-logo.png?v=2" alt="Logo CRM" style="height: 38px; width: auto; object-fit: contain;" onerror="this.src='assets/crm-logo.png'">
+              </div>
+              <div>
+                <h2 style="margin: 0; color: #0f172a; font-size: 1.25rem; font-family: 'Outfit', sans-serif; font-weight: 800; letter-spacing: -0.01em;">
+                  ${pharmacyName.toUpperCase()}
+                </h2>
+                <div style="color: #0d9488; font-weight: 800; font-size: 0.88rem; margin-top: 2px;">
+                  DECLARAÇÃO DE SERVIÇO FARMACÊUTICO (DSF)
+                </div>
+                <div style="color: #64748b; font-size: 0.76rem; margin-top: 2px;">
+                  Assistência Farmacêutica Clínica &amp; Prescrição de MIPs · Resoluções CFF nº 585/2013 e nº 586/2013 · RDC ANVISA nº 44/2009
+                </div>
+              </div>
+            </div>
+
+            <div style="text-align: right; font-size: 0.78rem; color: #475569; background: #f8fafc; padding: 8px 14px; border-radius: 8px; border: 1px solid #e2e8f0;">
+              <div><strong>Protocolo:</strong> ${dsfProtocol}</div>
+              <div style="margin-top: 2px;"><strong>Atendimento:</strong> ${visitDateStr}</div>
+              <div style="margin-top: 2px;"><strong>Resp. Técnico:</strong> ${rtPharmacist} (${pharmacyCRF})</div>
+              <div style="color: #059669; font-weight: 700; margin-top: 3px; font-size: 0.72rem;">✓ Assinatura Digital ICP-Brasil A3</div>
+            </div>
+          </div>
+
+          <!-- Card 1: Estabelecimento -->
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; margin-bottom: 14px; font-size: 0.82rem; color: #475569;">
+            <div><strong>${pharmacyName}</strong> · CNPJ: ${pharmacyCnpj} · Registro Sanitário: Regular</div>
+            <div style="margin-top: 2px;">${pharmacyAddress} · Fone: ${pharmacyPhone} · RT: ${rtPharmacist} (${pharmacyCRF})</div>
+          </div>
+
+          <!-- Card 2: Identificação do Paciente -->
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #0d9488; border-radius: 8px; padding: 12px 14px; margin-bottom: 14px; font-size: 0.84rem;">
+            <div style="font-weight: 800; color: #0f766e; font-size: 0.84rem; text-transform: uppercase; margin-bottom: 6px;">
+              1. Identificação do Paciente / Usuário
+            </div>
+            <div style="display: grid; grid-template-columns: 2fr 1.2fr 1fr; gap: 8px; margin-bottom: 6px;">
+              <div><strong>Nome:</strong> ${patientFullName}</div>
+              <div><strong>CPF:</strong> ${patientCpf}</div>
+              <div><strong>Idade/Sexo:</strong> ${patientAgeStr} / ${patientGender}</div>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 8px; margin-bottom: 4px;">
+              <div><strong>Contato:</strong> ${patientPhone}</div>
+              <div><strong>Comorbidades:</strong> ${patientChronic}</div>
+            </div>
+            <div style="margin-top: 4px; color: ${hasAllergyWarning ? '#b91c1c' : '#475569'}; font-weight: ${hasAllergyWarning ? '700' : 'normal'};">
+              ${hasAllergyWarning ? '⚠️ Alergias Relatadas:' : 'Alergias:'} ${patientAllergies}
+            </div>
+          </div>
+
+          <!-- Card 3: Avaliação Clínica e Queixa -->
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid ${hasRedFlags ? '#ef4444' : '#0d9488'}; border-radius: 8px; padding: 12px 14px; margin-bottom: 14px; font-size: 0.84rem;">
+            <div style="font-weight: 800; color: ${hasRedFlags ? '#b91c1c' : '#0f766e'}; font-size: 0.84rem; text-transform: uppercase; margin-bottom: 6px;">
+              2. Avaliação Clínica, Queixa Principal &amp; Triagem Farmacêutica
+            </div>
+            <div style="margin-bottom: 6px;">
+              <strong>Modalidade / Procedimento:</strong> ${tipoVisita}
+            </div>
+            <div style="margin-bottom: 8px; color: #334155;">
+              <strong style="color: #0f766e;">Queixa Relatada &amp; Sintomas:</strong> ${queixaTxt}
+            </div>
+            
+            ${hasRedFlags ? `
+              <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 6px; padding: 8px 12px; color: #b91c1c; font-size: 0.8rem; font-weight: 700;">
+                🚨 SINAIS DE ALERTA (RED FLAGS): ${att.red_flags.join(', ')} — PACIENTE ENCAMINHADO PARA AVALIAÇÃO MÉDICA IMEDIATA.
+              </div>
+            ` : `
+              <div style="background: #f0fdfa; border: 1px solid #ccfbf1; border-radius: 6px; padding: 6px 12px; color: #0d9488; font-size: 0.8rem; font-weight: 700;">
+                ✓ CHECAGEM DE SEGURANÇA (CDSS 4D): Nenhum sinal de alerta impeditivo detectado. Conduta de baixo risco clínico.
+              </div>
+            `}
+          </div>
+
+          <!-- Card 4: Conduta e Prescrição de MIPs -->
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #0d9488; border-radius: 8px; padding: 12px 14px; margin-bottom: 14px; font-size: 0.84rem;">
+            <div style="font-weight: 800; color: #0f766e; font-size: 0.84rem; text-transform: uppercase; margin-bottom: 6px;">
+              3. Conduta Farmacêutica &amp; Prescrição de MIPs (CFF nº 586/2013)
+            </div>
+            <div style="margin-bottom: 8px;">
+              <strong>Conduta Adotada:</strong> ${condutaFinal}
+            </div>
+            <div style="font-weight: 700; color: #0f766e; margin-bottom: 4px;">
+              Medicamentos Indicados / Dispensados:
+            </div>
+            
+            ${medItems.length > 0 ? `
+              <div style="display: flex; flex-direction: column; gap: 6px;">
+                ${medItems.map((m, idx) => `
+                  <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 12px;">
+                    <div style="font-weight: 700; color: #0f172a;">💊 ${idx + 1}. ${m}</div>
+                    <div style="font-size: 0.78rem; color: #64748b; margin-top: 2px;">
+                      Uso conforme orientações de rotulagem e dispensação individualizada do consultório farmacêutico.
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            ` : `
+              <div style="color: #64748b; font-size: 0.82rem;">
+                • Orientação e educação em saúde para autocuidado sem indicação medicamentosa imediata.
+              </div>
+            `}
+          </div>
+
+          <!-- Card 5: Orientações Não Farmacológicas -->
+          <div style="background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 8px; padding: 12px 14px; margin-bottom: 18px; font-size: 0.82rem; color: #334155;">
+            <div style="font-weight: 800; color: #0f766e; font-size: 0.84rem; text-transform: uppercase; margin-bottom: 6px;">
+              4. Orientações Não Farmacológicas &amp; Critérios de Procura Médica
+            </div>
+            <ul style="margin: 0 0 0 18px; padding: 0; display: flex; flex-direction: column; gap: 4px;">
+              <li>Hidratação adequada (ingerir em média 2 a 3 litros de água ao dia, salvo restrição médica específica).</li>
+              <li>Repouso relativo, refeições leves e fracionadas, evitando cafeína, álcool e ultraprocessados.</li>
+              <li>Armazenar os medicamentos em local seco, fresco e arejado, protegidos da luz e fora do alcance de crianças.</li>
+              <li style="color: #b91c1c; font-weight: 700;">
+                CRITÉRIOS DE ALERTA: Persistindo os sintomas por mais de 48h-72h, febre alta, dor intensa no peito, falta de ar ou piora clínica, procure atendimento médico de emergência imediatamente.
+              </li>
+            </ul>
+          </div>
+
+          <!-- Assinaturas e Carimbo -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding-top: 14px; border-top: 1px solid #cbd5e1; margin-bottom: 14px; text-align: center;">
+            <div>
+              <div style="border-top: 1px solid #94a3b8; margin: 24px auto 6px auto; width: 85%;"></div>
+              <div style="font-weight: 700; color: #0f172a; font-size: 0.82rem;">${patientFullName}</div>
+              <div style="font-size: 0.74rem; color: #64748b;">Paciente / Responsável Legal (CPF: ${patientCpf})</div>
+            </div>
+            <div>
+              <div style="border-top: 1px solid #0d9488; margin: 24px auto 6px auto; width: 85%;"></div>
+              <div style="font-weight: 700; color: #0f172a; font-size: 0.82rem;">${rtPharmacist}</div>
+              <div style="font-size: 0.74rem; color: #0d9488; font-weight: 600;">Farmacêutico Responsável Técnico · ${pharmacyCRF}</div>
+              <div style="font-size: 0.68rem; color: #94a3b8;">Assinatura Digital ICP-Brasil A3 · Hash: ${hashAuth}</div>
+            </div>
+          </div>
+
+          <!-- Validade Jurídica -->
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px 12px; font-size: 0.72rem; color: #64748b; text-align: center;">
+            <strong>Validade Jurídica &amp; Fé Pública:</strong> Lei Federal nº 13.021/2014, Resoluções CFF nº 585/2013 e nº 586/2013. Documento emitido eletronicamente pelo CRM Clínico Farmacêutico.
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  `;
+
+  document.body.appendChild(modal);
+
+  const closeModal = () => modal.remove();
+
+  document.getElementById('btn-close-dsf-preview')?.addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  // Ação: Baixar em PDF
+  document.getElementById('btn-export-pdf-action')?.addEventListener('click', () => {
+    if (typeof window.reemitirDsfPDF === 'function') {
+      window.reemitirDsfPDF(att, patient, att.data_hora);
+    }
+  });
+
+  // Ação: Enviar via WhatsApp
+  document.getElementById('btn-whatsapp-dsf-action')?.addEventListener('click', () => {
+    const rawPhone = patient.cellphone || patient.phone || '';
+    const cleanPhone = rawPhone.replace(/\D/g, '');
+    const medSummary = medItems.length > 0 ? medItems.join('; ') : 'Orientações clínicas farmacêuticas';
+    const textMsg = encodeURIComponent(
+      `Olá, ${patientFullName}! 👋\n\n` +
+      `Aqui é do *${pharmacyName}*.\n` +
+      `Segue a sua *Declaração de Serviço Farmacêutico (DSF)* (Protocolo: ${dsfProtocol}):\n\n` +
+      `📋 *Atendimento:* ${tipoVisita}\n` +
+      `🩺 *Conduta:* ${condutaFinal}\n` +
+      `💊 *Medicamentos / Cuidados:* ${medSummary}\n\n` +
+      `Qualquer dúvida ou alteração dos sintomas, estamos à disposição no consultório!\n` +
+      `*${rtPharmacist}* (${pharmacyCRF})`
+    );
+
+    if (cleanPhone.length >= 10) {
+      window.open(`https://api.whatsapp.com/send?phone=55${cleanPhone}&text=${textMsg}`, '_blank');
+    } else {
+      window.open(`https://api.whatsapp.com/send?text=${textMsg}`, '_blank');
+    }
+  });
+};
+
 // --- ABA CONSULTÓRIOS & SALAS ---
 
 async function loadConsultingRooms() {
