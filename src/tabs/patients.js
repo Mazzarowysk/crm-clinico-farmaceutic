@@ -1244,6 +1244,18 @@ export function renderPatientsTab(contentArea) {
       if (el) el.value = '';
     });
     
+    // Limpar resultados de busca flutuantes
+    const modalSearchResults = document.getElementById('modal-client-search-results');
+    if (modalSearchResults) {
+      modalSearchResults.innerHTML = '';
+      modalSearchResults.style.display = 'none';
+    }
+    const fullNameSearchResults = document.getElementById('fullname-client-search-results');
+    if (fullNameSearchResults) {
+      fullNameSearchResults.innerHTML = '';
+      fullNameSearchResults.style.display = 'none';
+    }
+
     const modalOverlay = document.getElementById('patient-modal-overlay');
     if (modalOverlay) modalOverlay.style.display = 'none';
   };
@@ -1384,15 +1396,10 @@ export function renderPatientsTab(contentArea) {
   const renderClientSearchResults = (matches, targetContainer, originalQuery) => {
     if (!targetContainer) return;
 
+    // Se não encontrou clientes, NUNCA exibe card ou overlay flutuante cobrindo os campos abaixo
     if (matches.length === 0) {
-      targetContainer.innerHTML = `
-        <div style="padding: 12px 14px; font-size: 0.82rem; color: #94a3b8; text-align: center;">
-          <i class="fa-solid fa-user-xmark" style="margin-right: 6px; color: #f87171;"></i>
-          Nenhum cliente cadastrado encontrado com <strong>"${originalQuery}"</strong>.<br>
-          <span style="font-size: 0.75rem; color: #38bdf8;">Preencha os campos abaixo para cadastrar um novo cliente.</span>
-        </div>
-      `;
-      targetContainer.style.display = 'block';
+      targetContainer.innerHTML = '';
+      targetContainer.style.display = 'none';
       return;
     }
 
@@ -1431,10 +1438,19 @@ export function renderPatientsTab(contentArea) {
         const chosen = matches.find(m => String(m.id) === String(pId));
         if (chosen) {
           populatePatientIntoForm(chosen);
+          targetContainer.innerHTML = '';
           targetContainer.style.display = 'none';
         }
       });
     });
+  };
+
+  // Função auxiliar para fechar todos os menus flutuantes de busca
+  const closeAllSearchDropdowns = () => {
+    const mSr = document.getElementById('modal-client-search-results');
+    const fSr = document.getElementById('fullname-client-search-results');
+    if (mSr) { mSr.innerHTML = ''; mSr.style.display = 'none'; }
+    if (fSr) { fSr.innerHTML = ''; fSr.style.display = 'none'; }
   };
 
   // Busca rápida de cliente já cadastrado dentro do modal
@@ -1464,6 +1480,17 @@ export function renderPatientsTab(contentArea) {
       renderClientSearchResults(matches, modalSearchResults, q);
     });
 
+    modalSearchInput.addEventListener('blur', () => {
+      setTimeout(() => { modalSearchResults.style.display = 'none'; }, 200);
+    });
+
+    modalSearchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        modalSearchResults.innerHTML = '';
+        modalSearchResults.style.display = 'none';
+      }
+    });
+
     document.addEventListener('click', (ev) => {
       if (!modalSearchInput.contains(ev.target) && !modalSearchResults.contains(ev.target)) {
         modalSearchResults.style.display = 'none';
@@ -1488,12 +1515,31 @@ export function renderPatientsTab(contentArea) {
       renderClientSearchResults(matches, fullNameSearchResults, q);
     });
 
+    fullNameInputEl.addEventListener('blur', () => {
+      setTimeout(() => { fullNameSearchResults.style.display = 'none'; }, 200);
+    });
+
+    fullNameInputEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        fullNameSearchResults.innerHTML = '';
+        fullNameSearchResults.style.display = 'none';
+      }
+    });
+
     document.addEventListener('click', (ev) => {
       if (!fullNameInputEl.contains(ev.target) && !fullNameSearchResults.contains(ev.target)) {
         fullNameSearchResults.style.display = 'none';
       }
     });
   }
+
+  // Ao focar em qualquer campo do formulário, fecha imediatamente qualquer card ou dropdown de busca
+  ['cpf', 'birthDate', 'gender', 'cellphone', 'phone', 'email', 'zipCode', 'address', 'neighborhood', 'city', 'complaintNotes', 'allergies', 'continuousMedications', 'chronicConditions'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener('focus', closeAllSearchDropdowns);
+    }
+  });
 
   // Preenchimento automático ao digitar CPF completo no campo de CPF
   const cpfInputEl = document.getElementById('cpf');
