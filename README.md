@@ -80,6 +80,15 @@ flowchart TD
 
 ---
 
+### 5. 🌟 Novidades da Versão 3.1
+- **📈 Telemetria Gráfica Longitudinal de PA & Glicemia (Chart.js)**: Gráficos evolutivos com curvas de Pressão Arterial (Sistólica e Diastólica) e Glicemia Capilar no Prontuário do Paciente. Inclui cálculo de médias, identificação da última aferição e alternância visual instantânea (PA, Glicose ou Visão Integrada).
+- **🧪 Módulo de Testes Laboratoriais Remotos (TLR - RDC 786/2023 ANVISA)**: Execução de testes rápidos em consultório (HbA1c, Perfil Lipídico, Beta-HCG, COVID-19/Flu, Dengue NS1, Glicemia, Strep A, Duo HIV/Sífilis) com controle de Lote, Validade, Registro ANVISA e emissão de Laudo Oficial em PDF vetorial A4.
+- **📲 Automação Ativa de Pós-Atendimento & Adesão (WhatsApp D+2 & Refill D-5)**: Painel inteligente de vigilância farmacoterapêutica para acompanhamento 48h pós-consulta e alerta antecipado de 5 dias para recompra de medicamentos de uso contínuo.
+- **🔏 Chancela Oficial de Assinatura Digital ICP-Brasil & GOV.BR**: Assinatura eletrônica avançada e qualificada com hash criptográfico SHA-256, Carimbo do Tempo (ACT) e QR Code rastreável no validador do ITI (`validar.iti.gov.br`).
+- **🧾 Impressão Térmica Direta ESC/POS (58mm e 80mm)**: Emissão de Cupom Clínico de Balcão não fiscal para impressoras térmicas contendo sinais vitais, queixa clínica, lista detalhada de MIPs com posologia e identificação do Farmacêutico RT.
+
+---
+
 ## 🚀 Como Executar
 
 ### 1. Instalação e Execução Local

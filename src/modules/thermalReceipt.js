@@ -569,6 +569,165 @@ if (typeof window !== 'undefined') {
   window.reprintSaleReceiptFromFin = function(id) {
     openSaleDetailsModal(id);
   };
+  window.imprimirCupomTermicoEscPos = function(attOrId, patientObj, width = '80mm') {
+    let att = attOrId;
+    if (typeof attOrId === 'string') {
+      const allAtts = (typeof localDB !== 'undefined' && localDB.list ? (localDB.list('pharmacy_attendances') || []).concat(localDB.list('pharmacy_consultations') || []) : []);
+      att = allAtts.find(a => String(a.id) === String(attOrId)) || { id: attOrId };
+    }
+    printClinicalAttendanceReceipt(att, patientObj, width);
+  };
+}
+
+/**
+ * Emite Cupom Térmico ESC/POS (58mm / 80mm) para Atendimento Clínico Farmacêutico & DSF
+ */
+export function printClinicalAttendanceReceipt(attendance = {}, patientObj = null, paperWidth = '80mm') {
+  const is58mm = paperWidth === '58mm';
+  const widthPx = is58mm ? '230px' : '320px';
+  const fontSize = is58mm ? '10px' : '12px';
+
+  let settings = {};
+  try {
+    settings = localDB.get('settings', 'main') || localDB.getConfig() || {};
+  } catch (e) {
+    settings = {};
+  }
+  const pharmacyName = settings.pharmacy_name || settings.clinic_name || 'FARMÁCIA & CONSULTÓRIO CLÍNICO';
+  const cnpj = settings.cnpj || '54.180.999/0001-44';
+  const address = settings.address || 'Av. Brasil, 1500 - Centro';
+  const phone = settings.phone || '(18) 3528-1000';
+  const rtName = attendance.pharmacist_name || settings.rt_name || (state.user?.name || 'Farmacêutico Responsável');
+  const crf = settings.crf || settings.rt_crf || 'CRF/SP 54.180';
+
+  const patient = patientObj || {
+    fullName: attendance.patient_name || attendance.patientName || 'Cliente Balcão',
+    cpf: attendance.patient_cpf || 'Não informado'
+  };
+
+  const protocol = attendance.id ? `DSF-${attendance.id.replace(/[^a-zA-Z0-9]/g, '').slice(-8).toUpperCase()}` : `DSF-${Date.now().toString().slice(-6)}`;
+  const dateStr = attendance.data_hora ? new Date(attendance.data_hora).toLocaleString('pt-BR') : new Date().toLocaleString('pt-BR');
+  const queixa = attendance.queixa_triagem || attendance.complaint || 'Atendimento e Orientação Clínica';
+  const prescricaoTxt = attendance.prescricao_mips || '';
+  const mipsList = prescricaoTxt ? prescricaoTxt.split(/;|\n/).map(m => m.trim()).filter(Boolean) : (attendance.prescribedMIPs || []);
+
+  const vitals = attendance.vitals || attendance.service_data || {};
+  const hasVitals = vitals.pa || vitals.bloodPressure || vitals.glucose || vitals.glicemia || vitals.temperature || vitals.heartRate;
+
+  const receiptHtml = `
+    <div id="clinical-thermal-sheet" style="background: #fff; color: #000; font-family: 'Courier New', Courier, monospace; width: 100%; max-width: ${widthPx}; margin: 0 auto; padding: 14px 10px; line-height: 1.35; font-size: ${fontSize}; box-sizing: border-box; border: 1px solid #ddd; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+      <div style="text-align: center; margin-bottom: 6px;">
+        <div style="font-weight: 900; font-size: ${is58mm ? '12px' : '14px'}; text-transform: uppercase;">${pharmacyName}</div>
+        <div style="font-size: ${is58mm ? '8.5px' : '10px'};">${address}</div>
+        <div style="font-size: ${is58mm ? '8.5px' : '10px'};">CNPJ: ${cnpj} • Tel: ${phone}</div>
+        <div style="font-size: ${is58mm ? '8.5px' : '9.5px'}; margin-top: 2px;">RT: ${rtName} • ${crf}</div>
+      </div>
+
+      <div style="border-top: 1.5px dashed #000; margin: 6px 0;"></div>
+      <div style="text-align: center; font-weight: 900; font-size: ${is58mm ? '11px' : '13px'};">
+        CUPOM DE ATENDIMENTO CLÍNICO
+      </div>
+      <div style="text-align: center; font-size: ${is58mm ? '8px' : '9.5px'};">
+        DECLARAÇÃO DE SERVIÇO FARMACÊUTICO (CFF 585/586)
+      </div>
+      <div style="border-top: 1.5px dashed #000; margin: 6px 0;"></div>
+
+      <div style="display: flex; justify-content: space-between; margin: 2px 0;">
+        <span>Protocolo: <strong>#${protocol}</strong></span>
+        <span>${dateStr.split(' ')[0]}</span>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin: 2px 0;">
+        <span>Hora: ${dateStr.split(' ')[1] || ''}</span>
+        <span>Farmacêutico: ${rtName.split(' ')[0]}</span>
+      </div>
+      <div style="margin: 2px 0;">
+        <span>Paciente: <strong>${patient.fullName || patient.name}</strong></span>
+      </div>
+      ${patient.cpf ? `<div>CPF: ${patient.cpf}</div>` : ''}
+
+      ${hasVitals ? `
+        <div style="border-top: 1px dashed #000; margin: 6px 0;"></div>
+        <div style="font-weight: bold; margin-bottom: 3px;">SINAIS VITAIS / PARÂMETROS:</div>
+        ${(vitals.pa || vitals.bloodPressure) ? `<div>• PA: <strong>${vitals.pa || vitals.bloodPressure} mmHg</strong></div>` : ''}
+        ${(vitals.glucose || vitals.glicemia) ? `<div>• Glicemia: <strong>${vitals.glucose || vitals.glicemia} mg/dL</strong></div>` : ''}
+        ${vitals.temperature ? `<div>• Temperatura: <strong>${vitals.temperature} °C</strong></div>` : ''}
+        ${vitals.heartRate ? `<div>• Freq. Cardíaca: <strong>${vitals.heartRate} bpm</strong></div>` : ''}
+      ` : ''}
+
+      <div style="border-top: 1px dashed #000; margin: 6px 0;"></div>
+      <div style="font-weight: bold; margin-bottom: 3px;">QUEIXA / MOTIVO DA CONSULTA:</div>
+      <div style="font-size: ${is58mm ? '9px' : '11px'}; margin-bottom: 4px;">${queixa}</div>
+
+      ${mipsList.length > 0 ? `
+        <div style="border-top: 1px dashed #000; margin: 6px 0;"></div>
+        <div style="font-weight: bold; margin-bottom: 4px;">MEDICAMENTOS & ORIENTAÇÕES:</div>
+        ${mipsList.map((m, idx) => {
+          const itemTitle = typeof m === 'object' ? (m.name || m.productName) : m;
+          const posology = typeof m === 'object' ? (m.posology || m.directions || '') : '';
+          return `
+            <div style="margin-bottom: 4px;">
+              <strong>${idx + 1}. ${itemTitle}</strong>
+              ${posology ? `<div style="font-size: ${is58mm ? '8.5px' : '10px'}; font-style: italic;">↳ ${posology}</div>` : ''}
+            </div>
+          `;
+        }).join('')}
+      ` : ''}
+
+      <div style="border-top: 1px dashed #000; margin: 6px 0;"></div>
+      <div style="font-size: ${is58mm ? '8px' : '9.5px'}; text-align: center; margin: 6px 0;">
+        Prescrição de Medicamentos Isentos de Prescrição (MIPs) conforme Resolução CFF nº 586/2013.<br>
+        Em caso de piora ou persistência dos sintomas, procure atendimento médico imediatamente.
+      </div>
+
+      <div style="border-top: 1.5px dashed #000; margin: 10px 0 6px 0;"></div>
+      <div style="text-align: center; margin-top: 12px;">
+        <div style="border-top: 1px solid #000; width: 80%; margin: 0 auto 3px auto;"></div>
+        <div style="font-weight: bold; font-size: ${is58mm ? '9px' : '10.5px'};">${rtName}</div>
+        <div style="font-size: ${is58mm ? '8px' : '9px'};">Farmacêutico(a) • ${crf}</div>
+        <div style="font-size: 7.5px; margin-top: 3px; color: #444;">Assinatura Digital ICP-Brasil / GOV.BR</div>
+      </div>
+    </div>
+  `;
+
+  // Modal de impressão do Cupom
+  const modal = document.createElement('div');
+  modal.id = 'clinical-thermal-modal';
+  modal.style.cssText = 'position: fixed; inset: 0; background: rgba(5,8,22,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 100300; padding: 16px;';
+  modal.innerHTML = `
+    <div style="background: #0f172a; border: 1.5px solid #334155; border-radius: 16px; max-width: 480px; width: 100%; max-height: 92vh; display: flex; flex-direction: column; overflow: hidden; box-shadow: 0 25px 60px rgba(0,0,0,0.8);">
+      <div style="padding: 14px 20px; background: #1e293b; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center;">
+        <div style="font-weight: 700; color: #fff; font-size: 1rem; display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-receipt" style="color: #f59e0b;"></i> Impressão Térmica ESC/POS (${paperWidth})
+        </div>
+        <button type="button" onclick="document.getElementById('clinical-thermal-modal')?.remove()" style="background: none; border: none; color: #94a3b8; font-size: 1.2rem; cursor: pointer;">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div style="flex: 1; overflow-y: auto; padding: 16px; display: flex; justify-content: center; background: #080c16;">
+        ${receiptHtml}
+      </div>
+
+      <div style="padding: 14px 20px; background: #1e293b; border-top: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <div style="display: flex; gap: 6px;">
+          <button type="button" onclick="window.imprimirCupomTermicoEscPos('${attendance.id || ''}', null, '58mm')" style="background: ${is58mm ? '#0d9488' : '#334155'}; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
+            58mm
+          </button>
+          <button type="button" onclick="window.imprimirCupomTermicoEscPos('${attendance.id || ''}', null, '80mm')" style="background: ${!is58mm ? '#0d9488' : '#334155'}; color: #fff; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer;">
+            80mm
+          </button>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <button type="button" onclick="window.print()" style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; border: none; padding: 8px 18px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-print"></i> Imprimir Cupom
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('clinical-thermal-modal')?.remove();
+  document.body.appendChild(modal);
 }
 
 

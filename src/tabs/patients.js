@@ -24,6 +24,12 @@ export function renderPatientsTab(contentArea) {
             <button id="btn-new-patient" class="btn btn-primary" style="padding: 7px 14px; font-size: 0.85rem; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px;">
               <i class="fa-solid fa-user-plus"></i> Novo Cliente / Queixa
             </button>
+            <button id="btn-quick-tlr-header" type="button" class="btn" style="background: linear-gradient(135deg, #7c3aed, #6d28d9); color: #fff; border: none; padding: 7px 14px; font-size: 0.85rem; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);" title="Exames Laboratoriais Remotos (RDC 786/2023)">
+              <i class="fa-solid fa-vial-virus"></i> Testes TLR
+            </button>
+            <button id="btn-quick-postcare-header" type="button" class="btn" style="background: linear-gradient(135deg, #059669, #047857); color: #fff; border: none; padding: 7px 14px; font-size: 0.85rem; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);" title="Automação Pós-Atendimento e Follow-up D+2 / Refill D-5">
+              <i class="fa-brands fa-whatsapp"></i> Pós-Atendimento
+            </button>
             <button id="btn-quick-vaccine-header" type="button" class="btn" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; padding: 7px 14px; font-size: 0.85rem; font-weight: 700; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">
               <i class="fa-solid fa-syringe"></i> Vacinação
             </button>
@@ -514,6 +520,9 @@ export function renderPatientsTab(contentArea) {
               <button class="btn-icon btn-icon-purchases" onclick="window.openPatientPurchasesModal('${p.id}', '${(p.fullName||p.name||'').replace(/'/g, "\\'")}')" style="color: #34d399; background: rgba(16, 185, 129, 0.2); border: 1px solid rgba(16, 185, 129, 0.45);" title="Ver Histórico de Compras & Previsão de Recompra (Refill)">
                 <i class="fa-solid fa-cart-shopping"></i>
               </button>
+              <button class="btn-icon btn-icon-tlr" onclick="window.openTlrModal ? window.openTlrModal('${p.id}', ${JSON.stringify(p).replace(/"/g, '&quot;')}) : null" style="color: #a78bfa; background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.35);" title="Registrar Teste Laboratorial Remoto (TLR - RDC 786/2023)">
+                <i class="fa-solid fa-vial-virus"></i>
+              </button>
               <button class="btn-icon btn-icon-history" onclick="window.openPatientHistoryModal('${p.id}', '${(p.fullName||p.name||'').replace(/'/g, "\\'")}')" title="Ver Prontuário Completo & Histórico Clínico">
                 <i class="fa-solid fa-timeline"></i>
               </button>
@@ -711,6 +720,22 @@ export function renderPatientsTab(contentArea) {
       e.preventDefault();
       e.stopPropagation();
       document.getElementById('btn-new-patient')?.click();
+    };
+  }
+
+  const tlrHeaderBtn = document.getElementById('btn-quick-tlr-header');
+  if (tlrHeaderBtn) {
+    tlrHeaderBtn.onclick = (e) => {
+      e.preventDefault();
+      if (typeof window.openTlrModal === 'function') window.openTlrModal();
+    };
+  }
+
+  const postCareHeaderBtn = document.getElementById('btn-quick-postcare-header');
+  if (postCareHeaderBtn) {
+    postCareHeaderBtn.onclick = (e) => {
+      e.preventDefault();
+      if (typeof window.openPostCareModal === 'function') window.openPostCareModal();
     };
   }
 

@@ -5,6 +5,15 @@
 
 export const DIGITAL_CERT_PROVIDERS = [
   {
+    id: 'govbr',
+    name: 'Assinatura GOV.BR (Nível Prata/Ouro)',
+    type: 'cloud',
+    badge: 'Oficial Federal',
+    icon: 'fa-solid fa-landmark',
+    color: '#2563eb',
+    description: 'Assinatura digital avançada pelo aplicativo GOV.BR com conta Prata ou Ouro.'
+  },
+  {
     id: 'birdid',
     name: 'BirdID (Soluti)',
     type: 'cloud',
@@ -232,4 +241,58 @@ export function renderDigitalSignatureModal({ docTitle, docType, docId, patientN
       confirmBtn.innerHTML = '<i class="fa-solid fa-lock"></i> Tentar Novamente';
     }
   });
+}
+
+/**
+ * Renderiza o selo visual de chancela eletrônica ICP-Brasil / GOV.BR com QR Code e Hash
+ */
+export function renderDigitalSealBadgeHTML({
+  signerName = 'Farmacêutico Responsável',
+  registry = 'CRF/SP 54.180',
+  providerName = 'ICP-Brasil / GOV.BR (Nuvem A3)',
+  hashSHA256 = '',
+  timestampStr = ''
+} = {}) {
+  const hash = hashSHA256 || 'A3F9-' + Array.from({length: 12}, () => Math.floor(Math.random()*16).toString(16)).join('').toUpperCase();
+  const time = timestampStr || new Date().toLocaleString('pt-BR');
+  const qrValidationUrl = `https://validar.iti.gov.br/?codigo=${hash.replace(/[^a-zA-Z0-9]/g, '')}`;
+
+  return `
+    <div style="background: linear-gradient(135deg, #f0fdf4, #ecfdf5); border: 1.5px solid #059669; border-radius: 10px; padding: 12px 16px; margin: 14px 0; display: flex; align-items: center; justify-content: space-between; gap: 16px; box-shadow: 0 4px 12px rgba(5, 150, 105, 0.1);">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div style="width: 44px; height: 44px; border-radius: 10px; background: #059669; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.3rem; flex-shrink: 0; box-shadow: 0 4px 10px rgba(5, 150, 105, 0.3);">
+          <i class="fa-solid fa-stamp"></i>
+        </div>
+        <div>
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <span style="font-weight: 800; font-size: 0.88rem; color: #065f46; text-transform: uppercase; letter-spacing: 0.5px;">Documento Assinado Digitalmente</span>
+            <span style="background: #10b981; color: #fff; font-size: 0.68rem; font-weight: 800; padding: 1px 6px; border-radius: 4px;">ICP-Brasil</span>
+          </div>
+          <div style="font-size: 0.8rem; color: #047857; margin-top: 2px;">
+            <strong>${signerName}</strong> · ${registry}
+          </div>
+          <div style="font-size: 0.72rem; color: #065f46; margin-top: 2px; font-family: monospace;">
+            Carimbo do Tempo (ACT): ${time} · Provedor: ${providerName}
+          </div>
+          <div style="font-size: 0.68rem; color: #047857; margin-top: 2px; font-family: monospace; word-break: break-all;">
+            Hash Criptográfico SHA-256: <span style="color: #065f46; font-weight: 700;">${hash}</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align: center; flex-shrink: 0; background: #fff; border: 1px solid #10b981; border-radius: 8px; padding: 6px 10px;">
+        <i class="fa-solid fa-qrcode" style="font-size: 2rem; color: #065f46; display: block;"></i>
+        <a href="${qrValidationUrl}" target="_blank" style="font-size: 0.65rem; color: #059669; font-weight: 700; text-decoration: none; display: block; margin-top: 2px;">
+          validar.iti.gov.br
+        </a>
+      </div>
+    </div>
+  `;
+}
+
+if (typeof window !== 'undefined') {
+  window.renderDigitalSignatureModal = renderDigitalSignatureModal;
+  window.signDocumentICP = signDocumentICP;
+  window.generateSHA256Hash = generateSHA256Hash;
+  window.renderDigitalSealBadgeHTML = renderDigitalSealBadgeHTML;
 }

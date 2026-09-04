@@ -62,6 +62,12 @@ export async function renderPharmacyTab() {
         </div>
 
         <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <button id="btn-tlr-pharm" onclick="window.openTlrModal ? window.openTlrModal() : null" class="btn" style="background: linear-gradient(135deg, #7c3aed, #6d28d9); color: #fff; border: none; font-weight: 700; padding: 9px 16px; border-radius: 10px; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35); cursor: pointer;" title="Executar e Laudar Teste Rápido / TLR (RDC 786/2023 ANVISA)">
+            <i class="fa-solid fa-vial-virus"></i> Teste Rápido (TLR)
+          </button>
+          <button id="btn-postcare-pharm" onclick="window.openPostCareModal ? window.openPostCareModal() : null" class="btn" style="background: linear-gradient(135deg, #059669, #047857); color: #fff; border: none; font-weight: 700; padding: 9px 16px; border-radius: 10px; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35); cursor: pointer;" title="Automação Pós-Atendimento & Adesão (Follow-up D+2 e Refill D-5)">
+            <i class="fa-brands fa-whatsapp"></i> Pós-Atendimento &amp; Adesão
+          </button>
           <button id="btn-teleconsultation-pharm" onclick="window.openTeleconsultationModal ? window.openTeleconsultationModal(currentClinicalEncounter.patient) : null" class="btn" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; border: none; font-weight: 700; padding: 9px 16px; border-radius: 10px; display: flex; align-items: center; gap: 8px; box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35); cursor: pointer;" title="Iniciar Sala de Teleconsulta WebRTC com Paciente">
             <i class="fa-solid fa-video"></i> Teleconsulta
           </button>

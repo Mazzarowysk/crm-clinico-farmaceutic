@@ -528,6 +528,76 @@ export const manualData = [
       { q: 'Por que o Semáforo Red Flags deve ficar desmarcado na simulação de balcão?', a: 'Porque manter o semáforo desmarcado atesta a ausência de sinais de gravidade (sinal verde), autorizando a prescrição farmacêutica de MIPs. Se for marcado como grave, o sistema bloqueia os medicamentos e gera Guia Médica imediata.' },
       { q: 'Onde encontro o PDF completo do Manual?', a: 'Você pode baixar o Manual em PDF no botão oficial no topo deste modal ou na aba de Configurações.' }
     ]
+  },
+  {
+    id: 'evolucao_v31',
+    title: 'Inovações Clínicas v3.1',
+    icon: 'fa-vial-virus',
+    color: '#8b5cf6',
+    summary: 'Recursos avançados da versão 3.1: Telemetria Gráfica Longitudinal de PA & Glicemia (Chart.js), Exames Rápidos TLR (RDC 786/2023 ANVISA), Automação de Pós-Atendimento WhatsApp (Follow-up D+2 e Refill D-5), Chancela Digital ICP-Brasil / GOV.BR e Impressão Térmica ESC/POS.',
+    buttons: [
+      {
+        icon: 'fa-chart-line',
+        name: '📈 Telemetria Gráfica Longitudinal (Chart.js)',
+        type: 'Monitoramento Clínico',
+        color: '#38bdf8',
+        description: 'Painel visual interativo no Prontuário do Paciente que plota curvas evolutivas de Pressão Arterial (Sistólica e Diastólica) e Glicemia Capilar, calculando médias, última medição e alertas de classificação clínica com alternância em 1 clique.',
+        shortcut: 'Prontuário do Paciente -> Seção Telemetria Gráfica',
+        rules: 'Cruza dados de triagens hospitalares, atendimentos farmacêuticos e exames TLR.',
+        keywords: ['telemetria', 'grafico pa', 'glicemia', 'chartjs', 'evolucao longitudinal', 'curva de pressao']
+      },
+      {
+        icon: 'fa-vial-virus',
+        name: '🧪 Testes Laboratoriais Remotos - TLR (RDC 786/2023)',
+        type: 'Serviço Clínico Especializado',
+        color: '#7c3aed',
+        description: 'Módulo completo para realização de Testes Rápidos em consultório (HbA1c, Beta-HCG, Perfil Lipídico, COVID-19, Dengue NS1, Glicemia, Strep A, HIV/Sífilis Duo) com controle de Lote, Validade, Registro ANVISA e emissão de Laudo Laboratorial Oficial em PDF vetorial A4.',
+        shortcut: 'Botão "Teste Rápido (TLR)" na Aba Farmácia ou Clientes',
+        rules: 'Conforme RDC ANVISA nº 786/2023 e Boas Práticas Farmacêuticas.',
+        keywords: ['tlr', 'testes rapidos', 'rdc 786', 'anvisa', 'laudo laboratorial', 'hba1c', 'dengue', 'beta-hcg', 'covid']
+      },
+      {
+        icon: 'fa-brands fa-whatsapp',
+        name: '📲 Automação de Pós-Atendimento & Adesão Terapêutica',
+        type: 'CRM & Fidelização Ativa',
+        color: '#10b981',
+        description: 'Painel que lista automaticamente pacientes elegíveis para Follow-up Clínico D+2 (48h após a consulta) e Alertas de Refill D-5 (antecipação de recompra de medicamentos de uso contínuo que esgotarão em 5 dias), com disparos formatados de WhatsApp.',
+        shortcut: 'Botão "Pós-Atendimento & Adesão" na Aba Farmácia ou Clientes',
+        rules: 'Calcula prazos a partir da data do atendimento e posologia dos medicamentos.',
+        keywords: ['pos atendimento', 'follow up', 'refill', 'recompra', 'whatsapp', 'adesao terapeutica', 'retencao']
+      },
+      {
+        icon: 'fa-signature',
+        name: '🔏 Chancela Digital Oficial ICP-Brasil & GOV.BR',
+        type: 'Validade Jurídica & Criptografia',
+        color: '#2563eb',
+        description: 'Selo eletrônico com hash criptográfico SHA-256, Carimbo do Tempo (ACT) e QR Code de validação rastreável em validar.iti.gov.br, em conformidade com a MP 2.200-2/2001 e Lei 14.063/2020.',
+        shortcut: 'Janela de Consulta da DSF -> Selo Digital Oficial',
+        rules: 'Injetado automaticamente na visualização em tela e no PDF vetorial da DSF.',
+        keywords: ['icp brasil', 'gov br', 'assinatura digital', 'sha-256', 'carimbo do tempo', 'validar iti', 'declaracao de servico']
+      },
+      {
+        icon: 'fa-receipt',
+        name: '🧾 Impressão Térmica ESC/POS de Cupom Clínico',
+        type: 'Impressão Balcão / Não Fiscal',
+        color: '#f59e0b',
+        description: 'Emissão rápida de comprovante não fiscal em bobinas térmicas de 58mm ou 80mm contendo sinais vitais, queixa clínica, lista detalhada de MIPs com posologia e dados do Farmacêutico RT.',
+        shortcut: 'Modal da DSF -> Botão "Cupom Térmico"',
+        rules: 'Formatado em layout ESC/POS monocromático para impressoras térmicas diretas.',
+        keywords: ['cupom termico', 'esc pos', 'impressora termica', '58mm', '80mm', 'comprovante clinico']
+      }
+    ],
+    workflow: [
+      { step: 1, title: 'Execução do Teste TLR', desc: 'Clique em Teste Rápido (TLR), selecione o paciente, preencha lote/validade, registre o resultado e emita o laudo oficial em PDF.' },
+      { step: 2, title: 'Telemetria no Prontuário', desc: 'Abra o Prontuário do Paciente para visualizar o gráfico interativo de PA e Glicemia com estatísticas em tempo real.' },
+      { step: 3, title: 'Disparo de Pós-Atendimento', desc: 'Acesse o Painel de Pós-Atendimento, verifique quem precisa de acompanhamento D+2 ou aviso de Refill D-5 e envie mensagens no WhatsApp.' },
+      { step: 4, title: 'DSF com Assinatura & Cupom', desc: 'Consulte a DSF em tela com selo digital ICP-Brasil/GOV.BR e imprima o cupom térmico ESC/POS para o cliente.' }
+    ],
+    faq: [
+      { q: 'Quais testes rápidos são cobertos pelo módulo TLR?', a: 'O módulo cobre os principais exames autorizados pela RDC 786/2023 da ANVISA: Glicemia Capilar, Hemoglobina Glicada (HbA1c), Perfil Lipídico, Beta-HCG, Teste Rápido de Dengue (NS1/IgG/IgM), Painel Respiratório COVID-19/Influenza A+B, Strep A e Duo HIV/Sífilis.' },
+      { q: 'A assinatura digital GOV.BR é aceita para DSF e prescrições?', a: 'Sim! Nos termos da Lei Federal nº 14.063/2020 e regulamentações do CFF, as assinaturas GOV.BR nos níveis Prata e Ouro possuem validade jurídica plena para documentos em saúde e serviços farmacêuticos.' },
+      { q: 'Como imprimir o cupom clínico na impressora térmica?', a: 'Basta clicar no botão "Cupom Térmico" dentro da janela de pré-visualização da DSF. O sistema abrirá a formatação em 80mm ou 58mm pronta para o comando de impressão (Ctrl+P).' }
+    ]
   }
 ];
 

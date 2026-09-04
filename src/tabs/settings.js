@@ -300,6 +300,37 @@ export function renderSettingsTab(contentArea) {
                   </div>
                 </div>
 
+                <div style="border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 16px; margin-top: 6px;">
+                  <div style="font-size: 0.84rem; font-weight: 700; color: #38bdf8; text-transform: uppercase; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-signature"></i> Chancela Digital ICP-Brasil / GOV.BR &amp; Impressão Térmica
+                  </div>
+                  
+                  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+                    <div class="form-group">
+                      <label class="form-label" for="pharm-digital-cert-provider">Provedor Padrão de Assinatura Digital:</label>
+                      <select id="pharm-digital-cert-provider" class="form-input">
+                        <option value="govbr" selected>GOV.BR (Nível Prata / Ouro - Gratuito)</option>
+                        <option value="birdid">BirdID (Soluti - Nuvem A3)</option>
+                        <option value="neoid">NeoID (Serpro - Nuvem A3)</option>
+                        <option value="certisign">CertiSign RemoteID (Nuvem A3)</option>
+                        <option value="vidaas">VIDaaS (Valid - Nuvem A3)</option>
+                        <option value="local_a1">Certificado Digital Arquivo A1 (.PFX)</option>
+                      </select>
+                    </div>
+                    <div class="form-group">
+                      <label class="form-label" for="pharm-thermal-paper-width">Largura Padrão do Cupom Térmico (ESC/POS):</label>
+                      <select id="pharm-thermal-paper-width" class="form-input">
+                        <option value="80mm" selected>80mm (Bobina Padrão Balcão / Cupom Clínico)</option>
+                        <option value="58mm">58mm (Mini Impressora Térmica Portátil / Bluetooth)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div style="margin-top: 10px; font-size: 0.76rem; color: #94a3b8; display: flex; align-items: center; gap: 6px;">
+                    <i class="fa-solid fa-shield-check" style="color: #10b981;"></i> Validador Oficial: <a href="https://validar.iti.gov.br" target="_blank" style="color: #38bdf8; text-decoration: none;">validar.iti.gov.br</a> (Conformidade MP 2.200-2/2001 e Lei 14.063/2020)
+                  </div>
+                </div>
+
                 <div style="display: flex; justify-content: flex-end; margin-top: 10px;">
                   <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #0d9488, #0f766e); border: none; padding: 10px 22px; font-weight: 700; font-size: 0.88rem; cursor: pointer;">
                     <i class="fa-solid fa-floppy-disk"></i> Salvar Dados do Estabelecimento
@@ -1081,7 +1112,19 @@ export function renderSettingsTab(contentArea) {
     openUserEditModal(null, loadUsersList);
   });
 
-  // Salvar Dados do Estabelecimento
+  // Carregar e Salvar Dados do Estabelecimento
+  try {
+    const savedEstab = JSON.parse(localStorage.getItem('crm_pharmacy_establishment') || '{}');
+    if (savedEstab.name && document.getElementById('pharm-name')) document.getElementById('pharm-name').value = savedEstab.name;
+    if (savedEstab.cnpj && document.getElementById('pharm-cnpj')) document.getElementById('pharm-cnpj').value = savedEstab.cnpj;
+    if (savedEstab.rtName && document.getElementById('pharm-rt-name')) document.getElementById('pharm-rt-name').value = savedEstab.rtName;
+    if (savedEstab.rtCrf && document.getElementById('pharm-rt-crf')) document.getElementById('pharm-rt-crf').value = savedEstab.rtCrf;
+    if (savedEstab.phone && document.getElementById('pharm-phone')) document.getElementById('pharm-phone').value = savedEstab.phone;
+    if (savedEstab.address && document.getElementById('pharm-address')) document.getElementById('pharm-address').value = savedEstab.address;
+    if (savedEstab.certProvider && document.getElementById('pharm-digital-cert-provider')) document.getElementById('pharm-digital-cert-provider').value = savedEstab.certProvider;
+    if (savedEstab.paperWidth && document.getElementById('pharm-thermal-paper-width')) document.getElementById('pharm-thermal-paper-width').value = savedEstab.paperWidth;
+  } catch(e) {}
+
   document.getElementById('pharmacy-details-form')?.addEventListener('submit', (e) => {
     e.preventDefault();
     const pharmData = {
@@ -1090,10 +1133,12 @@ export function renderSettingsTab(contentArea) {
       rtName: document.getElementById('pharm-rt-name').value,
       rtCrf: document.getElementById('pharm-rt-crf').value,
       phone: document.getElementById('pharm-phone').value,
-      address: document.getElementById('pharm-address').value
+      address: document.getElementById('pharm-address').value,
+      certProvider: document.getElementById('pharm-digital-cert-provider')?.value || 'govbr',
+      paperWidth: document.getElementById('pharm-thermal-paper-width')?.value || '80mm'
     };
     localStorage.setItem('crm_pharmacy_establishment', JSON.stringify(pharmData));
-    showToast('✅ Dados do Estabelecimento & RT salvos com sucesso!');
+    showToast('✅ Dados do Estabelecimento, Assinatura Digital & Impressão salvos com sucesso!');
     syncManager.pushToCloud(false);
   });
 

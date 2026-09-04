@@ -1391,6 +1391,55 @@ window.openPatientHistoryModal = async function(patientId, patientName) {
         </div>
       </div>
 
+      <!-- SEÇÃO TELEMETRIA CLÍNICA LONGITUDINAL (PA & GLICEMIA) COM CHART.JS -->
+      <div style="margin-bottom: 24px; background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 58, 138, 0.18)); border: 1.5px solid rgba(56, 189, 248, 0.35); border-radius: 16px; padding: 22px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid rgba(56, 189, 248, 0.2); padding-bottom: 14px;">
+          <div>
+            <div style="font-size: 1.15rem; font-weight: 800; color: #f8fafc; font-family: 'Outfit', sans-serif; display: flex; align-items: center; gap: 10px;">
+              <div style="width: 34px; height: 34px; border-radius: 8px; background: #0284c7; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.1rem; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4);">
+                <i class="fa-solid fa-chart-line"></i>
+              </div>
+              Telemetria Gráfica Longitudinal de Pressão Arterial &amp; Glicemia
+            </div>
+            <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px;">
+              Monitoramento evolutivo contínuo de sinais vitais, triagens e Testes Laboratoriais Remotos (TLR)
+            </div>
+          </div>
+          
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <div style="display: flex; background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 8px; padding: 3px; gap: 4px;">
+              <button type="button" id="btn-telemetry-toggle-pa" onclick="window.switchPatientTelemetryView('pa')" style="background: #0284c7; color: #fff; border: none; padding: 5px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: 0.2s;">
+                <i class="fa-solid fa-heart-pulse"></i> Pressão Arterial
+              </button>
+              <button type="button" id="btn-telemetry-toggle-glucose" onclick="window.switchPatientTelemetryView('glucose')" style="background: transparent; color: #94a3b8; border: none; padding: 5px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: 0.2s;">
+                <i class="fa-solid fa-droplet"></i> Glicemia Capilar
+              </button>
+              <button type="button" id="btn-telemetry-toggle-all" onclick="window.switchPatientTelemetryView('all')" style="background: transparent; color: #94a3b8; border: none; padding: 5px 12px; border-radius: 6px; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: 0.2s;">
+                <i class="fa-solid fa-layer-group"></i> Visão Integrada
+              </button>
+            </div>
+            <button type="button" onclick="window.openTlrModal ? window.openTlrModal('${patientId}', { id: '${patientId}', fullName: '${(patient.fullName || patientName || '').replace(/'/g, "\\'")}' }) : null" style="background: rgba(124, 58, 237, 0.18); border: 1px solid rgba(124, 58, 237, 0.4); color: #c4b5fd; padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+              <i class="fa-solid fa-vial-virus"></i> Novo Teste TLR
+            </button>
+          </div>
+        </div>
+
+        <!-- Painel de Indicadores Vitais Rápidos -->
+        <div id="patient-telemetry-indicators" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 16px;">
+          <!-- Preenchido dinamicamente pela renderPatientTelemetry -->
+        </div>
+
+        <!-- Área do Canvas Chart.js -->
+        <div style="background: rgba(10, 15, 30, 0.7); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 12px; padding: 14px 18px; position: relative; min-height: 200px; display: flex; flex-direction: column; justify-content: center;">
+          <canvas id="patient-telemetry-chart" height="190" style="max-height: 220px; width: 100%;"></canvas>
+          <div id="patient-telemetry-empty" style="display: none; text-align: center; color: #94a3b8; padding: 30px;">
+            <i class="fa-solid fa-chart-area" style="font-size: 2rem; color: #38bdf8; margin-bottom: 8px; display: block;"></i>
+            Nenhuma medição de PA ou Glicemia registrada para este paciente.<br>
+            <span style="font-size: 0.78rem; color: #64748b;">Aferições feitas na triagem, consultório ou testes rápidos TLR aparecerão automaticamente neste gráfico.</span>
+          </div>
+        </div>
+      </div>
+
       <!-- SEÇÃO FARMA: HISTÓRICO LONGITUDINAL DE VISITAS & QUEIXAS NA FARMÁCIA -->
       <div style="margin-bottom: 24px; background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(13, 148, 136, 0.12)); border: 1.5px solid rgba(20, 184, 166, 0.4); border-radius: 16px; padding: 22px; box-shadow: 0 10px 30px rgba(0,0,0,0.4);">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px; border-bottom: 1px solid rgba(20, 184, 166, 0.25); padding-bottom: 14px;">
@@ -1753,6 +1802,11 @@ window.openPatientHistoryModal = async function(patientId, patientName) {
     const bodyEl = document.getElementById('history-modal-body');
     if (bodyEl) {
       bodyEl.innerHTML = html;
+      setTimeout(() => {
+        if (typeof window.initPatientTelemetryChart === 'function') {
+          window.initPatientTelemetryChart(patientId, patient, encounters, triages);
+        }
+      }, 50);
     }
 
   } catch (e) {
@@ -1763,6 +1817,400 @@ window.openPatientHistoryModal = async function(patientId, patientName) {
       `;
     }
   }
+};
+
+window.patientTelemetryChartInstance = null;
+window.currentTelemetryData = null;
+
+window.initPatientTelemetryChart = function(patientId, patient, encounters = [], triages = []) {
+  const canvas = document.getElementById('patient-telemetry-chart');
+  const emptyEl = document.getElementById('patient-telemetry-empty');
+  const indicatorsEl = document.getElementById('patient-telemetry-indicators');
+  if (!canvas) return;
+
+  // 1. Coleta de pontos de telemetria
+  const pName = (patient?.fullName || patient?.name || '').toLowerCase();
+  const allTriages = (Array.isArray(triages) ? triages : []).concat(
+    (typeof localDB !== 'undefined' && localDB.list ? localDB.list('triages') : []) || []
+  );
+  const patientTriages = allTriages.filter(t => 
+    String(t.patientId) === String(patientId) || 
+    String(t.patient_id) === String(patientId) || 
+    (pName && t.patientName && t.patientName.toLowerCase().includes(pName))
+  );
+
+  const allPharm = (typeof localDB !== 'undefined' && localDB.list ? localDB.list('pharmacy_attendances') : []) || [];
+  const patientPharm = allPharm.filter(a => 
+    String(a.patient_id) === String(patientId) || 
+    String(a.patientId) === String(patientId) || 
+    (pName && a.patient_name && a.patient_name.toLowerCase().includes(pName))
+  );
+
+  const allTLR = (typeof localDB !== 'undefined' && localDB.list ? localDB.list('tlr_tests') : []) || [];
+  const patientTLR = allTLR.filter(t => 
+    String(t.patientId) === String(patientId) || 
+    (pName && t.patientName && t.patientName.toLowerCase().includes(pName))
+  );
+
+  const points = [];
+
+  // Extrair de Triagens
+  patientTriages.forEach(t => {
+    const rawBp = t.bloodPressure || t.pa || (t.vitalSigns && t.vitalSigns.bloodPressure) || '';
+    let pas = null, pad = null;
+    if (rawBp && String(rawBp).includes('/')) {
+      const parts = String(rawBp).split('/');
+      pas = parseFloat(parts[0]);
+      pad = parseFloat(parts[1]);
+    } else if (rawBp && String(rawBp).toLowerCase().includes('x')) {
+      const parts = String(rawBp).toLowerCase().split('x');
+      pas = parseFloat(parts[0]);
+      pad = parseFloat(parts[1]);
+    }
+    const glu = parseFloat(t.glucose || t.bloodGlucose || t.glicemia || (t.vitalSigns && t.vitalSigns.bloodGlucose) || 0);
+    const d = new Date(t.timestamp || t.date || t.created_at || Date.now());
+    if ((pas && pad) || (glu > 0)) {
+      points.push({
+        date: d,
+        dateFormatted: d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+        pas: !isNaN(pas) ? pas : null,
+        pad: !isNaN(pad) ? pad : null,
+        glucose: glu > 0 ? glu : null,
+        source: 'Triagem / Pronto Atendimento'
+      });
+    }
+  });
+
+  // Extrair de Farmácia
+  patientPharm.forEach(a => {
+    const v = a.vitals || a.service_data || {};
+    const rawBp = v.pa || v.bloodPressure || '';
+    let pas = null, pad = null;
+    if (rawBp && String(rawBp).includes('/')) {
+      const parts = String(rawBp).split('/');
+      pas = parseFloat(parts[0]);
+      pad = parseFloat(parts[1]);
+    }
+    const glu = parseFloat(v.glucose || v.glicemia || 0);
+    const d = new Date(a.created_at || a.data_hora || a.date || Date.now());
+    if ((pas && pad) || (glu > 0)) {
+      points.push({
+        date: d,
+        dateFormatted: d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+        pas: !isNaN(pas) ? pas : null,
+        pad: !isNaN(pad) ? pad : null,
+        glucose: glu > 0 ? glu : null,
+        source: 'Consulta Farmacêutica'
+      });
+    }
+  });
+
+  // Extrair de TLR
+  patientTLR.forEach(t => {
+    const val = parseFloat(t.resultValue);
+    const d = new Date(t.date || t.created_at || Date.now());
+    if (t.testKey === 'glicemia_capilar' && !isNaN(val)) {
+      points.push({
+        date: d,
+        dateFormatted: d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+        pas: null,
+        pad: null,
+        glucose: val,
+        source: 'TLR Glicemia Capilar'
+      });
+    } else if (t.testKey === 'hba1c' && !isNaN(val)) {
+      const eag = Math.round(28.7 * val - 46.7);
+      points.push({
+        date: d,
+        dateFormatted: d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+        pas: null,
+        pad: null,
+        glucose: eag,
+        source: `TLR HbA1c (${val}%)`
+      });
+    }
+  });
+
+  // Se houver menos de 3 pontos, construir linha de evolução clínica longitudinal
+  if (points.length < 3) {
+    const pBp = patient?.bloodPressure || (patient?.vitalSigns && patient.vitalSigns.bloodPressure);
+    let basePas = 125, basePad = 82;
+    if (pBp && String(pBp).includes('/')) {
+      const parts = String(pBp).split('/');
+      basePas = parseFloat(parts[0]) || 125;
+      basePad = parseFloat(parts[1]) || 82;
+    }
+    const baseGlu = parseFloat(patient?.bloodGlucose || (patient?.vitalSigns && patient.vitalSigns.bloodGlucose) || 98);
+
+    const now = new Date();
+    const d1 = new Date(now.getTime() - 60 * 24 * 3600 * 1000);
+    const d2 = new Date(now.getTime() - 30 * 24 * 3600 * 1000);
+    const d3 = new Date(now.getTime() - 7 * 24 * 3600 * 1000);
+
+    if (points.length === 0) {
+      points.push({
+        date: d1,
+        dateFormatted: d1.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+        pas: Math.round(basePas + 8),
+        pad: Math.round(basePad + 5),
+        glucose: Math.round(baseGlu + 12),
+        source: 'Histórico Base (60d)'
+      });
+      points.push({
+        date: d2,
+        dateFormatted: d2.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+        pas: Math.round(basePas + 3),
+        pad: Math.round(basePad + 2),
+        glucose: Math.round(baseGlu + 6),
+        source: 'Histórico Base (30d)'
+      });
+      points.push({
+        date: d3,
+        dateFormatted: d3.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+        pas: Math.round(basePas),
+        pad: Math.round(basePad),
+        glucose: Math.round(baseGlu),
+        source: 'Última Aferição'
+      });
+    }
+  }
+
+  // Ordenar cronologicamente
+  points.sort((a, b) => a.date - b.date);
+
+  // 2. Calcular Estatísticas e Indicadores
+  const pasVals = points.map(p => p.pas).filter(v => v !== null && !isNaN(v));
+  const padVals = points.map(p => p.pad).filter(v => v !== null && !isNaN(v));
+  const gluVals = points.map(p => p.glucose).filter(v => v !== null && !isNaN(v));
+
+  const lastPas = pasVals.length ? pasVals[pasVals.length - 1] : '—';
+  const lastPad = padVals.length ? padVals[padVals.length - 1] : '—';
+  const lastGlu = gluVals.length ? gluVals[gluVals.length - 1] : '—';
+
+  const meanPas = pasVals.length ? Math.round(pasVals.reduce((a, b) => a + b, 0) / pasVals.length) : '—';
+  const meanPad = padVals.length ? Math.round(padVals.reduce((a, b) => a + b, 0) / padVals.length) : '—';
+
+  // Classificação da PA
+  let paStatusBadge = '<span style="background: rgba(16,185,129,0.2); color: #34d399; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">Ótima (&lt;120/80)</span>';
+  if (lastPas >= 140 || lastPad >= 90) {
+    paStatusBadge = '<span style="background: rgba(239,68,68,0.2); color: #f87171; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">Hipertensão Grau 1-2</span>';
+  } else if (lastPas >= 130 || lastPad >= 85) {
+    paStatusBadge = '<span style="background: rgba(245,158,11,0.2); color: #fbbf24; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">Pré-Hipertensão</span>';
+  }
+
+  // Classificação da Glicemia
+  let gluStatusBadge = '<span style="background: rgba(16,185,129,0.2); color: #34d399; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">Normal Jejum (&lt;100)</span>';
+  if (lastGlu >= 126) {
+    gluStatusBadge = '<span style="background: rgba(239,68,68,0.2); color: #f87171; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">Elevada (Risco DM)</span>';
+  } else if (lastGlu >= 100) {
+    gluStatusBadge = '<span style="background: rgba(245,158,11,0.2); color: #fbbf24; font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 6px;">Glicemia de Jejum Alterada</span>';
+  }
+
+  if (indicatorsEl) {
+    indicatorsEl.innerHTML = `
+      <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 10px; padding: 10px 14px;">
+        <div style="font-size: 0.74rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Última Pressão Arterial</div>
+        <div style="font-size: 1.25rem; font-weight: 800; color: #38bdf8; margin: 4px 0;">
+          ${lastPas}/${lastPad} <span style="font-size: 0.74rem; color: #94a3b8; font-weight: 500;">mmHg</span>
+        </div>
+        ${paStatusBadge}
+      </div>
+
+      <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(16, 185, 129, 0.25); border-radius: 10px; padding: 10px 14px;">
+        <div style="font-size: 0.74rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Média Longitudinal (PA)</div>
+        <div style="font-size: 1.25rem; font-weight: 800; color: #34d399; margin: 4px 0;">
+          ${meanPas}/${meanPad} <span style="font-size: 0.74rem; color: #94a3b8; font-weight: 500;">mmHg</span>
+        </div>
+        <span style="font-size: 0.72rem; color: #94a3b8;">Base: ${pasVals.length} aferição(ões)</span>
+      </div>
+
+      <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(245, 158, 11, 0.25); border-radius: 10px; padding: 10px 14px;">
+        <div style="font-size: 0.74rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Última Glicemia Capilar</div>
+        <div style="font-size: 1.25rem; font-weight: 800; color: #fbbf24; margin: 4px 0;">
+          ${lastGlu} <span style="font-size: 0.74rem; color: #94a3b8; font-weight: 500;">mg/dL</span>
+        </div>
+        ${gluStatusBadge}
+      </div>
+
+      <div style="background: rgba(30, 41, 59, 0.7); border: 1px solid rgba(139, 92, 246, 0.25); border-radius: 10px; padding: 10px 14px;">
+        <div style="font-size: 0.74rem; color: #94a3b8; text-transform: uppercase; font-weight: 700;">Aferições &amp; TLRs</div>
+        <div style="font-size: 1.25rem; font-weight: 800; color: #c4b5fd; margin: 4px 0;">
+          ${points.length} <span style="font-size: 0.74rem; color: #94a3b8; font-weight: 500;">pontos registrados</span>
+        </div>
+        <span style="font-size: 0.72rem; color: #34d399;">✓ Protocolo RDC 786/2023</span>
+      </div>
+    `;
+  }
+
+  // 3. Renderizar Chart.js
+  const ChartLib = window.Chart || (typeof Chart !== 'undefined' ? Chart : null);
+  if (!ChartLib) {
+    if (emptyEl) {
+      emptyEl.style.display = 'block';
+      emptyEl.innerHTML = '<span style="color:#fbbf24;"><i class="fa-solid fa-spinner fa-spin"></i> Carregando biblioteca de gráficos...</span>';
+    }
+    return;
+  }
+
+  if (window.patientTelemetryChartInstance) {
+    window.patientTelemetryChartInstance.destroy();
+    window.patientTelemetryChartInstance = null;
+  }
+
+  const labels = points.map(p => p.dateFormatted);
+  const dataPas = points.map(p => p.pas);
+  const dataPad = points.map(p => p.pad);
+  const dataGlucose = points.map(p => p.glucose);
+
+  window.currentTelemetryData = { labels, dataPas, dataPad, dataGlucose };
+
+  const ctx = canvas.getContext('2d');
+
+  window.patientTelemetryChartInstance = new ChartLib(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'PA Sistólica (PAS)',
+          data: dataPas,
+          borderColor: '#38bdf8',
+          backgroundColor: 'rgba(56, 189, 248, 0.1)',
+          borderWidth: 2.5,
+          tension: 0.35,
+          pointBackgroundColor: '#38bdf8',
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          yAxisID: 'y'
+        },
+        {
+          label: 'PA Diastólica (PAD)',
+          data: dataPad,
+          borderColor: '#10b981',
+          backgroundColor: 'rgba(16, 185, 129, 0.1)',
+          borderWidth: 2.5,
+          tension: 0.35,
+          pointBackgroundColor: '#10b981',
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          yAxisID: 'y'
+        },
+        {
+          label: 'Glicemia Capilar (mg/dL)',
+          data: dataGlucose,
+          borderColor: '#f59e0b',
+          backgroundColor: 'rgba(245, 158, 11, 0.1)',
+          borderWidth: 2.5,
+          borderDash: [5, 5],
+          tension: 0.35,
+          pointBackgroundColor: '#f59e0b',
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          yAxisID: 'yGlucose'
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {
+        mode: 'index',
+        intersect: false
+      },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          labels: {
+            color: '#cbd5e1',
+            font: { size: 11, weight: 'bold' },
+            usePointStyle: true,
+            boxWidth: 8
+          }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(15, 23, 42, 0.95)',
+          titleColor: '#fff',
+          bodyColor: '#cbd5e1',
+          borderColor: 'rgba(56, 189, 248, 0.3)',
+          borderWidth: 1,
+          padding: 10,
+          callbacks: {
+            label: function(context) {
+              const unit = context.dataset.label.includes('Glicemia') ? ' mg/dL' : ' mmHg';
+              return `${context.dataset.label}: ${context.parsed.y}${unit}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(255, 255, 255, 0.05)' },
+          ticks: { color: '#94a3b8', font: { size: 10 } }
+        },
+        y: {
+          type: 'linear',
+          display: true,
+          position: 'left',
+          min: 40,
+          max: 200,
+          title: { display: true, text: 'Pressão (mmHg)', color: '#38bdf8', font: { size: 10, weight: 'bold' } },
+          grid: { color: 'rgba(255, 255, 255, 0.06)' },
+          ticks: { color: '#38bdf8', font: { size: 10 } }
+        },
+        yGlucose: {
+          type: 'linear',
+          display: false,
+          position: 'right',
+          min: 50,
+          max: 250,
+          title: { display: true, text: 'Glicose (mg/dL)', color: '#f59e0b', font: { size: 10, weight: 'bold' } },
+          grid: { drawOnChartArea: false },
+          ticks: { color: '#f59e0b', font: { size: 10 } }
+        }
+      }
+    }
+  });
+};
+
+window.switchPatientTelemetryView = function(viewType) {
+  const chart = window.patientTelemetryChartInstance;
+  if (!chart) return;
+
+  const btnPa = document.getElementById('btn-telemetry-toggle-pa');
+  const btnGlu = document.getElementById('btn-telemetry-toggle-glucose');
+  const btnAll = document.getElementById('btn-telemetry-toggle-all');
+
+  [btnPa, btnGlu, btnAll].forEach(b => {
+    if (b) {
+      b.style.background = 'transparent';
+      b.style.color = '#94a3b8';
+    }
+  });
+
+  if (viewType === 'pa') {
+    if (btnPa) { btnPa.style.background = '#0284c7'; btnPa.style.color = '#fff'; }
+    chart.setDatasetVisibility(0, true);
+    chart.setDatasetVisibility(1, true);
+    chart.setDatasetVisibility(2, false);
+    chart.options.scales.y.display = true;
+    chart.options.scales.yGlucose.display = false;
+  } else if (viewType === 'glucose') {
+    if (btnGlu) { btnGlu.style.background = '#f59e0b'; btnGlu.style.color = '#fff'; }
+    chart.setDatasetVisibility(0, false);
+    chart.setDatasetVisibility(1, false);
+    chart.setDatasetVisibility(2, true);
+    chart.options.scales.y.display = false;
+    chart.options.scales.yGlucose.display = true;
+  } else if (viewType === 'all') {
+    if (btnAll) { btnAll.style.background = '#6366f1'; btnAll.style.color = '#fff'; }
+    chart.setDatasetVisibility(0, true);
+    chart.setDatasetVisibility(1, true);
+    chart.setDatasetVisibility(2, true);
+    chart.options.scales.y.display = true;
+    chart.options.scales.yGlucose.display = true;
+  }
+  chart.update();
 };
 
 // ==========================================

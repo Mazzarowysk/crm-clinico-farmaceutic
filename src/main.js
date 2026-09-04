@@ -37,12 +37,19 @@ window.formatCurrency = formatCurrency;
 window.formatBRL = formatBRL;
 import { openCameraBarcodeScanner, playBeepSound } from './modules/barcodeScanner.js';
 import { openQuickCheckoutModal } from './modules/quickCheckoutModal.js';
-import { printThermalReceipt, generateWhatsAppSaleText } from './modules/thermalReceipt.js';
+import { printThermalReceipt, generateWhatsAppSaleText, printClinicalAttendanceReceipt } from './modules/thermalReceipt.js';
+import { openTlrModal, generateTlrLaudoPDF } from './modules/tlrModal.js';
+import { openPostCareModal } from './modules/postCareAutomation.js';
 import { openCashRegisterModal, printCashRegisterReceipt, getActiveCashRegister } from './modules/cashRegister.js';
 import { openSngpcBookModal, openSngpcDispensationModal } from './modules/sngpc.js';
 import { openVaccinationModal, printVaccinationDsf } from './modules/vaccination.js';
 import { openPatientPortalModal } from './modules/patientPortal.js';
 import { openPatientPurchasesModal } from './modules/patientPurchasesModal.js';
+
+window.openTlrModal = openTlrModal;
+window.generateTlrLaudoPDF = generateTlrLaudoPDF;
+window.openPostCareModal = openPostCareModal;
+window.printClinicalAttendanceReceipt = printClinicalAttendanceReceipt;
 import { openNFeImporterModal } from './modules/nfeImporter.js';
 import { openPricingCalculatorModal } from './modules/pricingCalculatorModal.js';
 import { renderSmartFlowGuide, updateFlowGuideStep, completeFlow } from './modules/smartFlowGuide.js';
@@ -4199,9 +4206,12 @@ window.openDsfPreviewModal = function(attIdOrObj, patientIdOrObj, attDate) {
           </div>
         </div>
 
-        <div style="display: flex; align-items: center; gap: 10px;">
+        <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
           <button type="button" id="btn-export-pdf-action" style="background: linear-gradient(135deg, #0284c7, #0369a1); border: 1px solid #38bdf8; color: #fff; padding: 7px 16px; border-radius: 8px; font-weight: 700; font-size: 0.84rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.4); transition: 0.2s;" title="Baixar documento em arquivo PDF">
             <i class="fa-solid fa-file-arrow-down"></i> Baixar em PDF
+          </button>
+          <button type="button" id="btn-thermal-dsf-action" style="background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); color: #fbbf24; padding: 7px 14px; border-radius: 8px; font-weight: 700; font-size: 0.84rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s;" title="Imprimir Cupom Térmico Balcão 58mm/80mm (ESC/POS)">
+            <i class="fa-solid fa-receipt"></i> Cupom Térmico
           </button>
           <button type="button" id="btn-whatsapp-dsf-action" style="background: rgba(16, 185, 129, 0.15); border: 1px solid rgba(16, 185, 129, 0.4); color: #34d399; padding: 7px 14px; border-radius: 8px; font-weight: 700; font-size: 0.84rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: 0.2s;" title="Enviar resumo via WhatsApp">
             <i class="fa-brands fa-whatsapp"></i> WhatsApp
@@ -4337,6 +4347,15 @@ window.openDsfPreviewModal = function(attIdOrObj, patientIdOrObj, attDate) {
             </ul>
           </div>
 
+          <!-- Selo Oficial de Assinatura Digital ICP-Brasil / GOV.BR -->
+          ${typeof window.renderDigitalSealBadgeHTML === 'function' ? window.renderDigitalSealBadgeHTML({
+            signerName: rtPharmacist,
+            registry: pharmacyCRF,
+            providerName: 'ICP-Brasil / GOV.BR (Nuvem A3)',
+            hashSHA256: hashAuth,
+            timestampStr: visitDateStr
+          }) : ''}
+
           <!-- Assinaturas e Carimbo -->
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding-top: 14px; border-top: 1px solid #cbd5e1; margin-bottom: 14px; text-align: center;">
             <div>
@@ -4348,7 +4367,7 @@ window.openDsfPreviewModal = function(attIdOrObj, patientIdOrObj, attDate) {
               <div style="border-top: 1px solid #0d9488; margin: 24px auto 6px auto; width: 85%;"></div>
               <div style="font-weight: 700; color: #0f172a; font-size: 0.82rem;">${rtPharmacist}</div>
               <div style="font-size: 0.74rem; color: #0d9488; font-weight: 600;">Farmacêutico Responsável Técnico · ${pharmacyCRF}</div>
-              <div style="font-size: 0.68rem; color: #94a3b8;">Assinatura Digital ICP-Brasil A3 · Hash: ${hashAuth}</div>
+              <div style="font-size: 0.68rem; color: #94a3b8;">Assinatura Digital ICP-Brasil / GOV.BR · Hash: ${hashAuth}</div>
             </div>
           </div>
 
@@ -4377,6 +4396,13 @@ window.openDsfPreviewModal = function(attIdOrObj, patientIdOrObj, attDate) {
   document.getElementById('btn-export-pdf-action')?.addEventListener('click', () => {
     if (typeof window.reemitirDsfPDF === 'function') {
       window.reemitirDsfPDF(att, patient, att.data_hora);
+    }
+  });
+
+  // Ação: Imprimir Cupom Térmico (ESC/POS)
+  document.getElementById('btn-thermal-dsf-action')?.addEventListener('click', () => {
+    if (typeof window.imprimirCupomTermicoEscPos === 'function') {
+      window.imprimirCupomTermicoEscPos(att, patient);
     }
   });
 

@@ -1,15 +1,15 @@
 # 💻 CRM Clínico Farmacêutico — Guia Completo do Desenvolvedor & Arquitetura de Software
 
-> **Versão:** 3.0.0  
+> **Versão:** 3.1.0  
 > **Arquitetura:** SPA Modular Vanilla JavaScript (ES Modules) + Vite 5 + LocalDB (Offline-First) + Turso Cloud (LibSQL Cluster)  
 > **Conformidade Regulatória:** CFF nº 585/2013, CFF nº 586/2013, CFF nº 654/2018, ANVISA RDC nº 44/2009 e RDC nº 786/2023  
-> **Última Atualização:** Agosto/2026
+> **Última Atualização:** Setembro/2026
 
 ---
 
 ## 📐 1. Organograma da Arquitetura do Sistema
 
-O **CRM Clínico Farmacêutico v3.0** foi construído com arquitetura modular, sem acoplamento a frameworks pesados, garantindo carregamento instantâneo (< 200ms) e operação 100% resiliente em modo Offline-First.
+O **CRM Clínico Farmacêutico v3.1** foi construído com arquitetura modular, sem acoplamento a frameworks pesados, garantindo carregamento instantâneo (< 200ms) e operação 100% resiliente em modo Offline-First.
 
 ```mermaid
 graph TD
@@ -196,23 +196,28 @@ CRM Clínico Farmacêutico/
 │   ├── modules/
 │   │   ├── auth.js              # Autenticação, RBAC e sessões
 │   │   ├── cdssEngine.js        # Motor 4D de interações e alertas de segurança
+│   │   ├── digitalCert.js       # Chancela Digital ICP-Brasil / GOV.BR e Carimbo do Tempo (ACT)
 │   │   ├── financialParams.js   # Gestão de categorias financeiras e formas de pagamento
+│   │   ├── postCareAutomation.js# Automação de Follow-up D+2 e Alerta de Refill D-5 via WhatsApp
 │   │   ├── simulationManager.js # Sandbox de simulação e rotinas de limpeza segura
 │   │   ├── sync.js              # Sincronização inteligente com Turso Cloud LibSQL
+│   │   ├── thermalReceipt.js    # Impressão térmica ESC/POS (58mm/80mm) para vendas e cupom clínico
+│   │   ├── tlrModal.js          # Testes Laboratoriais Remotos (RDC 786/2023) e Laudo em PDF
 │   │   └── ui.js                # Modais, Toasts, Confirmações e utilitários visuais
 │   └── tabs/
 │       ├── dashboard.js         # Gráficos, métricas clínicas e indicadores
-│       ├── farmacia.js          # Balcão SOAP, triagem <60s, MIPs e vacinas
-│       ├── patients.js          # Prontuário longitudinal e Portal do Paciente PWA
+│       ├── doctors.js           # Prontuário médico/farmacêutico e Telemetria Gráfica (Chart.js)
+│       ├── pharmacy.js          # Balcão SOAP, triagem <60s, MIPs e vacinas
+│       ├── patients.js          # Prontuário longitudinal, TLR e Portal do Paciente PWA
 │       ├── inventory.js         # Estoque, leitor de código de barras e lotes
 │       ├── financial.js         # Controle financeiro, Abas Neon e DRE
 │       ├── reports.js           # Declarações DSF e relatórios executivos
-│       └── settings.js          # Painel central em 7 Agrupamentos Estruturados
+│       └── settings.js          # Painel central com dados do estabelecimento e assinatura digital
 ├── docs/                        # Documentação técnica e arquitetural
 ├── api/                         # Endpoints Serverless (Vercel)
 ├── index.html                   # HTML base com fontes Outfit/Inter e FontAwesome
 ├── vite.config.js               # Configuração do empacotador Vite
-└── package.json                 # Manifesto do projeto v3.0.0
+└── package.json                 # Manifesto do projeto v3.1.0
 ```
 
 ---

@@ -17,6 +17,9 @@
 6. [Gestão Financeira, PDV Rápido & Boletos FEBRABAN](#6-gestão-financeira-pdv-rápido--boletos-febraban)
 7. [Central de Relatórios & Exportação Direta de PDF A4](#7-central-de-relatórios--exportação-direta-de-pdf-a4)
 8. [Configurações, Backup & Sincronização Cloud](#8-configurações-backup--sincronização-cloud)
+9. [Testes Laboratoriais Remotos (TLR - RDC 786/2023) & Laudo Oficial](#9-testes-laboratoriais-remotos-tlr---rdc-7862023--laudo-oficial)
+10. [Automação de Pós-Atendimento & Adesão (WhatsApp D+2 / Refill D-5)](#10-automação-de-pós-atendimento--adesão-whatsapp-d2--refill-d-5)
+11. [Chancela Digital ICP-Brasil / GOV.BR & Impressão Térmica ESC/POS](#11-chancela-digital-icp-brasil--govbr--impressão-térmica-escpos)
 
 ---
 
@@ -175,3 +178,55 @@ Clique no ícone de carrinho para visualizar todas as compras e medicamentos já
 ### 8.3. Sandbox de Demonstração & HARD RESET Atômico Seguro
 - O sistema disponibiliza no Agrupamento 6 o gerador de dados de teste (com a tag `[SIMULADO]`).
 - **Limpeza Profunda (HARD RESET):** Remove com 1 clique todas as consultas, prescrições, compras, vendas PDV e movimentações financeiras de teste. O expurgo é sincronizado atômica e simultaneamente no banco local (IndexedDB) e na nuvem (Turso Cloud), garantindo a eliminação total de registros órfãos ou resíduos, mantendo intactos os dados cadastrais da farmácia e os operadores do sistema.
+
+---
+
+## 9. Testes Laboratoriais Remotos (TLR - RDC 786/2023) & Laudo Oficial
+
+O módulo de **Exames de Análises Clínicas em Farmácia (TLR)** foi desenvolvido em estrita conformidade com a **RDC ANVISA nº 786/2023** e resoluções do CFF:
+
+### 9.1. Catálogo de Exames Rápidos Homologados
+- **Hemoglobina Glicada (HbA1c):** Monitoramento do controle glicêmico longitudinal do paciente diabético.
+- **Perfil Lipídico Completo:** Colesterol Total, HDL, Triglicerídeos e cálculo de LDL.
+- **Beta-HCG Quantitativo/Qualitativo:** Teste imunocromatográfico rápido de gravidez com consentimento informado.
+- **Painel Respiratório Combinado (COVID-19 Ag + Influenza A/B):** Detecção rápida diferencial por swab nasofaríngeo.
+- **Dengue NS1 Ag / Anticorpos IgG/IgM:** Triagem rápida de arboviroses com alerta de choque e plaquetopenia.
+- **Glicemia Capilar de Jejum / Pós-Prandial:** Triagem pontual de hipoglicemia e hiperglicemia.
+- **Streptococcus Grupo A (Strep A):** Diferenciação imediata de faringoamigdalite bacteriana vs. viral.
+- **Painel Duo ISTs (HIV 1/2 + Sífilis):** Triagem rápida com protocolo de acolhimento e encaminhamento CTA/SAE.
+
+### 9.2. Campos Obrigatórios de Rastreabilidade
+- **Número do Lote & Data de Validade:** Rastreabilidade estrita do kit comercial.
+- **Registro ANVISA:** Identificação sanitária do fabricante e metodologia (Ex.: Imunocromatografia ou Fluorescência).
+- **Parecer Clínico Farmacêutico:** Campo aberto para anotações de conduta, orientações e encaminhamentos.
+- **Laudo Laboratorial Oficial em PDF A4:** Emissão imediata de laudo oficial em alta resolução vetorial com termo de responsabilidade técnica, dados do farmacêutico e chancela de autenticidade.
+
+---
+
+## 10. Automação de Pós-Atendimento & Adesão (WhatsApp D+2 / Refill D-5)
+
+A fidelização ativa e a vigilância farmacoterapêutica contínua são operadas através da central de automação:
+
+### 10.1. Follow-up Clínico D+2 (48 horas pós-atendimento)
+- O motor analisa automaticamente todos os atendimentos realizados entre 24h e 96h atrás.
+- Lista os clientes que iniciaram tratamentos ou receberam prescrição de MIPs.
+- Permite o disparo de mensagem pré-formatada via **WhatsApp Web / Desktop** indagando sobre a evolução dos sintomas, adesão e possíveis reações adversas.
+
+### 10.2. Alerta de Refill D-5 (Previsão de Término de Medicamento Contínuo)
+- Cruza as compras de medicamentos de uso contínuo (anti-hipertensivos, hipoglicemiantes, estatinas, etc.) com a quantidade de comprimidos por caixa e posologia diária.
+- Identifica os pacientes cujo medicamento terminará nos próximos 5 a 7 dias.
+- Disponibiliza botão direto de mensagem para antecipação de separação da próxima caixa na farmácia, evitando lacunas no tratamento crônico.
+
+---
+
+## 11. Chancela Digital ICP-Brasil / GOV.BR & Impressão Térmica ESC/POS
+
+### 11.1. Assinatura Digital ICP-Brasil & GOV.BR
+- **Validade Jurídica Plena:** Em conformidade com a **Medida Provisória nº 2.200-2/2001** e **Lei Federal nº 14.063/2020**.
+- **Provedores Suportados:** GOV.BR (Prata/Ouro oficial do Governo Federal), BirdID (Soluti), NeoID (Serpro), CertiSign RemoteID, VIDaaS (Valid) e certificados A1 locais em arquivo (.PFX).
+- **Selo Visual de Autenticidade:** Inclui hash criptográfico **SHA-256**, Carimbo do Tempo (ACT) e link/QR Code de verificação em **validar.iti.gov.br**.
+
+### 11.2. Impressão Térmica ESC/POS de Balcão (58mm e 80mm)
+- **Cupom Clínico de Atendimento:** Permite imprimir declarações de serviço e comprovantes de aferição de parâmetros em impressoras térmicas diretas de cupom.
+- **Layout Otimizado:** Monocromático, de alta legibilidade, com resumo dos sinais vitais aferidos, queixa principal, lista dos medicamentos indicados com posologia e identificação do Farmacêutico RT.
+
