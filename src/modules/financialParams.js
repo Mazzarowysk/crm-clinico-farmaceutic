@@ -6,6 +6,13 @@ import * as localDB from '../localDB.js';
 import { syncManager } from './sync.js';
 import { showToast, showCustomConfirm, showCustomAlert } from './ui.js';
 
+export function formatCurrency(val) {
+  const num = Number(val) || 0;
+  return num.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+}
+
+export const formatBRL = formatCurrency;
+
 export const DEFAULT_FINANCIAL_CATEGORIES = [
   // Receitas Clínicas & Balcão
   { id: 'cat-rec-1', name: 'Consulta Farmacêutica (Balcão)', type: 'receita', isDefault: true, color: '#10b981' },

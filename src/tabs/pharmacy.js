@@ -12,6 +12,7 @@ import { searchMedicationsNLP } from '../modules/medicationNLP.js';
 import { openQuickCheckoutModal } from '../modules/quickCheckoutModal.js';
 import { evaluateSepsisRisk, renderSepsisAlertCard } from '../modules/sepsisScreener.js';
 import { syncManager } from '../modules/sync.js';
+import { formatCurrency } from '../modules/financialParams.js';
 
 const API_URL = '/api';
 
@@ -1647,7 +1648,7 @@ function renderPharmacyTable(items) {
   if (elTot) elTot.textContent = items.length;
   if (elCrit) elCrit.textContent = criticalCount;
   if (elUnits) elUnits.textContent = totalUnits;
-  if (elVal) elVal.textContent = `R$ ${totalValue.toFixed(2)}`;
+  if (elVal) elVal.textContent = formatCurrency(totalValue);
 
   tbody.innerHTML = items.map(item => {
     const qty = Number(item.stockQuantity || 0);
@@ -1677,7 +1678,7 @@ function renderPharmacyTable(items) {
           ${qty}
         </td>
         <td style="padding: 12px;">${statusBadge}</td>
-        <td style="padding: 12px; color: #38bdf8;">R$ ${price.toFixed(2)}</td>
+        <td style="padding: 12px; color: #38bdf8;">${formatCurrency(price)}</td>
         <td style="padding: 12px; text-align: right;">
           <button type="button" class="btn btn-sm btn-secondary" onclick="window.editPharmacyItem('${item.id}')" style="padding: 4px 8px; font-size: 0.78rem; margin-right: 4px;">
             <i class="fa-solid fa-pen-to-square"></i>

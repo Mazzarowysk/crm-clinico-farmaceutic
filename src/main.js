@@ -29,9 +29,12 @@ import { startVoiceDictation, stopVoiceDictation, calculateMEWS, checkDrugIntera
 import { renderDigitalSignatureModal, signDocumentICP, DIGITAL_CERT_PROVIDERS } from './modules/digitalCert.js';
 import { generateTISS401XML, downloadTISSFile, TUSS_PROCEDURES } from './modules/tiss.js';
 import { evaluateSepsisRisk, renderSepsisAlertCard } from './modules/sepsisScreener.js';
+import { formatCurrency, formatBRL } from './modules/financialParams.js';
 
 window.evaluateSepsisRisk = evaluateSepsisRisk;
 window.renderSepsisAlertCard = renderSepsisAlertCard;
+window.formatCurrency = formatCurrency;
+window.formatBRL = formatBRL;
 import { openCameraBarcodeScanner, playBeepSound } from './modules/barcodeScanner.js';
 import { openQuickCheckoutModal } from './modules/quickCheckoutModal.js';
 import { printThermalReceipt, generateWhatsAppSaleText } from './modules/thermalReceipt.js';
@@ -677,58 +680,58 @@ function openLoginInstructionsModal() {
         </div>
         <div>
           <h3 style="margin: 0; font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 1.15rem; color: #ffffff;">Instruções de Acesso</h3>
-          <span style="font-size: 0.78rem; color: #94a3b8;">Credenciais do CRM Clínico Farmacêutico</span>
+          <span style="font-size: 0.78rem; color: #94a3b8;">Diretrizes e Perfis de Acesso ao Sistema</span>
         </div>
       </div>
 
       <!-- Texto de Orientação -->
       <p style="font-size: 0.84rem; color: #cbd5e1; line-height: 1.5; margin-bottom: 18px; background: #111827; padding: 12px 14px; border-radius: 10px; border-left: 3px solid #0d9488;">
-        Para acessar o sistema de demonstração clínica, utilize uma das contas pré-configuradas abaixo ou clique em <strong>"Preencher"</strong>.
+        Para acessar o sistema de demonstração clínica, selecione um dos perfis pré-configurados abaixo ou clique em <strong>"Preencher"</strong> para carregar o perfil.
       </p>
 
-      <!-- Cartões de Credenciais -->
+      <!-- Cartões de Perfis e Instruções -->
       <div style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 22px;">
         <!-- Perfil Master Oficial -->
-        <div style="background: rgba(30, 41, 59, 0.75); border: 1.5px solid rgba(245, 158, 11, 0.45); border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.15);">
-          <div>
+        <div style="background: rgba(30, 41, 59, 0.75); border: 1.5px solid rgba(245, 158, 11, 0.45); border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 14px rgba(245, 158, 11, 0.15); gap: 12px;">
+          <div style="flex: 1;">
             <div style="font-family: 'Outfit', sans-serif; font-weight: 700; font-size: 0.95rem; color: #fbbf24; display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
               <i class="fa-solid fa-crown" style="color: #f59e0b;"></i> Gestor Master (Acesso Total)
             </div>
-            <div style="font-size: 0.82rem; color: #94a3b8; font-family: monospace;">
-              Usuário: <strong style="color: #fff;">mazzarowysk</strong> &nbsp;|&nbsp; Senha: <strong style="color: #fff;">T@zm4n1c0054180</strong>
+            <div style="font-size: 0.82rem; color: #94a3b8; line-height: 1.35;">
+              Acesso irrestrito a relatórios gerais, módulos financeiros, auditoria e configurações globais.
             </div>
           </div>
-          <button type="button" class="btn-fill-cred" data-user="mazzarowysk" data-pass="T@zm4n1c0054180" style="background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.5); color: #fbbf24; padding: 7px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.2s;">
+          <button type="button" class="btn-fill-cred" data-user="mazzarowysk" data-pass="T@zm4n1c0054180" style="background: rgba(245, 158, 11, 0.2); border: 1px solid rgba(245, 158, 11, 0.5); color: #fbbf24; padding: 7px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.2s; flex-shrink: 0;">
             Preencher
           </button>
         </div>
 
         <!-- Perfil Farmacêutico Clínico -->
-        <div style="background: rgba(30, 41, 59, 0.65); border: 1px solid rgba(20, 184, 166, 0.35); border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;">
-          <div>
+        <div style="background: rgba(30, 41, 59, 0.65); border: 1px solid rgba(20, 184, 166, 0.35); border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+          <div style="flex: 1;">
             <div style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 0.92rem; color: #2dd4bf; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
               <i class="fa-solid fa-pills"></i> Farmacêutico(a) Clínico(a) / Balcão
             </div>
-            <div style="font-size: 0.82rem; color: #94a3b8; font-family: monospace;">
-              Usuário: <strong style="color: #fff;">farmacia</strong> &nbsp;|&nbsp; Senha: <strong style="color: #fff;">farmacia123</strong>
+            <div style="font-size: 0.82rem; color: #94a3b8; line-height: 1.35;">
+              Rotina assistencial, atendimento a pacientes, prescrições clínicas e controle de estoque.
             </div>
           </div>
-          <button type="button" class="btn-fill-cred" data-user="farmacia" data-pass="farmacia123" style="background: rgba(13, 148, 136, 0.2); border: 1px solid rgba(20, 184, 166, 0.5); color: #2dd4bf; padding: 7px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.2s;">
+          <button type="button" class="btn-fill-cred" data-user="farmacia" data-pass="farmacia123" style="background: rgba(13, 148, 136, 0.2); border: 1px solid rgba(20, 184, 166, 0.5); color: #2dd4bf; padding: 7px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 700; cursor: pointer; transition: all 0.2s; flex-shrink: 0;">
             Preencher
           </button>
         </div>
 
         <!-- Perfil Administrador -->
-        <div style="background: rgba(30, 41, 59, 0.65); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;">
-          <div>
+        <div style="background: rgba(30, 41, 59, 0.65); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 12px; padding: 14px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+          <div style="flex: 1;">
             <div style="font-family: 'Outfit', sans-serif; font-weight: 600; font-size: 0.92rem; color: #38bdf8; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;">
               <i class="fa-solid fa-user-shield"></i> Responsável Técnico / Admin
             </div>
-            <div style="font-size: 0.82rem; color: #94a3b8; font-family: monospace;">
-              Usuário: <strong style="color: #fff;">admin</strong> &nbsp;|&nbsp; Senha: <strong style="color: #fff;">admin123</strong>
+            <div style="font-size: 0.82rem; color: #94a3b8; line-height: 1.35;">
+              Supervisão técnica, parametrização dos módulos do sistema e gestão de cadastros.
             </div>
           </div>
-          <button type="button" class="btn-fill-cred" data-user="admin" data-pass="admin123" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; padding: 7px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">
+          <button type="button" class="btn-fill-cred" data-user="admin" data-pass="admin123" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; padding: 7px 14px; border-radius: 8px; font-size: 0.78rem; font-weight: 600; cursor: pointer; transition: all 0.2s; flex-shrink: 0;">
             Preencher
           </button>
         </div>
@@ -757,7 +760,7 @@ function openLoginInstructionsModal() {
       const passInput = document.getElementById('auth-password');
       if (userInput) userInput.value = u;
       if (passInput) passInput.value = p;
-      showToast(`✨ Credenciais de ${u} preenchidas!`);
+      showToast(`✨ Perfil ${u} selecionado!`);
       closeModal();
     });
   });
@@ -2064,7 +2067,7 @@ function initGlobalSystemSearch() {
       products.slice(0, 4).forEach(prod => {
         const prodName = prod.name || 'Produto';
         const dcb = prod.dcb || prod.active_ingredient || '';
-        const price = parseFloat(prod.sale_price || prod.price || 0).toFixed(2).replace('.', ',');
+        const price = formatCurrency(prod.sale_price || prod.price || 0);
         const stock = parseInt(prod.current_stock || prod.stock || 0, 10);
         const ean = prod.ean || prod.barcode || '';
 
@@ -2077,7 +2080,7 @@ function initGlobalSystemSearch() {
             <div style="flex: 1;">
               <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
                 <strong style="color: #f8fafc; font-size: 0.86rem;">${highlightMatch(prodName, rawQuery)}</strong>
-                <span style="font-size: 0.72rem; color: #34d399; font-weight: 700;">R$ ${price}</span>
+                <span style="font-size: 0.72rem; color: #34d399; font-weight: 700;">${price}</span>
               </div>
               <div style="font-size: 0.74rem; color: #94a3b8;">
                 ${dcb ? `<span>DCB: ${highlightMatch(dcb, rawQuery)}</span> • ` : ''}
@@ -2145,7 +2148,7 @@ function initGlobalSystemSearch() {
       sales.slice(0, 3).forEach(s => {
         const proto = s.protocol || s.id || 'VD';
         const client = s.clientName || s.patient_name || 'Consumidor';
-        const total = parseFloat(s.totalSale || s.total_price || 0).toFixed(2).replace('.', ',');
+        const total = formatCurrency(s.totalSale || s.total_price || 0);
         const pay = s.paymentMethod || 'Dinheiro';
 
         html += `
@@ -2157,7 +2160,7 @@ function initGlobalSystemSearch() {
             <div style="flex: 1;">
               <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 2px;">
                 <strong style="color: #f8fafc; font-size: 0.84rem;">Cupom #${highlightMatch(proto, rawQuery)}</strong>
-                <span style="font-size: 0.72rem; color: #34d399; font-weight: 700;">R$ ${total}</span>
+                <span style="font-size: 0.72rem; color: #34d399; font-weight: 700;">${total}</span>
               </div>
               <div style="font-size: 0.74rem; color: #94a3b8;">
                 Cliente: <strong style="color: #f1f5f9;">${highlightMatch(client, rawQuery)}</strong> • Pagto: ${highlightMatch(pay, rawQuery)}

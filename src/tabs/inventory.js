@@ -12,6 +12,7 @@ import { openCashRegisterModal } from '../modules/cashRegister.js';
 import { openSngpcBookModal, openSngpcDispensationModal } from '../modules/sngpc.js';
 import { openNFeImporterModal } from '../modules/nfeImporter.js';
 import { openPricingCalculatorModal } from '../modules/pricingCalculatorModal.js';
+import { formatCurrency } from '../modules/financialParams.js';
 
 export function renderInventoryTab(contentArea) {
   const currentUser = state.user || {};
@@ -440,8 +441,8 @@ export function renderInventoryTab(contentArea) {
 
     document.getElementById('kpi-stock-products-count').textContent = totalProducts;
     document.getElementById('kpi-stock-units-count').textContent = totalUnits.toLocaleString('pt-BR');
-    document.getElementById('kpi-stock-value-sale').textContent = `R$ ${totalSaleVal.toFixed(2).replace('.', ',')}`;
-    document.getElementById('kpi-stock-value-cost').textContent = `Custo: R$ ${totalCostVal.toFixed(2).replace('.', ',')}`;
+    document.getElementById('kpi-stock-value-sale').textContent = formatCurrency(totalSaleVal);
+    document.getElementById('kpi-stock-value-cost').textContent = `Custo: ${formatCurrency(totalCostVal)}`;
     
     const alertsEl = document.getElementById('kpi-stock-alerts');
     alertsEl.textContent = `${criticalCount + nearExpiryCount} Alertas`;
@@ -562,8 +563,8 @@ export function renderInventoryTab(contentArea) {
                   <div style="font-size: 0.68rem; color: #64748b; margin-top: 3px;">Mín: ${p.min_stock || 5} un</div>
                 </td>
                 <td style="padding: 12px 10px; text-align: right;">
-                  <strong style="color: #34d399; font-size: 0.95rem;">R$ ${(parseFloat(p.sale_price || 0)).toFixed(2).replace('.', ',')}</strong>
-                  <div style="font-size: 0.7rem; color: #94a3b8;">Custo: R$ ${(parseFloat(p.cost_price || 0)).toFixed(2).replace('.', ',')}</div>
+                  <strong style="color: #34d399; font-size: 0.95rem;">${formatCurrency(p.sale_price)}</strong>
+                  <div style="font-size: 0.7rem; color: #94a3b8;">Custo: ${formatCurrency(p.cost_price)}</div>
                 </td>
                 <td style="padding: 12px 10px; text-align: right;">
                   <div style="display: inline-flex; gap: 6px;">
@@ -796,7 +797,7 @@ export function renderInventoryTab(contentArea) {
                       </div>
                       <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 6px; font-size: 0.78rem;">
                         <span style="color: #34d399; font-weight: 700;">Saldo: ${p.current_stock || 0} un</span>
-                        <span style="color: #38bdf8;">R$ ${(parseFloat(p.sale_price || 0)).toFixed(2).replace('.', ',')}</span>
+                        <span style="color: #38bdf8;">${formatCurrency(p.sale_price)}</span>
                       </div>
                     </div>
 

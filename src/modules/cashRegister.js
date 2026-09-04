@@ -6,6 +6,7 @@ import { state } from '../state.js';
 import { showToast, showCustomAlert, showCustomConfirm } from './ui.js';
 import { syncManager } from './sync.js';
 import { printThermalReceipt } from './thermalReceipt.js';
+import { formatCurrency } from './financialParams.js';
 
 // Retorna o caixa atualmente aberto
 export function getActiveCashRegister() {
@@ -105,7 +106,7 @@ export function openCashRegisterModal(onUpdated = null) {
 
       localDB.insert('cash_registers', newRegister);
       syncManager.pushToCloud(false);
-      showToast(`✅ Caixa #${newRegister.protocol} aberto com R$ ${initialCash.toFixed(2).replace('.', ',')} de fundo de troco!`);
+      showToast(`✅ Caixa #${newRegister.protocol} aberto com ${formatCurrency(initialCash)} de fundo de troco!`);
       closeModal();
       if (typeof onUpdated === 'function') onUpdated();
     });
@@ -184,14 +185,14 @@ export function openCashRegisterModal(onUpdated = null) {
           <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px;">
             <div style="font-size: 0.72rem; color: #94a3b8; text-transform: uppercase;">Fundo Inicial</div>
             <div style="font-size: 1.25rem; font-weight: 800; color: #fff; margin-top: 2px; font-family: 'Outfit';">
-              R$ ${(activeCash.initial_cash || 0).toFixed(2).replace('.', ',')}
+              ${formatCurrency(activeCash.initial_cash || 0)}
             </div>
           </div>
 
           <div style="background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; padding: 12px;">
             <div style="font-size: 0.72rem; color: #34d399; text-transform: uppercase;">Total Vendas</div>
             <div style="font-size: 1.25rem; font-weight: 800; color: #34d399; margin-top: 2px; font-family: 'Outfit';">
-              R$ ${totalVendas.toFixed(2).replace('.', ',')}
+              ${formatCurrency(totalVendas)}
             </div>
             <small style="font-size: 0.68rem; color: #94a3b8;">${sales.length} cupom(ns)</small>
           </div>
@@ -199,7 +200,7 @@ export function openCashRegisterModal(onUpdated = null) {
           <div style="background: rgba(56, 189, 248, 0.12); border: 1.5px solid rgba(56, 189, 248, 0.4); border-radius: 12px; padding: 12px;">
             <div style="font-size: 0.72rem; color: #38bdf8; text-transform: uppercase; font-weight: 700;">💵 Dinheiro na Gaveta</div>
             <div style="font-size: 1.35rem; font-weight: 900; color: #38bdf8; margin-top: 2px; font-family: 'Outfit';">
-              R$ ${expectedCashInDrawer.toFixed(2).replace('.', ',')}
+              ${formatCurrency(expectedCashInDrawer)}
             </div>
             <small style="font-size: 0.68rem; color: #94a3b8;">Esperado físico</small>
           </div>
@@ -207,7 +208,7 @@ export function openCashRegisterModal(onUpdated = null) {
           <div style="background: rgba(245, 158, 11, 0.12); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 12px;">
             <div style="font-size: 0.72rem; color: #fbbf24; text-transform: uppercase;">Retiradas / Sangrias</div>
             <div style="font-size: 1.25rem; font-weight: 800; color: #fbbf24; margin-top: 2px; font-family: 'Outfit';">
-              - R$ ${totalSangria.toFixed(2).replace('.', ',')}
+              - ${formatCurrency(totalSangria)}
             </div>
           </div>
 
@@ -222,23 +223,23 @@ export function openCashRegisterModal(onUpdated = null) {
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; font-size: 0.8rem;">
             <div style="background: rgba(15, 23, 42, 0.6); padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.04);">
               <span style="color: #94a3b8; display: block; font-size: 0.72rem;">💵 Dinheiro:</span>
-              <strong style="color: #fff;">R$ ${totalDinheiro.toFixed(2).replace('.', ',')}</strong>
+              <strong style="color: #fff;">${formatCurrency(totalDinheiro)}</strong>
             </div>
             <div style="background: rgba(15, 23, 42, 0.6); padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.04);">
               <span style="color: #94a3b8; display: block; font-size: 0.72rem;">📱 PIX:</span>
-              <strong style="color: #06b6d4;">R$ ${totalPix.toFixed(2).replace('.', ',')}</strong>
+              <strong style="color: #06b6d4;">${formatCurrency(totalPix)}</strong>
             </div>
             <div style="background: rgba(15, 23, 42, 0.6); padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.04);">
               <span style="color: #94a3b8; display: block; font-size: 0.72rem;">💳 Cartão Débito:</span>
-              <strong style="color: #38bdf8;">R$ ${totalDebito.toFixed(2).replace('.', ',')}</strong>
+              <strong style="color: #38bdf8;">${formatCurrency(totalDebito)}</strong>
             </div>
             <div style="background: rgba(15, 23, 42, 0.6); padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.04);">
               <span style="color: #94a3b8; display: block; font-size: 0.72rem;">💳 Cartão Crédito:</span>
-              <strong style="color: #a855f7;">R$ ${totalCredito.toFixed(2).replace('.', ',')}</strong>
+              <strong style="color: #a855f7;">${formatCurrency(totalCredito)}</strong>
             </div>
             <div style="background: rgba(15, 23, 42, 0.6); padding: 8px 10px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.04);">
               <span style="color: #94a3b8; display: block; font-size: 0.72rem;">📋 Convênio/Prazo:</span>
-              <strong style="color: #fbbf24;">R$ ${totalConvenio.toFixed(2).replace('.', ',')}</strong>
+              <strong style="color: #fbbf24;">${formatCurrency(totalConvenio)}</strong>
             </div>
           </div>
         </div>
@@ -273,7 +274,7 @@ export function openCashRegisterModal(onUpdated = null) {
                     <small style="color: #64748b; display: block; font-size: 0.68rem;">${new Date(m.created_at).toLocaleTimeString('pt-BR')}</small>
                   </div>
                   <strong style="font-size: 0.88rem; color: ${m.type === 'suprimento' ? '#34d399' : '#f87171'};">
-                    ${m.type === 'suprimento' ? '+' : '-'} R$ ${(parseFloat(m.amount || 0)).toFixed(2).replace('.', ',')}
+                    ${m.type === 'suprimento' ? '+' : '-'} ${formatCurrency(m.amount || 0)}
                   </strong>
                 </div>
               `).join('')}
@@ -420,7 +421,7 @@ function openMovementModal(activeCash, type, onDone) {
 
     localDB.update('cash_registers', activeCash.id, { movements });
     syncManager.pushToCloud(false);
-    showToast(`✅ ${isSuprimento ? 'Suprimento' : 'Sangria'} de R$ ${amount.toFixed(2).replace('.', ',')} registrado!`);
+    showToast(`✅ ${isSuprimento ? 'Suprimento' : 'Sangria'} de ${formatCurrency(amount)} registrado!`);
     closeMov();
     if (typeof onDone === 'function') onDone();
   });
@@ -439,31 +440,36 @@ function openCloseCashVerificationModal(cashData, onClosed) {
   modal.innerHTML = `
     <div style="width: 100%; max-width: 480px; background: #0f172a; border: 1.5px solid rgba(239, 68, 68, 0.5); border-radius: 20px; padding: 24px; box-shadow: 0 25px 60px rgba(0,0,0,0.95); text-align: center;">
       
-      <div style="width: 50px; height: 50px; border-radius: 50%; background: rgba(239, 68, 68, 0.15); border: 2px solid #ef4444; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px; color: #f87171; font-size: 1.5rem;">
+      <div style="width: 54px; height: 54px; border-radius: 50%; background: rgba(239, 68, 68, 0.15); border: 2px solid #ef4444; display: flex; align-items: center; justify-content: center; margin: 0 auto 12px auto; color: #f87171; font-size: 1.5rem;">
         <i class="fa-solid fa-lock"></i>
       </div>
 
-      <h3 style="margin: 0; color: #fff; font-family: 'Outfit'; font-size: 1.3rem; font-weight: 800;">
-        Conferência e Fechamento de Caixa
+      <h3 style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.3rem; color: #fff; font-weight: 800;">
+        Fechamento de Caixa Cego
       </h3>
-      <p style="margin: 4px 0 16px; font-size: 0.8rem; color: #94a3b8;">
-        Informe o valor total em cédulas e moedas contado na gaveta.
+      <p style="color: #94a3b8; font-size: 0.82rem; margin: 6px 0 16px 0;">
+        Protocolo <strong style="color: #38bdf8;">#${cashData.activeCash.protocol}</strong> &bull; Operador: <strong>${cashData.activeCash.operator_name || 'Operador'}</strong>
       </p>
 
-      <form id="form-blind-close" style="text-align: left; display: flex; flex-direction: column; gap: 12px;">
-        <div style="background: rgba(30, 41, 59, 0.4); border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; padding: 12px;">
-          <label style="display: block; font-size: 0.78rem; color: #38bdf8; font-weight: 700; margin-bottom: 4px;">
-            * Valor em Dinheiro Contado na Gaveta (R$):
+      <form id="form-blind-close" style="text-align: left;">
+        <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px; margin-bottom: 16px;">
+          <label style="display: block; font-size: 0.85rem; color: #f8fafc; font-weight: 700; margin-bottom: 6px;">
+            <i class="fa-solid fa-money-bill-wave" style="color: #34d399;"></i> Valor Físico Contado na Gaveta (R$):
           </label>
-          <input type="number" id="input-counted-cash" step="0.01" min="0" required placeholder="0.00" class="form-input" style="font-size: 1.25rem; font-weight: 900; color: #fff; height: 44px; text-align: center; border-color: #38bdf8;">
+          <input type="number" id="input-counted-cash" step="0.01" min="0" placeholder="0,00" required autofocus style="width: 100%; height: 44px; font-size: 1.25rem; font-weight: 800; font-family: 'Outfit'; background: #0f172a; border: 1.5px solid #10b981; color: #34d399; border-radius: 8px; padding: 0 12px; box-sizing: border-box;" />
+          <small style="display: block; color: #64748b; font-size: 0.72rem; margin-top: 6px;">
+            Conte todas as cédulas e moedas físicas presentes na gaveta antes de encerrar.
+          </small>
         </div>
 
-        <div id="diff-preview" style="display: none; padding: 10px; border-radius: 8px; font-size: 0.84rem; text-align: center;"></div>
+        <div id="blind-close-diff-preview" style="display: none; padding: 12px; border-radius: 8px; margin-bottom: 16px; font-size: 0.85rem; text-align: center;"></div>
 
-        <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
-          <button type="button" id="btn-cancel-close-verify" class="btn" style="background: rgba(255,255,255,0.06); color: #94a3b8; border: 1px solid rgba(255,255,255,0.12); padding: 9px 16px; border-radius: 8px;">Voltar</button>
-          <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #ef4444, #dc2626); border: none; padding: 9px 22px; border-radius: 8px; font-weight: 700; color: #fff;">
-            Confirmar Fechamento
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+          <button type="button" id="btn-cancel-blind-close" class="btn" style="background: rgba(255,255,255,0.06); color: #94a3b8; border: 1px solid rgba(255,255,255,0.12); padding: 9px 16px; border-radius: 8px; cursor: pointer;">
+            Voltar
+          </button>
+          <button type="submit" class="btn btn-primary" style="background: linear-gradient(135deg, #ef4444, #dc2626); border: none; padding: 9px 22px; border-radius: 8px; font-weight: 700; color: #fff; cursor: pointer;">
+            Confirmar Fechamento &amp; Imprimir Extrato
           </button>
         </div>
       </form>
@@ -474,10 +480,10 @@ function openCloseCashVerificationModal(cashData, onClosed) {
   document.body.appendChild(modal);
 
   const closeVerify = () => modal.remove();
-  document.getElementById('btn-cancel-close-verify')?.addEventListener('click', closeVerify);
+  document.getElementById('btn-cancel-blind-close')?.addEventListener('click', closeVerify);
 
   const countedInput = document.getElementById('input-counted-cash');
-  const diffPreview = document.getElementById('diff-preview');
+  const diffPreview = document.getElementById('blind-close-diff-preview');
 
   countedInput?.addEventListener('input', () => {
     const counted = parseFloat(countedInput.value || 0);
@@ -494,12 +500,12 @@ function openCloseCashVerificationModal(cashData, onClosed) {
       diffPreview.style.background = 'rgba(56, 189, 248, 0.15)';
       diffPreview.style.border = '1px solid rgba(56, 189, 248, 0.3)';
       diffPreview.style.color = '#38bdf8';
-      diffPreview.innerHTML = `<strong>🔵 Sobra de Caixa:</strong> + R$ ${diff.toFixed(2).replace('.', ',')}`;
+      diffPreview.innerHTML = `<strong>🔵 Sobra de Caixa:</strong> + ${formatCurrency(diff)}`;
     } else {
       diffPreview.style.background = 'rgba(239, 68, 68, 0.15)';
       diffPreview.style.border = '1px solid rgba(239, 68, 68, 0.3)';
       diffPreview.style.color = '#f87171';
-      diffPreview.innerHTML = `<strong>⚠️ Falta de Caixa:</strong> - R$ ${Math.abs(diff).toFixed(2).replace('.', ',')}`;
+      diffPreview.innerHTML = `<strong>⚠️ Falta de Caixa:</strong> - ${formatCurrency(Math.abs(diff))}`;
     }
   });
 
@@ -589,42 +595,42 @@ export function printCashRegisterReceipt(data, paperWidth = '80mm') {
       <div class="bold">RESUMO FINANCEIRO:</div>
       <div class="row">
         <span>Fundo de Troco Inicial:</span>
-        <span>R$ ${(data.activeCash?.initial_cash || 0).toFixed(2).replace('.', ',')}</span>
+        <span>${formatCurrency(data.activeCash?.initial_cash || 0)}</span>
       </div>
       <div class="row">
         <span>Total Vendas (${data.salesCount || 0} un):</span>
-        <strong>R$ ${(data.totalVendas || 0).toFixed(2).replace('.', ',')}</strong>
+        <strong>${formatCurrency(data.totalVendas || 0)}</strong>
       </div>
       <div class="row">
         <span>(+) Suprimentos:</span>
-        <span>R$ ${(data.totalSuprimento || 0).toFixed(2).replace('.', ',')}</span>
+        <span>${formatCurrency(data.totalSuprimento || 0)}</span>
       </div>
       <div class="row">
         <span>(-) Sangrias / Retiradas:</span>
-        <span>R$ ${(data.totalSangria || 0).toFixed(2).replace('.', ',')}</span>
+        <span>${formatCurrency(data.totalSangria || 0)}</span>
       </div>
 
       <div class="divider"></div>
       <div class="bold">POR FORMA DE PAGAMENTO:</div>
-      <div class="row"><span>Dinheiro:</span><span>R$ ${(data.totalDinheiro || 0).toFixed(2).replace('.', ',')}</span></div>
-      <div class="row"><span>PIX:</span><span>R$ ${(data.totalPix || 0).toFixed(2).replace('.', ',')}</span></div>
-      <div class="row"><span>Cartão Débito:</span><span>R$ ${(data.totalDebito || 0).toFixed(2).replace('.', ',')}</span></div>
-      <div class="row"><span>Cartão Crédito:</span><span>R$ ${(data.totalCredito || 0).toFixed(2).replace('.', ',')}</span></div>
-      <div class="row"><span>Convênio/Prazo:</span><span>R$ ${(data.totalConvenio || 0).toFixed(2).replace('.', ',')}</span></div>
+      <div class="row"><span>Dinheiro:</span><span>${formatCurrency(data.totalDinheiro || 0)}</span></div>
+      <div class="row"><span>PIX:</span><span>${formatCurrency(data.totalPix || 0)}</span></div>
+      <div class="row"><span>Cartão Débito:</span><span>${formatCurrency(data.totalDebito || 0)}</span></div>
+      <div class="row"><span>Cartão Crédito:</span><span>${formatCurrency(data.totalCredito || 0)}</span></div>
+      <div class="row"><span>Convênio/Prazo:</span><span>${formatCurrency(data.totalConvenio || 0)}</span></div>
 
       <div class="divider"></div>
       <div class="row bold" style="font-size: ${is58mm ? '11px' : '13px'};">
         <span>DINHEIRO ESPERADO:</span>
-        <span>R$ ${(data.expectedCashInDrawer || 0).toFixed(2).replace('.', ',')}</span>
+        <span>${formatCurrency(data.expectedCashInDrawer || 0)}</span>
       </div>
       ${data.isFinal ? `
         <div class="row">
           <span>Dinheiro Contado:</span>
-          <strong>R$ ${(data.countedCash || 0).toFixed(2).replace('.', ',')}</strong>
+          <strong>${formatCurrency(data.countedCash || 0)}</strong>
         </div>
         <div class="row bold" style="color: #000;">
           <span>Diferença (Sobra/Falta):</span>
-          <span>R$ ${(data.difference || 0).toFixed(2).replace('.', ',')}</span>
+          <span>${formatCurrency(data.difference || 0)}</span>
         </div>
       ` : ''}
 

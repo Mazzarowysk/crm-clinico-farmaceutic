@@ -4,6 +4,7 @@
 import { state } from '../state.js';
 import * as localDB from '../localDB.js';
 import { showToast } from './ui.js';
+import { formatCurrency } from './financialParams.js';
 
 export function printThermalReceipt(saleData, paperWidth = '80mm') {
   const is58mm = paperWidth === '58mm';
@@ -32,8 +33,8 @@ export function printThermalReceipt(saleData, paperWidth = '80mm') {
 
   const itemsHtml = (saleData.items || []).map((item, idx) => {
     const qty = item.quantity || 1;
-    const price = parseFloat(item.unitPrice || 0).toFixed(2).replace('.', ',');
-    const subtotal = parseFloat(item.subtotal || (qty * item.unitPrice)).toFixed(2).replace('.', ',');
+    const price = formatCurrency(item.unitPrice || 0);
+    const subtotal = formatCurrency(item.subtotal || (qty * (item.unitPrice || 0)));
     const name = item.product?.name || item.name || 'Produto';
     const ean = item.product?.ean || item.ean || '';
 
@@ -44,18 +45,18 @@ export function printThermalReceipt(saleData, paperWidth = '80mm') {
         </div>
         ${ean ? `<div style="font-size: 8.5px; color: #64748b; font-family: monospace;">EAN: ${ean}</div>` : ''}
         <div style="display: flex; justify-content: space-between; font-size: ${is58mm ? '9.5px' : '11.5px'}; color: #334155; margin-top: 2px;">
-          <span>${qty} un x R$ ${price}</span>
-          <strong style="color: #0f172a;">R$ ${subtotal}</strong>
+          <span>${qty} un x ${price}</span>
+          <strong style="color: #0f172a;">${subtotal}</strong>
         </div>
       </div>
     `;
   }).join('');
 
-  const subtotalGross = parseFloat(saleData.subtotalGross || saleData.totalSale || 0).toFixed(2).replace('.', ',');
-  const discountVal = parseFloat(saleData.discount || 0).toFixed(2).replace('.', ',');
-  const totalNet = parseFloat(saleData.totalSale || 0).toFixed(2).replace('.', ',');
-  const paidVal = parseFloat(saleData.paidAmount || saleData.totalSale || 0).toFixed(2).replace('.', ',');
-  const changeVal = parseFloat(saleData.change || 0).toFixed(2).replace('.', ',');
+  const subtotalGross = formatCurrency(saleData.subtotalGross || saleData.totalSale || 0);
+  const discountVal = formatCurrency(saleData.discount || 0);
+  const totalNet = formatCurrency(saleData.totalSale || 0);
+  const paidVal = formatCurrency(saleData.paidAmount || saleData.totalSale || 0);
+  const changeVal = formatCurrency(saleData.change || 0);
   const receiptBodyHtml = `
     <div id="thermal-receipt-sheet" style="background: #fef08a; color: #000000; font-family: 'Courier New', Courier, monospace; width: 100%; max-width: ${widthPx}; margin: 0 auto; padding: 14px 12px; line-height: 1.3; font-size: ${fontSize}; box-sizing: border-box; box-shadow: 0 4px 14px rgba(0,0,0,0.15); border: 1px solid rgba(0,0,0,0.08);">
       <div style="text-align: center; margin-bottom: 6px;">
@@ -300,26 +301,26 @@ export function exportThermalReceiptPDF(saleData, paperWidth = '80mm') {
   items.forEach((it, i) => {
     const name = it.product?.name || it.name || 'Produto';
     const qty = it.quantity || 1;
-    const price = parseFloat(it.unitPrice || 0).toFixed(2).replace('.', ',');
-    const sub = parseFloat(it.subtotal || (qty * it.unitPrice)).toFixed(2).replace('.', ',');
+    const price = formatCurrency(it.unitPrice || 0);
+    const sub = formatCurrency(it.subtotal || (qty * (it.unitPrice || 0)));
 
     doc.setFont('courier', 'bold');
     doc.text(`${i + 1}. ${name.slice(0, 28)}`, 4, y);
     y += 3.2;
     doc.setFont('courier', 'normal');
-    doc.text(`   ${qty} un x R$ ${price}`, 4, y);
-    doc.text(`R$ ${sub}`, widthMm - 4, y, { align: 'right' });
+    doc.text(`   ${qty} un x ${price}`, 4, y);
+    doc.text(`${sub}`, widthMm - 4, y, { align: 'right' });
     y += 3.8;
   });
 
   doc.text('------------------------------------------------', center, y, { align: 'center' });
   y += 4;
 
-  const totalNet = parseFloat(saleData.totalSale || 0).toFixed(2).replace('.', ',');
+  const totalNet = formatCurrency(saleData.totalSale || 0);
   doc.setFont('courier', 'bold');
   doc.setFontSize(is58 ? 9 : 10.5);
   doc.text('TOTAL A PAGAR:', 4, y);
-  doc.text(`R$ ${totalNet}`, widthMm - 4, y, { align: 'right' });
+  doc.text(`${totalNet}`, widthMm - 4, y, { align: 'right' });
   y += 5;
 
   doc.setFont('courier', 'normal');
@@ -445,7 +446,7 @@ export function openSaleDetailsModal(saleOrTransaction) {
   const existing = document.getElementById('sale-details-modal');
   if (existing) existing.remove();
 
-  const totalFormatted = (parseFloat(sale.totalSale || sale.amount || 0)).toFixed(2).replace('.', ',');
+  const totalFormatted = formatCurrency(sale.totalSale || sale.amount || 0);
   const items = sale.items || [];
 
   const modal = document.createElement('div');
@@ -508,9 +509,9 @@ export function openSaleDetailsModal(saleOrTransaction) {
           <div style="display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px dashed rgba(255,255,255,0.08); font-size: 0.82rem;">
             <div>
               <strong style="color: #f8fafc;">${idx + 1}. ${it.product?.name || it.name || 'Produto'}</strong>
-              <div style="font-size: 0.72rem; color: #94a3b8;">${it.quantity || 1} un x R$ ${(parseFloat(it.unitPrice || it.total_price || 0)).toFixed(2).replace('.', ',')}</div>
+              <div style="font-size: 0.72rem; color: #94a3b8;">${it.quantity || 1} un x ${formatCurrency(it.unitPrice || it.total_price || 0)}</div>
             </div>
-            <strong style="color: #34d399;">R$ ${(parseFloat(it.subtotal || it.total_price || it.unitPrice || 0)).toFixed(2).replace('.', ',')}</strong>
+            <strong style="color: #34d399;">${formatCurrency(it.subtotal || it.total_price || it.unitPrice || 0)}</strong>
           </div>
         `).join('')}
       </div>
@@ -518,7 +519,7 @@ export function openSaleDetailsModal(saleOrTransaction) {
       <!-- Total -->
       <div style="display: flex; justify-content: space-between; align-items: baseline; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; padding: 10px 14px; margin-bottom: 16px;">
         <span style="color: #f8fafc; font-weight: 700; font-size: 0.95rem;">TOTAL DA VENDA:</span>
-        <span style="font-size: 1.45rem; font-weight: 800; color: #34d399; font-family: 'Outfit';">R$ ${totalFormatted}</span>
+        <span style="font-size: 1.45rem; font-weight: 800; color: #34d399; font-family: 'Outfit';">${totalFormatted}</span>
       </div>
 
       <!-- Ações de Reemissão -->
@@ -575,7 +576,7 @@ if (typeof window !== 'undefined') {
 export function generateWhatsAppSaleText(saleData) {
   const saleId = saleData.protocol || `VD-${Date.now().toString().slice(-6)}`;
   const clientName = saleData.clientName || 'Cliente';
-  const total = parseFloat(saleData.totalSale || 0).toFixed(2).replace('.', ',');
+  const total = formatCurrency(saleData.totalSale || 0);
   const dateStr = new Date(saleData.created_at || Date.now()).toLocaleString('pt-BR');
 
   let text = `*COMPROVANTE DE DISPENSAÇÃO & VENDA* 🧾\n`;
@@ -587,12 +588,12 @@ export function generateWhatsAppSaleText(saleData) {
 
   (saleData.items || []).forEach((item, i) => {
     const qty = item.quantity || 1;
-    const sub = parseFloat(item.subtotal || (qty * item.unitPrice)).toFixed(2).replace('.', ',');
-    text += `${i + 1}. ${item.product?.name || item.name} (${qty}x) = R$ ${sub}\n`;
+    const sub = formatCurrency(item.subtotal || (qty * (item.unitPrice || 0)));
+    text += `${i + 1}. ${item.product?.name || item.name} (${qty}x) = ${sub}\n`;
   });
 
   text += `----------------------------------------\n`;
-  text += `*TOTAL PAGO:* R$ ${total} (${saleData.paymentMethod || 'Dinheiro'})\n\n`;
+  text += `*TOTAL PAGO:* ${total} (${saleData.paymentMethod || 'Dinheiro'})\n\n`;
   text += `💊 _Dúvidas sobre o uso dos medicamentos? Consulte nosso farmacêutico!_\n`;
   text += `Agradecemos a sua preferência!`;
 

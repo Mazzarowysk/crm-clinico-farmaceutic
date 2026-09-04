@@ -5,6 +5,7 @@ import * as localDB from '../localDB.js';
 import { state } from '../state.js';
 import { showToast, showCustomAlert, showCustomConfirm } from './ui.js';
 import { syncManager } from './sync.js';
+import { formatCurrency } from './financialParams.js';
 
 // Calcula status e agrupamentos de validade para todos os produtos
 export function analyzeExpiryRisk(products = []) {
@@ -153,8 +154,8 @@ export function openPromoDiscountModal(product, onUpdated = null) {
           Validade: <strong style="color: #fbbf24;">${product.expiry_date ? new Date(product.expiry_date).toLocaleDateString('pt-BR') : 'N/A'}</strong>
         </div>
         <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-top: 6px; color: #94a3b8;">
-          <span>Preço Atual: <strong>R$ ${currentPrice.toFixed(2).replace('.', ',')}</strong></span>
-          <span>Custo: <strong>R$ ${costPrice.toFixed(2).replace('.', ',')}</strong></span>
+          <span>Preço Atual: <strong>${formatCurrency(currentPrice)}</strong></span>
+          <span>Custo: <strong>${formatCurrency(costPrice)}</strong></span>
         </div>
       </div>
 
@@ -172,7 +173,7 @@ export function openPromoDiscountModal(product, onUpdated = null) {
         <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 10px; padding: 10px 14px;">
           <span style="font-size: 0.82rem; color: #cbd5e1;">Novo Preço de Venda:</span>
           <strong id="promo-new-price-display" style="font-size: 1.3rem; font-weight: 800; color: #34d399; font-family: 'Outfit';">
-            R$ ${(currentPrice * 0.7).toFixed(2).replace('.', ',')}
+            ${formatCurrency(currentPrice * 0.7)}
           </strong>
         </div>
       </div>
@@ -197,7 +198,7 @@ export function openPromoDiscountModal(product, onUpdated = null) {
   const updatePrice = (pct) => {
     selectedPct = pct;
     const newPrice = Math.max(costPrice, currentPrice * (1 - pct / 100));
-    newPriceDisplay.textContent = `R$ ${newPrice.toFixed(2).replace('.', ',')}`;
+    newPriceDisplay.textContent = formatCurrency(newPrice);
   };
 
   modal.querySelectorAll('.btn-pct-promo').forEach(btn => {
@@ -231,14 +232,14 @@ export function openPromoDiscountModal(product, onUpdated = null) {
       batch: product.batch || 'N/A',
       cost_unit: costPrice,
       total_value: 0,
-      reason: `Preço Promocional FEFO (-${selectedPct}%): De R$ ${currentPrice.toFixed(2)} por R$ ${finalPrice.toFixed(2)}`,
+      reason: `Preço Promocional FEFO (-${selectedPct}%): De ${formatCurrency(currentPrice)} por ${formatCurrency(finalPrice)}`,
       patient_name: 'Campanha de Prevenção de Perdas',
       operator_name: `${state.user?.name || 'Operador'} (${state.user?.role || 'Farmacêutico'})`,
       created_at: new Date().toISOString()
     });
 
     syncManager.pushToCloud(false);
-    showToast(`🏷️ Preço promocional de R$ ${finalPrice.toFixed(2).replace('.', ',')} aplicado com sucesso!`);
+    showToast(`🏷️ Preço promocional de ${formatCurrency(finalPrice)} aplicado com sucesso!`);
     closeModal();
 
     if (typeof onUpdated === 'function') {

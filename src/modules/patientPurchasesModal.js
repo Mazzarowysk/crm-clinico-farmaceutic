@@ -5,6 +5,7 @@ import * as localDB from '../localDB.js';
 import { showToast, showCustomAlert } from './ui.js';
 import { openQuickCheckoutModal } from './quickCheckoutModal.js';
 import { printThermalReceipt, exportThermalReceiptPDF } from './thermalReceipt.js';
+import { formatCurrency } from './financialParams.js';
 
 export function openPatientPurchasesModal(patientId, patientName = 'Cliente') {
   try {
@@ -216,7 +217,7 @@ export function openPatientPurchasesModal(patientId, patientName = 'Cliente') {
             </div>
             <div>
               <small style="color: #94a3b8; font-size: 0.72rem; text-transform: uppercase; font-weight: 600;">Valor Total Acumulado</small>
-              <div style="color: #34d399; font-size: 1.15rem; font-weight: 800; font-family: 'Outfit';">R$ ${totalSpent.toFixed(2).replace('.', ',')}</div>
+              <div style="color: #34d399; font-size: 1.15rem; font-weight: 800; font-family: 'Outfit';">${formatCurrency(totalSpent)}</div>
             </div>
           </div>
           <button type="button" id="btn-new-sale-for-patient" style="background: linear-gradient(135deg, #10b981, #059669); color: #fff; border: none; padding: 8px 16px; border-radius: 8px; font-weight: 700; font-size: 0.82rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.35);">
@@ -241,7 +242,7 @@ export function openPatientPurchasesModal(patientId, patientName = 'Cliente') {
             <div style="display: flex; flex-direction: column; gap: 14px;">
               ${groupedPurchases.map((purchase, index) => {
                 const dt = purchase.created_at ? new Date(purchase.created_at).toLocaleString('pt-BR') : 'Data não informada';
-                const totalPurchaseVal = parseFloat(purchase.totalSale || 0).toFixed(2).replace('.', ',');
+                const totalPurchaseVal = formatCurrency(purchase.totalSale || 0);
                 
                 // Checar se algum item tem alerta de uso contínuo
                 const continuousItem = purchase.items.find(i => i.is_continuous);
@@ -322,7 +323,7 @@ export function openPatientPurchasesModal(patientId, patientName = 'Cliente') {
                             ${it.is_continuous ? '<span style="font-size: 0.62rem; background: rgba(56, 189, 248, 0.2); color: #38bdf8; border: 1px solid rgba(56,189,248,0.4); padding: 1px 5px; border-radius: 4px; font-weight: 700;">CONTÍNUO</span>' : ''}
                           </div>
                           <div style="font-weight: 700; color: #f1f5f9;">
-                            R$ ${parseFloat(it.total_price || (it.unit_price * it.quantity) || 0).toFixed(2).replace('.', ',')}
+                            ${formatCurrency(it.total_price || (it.unit_price * it.quantity) || 0)}
                           </div>
                         </div>
                       `).join('')}

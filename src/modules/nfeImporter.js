@@ -7,6 +7,7 @@ import { state } from '../state.js';
 import { showToast, showCustomAlert, showCustomConfirm } from './ui.js';
 import { syncManager } from './sync.js';
 import { playBeepSound } from './barcodeScanner.js';
+import { formatCurrency } from './financialParams.js';
 
 // Função para fazer o parse do arquivo XML da NF-e
 export function parseNFeXML(xmlString) {
@@ -390,7 +391,7 @@ export function openNFeImporterModal() {
     document.getElementById('nfe-emit-cnpj').textContent = `CNPJ: ${data.emitente.cnpj} (${data.emitente.uf})`;
     document.getElementById('nfe-number').textContent = `NF #${data.nNF} / Série ${data.serie}`;
     document.getElementById('nfe-date').textContent = `Emissão: ${new Date(data.dhEmi).toLocaleDateString('pt-BR')}`;
-    document.getElementById('nfe-total').textContent = `R$ ${data.totalValue.toFixed(2)}`;
+    document.getElementById('nfe-total').textContent = formatCurrency(data.totalValue);
     document.getElementById('nfe-count').textContent = `${data.itemsCount} produto(s)`;
 
     const tbody = document.getElementById('nfe-items-table-body');
@@ -424,10 +425,10 @@ export function openNFeImporterModal() {
             ${item.quantity} <small style="font-size: 0.7rem; color: #94a3b8;">${item.unit}</small>
           </td>
           <td style="padding: 10px; text-align: right; color: #fff;">
-            R$ ${item.unitCost.toFixed(2)}
+            ${formatCurrency(item.unitCost)}
           </td>
           <td style="padding: 10px; text-align: right; color: #94a3b8; font-weight: 600;">
-            R$ ${item.totalCost.toFixed(2)}
+            ${formatCurrency(item.totalCost)}
           </td>
           <td style="padding: 10px; text-align: right;">
             <input type="number" step="0.01" class="nfe-sale-price-input" data-index="${idx}" value="${item.suggestedPrice}" style="width: 80px; background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(56, 189, 248, 0.4); color: #38bdf8; font-weight: 700; font-size: 0.8rem; text-align: right; padding: 4px 6px; border-radius: 6px;">

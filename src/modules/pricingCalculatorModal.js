@@ -4,6 +4,7 @@
 import * as localDB from '../localDB.js';
 import { showToast, showCustomAlert } from './ui.js';
 import { syncManager } from './sync.js';
+import { formatCurrency } from './financialParams.js';
 
 // Presets de Margem por Categoria Farmacêutica
 const CATEGORY_PRESETS = {
@@ -87,7 +88,7 @@ export function openPricingCalculatorModal(targetProductId = null, onAppliedCall
               <option value="">-- Modo Simulação Livre (Novo Produto) --</option>
               ${allProducts.map(p => `
                 <option value="${p.id}" ${selectedProduct && selectedProduct.id === p.id ? 'selected' : ''}>
-                  ${p.name} (Custo: R$ ${(parseFloat(p.cost_price || 0)).toFixed(2)} | Venda Atual: R$ ${(parseFloat(p.sale_price || 0)).toFixed(2)})
+                  ${p.name} (Custo: ${formatCurrency(p.cost_price)} | Venda Atual: ${formatCurrency(p.sale_price)})
                 </option>
               `).join('')}
             </select>
@@ -342,14 +343,14 @@ export function openPricingCalculatorModal(targetProductId = null, onAppliedCall
       const promoPrice = Math.max(breakevenPrice, idealPrice * 0.85);
 
       // Atualizar UI em tempo real
-      document.getElementById('res-suggested-price').textContent = `R$ ${idealPrice.toFixed(2).replace('.', ',')}`;
+      document.getElementById('res-suggested-price').textContent = formatCurrency(idealPrice);
       document.getElementById('badge-markup').textContent = `Markup: ${markup.toFixed(2)}x`;
-      document.getElementById('badge-psychological-price').textContent = `Preço Psicológico: R$ ${finalPsychPrice.toFixed(2).replace('.', ',')}`;
-      document.getElementById('res-total-cost').textContent = `R$ ${effectiveCost.toFixed(2).replace('.', ',')}`;
-      document.getElementById('res-breakeven-price').textContent = `R$ ${breakevenPrice.toFixed(2).replace('.', ',')}`;
-      document.getElementById('res-total-fees').textContent = `- R$ ${totalFeesVal.toFixed(2).replace('.', ',')} (${(tax + cardFee + comm).toFixed(1)}%)`;
-      document.getElementById('res-net-profit').textContent = `R$ ${netProfitVal.toFixed(2).replace('.', ',')} (${netProfitPct.toFixed(1)}%)`;
-      document.getElementById('res-promo-price').textContent = `R$ ${promoPrice.toFixed(2).replace('.', ',')}`;
+      document.getElementById('badge-psychological-price').textContent = `Preço Psicológico: ${formatCurrency(finalPsychPrice)}`;
+      document.getElementById('res-total-cost').textContent = formatCurrency(effectiveCost);
+      document.getElementById('res-breakeven-price').textContent = formatCurrency(breakevenPrice);
+      document.getElementById('res-total-fees').textContent = `- ${formatCurrency(totalFeesVal)} (${(tax + cardFee + comm).toFixed(1)}%)`;
+      document.getElementById('res-net-profit').textContent = `${formatCurrency(netProfitVal)} (${netProfitPct.toFixed(1)}%)`;
+      document.getElementById('res-promo-price').textContent = formatCurrency(promoPrice);
 
       // Validação CMED / Anvisa
       const anvisaBox = document.getElementById('box-anvisa-status');
@@ -360,13 +361,13 @@ export function openPricingCalculatorModal(targetProductId = null, onAppliedCall
           anvisaBox.style.background = 'rgba(239, 68, 68, 0.15)';
           anvisaBox.style.borderColor = 'rgba(239, 68, 68, 0.45)';
           anvisaBox.style.color = '#f87171';
-          anvisaText.innerHTML = `⚠️ <strong>ALERTA CMED/ANVISA:</strong> O preço calculado (R$ ${idealPrice.toFixed(2)}) ultrapassa o PMC regulatório teto de R$ ${pmc.toFixed(2)}!`;
+          anvisaText.innerHTML = `⚠️ <strong>ALERTA CMED/ANVISA:</strong> O preço calculado (${formatCurrency(idealPrice)}) ultrapassa o PMC regulatório teto de ${formatCurrency(pmc)}!`;
         } else {
           const discountFromPmc = ((pmc - idealPrice) / pmc) * 100;
           anvisaBox.style.background = 'rgba(16, 185, 129, 0.12)';
           anvisaBox.style.borderColor = 'rgba(16, 185, 129, 0.35)';
           anvisaBox.style.color = '#34d399';
-          anvisaText.innerHTML = `✅ <strong>CONFORME ANVISA:</strong> Preço dentro do teto legal (PMC R$ ${pmc.toFixed(2)} &bull; Desconto de ${discountFromPmc.toFixed(1)}% ao consumidor).`;
+          anvisaText.innerHTML = `✅ <strong>CONFORME ANVISA:</strong> Preço dentro do teto legal (PMC ${formatCurrency(pmc)} &bull; Desconto de ${discountFromPmc.toFixed(1)}% ao consumidor).`;
         }
       } else {
         anvisaBox.style.background = 'rgba(56, 189, 248, 0.12)';
@@ -448,7 +449,7 @@ export function openPricingCalculatorModal(targetProductId = null, onAppliedCall
       if (!pId) {
         showCustomAlert({
           title: 'Simulação Livre',
-          message: `Preço calculado: <strong>R$ ${finalPrice.toFixed(2).replace('.', ',')}</strong>.<br><br>Para salvar automaticamente, selecione um produto cadastrado no menu superior.`,
+          message: `Preço calculado: <strong>${formatCurrency(finalPrice)}</strong>.<br><br>Para salvar automaticamente, selecione um produto cadastrado no menu superior.`,
           type: 'info'
         });
         return;
@@ -460,7 +461,7 @@ export function openPricingCalculatorModal(targetProductId = null, onAppliedCall
         sale_price: parseFloat(finalPrice.toFixed(2))
       });
 
-      showToast(`🏷️ Preço de R$ ${finalPrice.toFixed(2).replace('.', ',')} aplicado com sucesso no produto e Frente de Caixa!`);
+      showToast(`🏷️ Preço de ${formatCurrency(finalPrice)} aplicado com sucesso no produto e Frente de Caixa!`);
       syncManager.pushToCloud(false);
       closeModal();
 

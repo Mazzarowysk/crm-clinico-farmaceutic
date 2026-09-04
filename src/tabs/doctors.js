@@ -3,6 +3,7 @@ import { state, dataCache, dataCacheTimestamps } from '../state.js';
 import * as localDB from '../localDB.js';
 import { startVoiceDictation, stopVoiceDictation, calculateMEWS, checkDrugInteractions, generateWhatsAppClinicalMessage, sendToWhatsApp } from '../modules/clinicalAI.js';
 import { openTelemedicineModal } from '../modules/telemedicina.js';
+import { formatCurrency } from '../modules/financialParams.js';
 
 const API_URL = '/api';
 
@@ -1731,7 +1732,7 @@ window.openPatientHistoryModal = async function(patientId, patientName) {
                         </div>
                       </div>
                       <div style="text-align: right;">
-                        <span style="font-size: 0.9rem; font-weight: 800; color: #34d399;">R$ ${(parseFloat(pur.total_price || 0)).toFixed(2).replace('.', ',')}</span>
+                        <span style="font-size: 0.9rem; font-weight: 800; color: #34d399;">${formatCurrency(pur.total_price || 0)}</span>
                         <div style="font-size: 0.72rem; color: #94a3b8;">${pur.quantity || 1} un</div>
                       </div>
                     </div>

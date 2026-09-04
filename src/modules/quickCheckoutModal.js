@@ -9,6 +9,7 @@ import { playBeepSound, openCameraBarcodeScanner } from './barcodeScanner.js';
 import { printThermalReceipt, generateWhatsAppSaleText } from './thermalReceipt.js';
 import { getActiveCashRegister, openCashRegisterModal } from './cashRegister.js';
 import { generatePixPayload, getPixQRCodeUrl } from './pixGenerator.js';
+import { formatCurrency } from './financialParams.js';
 
 export function openQuickCheckoutModal(onFinished = null, initialData = null) {
   const existing = document.getElementById('quick-checkout-modal');
@@ -117,7 +118,7 @@ export function openQuickCheckoutModal(onFinished = null, initialData = null) {
               <select id="select-pdv-product-manual" class="form-input" style="flex: 1; background: #1e293b; color: #fff; font-size: 0.82rem; height: 36px;">
                 <option value="">Selecione um produto...</option>
                 ${(localDB.list('products') || []).map(p => `
-                  <option value="${p.id}">${p.name} — R$ ${(parseFloat(p.sale_price || 0)).toFixed(2).replace('.', ',')} (Saldo: ${p.current_stock || 0})</option>
+                  <option value="${p.id}">${p.name} — ${formatCurrency(p.sale_price)} (Saldo: ${p.current_stock || 0})</option>
                 `).join('')}
               </select>
               <button type="button" id="btn-add-pdv-manual" class="btn" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #cbd5e1; padding: 0 12px; border-radius: 6px; font-weight: 600; font-size: 0.8rem;">
@@ -269,7 +270,7 @@ export function openQuickCheckoutModal(onFinished = null, initialData = null) {
       const updateChange = () => {
         const received = parseFloat(cashInput.value || 0);
         const change = Math.max(0, received - net);
-        changeDisplay.textContent = `R$ ${change.toFixed(2).replace('.', ',')}`;
+        changeDisplay.textContent = formatCurrency(change);
       };
 
       cashInput?.addEventListener('input', updateChange);
@@ -293,7 +294,7 @@ export function openQuickCheckoutModal(onFinished = null, initialData = null) {
               <div style="font-size: 0.82rem; font-weight: 800; color: #06b6d4; display: flex; align-items: center; gap: 6px;">
                 <i class="fa-brands fa-pix"></i> PIX Dinâmico BACEN
               </div>
-              <strong style="font-size: 0.95rem; color: #34d399;">R$ ${net.toFixed(2).replace('.', ',')}</strong>
+              <strong style="font-size: 0.95rem; color: #34d399;">${formatCurrency(net)}</strong>
             </div>
             <div style="font-size: 0.68rem; color: #94a3b8; margin: 3px 0 6px 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: monospace;">
               ${pixPayload}
@@ -323,12 +324,12 @@ export function openQuickCheckoutModal(onFinished = null, initialData = null) {
           <div style="flex: 1;">
             <label style="display: block; font-size: 0.72rem; color: #94a3b8; margin-bottom: 2px;">Parcelamento:</label>
             <select id="select-card-installments" class="form-input" style="width: 100%; height: 32px; font-size: 0.8rem; background: #0f172a; color: #fff;">
-              <option value="1">1x de R$ ${net.toFixed(2).replace('.', ',')} (À Vista)</option>
-              <option value="2">2x de R$ ${(net/2).toFixed(2).replace('.', ',')} sem juros</option>
-              <option value="3">3x de R$ ${(net/3).toFixed(2).replace('.', ',')} sem juros</option>
-              <option value="4">4x de R$ ${(net/4).toFixed(2).replace('.', ',')} sem juros</option>
-              <option value="5">5x de R$ ${(net/5).toFixed(2).replace('.', ',')} sem juros</option>
-              <option value="6">6x de R$ ${(net/6).toFixed(2).replace('.', ',')} sem juros</option>
+              <option value="1">1x de ${formatCurrency(net)} (À Vista)</option>
+              <option value="2">2x de ${formatCurrency(net/2)} sem juros</option>
+              <option value="3">3x de ${formatCurrency(net/3)} sem juros</option>
+              <option value="4">4x de ${formatCurrency(net/4)} sem juros</option>
+              <option value="5">5x de ${formatCurrency(net/5)} sem juros</option>
+              <option value="6">6x de ${formatCurrency(net/6)} sem juros</option>
             </select>
           </div>
         </div>
@@ -340,7 +341,7 @@ export function openQuickCheckoutModal(onFinished = null, initialData = null) {
       payPanel.innerHTML = `
         <div style="font-size: 0.78rem; color: #cbd5e1; display: flex; align-items: center; gap: 8px;">
           <i class="fa-solid fa-credit-card" style="color: #38bdf8; font-size: 1.2rem;"></i>
-          <span>Insira ou aproxime o cartão de débito na maquininha TEF/POS. Total: <strong>R$ ${net.toFixed(2).replace('.', ',')}</strong></span>
+          <span>Insira ou aproxime o cartão de débito na maquininha TEF/POS. Total: <strong>${formatCurrency(net)}</strong></span>
         </div>
       `;
     } else if (selectedPayment === 'boleto') {
@@ -353,7 +354,7 @@ export function openQuickCheckoutModal(onFinished = null, initialData = null) {
             <span style="font-size: 0.7rem; background: rgba(245, 158, 11, 0.15); color: #fbbf24; padding: 2px 8px; border-radius: 6px; border: 1px solid rgba(245, 158, 11, 0.3);">Vencimento em 3 dias úteis</span>
           </div>
           <div style="font-size: 0.74rem; color: #94a3b8;">
-            Emissão de cobrança bancária com código de barras. Total: <strong style="color: #34d399;">R$ ${net.toFixed(2).replace('.', ',')}</strong>
+            Emissão de cobrança bancária com código de barras. Total: <strong style="color: #34d399;">${formatCurrency(net)}</strong>
           </div>
         </div>
       `;
@@ -412,7 +413,7 @@ export function openQuickCheckoutModal(onFinished = null, initialData = null) {
             <strong style="color: #fff; font-size: 0.85rem; display: block;">${item.product.name}</strong>
             <small style="color: #94a3b8; font-size: 0.72rem;">EAN: ${item.product.ean || 'N/A'} • Saldo: ${item.product.current_stock || 0} un</small>
             <div style="color: #38bdf8; font-size: 0.76rem; font-weight: 600; margin-top: 2px;">
-              R$ ${item.unitPrice.toFixed(2).replace('.', ',')} un
+              ${formatCurrency(item.unitPrice)} un
             </div>
           </div>
 
@@ -424,7 +425,7 @@ export function openQuickCheckoutModal(onFinished = null, initialData = null) {
             </div>
 
             <div style="text-align: right; min-width: 65px;">
-              <strong style="color: #34d399; font-size: 0.88rem;">R$ ${subtotal.toFixed(2).replace('.', ',')}</strong>
+              <strong style="color: #34d399; font-size: 0.88rem;">${formatCurrency(subtotal)}</strong>
             </div>
 
             <button type="button" class="btn-cart-remove" data-index="${index}" style="background: none; border: none; color: #f87171; cursor: pointer; padding: 4px;" title="Remover">
@@ -435,8 +436,8 @@ export function openQuickCheckoutModal(onFinished = null, initialData = null) {
       `;
     }).join('');
 
-    grossSubtotalEl.textContent = `R$ ${gross.toFixed(2).replace('.', ',')}`;
-    totalValueEl.textContent = `R$ ${net.toFixed(2).replace('.', ',')}`;
+    grossSubtotalEl.textContent = formatCurrency(gross);
+    totalValueEl.textContent = formatCurrency(net);
     itemsCountEl.textContent = `${totalQty} un (${cart.length} itens)`;
 
     // Listeners dos botões do carrinho
@@ -779,7 +780,7 @@ export function openQuickCheckoutModal(onFinished = null, initialData = null) {
         badgeIcon: 'fa-circle-check',
         icon: 'fa-cash-register',
         actionTitle: `💳 Venda #${protocol} Finalizada`,
-        message: `Valor total: <strong>R$ ${net.toFixed(2).replace('.', ',')}</strong> (${paymentNames[selectedPayment] || 'Dinheiro'}). Cliente: <strong>${clientName}</strong>.`,
+        message: `Valor total: <strong>${formatCurrency(net)}</strong> (${paymentNames[selectedPayment] || 'Dinheiro'}). Cliente: <strong>${clientName}</strong>.`,
         targetTab: 'farmacia',
         targetTabLabel: 'Farmácia & Estoque',
         actionButtonText: 'Ver Estoque >'
@@ -802,7 +803,7 @@ function openSaleSuccessModal(saleRecord, onFinished) {
     display: flex; justify-content: center; align-items: center; z-index: 10003; padding: 16px;
   `;
 
-  const totalFormatted = parseFloat(saleRecord.totalSale || 0).toFixed(2).replace('.', ',');
+  const totalFormatted = formatCurrency(saleRecord.totalSale || 0);
 
   successModal.innerHTML = `
     <div style="width: 100%; max-width: 520px; background: #0f172a; border: 1.5px solid rgba(16, 185, 129, 0.5); border-radius: 20px; padding: 24px; box-shadow: 0 25px 60px rgba(0,0,0,0.9); text-align: center;">
