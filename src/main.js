@@ -3028,20 +3028,21 @@ window.generatePatientPDF = async function(patientId, patientName) {
 
   let currentY = 38;
 
-  // --- DADOS CADASTRAIS DO CLIENTE (CARD REFINADO) ---
+  // --- DADOS CADASTRAIS DO CLIENTE (CARD REFINADO SEM SOBREPOSIÇÃO) ---
+  const cardHeight = 50;
   doc.setFillColor(248, 250, 252);
-  doc.roundedRect(12, currentY, 186, 36, 2, 2, 'F');
+  doc.roundedRect(12, currentY, 186, cardHeight, 2, 2, 'F');
   doc.setDrawColor(203, 213, 225);
   doc.setLineWidth(0.3);
-  doc.roundedRect(12, currentY, 186, 36, 2, 2, 'S');
+  doc.roundedRect(12, currentY, 186, cardHeight, 2, 2, 'S');
   doc.setFillColor(16, 185, 129);
-  doc.rect(12, currentY, 3.5, 36, 'F'); // Barra lateral decorativa verde esmeralda
+  doc.rect(12, currentY, 3.5, cardHeight, 'F'); // Barra lateral decorativa verde esmeralda
 
   doc.setTextColor(15, 23, 42);
   doc.setFontSize(10.5);
   doc.setFont('helvetica', 'bold');
   const patFullName = cleanPdfText(patient.fullName || patient.name || patientName || 'Não Informado');
-  doc.text(`CLIENTE / PACIENTE: ${patFullName.toUpperCase()}`, 18, currentY + 7);
+  doc.text(`CLIENTE / PACIENTE: ${patFullName.toUpperCase()}`, 18, currentY + 6.5);
 
   // Cálculo de idade
   let ageStr = '';
@@ -3055,32 +3056,37 @@ window.generatePatientPDF = async function(patientId, patientName) {
     ageStr = ` (${patient.age} anos)`;
   }
 
-  doc.setFontSize(8);
+  doc.setFontSize(7.6);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(71, 85, 105);
-  doc.text(`CPF: ${patient.cpf || 'Não Informado'}`, 18, currentY + 13.5);
-  doc.text(`Telefone / Celular: ${patient.cellphone || patient.phone || '(18) 98817-5809'}`, 78, currentY + 13.5);
-  doc.text(`Nasc.: ${patient.birthDate ? new Date(patient.birthDate).toLocaleDateString('pt-BR') : 'Não Informado'}${ageStr}`, 142, currentY + 13.5);
+  doc.text(`CPF: ${patient.cpf || 'Não Informado'}`, 18, currentY + 12.5);
+  doc.text(`Telefone / Celular: ${patient.cellphone || patient.phone || '(18) 98817-5809'}`, 78, currentY + 12.5);
+  doc.text(`Nasc.: ${patient.birthDate ? new Date(patient.birthDate).toLocaleDateString('pt-BR') : 'Não Informado'}${ageStr}`, 142, currentY + 12.5);
 
-  doc.text(`Sexo: ${patient.gender || 'Não Informado'}`, 18, currentY + 20);
-  doc.text(`Cidade / UF: ${cleanPdfText(patient.city || 'Osvaldo Cruz - SP')}`, 78, currentY + 20);
-  doc.text(`Prontuário (ID): #${(patient.id || patientId || '').toString().slice(0, 12).toUpperCase()}`, 142, currentY + 20);
+  doc.text(`Sexo: ${patient.gender || 'Não Informado'}`, 18, currentY + 18);
+  doc.text(`Cidade / UF: ${cleanPdfText(patient.city || 'Osvaldo Cruz - SP')}`, 78, currentY + 18);
+  doc.text(`Prontuário (ID): #${(patient.id || patientId || '').toString().slice(0, 12).toUpperCase()}`, 142, currentY + 18);
 
-  const condCrTxt = patient.chronicConditions || patient.chronicDiseases ? cleanPdfText(patient.chronicConditions || patient.chronicDiseases) : 'Nenhuma doença crônica declarada';
-  doc.text(`Condições Crônicas: ${condCrTxt.slice(0, 38)}`, 18, currentY + 26.5);
-  
-  const medContTxt = patient.continuousMedications ? cleanPdfText(patient.continuousMedications) : 'Nenhum medicamento contínuo declarado';
-  doc.text(`Uso Contínuo: ${medContTxt.slice(0, 35)}`, 78, currentY + 26.5);
-
+  // Linha 3: Alergias e Condições Crônicas (separadas com espaçamento seguro)
   const allergiesTxt = patient.allergies ? cleanPdfText(patient.allergies) : 'Nenhuma alergia relatada';
   if (patient.allergies) {
     doc.setTextColor(185, 28, 28);
     doc.setFont('helvetica', 'bold');
-    doc.text(`Alergias: ${allergiesTxt.slice(0, 28)}`, 142, currentY + 26.5);
+    doc.text(`Alergias: ${allergiesTxt.slice(0, 36)}`, 18, currentY + 23.5);
   } else {
     doc.setTextColor(71, 85, 105);
-    doc.text(`Alergias: ${allergiesTxt}`, 142, currentY + 26.5);
+    doc.setFont('helvetica', 'normal');
+    doc.text(`Alergias: ${allergiesTxt.slice(0, 36)}`, 18, currentY + 23.5);
   }
+
+  const condCrTxt = patient.chronicConditions || patient.chronicDiseases ? cleanPdfText(patient.chronicConditions || patient.chronicDiseases) : 'Nenhuma doença crônica declarada';
+  doc.setTextColor(71, 85, 105);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`Condições Crônicas: ${condCrTxt.slice(0, 46)}`, 95, currentY + 23.5);
+
+  // Linha 4: Medicamentos de Uso Contínuo (linha dedicada em toda a largura)
+  const medContTxt = patient.continuousMedications ? cleanPdfText(patient.continuousMedications) : 'Nenhum medicamento contínuo declarado';
+  doc.text(`Uso Contínuo: ${medContTxt.slice(0, 85)}`, 18, currentY + 29);
 
   // --- SUB-BLOCO DE SINAIS VITAIS & PARÂMETROS CLÍNICOS NA VISITA ---
   const vitals = patient.vitalSigns || {};
@@ -3089,27 +3095,26 @@ window.generatePatientPDF = async function(patientId, patientName) {
   const spo2 = patient.oxygenSaturation || vitals.oxygenSaturation || '98 %';
   const glic = patient.bloodGlucose || vitals.bloodGlucose || '95 mg/dL';
   const temp = patient.temperature || vitals.temperature || '36.5 °C';
-  const peso = patient.weight || vitals.weight || '72 kg';
 
   doc.setFillColor(241, 245, 249);
-  doc.roundedRect(18, currentY + 30.5, 174, 11, 1.5, 1.5, 'F');
+  doc.roundedRect(18, currentY + 34.5, 174, 10.5, 1.5, 1.5, 'F');
   doc.setDrawColor(226, 232, 240);
-  doc.roundedRect(18, currentY + 30.5, 174, 11, 1.5, 1.5, 'S');
+  doc.roundedRect(18, currentY + 34.5, 174, 10.5, 1.5, 1.5, 'S');
 
   doc.setFontSize(6.8);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(14, 116, 144);
-  doc.text('SINAIS VITAIS:', 22, currentY + 37.5);
+  doc.text('SINAIS VITAIS:', 22, currentY + 41.5);
 
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(30, 41, 59);
-  doc.text(`PA: ${pa}`, 48, currentY + 37.5);
-  doc.text(`FC: ${fc}`, 76, currentY + 37.5);
-  doc.text(`SpO2: ${spo2}`, 104, currentY + 37.5);
-  doc.text(`Glicemia: ${glic}`, 130, currentY + 37.5);
-  doc.text(`Temp: ${temp}`, 162, currentY + 37.5);
+  doc.text(`PA: ${pa}`, 48, currentY + 41.5);
+  doc.text(`FC: ${fc}`, 76, currentY + 41.5);
+  doc.text(`SpO2: ${spo2}`, 104, currentY + 41.5);
+  doc.text(`Glicemia: ${glic}`, 130, currentY + 41.5);
+  doc.text(`Temp: ${temp}`, 162, currentY + 41.5);
 
-  currentY += 49;
+  currentY += 57;
 
   // Helper para desenhar títulos de seção elegantes
   const drawSectionTitle = (title, color = [16, 185, 129]) => {
