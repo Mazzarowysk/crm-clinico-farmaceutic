@@ -517,9 +517,6 @@ export function renderPatientsTab(contentArea) {
               <button class="btn-icon btn-icon-history" onclick="window.openPatientHistoryModal('${p.id}', '${(p.fullName||p.name||'').replace(/'/g, "\\'")}')" title="Ver Prontuário Completo & Histórico Clínico">
                 <i class="fa-solid fa-timeline"></i>
               </button>
-              <button class="btn-icon btn-icon-pdf" onclick="window.generatePatientPDF('${p.id}', '${(p.fullName||p.name||'').replace(/'/g, "\\'")}')" title="Gerar Ficha & Prontuário do Cliente em PDF">
-                <i class="fa-solid fa-file-pdf"></i>
-              </button>
               <button class="btn-icon btn-icon-edit" 
                 data-edit-id="${p.id}" 
                 data-full-name="${p.fullName || p.name || ''}" 

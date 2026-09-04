@@ -1172,9 +1172,6 @@ window.openPatientHistoryModal = async function(patientId, patientName) {
         </div>
         <div style="display: flex; gap: 8px; align-items: center;">
           <button type="button" onclick="window.startNewPharmacyConsultationForClient('${patientId}', '${(patientName || '').replace(/'/g, "\\'")}')" style="background: linear-gradient(135deg, #0d9488, #0f766e); border: 1px solid #14b8a6; color: #fff; padding: 6px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 10px rgba(13,148,136,0.4);" title="Atender / Registrar Queixa no Balcão"><i class="fa-solid fa-stethoscope"></i> + Nova Visita / Queixa</button>
-          <button type="button" onclick="window.generateHistoryReport('${patientId}', '${patientName || ''}')" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'" title="Exportar Histórico Completo">
-            <i class="fa-solid fa-file-pdf"></i> Gerar PDF
-          </button>
           <button type="button" onclick="document.getElementById('import-exam-input').click()" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.1)'" title="Anexar laudos ou resultados de exames">
             <i class="fa-solid fa-upload"></i> Anexar Exame
           </button>
