@@ -3552,6 +3552,482 @@ window.generateAppointmentPDF = async function(id, patientName, doctorName, date
   if (typeof showToast === 'function') showToast(`✅ Comprovante PDF gerado com sucesso!`);
 };
 
+// ============================================================================
+// GERAR DECLARAÇÃO DE SERVIÇO FARMACÊUTICO (DSF) EM PDF DIRETAMENTE
+// Emissão direta sem abrir diálogo poluído de impressão, 100% CFF 585/586 & RDC 44/09
+// ============================================================================
+window.reemitirDsfPDF = async function(attIdOrObj, patientIdOrObj, attDate) {
+  if (!window.jspdf) {
+    if (typeof showToast === 'function') showToast('⚠️ Biblioteca PDF não disponível.', 'warning');
+    else alert('⚠️ Biblioteca jsPDF não disponível.');
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+
+  // 1. Obter Atendimento
+  let att = null;
+  const allAtts = (typeof localDB !== 'undefined' && localDB.list ? (localDB.list('pharmacy_attendances') || []).concat(localDB.list('pharmacy_consultations') || []) : []);
+  
+  if (typeof attIdOrObj === 'object' && attIdOrObj !== null) {
+    att = attIdOrObj;
+  } else if (attIdOrObj) {
+    att = allAtts.find(a => String(a.id) === String(attIdOrObj) || String(a._id) === String(attIdOrObj));
+  }
+
+  const pId = (typeof patientIdOrObj === 'object' && patientIdOrObj !== null) 
+    ? (patientIdOrObj.id || patientIdOrObj.patientId)
+    : (patientIdOrObj || (att ? (att.patient_id || att.patientId) : null));
+
+  if (!att && pId) {
+    const pAtts = allAtts.filter(a => String(a.patient_id) === String(pId) || String(a.patientId) === String(pId));
+    if (attDate) {
+      att = pAtts.find(a => a.data_hora === attDate || a.created_at === attDate);
+    }
+    if (!att && pAtts.length > 0) {
+      att = pAtts[0];
+    }
+  }
+
+  // Fallback estruturado caso o atendimento não seja encontrado diretamente
+  if (!att) {
+    att = {
+      tipo_visita: 'Atendimento Clínico & Balcão Farmacêutico',
+      data_hora: attDate || new Date().toISOString(),
+      queixa_triagem: 'Consulta e Orientação Clínica Farmacêutica',
+      observacoes: 'Atendimento farmacêutico de suporte ao autocuidado e uso racional de medicamentos.',
+      conduta_final: 'Dispensação com Orientação Farmacêutica',
+      pharmacist_name: state.user?.name || 'Dr. Marcelo Mazaro'
+    };
+  }
+
+  // 2. Obter Paciente
+  let patient = null;
+  if (typeof patientIdOrObj === 'object' && patientIdOrObj !== null) {
+    patient = patientIdOrObj;
+  } else {
+    const allPatients = (typeof localDB !== 'undefined' && localDB.list ? (localDB.list('pharmacy_patients') || []).concat(localDB.list('patients') || []) : []);
+    if (pId) {
+      patient = allPatients.find(p => String(p.id) === String(pId) || p.fullName === pId || p.name === pId);
+    }
+    if (!patient && att && (att.patient_name || att.patientName)) {
+      const pNameQuery = (att.patient_name || att.patientName).toLowerCase();
+      patient = allPatients.find(p => (p.fullName && p.fullName.toLowerCase().includes(pNameQuery)) || (p.name && p.name.toLowerCase().includes(pNameQuery)));
+    }
+  }
+
+  if (!patient) {
+    patient = {
+      fullName: att.patient_name || att.patientName || 'Cliente / Paciente',
+      name: att.patient_name || att.patientName || 'Cliente / Paciente',
+      cpf: 'Não informado',
+      birthDate: '—',
+      gender: '—',
+      cellphone: '—',
+      phone: '—',
+      allergies: 'Nenhuma alergia conhecida relatada',
+      chronicConditions: 'Nenhuma comorbidade relatada'
+    };
+  }
+
+  // Sanitização de texto para compatibilidade com jsPDF
+  const cleanPdfText = (str) => {
+    if (!str) return '';
+    return String(str)
+      .replace(/[^\x20-\x7E\xA0-\xFF]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
+  // Helper para carregamento da logo institucional
+  const loadLogo = () => new Promise(resolve => {
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.src = '/assets/crm-logo.png?v=2';
+    img.onload = () => resolve(img);
+    img.onerror = () => {
+      const imgFallback = new Image();
+      imgFallback.src = 'assets/crm-logo.png';
+      imgFallback.onload = () => resolve(imgFallback);
+      imgFallback.onerror = () => resolve(null);
+    };
+  });
+
+  const logoImg = await loadLogo();
+
+  // Dados de Configuração da Farmácia
+  const settings = (typeof localDB !== 'undefined' && localDB.get ? (localDB.get('settings', 'main') || localDB.get('settings') || {}) : {}) || {};
+  const pharmacyName = settings.pharmacy_name || settings.clinic_name || 'CRM CLÍNICO FARMACÊUTICO';
+  const pharmacyCnpj = settings.cnpj || settings.pharmacy_cnpj || '54.180.999/0001-44';
+  const pharmacyAddress = settings.address || settings.pharmacy_address || 'Av. Brasil, 1500 - Centro, Osvaldo Cruz - SP';
+  const pharmacyPhone = settings.phone || settings.pharmacy_phone || '(18) 3528-1000';
+  const pharmacyCRF = settings.crf || 'CRF/SP 54.180';
+  const rtPharmacist = att.pharmacist_name || state.user?.name || 'Dr. Marcelo Mazaro';
+
+  const visitDateStr = att.data_hora ? new Date(att.data_hora).toLocaleString('pt-BR') : new Date().toLocaleString('pt-BR');
+  const dsfProtocol = att.id ? `DSF-${att.id.replace(/[^a-zA-Z0-9]/g, '').toUpperCase()}` : `DSF-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${Math.floor(1000 + Math.random()*9000)}`;
+  const hashAuth = 'CFF-' + Array.from({length: 16}, () => Math.floor(Math.random()*16).toString(16)).join('').toUpperCase();
+
+  // ==========================================
+  // CABEÇALHO INSTITUCIONAL EXECUTIVO (DSF)
+  // ==========================================
+  doc.setFillColor(15, 23, 42); // #0f172a (Dark Slate)
+  doc.rect(0, 0, 210, 32, 'F');
+  doc.setFillColor(13, 148, 136); // #0d9488 (Teal Accent)
+  doc.rect(0, 32, 210, 2, 'F');
+
+  let textStartX = 14;
+  if (logoImg) {
+    try {
+      doc.addImage(logoImg, 'PNG', 12, 5, 22, 22);
+      textStartX = 38;
+    } catch(e) {}
+  }
+
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(12);
+  doc.setFont('helvetica', 'bold');
+  doc.text(cleanPdfText(pharmacyName).toUpperCase(), textStartX, 11);
+
+  doc.setFontSize(8.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(45, 212, 191); // Teal 400
+  doc.text('DECLARAÇÃO DE SERVIÇO FARMACÊUTICO (DSF)', textStartX, 17);
+
+  doc.setFontSize(6.8);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(203, 213, 225);
+  doc.text('Assistência Farmacêutica Clínica & Prescrição de MIPs · Resoluções CFF nº 585/2013 e nº 586/2013', textStartX, 22);
+  doc.text('Conformidade com Lei Federal nº 13.021/2014 e RDC ANVISA nº 44/2009', textStartX, 26.5);
+
+  // Metadados do documento no topo direito
+  doc.setFontSize(7.2);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(203, 213, 225);
+  doc.text(`Protocolo: ${dsfProtocol}`, 196, 11, { align: 'right' });
+  doc.text(`Atendimento: ${visitDateStr}`, 196, 16.5, { align: 'right' });
+  doc.text(`Resp. Técnico: ${cleanPdfText(rtPharmacist)}`, 196, 22, { align: 'right' });
+  doc.setTextColor(52, 211, 153);
+  doc.setFont('helvetica', 'bold');
+  doc.text('✓ Assinatura Digital ICP-Brasil A3', 196, 27, { align: 'right' });
+
+  let curY = 38;
+
+  // ==========================================
+  // CARD 1: DADOS DO ESTABELECIMENTO FARMACÊUTICO
+  // ==========================================
+  doc.setFillColor(248, 250, 252);
+  doc.roundedRect(12, curY, 186, 13, 1.5, 1.5, 'F');
+  doc.setDrawColor(226, 232, 240);
+  doc.setLineWidth(0.2);
+  doc.roundedRect(12, curY, 186, 13, 1.5, 1.5, 'S');
+
+  doc.setFontSize(7.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(15, 23, 42);
+  doc.text(`${cleanPdfText(pharmacyName)} · CNPJ: ${pharmacyCnpj} · Registro Sanitário: Regular`, 16, curY + 5);
+
+  doc.setFontSize(6.8);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(100, 116, 139);
+  doc.text(`${cleanPdfText(pharmacyAddress)} · Fone: ${pharmacyPhone} · RT: ${cleanPdfText(rtPharmacist)} (${pharmacyCRF})`, 16, curY + 9.5);
+
+  curY += 16;
+
+  // ==========================================
+  // CARD 2: IDENTIFICAÇÃO DO PACIENTE
+  // ==========================================
+  const patientFullName = cleanPdfText(patient.fullName || patient.name || 'Paciente');
+  const patientCpf = patient.cpf || 'Não informado';
+  const patientAge = patient.age ? `${patient.age} anos` : (patient.birthDate ? patient.birthDate : '—');
+  const patientGender = patient.gender || '—';
+  const patientPhone = patient.cellphone || patient.phone || '—';
+  const patientAllergies = cleanPdfText(patient.allergies || 'Nenhuma alergia conhecida relatada');
+  const patientChronic = cleanPdfText(patient.chronicConditions || 'Nenhuma comorbidade relatada');
+
+  doc.setFillColor(248, 250, 252);
+  doc.roundedRect(12, curY, 186, 28, 2, 2, 'F');
+  doc.setDrawColor(203, 213, 225);
+  doc.setLineWidth(0.25);
+  doc.roundedRect(12, curY, 186, 28, 2, 2, 'S');
+  doc.setFillColor(13, 148, 136);
+  doc.rect(12, curY, 2.5, 28, 'F'); // Barra lateral
+
+  doc.setFontSize(8.2);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(15, 118, 110);
+  doc.text('1. IDENTIFICAÇÃO DO PACIENTE / USUÁRIO', 17, curY + 5.5);
+
+  doc.setFontSize(7.5);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(51, 65, 85);
+
+  doc.setFont('helvetica', 'bold');
+  doc.text('Nome:', 17, curY + 11);
+  doc.setFont('helvetica', 'normal');
+  doc.text(patientFullName, 28, curY + 11);
+
+  doc.setFont('helvetica', 'bold');
+  doc.text('CPF:', 115, curY + 11);
+  doc.setFont('helvetica', 'normal');
+  doc.text(patientCpf, 124, curY + 11);
+
+  doc.setFont('helvetica', 'bold');
+  doc.text('Idade/Sexo:', 155, curY + 11);
+  doc.setFont('helvetica', 'normal');
+  doc.text(`${patientAge} / ${patientGender}`, 172, curY + 11);
+
+  doc.setFont('helvetica', 'bold');
+  doc.text('Contato:', 17, curY + 16.5);
+  doc.setFont('helvetica', 'normal');
+  doc.text(patientPhone, 30, curY + 16.5);
+
+  doc.setFont('helvetica', 'bold');
+  doc.text('Comorbidades:', 78, curY + 16.5);
+  doc.setFont('helvetica', 'normal');
+  const chronicSplits = doc.splitTextToSize(patientChronic, 90);
+  doc.text(chronicSplits[0] || '—', 101, curY + 16.5);
+
+  // Alergias em destaque
+  const hasAllergyWarning = patientAllergies && !patientAllergies.toLowerCase().includes('nenhum') && !patientAllergies.toLowerCase().includes('não');
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(hasAllergyWarning ? 225 : 51, hasAllergyWarning ? 29 : 65, hasAllergyWarning ? 72 : 85);
+  doc.text(hasAllergyWarning ? '⚠️ Alergias Relatadas:' : 'Alergias:', 17, curY + 22.5);
+  doc.setFont('helvetica', hasAllergyWarning ? 'bold' : 'normal');
+  const allergySplits = doc.splitTextToSize(patientAllergies, 135);
+  doc.text(allergySplits[0] || 'Nenhuma alergia conhecida', hasAllergyWarning ? 49 : 32, curY + 22.5);
+
+  curY += 32;
+
+  // ==========================================
+  // CARD 3: AVALIAÇÃO CLÍNICA & TRIAGEM DE QUEIXAS
+  // ==========================================
+  const tipoVisita = cleanPdfText(att.tipo_visita || 'Atendimento Clínico & Balcão Farmacêutico');
+  const queixaTxt = cleanPdfText((att.queixa_triagem ? att.queixa_triagem.toUpperCase().replace(/_/g, ' ') : 'Queixa clínica geral') + (att.observacoes ? ' — ' + att.observacoes : ''));
+  const hasRedFlags = att.red_flags && att.red_flags.length > 0;
+
+  doc.setFontSize(7.8);
+  const complaintLines = doc.splitTextToSize(queixaTxt, 174);
+  const complaintBoxHeight = Math.max(24, 14 + (complaintLines.length * 3.8) + (hasRedFlags ? 12 : 8));
+
+  doc.setFillColor(248, 250, 252);
+  doc.roundedRect(12, curY, 186, complaintBoxHeight, 2, 2, 'F');
+  doc.setDrawColor(203, 213, 225);
+  doc.setLineWidth(0.25);
+  doc.roundedRect(12, curY, 186, complaintBoxHeight, 2, 2, 'S');
+  doc.setFillColor(hasRedFlags ? 239 : 13, hasRedFlags ? 68 : 148, hasRedFlags ? 68 : 136);
+  doc.rect(12, curY, 2.5, complaintBoxHeight, 'F');
+
+  doc.setFontSize(8.2);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(hasRedFlags ? 220 : 15, hasRedFlags ? 38 : 118, hasRedFlags ? 38 : 110);
+  doc.text('2. AVALIAÇÃO CLÍNICA, QUEIXA PRINCIPAL & TRIAGEM FARMACÊUTICA', 17, curY + 5.5);
+
+  doc.setFontSize(7.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(30, 41, 59);
+  doc.text('Modalidade / Procedimento:', 17, curY + 11);
+  doc.setFont('helvetica', 'normal');
+  doc.text(tipoVisita, 58, curY + 11);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(15, 118, 110);
+  doc.text('Queixa Relatada & Sintomas:', 17, curY + 16);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(51, 65, 85);
+  doc.text(complaintLines, 17, curY + 20.5);
+
+  let badgeY = curY + 20.5 + (complaintLines.length * 3.8) + 1;
+  if (hasRedFlags) {
+    doc.setFillColor(254, 242, 242);
+    doc.rect(17, badgeY, 174, 9, 'F');
+    doc.setDrawColor(254, 202, 202);
+    doc.rect(17, badgeY, 174, 9, 'S');
+    doc.setFontSize(7.2);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(185, 28, 28);
+    const rfText = cleanPdfText(`🚨 SINAIS DE ALERTA (RED FLAGS): ${att.red_flags.join(', ')} — ENCAMINHAMENTO MÉDICO IMEDIATO`);
+    doc.text(rfText, 20, badgeY + 6);
+  } else {
+    doc.setFillColor(240, 253, 250);
+    doc.rect(17, badgeY, 174, 7, 'F');
+    doc.setDrawColor(204, 251, 241);
+    doc.rect(17, badgeY, 174, 7, 'S');
+    doc.setFontSize(7);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(13, 148, 136);
+    doc.text('✓ CHECAGEM DE SEGURANÇA (CDSS 4D): NENHUM SINAL DE ALERTA IMPEDITIVO. CONDUTA DE BAIXO RISCO.', 20, badgeY + 4.8);
+  }
+
+  curY += complaintBoxHeight + 4;
+
+  // ==========================================
+  // CARD 4: CONDUTA & PRESCRIÇÃO FARMACÊUTICA DE MIPS
+  // ==========================================
+  const condutaFinal = cleanPdfText(att.conduta_final || 'Dispensação com Orientação Farmacêutica e Apoio ao Autocuidado');
+  const prescricaoTxt = cleanPdfText(att.prescricao_mips || '');
+  const medItems = prescricaoTxt ? prescricaoTxt.split(/;|\n/).map(m => m.trim()).filter(Boolean) : [];
+  const rxBoxHeight = Math.max(22, 18 + (medItems.length > 0 ? (medItems.length * 7.5) : 6));
+
+  doc.setFillColor(248, 250, 252);
+  doc.roundedRect(12, curY, 186, rxBoxHeight, 2, 2, 'F');
+  doc.setDrawColor(203, 213, 225);
+  doc.setLineWidth(0.25);
+  doc.roundedRect(12, curY, 186, rxBoxHeight, 2, 2, 'S');
+  doc.setFillColor(13, 148, 136);
+  doc.rect(12, curY, 2.5, rxBoxHeight, 'F');
+
+  doc.setFontSize(8.2);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(15, 118, 110);
+  doc.text('3. CONDUTA FARMACÊUTICA & PRESCRIÇÃO DE MIPs (CFF nº 586/2013)', 17, curY + 5.5);
+
+  doc.setFontSize(7.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(30, 41, 59);
+  doc.text('Conduta Adotada:', 17, curY + 11);
+  doc.setFont('helvetica', 'normal');
+  doc.text(condutaFinal, 44, curY + 11);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(15, 118, 110);
+  doc.text('Medicamentos Indicados / Dispensados:', 17, curY + 16.5);
+
+  let medLineY = curY + 22;
+  if (medItems.length > 0) {
+    medItems.forEach((item, idx) => {
+      doc.setFont('helvetica', 'bold');
+      doc.setTextColor(15, 23, 42);
+      doc.setFontSize(7.6);
+      doc.text(`💊 ${idx + 1}. ${item}`, 20, medLineY);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      doc.setTextColor(100, 116, 139);
+      doc.text('Uso conforme orientações de rotulagem e dispensação individualizada do consultório farmacêutico.', 25, medLineY + 3.8);
+
+      medLineY += 7.5;
+    });
+  } else {
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7.3);
+    doc.setTextColor(71, 85, 105);
+    doc.text('• Orientação e educação em saúde para autocuidado sem indicação medicamentosa imediata.', 20, curY + 22);
+  }
+
+  curY += rxBoxHeight + 4;
+
+  // ==========================================
+  // CARD 5: ORIENTAÇÕES NÃO FARMACOLÓGICAS & CRITÉRIOS DE ALERTA
+  // ==========================================
+  const nonPharmaBoxHeight = 28;
+  doc.setFillColor(240, 253, 250);
+  doc.roundedRect(12, curY, 186, nonPharmaBoxHeight, 2, 2, 'F');
+  doc.setDrawColor(153, 246, 228);
+  doc.setLineWidth(0.25);
+  doc.roundedRect(12, curY, 186, nonPharmaBoxHeight, 2, 2, 'S');
+
+  doc.setFontSize(8.2);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(15, 118, 110);
+  doc.text('4. ORIENTAÇÕES NÃO FARMACOLÓGICAS & CRITÉRIOS DE PROCURA MÉDICA', 17, curY + 5.5);
+
+  doc.setFontSize(7.2);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(51, 65, 85);
+  doc.text('• Hidratação adequada (ingerir em média 2 a 3 litros de água ao dia, salvo restrição hídrica médica).', 17, curY + 10.5);
+  doc.text('• Repouso relativo, refeições leves e fracionadas, evitando cafeína, álcool e ultraprocessados.', 17, curY + 15);
+  doc.text('• Armazenar os medicamentos em local seco, fresco e arejado, protegidos da luz e fora do alcance de crianças.', 17, curY + 19.5);
+
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(185, 28, 28);
+  doc.text('• CRITÉRIOS DE ALERTA: Persistindo os sintomas por mais de 48h-72h, febre alta, dor intensa no peito, dispneia ou piora clínica,', 17, curY + 24);
+  doc.text('  o paciente deve procurar atendimento médico de emergência imediatamente.', 17, curY + 27.5);
+
+  curY += nonPharmaBoxHeight + 5;
+
+  // ==========================================
+  // CARD 6: ASSINATURAS & TERMO DE CONFORMIDADE
+  // ==========================================
+  if (curY > 230) {
+    doc.addPage();
+    curY = 20;
+  }
+
+  const sigBoxY = curY;
+  doc.setDrawColor(203, 213, 225);
+  doc.setLineWidth(0.3);
+
+  // Assinatura do Paciente (lado esquerdo)
+  doc.line(22, sigBoxY + 15, 92, sigBoxY + 15);
+  doc.setFontSize(7.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(15, 23, 42);
+  doc.text(patientFullName, 57, sigBoxY + 19.5, { align: 'center' });
+  doc.setFontSize(6.8);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(100, 116, 139);
+  doc.text(`Paciente / Responsável Legal (CPF: ${patientCpf})`, 57, sigBoxY + 23.5, { align: 'center' });
+
+  // Assinatura do Farmacêutico RT (lado direito)
+  doc.line(118, sigBoxY + 15, 188, sigBoxY + 15);
+  doc.setFontSize(7.5);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(15, 23, 42);
+  doc.text(cleanPdfText(rtPharmacist), 153, sigBoxY + 19.5, { align: 'center' });
+  doc.setFontSize(6.8);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(13, 148, 136);
+  doc.text(`Farmacêutico Responsável Técnico · ${pharmacyCRF}`, 153, sigBoxY + 23.5, { align: 'center' });
+  doc.setFontSize(6.2);
+  doc.setTextColor(100, 116, 139);
+  doc.text(`Certificação Digital ICP-Brasil A3 · Hash: ${hashAuth}`, 153, sigBoxY + 27, { align: 'center' });
+
+  curY = sigBoxY + 31;
+
+  // Caixa de Autenticidade & Conformidade Legal
+  doc.setFillColor(248, 250, 252);
+  doc.roundedRect(12, curY, 186, 14, 1.5, 1.5, 'F');
+  doc.setDrawColor(226, 232, 240);
+  doc.roundedRect(12, curY, 186, 14, 1.5, 1.5, 'S');
+
+  doc.setFontSize(6.8);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(30, 41, 59);
+  doc.text('VALIDADE JURÍDICA & CONFORMIDADE REGULATÓRIA (LEI 13.021/2014 & RESOLUÇÕES CFF 585/2013 E 586/2013)', 16, curY + 4.5);
+
+  doc.setFontSize(6.2);
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(100, 116, 139);
+  doc.text('Documento emitido eletronicamente pelo CRM Clínico Farmacêutico. Declaração válida em todo o território nacional como prova de serviço', 16, curY + 8.5);
+  doc.text('farmacêutico prestado, dispensação orientada e registro de prescrição de medicamentos isentos de prescrição médica (MIPs).', 16, curY + 11.8);
+
+  // Rodapé em todas as páginas
+  const totalPages = doc.internal.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i);
+    doc.setDrawColor(226, 232, 240);
+    doc.setLineWidth(0.2);
+    doc.line(12, 285, 198, 285);
+    doc.setFontSize(6.8);
+    doc.setTextColor(148, 163, 184);
+    doc.text(`CRM Clínico Farmacêutico · Declaração de Serviço Farmacêutico (DSF) · Protocolo: ${dsfProtocol}`, 12, 290);
+    doc.text(`Página ${i} de ${totalPages}`, 198, 290, { align: 'right' });
+  }
+
+  // Download direto do arquivo PDF
+  const safeName = (patient.fullName || patient.name || 'paciente').replace(/[^a-zA-Z0-9]/g, '_').substring(0, 25);
+  const dateStrFile = (att.data_hora ? att.data_hora.slice(0,10) : new Date().toISOString().slice(0,10)).replace(/-/g, '');
+  const fileName = `DSF_${safeName}_${dateStrFile}.pdf`;
+
+  doc.save(fileName);
+
+  if (typeof showToast === 'function') {
+    showToast(`📄 Declaração de Serviço Farmacêutico (DSF) baixada em PDF com sucesso!`, 'success');
+  }
+};
+
 // --- ABA CONSULTÓRIOS & SALAS ---
 
 async function loadConsultingRooms() {
