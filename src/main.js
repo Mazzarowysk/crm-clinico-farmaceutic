@@ -3710,84 +3710,96 @@ window.reemitirDsfPDF = async function(attIdOrObj, patientIdOrObj, attDate) {
   doc.text(`Resp. Técnico: ${cleanPdfText(rtPharmacist)}`, 196, 22, { align: 'right' });
   doc.setTextColor(52, 211, 153);
   doc.setFont('helvetica', 'bold');
-  doc.text('✓ Assinatura Digital ICP-Brasil A3', 196, 27, { align: 'right' });
+  doc.setFontSize(6.8);
+  doc.text('[OK] Assinatura Digital ICP-Brasil A3', 196, 27, { align: 'right' });
 
   let curY = 38;
 
   // ==========================================
   // CARD 1: DADOS DO ESTABELECIMENTO FARMACÊUTICO
   // ==========================================
+  const c1Height = 14;
   doc.setFillColor(248, 250, 252);
-  doc.roundedRect(12, curY, 186, 13, 1.5, 1.5, 'F');
+  doc.roundedRect(12, curY, 186, c1Height, 1.5, 1.5, 'F');
   doc.setDrawColor(226, 232, 240);
   doc.setLineWidth(0.2);
-  doc.roundedRect(12, curY, 186, 13, 1.5, 1.5, 'S');
+  doc.roundedRect(12, curY, 186, c1Height, 1.5, 1.5, 'S');
 
   doc.setFontSize(7.5);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(15, 23, 42);
-  doc.text(`${cleanPdfText(pharmacyName)} · CNPJ: ${pharmacyCnpj} · Registro Sanitário: Regular`, 16, curY + 5);
+  doc.text(`${cleanPdfText(pharmacyName)} · CNPJ: ${pharmacyCnpj} · Registro Sanitário: Regular`, 16, curY + 5.2);
 
   doc.setFontSize(6.8);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(100, 116, 139);
-  doc.text(`${cleanPdfText(pharmacyAddress)} · Fone: ${pharmacyPhone} · RT: ${cleanPdfText(rtPharmacist)} (${pharmacyCRF})`, 16, curY + 9.5);
+  doc.text(`${cleanPdfText(pharmacyAddress)} · Fone: ${pharmacyPhone} · RT: ${cleanPdfText(rtPharmacist)} (${pharmacyCRF})`, 16, curY + 10);
 
-  curY += 16;
+  curY += c1Height + 4;
 
   // ==========================================
   // CARD 2: IDENTIFICAÇÃO DO PACIENTE
   // ==========================================
   const patientFullName = cleanPdfText(patient.fullName || patient.name || 'Paciente');
   const patientCpf = patient.cpf || 'Não informado';
-  const patientAge = patient.age ? `${patient.age} anos` : (patient.birthDate ? patient.birthDate : '—');
+
+  let calculatedAge = patient.age;
+  if (!calculatedAge && patient.birthDate && String(patient.birthDate).length >= 4) {
+    try {
+      const bYear = parseInt(String(patient.birthDate).slice(0, 4), 10);
+      if (!isNaN(bYear)) {
+        calculatedAge = `${new Date().getFullYear() - bYear} anos`;
+      }
+    } catch(e) {}
+  }
+  const patientAgeStr = calculatedAge ? (String(calculatedAge).includes('ano') ? calculatedAge : `${calculatedAge} anos`) : (patient.birthDate || '—');
   const patientGender = patient.gender || '—';
   const patientPhone = patient.cellphone || patient.phone || '—';
   const patientAllergies = cleanPdfText(patient.allergies || 'Nenhuma alergia conhecida relatada');
   const patientChronic = cleanPdfText(patient.chronicConditions || 'Nenhuma comorbidade relatada');
 
+  const c2Height = 28;
   doc.setFillColor(248, 250, 252);
-  doc.roundedRect(12, curY, 186, 28, 2, 2, 'F');
+  doc.roundedRect(12, curY, 186, c2Height, 2, 2, 'F');
   doc.setDrawColor(203, 213, 225);
   doc.setLineWidth(0.25);
-  doc.roundedRect(12, curY, 186, 28, 2, 2, 'S');
+  doc.roundedRect(12, curY, 186, c2Height, 2, 2, 'S');
   doc.setFillColor(13, 148, 136);
-  doc.rect(12, curY, 2.5, 28, 'F'); // Barra lateral
+  doc.rect(12, curY, 2.5, c2Height, 'F'); // Barra lateral
 
-  doc.setFontSize(8.2);
+  doc.setFontSize(8);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(15, 118, 110);
   doc.text('1. IDENTIFICAÇÃO DO PACIENTE / USUÁRIO', 17, curY + 5.5);
 
-  doc.setFontSize(7.5);
-  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(7.4);
+  doc.setFont('helvetica', 'bold');
   doc.setTextColor(51, 65, 85);
 
-  doc.setFont('helvetica', 'bold');
-  doc.text('Nome:', 17, curY + 11);
+  doc.text('Nome:', 17, curY + 11.2);
   doc.setFont('helvetica', 'normal');
-  doc.text(patientFullName, 28, curY + 11);
+  doc.text(patientFullName, 28, curY + 11.2);
 
   doc.setFont('helvetica', 'bold');
-  doc.text('CPF:', 115, curY + 11);
+  doc.text('CPF:', 115, curY + 11.2);
   doc.setFont('helvetica', 'normal');
-  doc.text(patientCpf, 124, curY + 11);
+  doc.text(patientCpf, 124, curY + 11.2);
 
   doc.setFont('helvetica', 'bold');
-  doc.text('Idade/Sexo:', 155, curY + 11);
+  doc.text('Idade/Sexo:', 152, curY + 11.2);
   doc.setFont('helvetica', 'normal');
-  doc.text(`${patientAge} / ${patientGender}`, 172, curY + 11);
+  doc.text(`${patientAgeStr} / ${patientGender}`, 169, curY + 11.2);
 
   doc.setFont('helvetica', 'bold');
-  doc.text('Contato:', 17, curY + 16.5);
+  doc.text('Contato:', 17, curY + 16.8);
   doc.setFont('helvetica', 'normal');
-  doc.text(patientPhone, 30, curY + 16.5);
+  doc.text(patientPhone, 30, curY + 16.8);
 
   doc.setFont('helvetica', 'bold');
-  doc.text('Comorbidades:', 78, curY + 16.5);
+  doc.text('Comorbidades:', 78, curY + 16.8);
   doc.setFont('helvetica', 'normal');
-  const chronicSplits = doc.splitTextToSize(patientChronic, 90);
-  doc.text(chronicSplits[0] || '—', 101, curY + 16.5);
+  const chronicSplits = doc.splitTextToSize(patientChronic, 88);
+  doc.text(chronicSplits[0] || '—', 101, curY + 16.8);
 
   // Alergias em destaque
   const hasAllergyWarning = patientAllergies && !patientAllergies.toLowerCase().includes('nenhum') && !patientAllergies.toLowerCase().includes('não');
@@ -3795,10 +3807,10 @@ window.reemitirDsfPDF = async function(attIdOrObj, patientIdOrObj, attDate) {
   doc.setTextColor(hasAllergyWarning ? 225 : 51, hasAllergyWarning ? 29 : 65, hasAllergyWarning ? 72 : 85);
   doc.text(hasAllergyWarning ? '⚠️ Alergias Relatadas:' : 'Alergias:', 17, curY + 22.5);
   doc.setFont('helvetica', hasAllergyWarning ? 'bold' : 'normal');
-  const allergySplits = doc.splitTextToSize(patientAllergies, 135);
-  doc.text(allergySplits[0] || 'Nenhuma alergia conhecida', hasAllergyWarning ? 49 : 32, curY + 22.5);
+  const allergySplits = doc.splitTextToSize(patientAllergies, 130);
+  doc.text(allergySplits[0] || 'Nenhuma alergia conhecida relatada', hasAllergyWarning ? 49 : 32, curY + 22.5);
 
-  curY += 32;
+  curY += c2Height + 4;
 
   // ==========================================
   // CARD 3: AVALIAÇÃO CLÍNICA & TRIAGEM DE QUEIXAS
@@ -3807,24 +3819,33 @@ window.reemitirDsfPDF = async function(attIdOrObj, patientIdOrObj, attDate) {
   const queixaTxt = cleanPdfText((att.queixa_triagem ? att.queixa_triagem.toUpperCase().replace(/_/g, ' ') : 'Queixa clínica geral') + (att.observacoes ? ' — ' + att.observacoes : ''));
   const hasRedFlags = att.red_flags && att.red_flags.length > 0;
 
-  doc.setFontSize(7.8);
-  const complaintLines = doc.splitTextToSize(queixaTxt, 174);
-  const complaintBoxHeight = Math.max(24, 14 + (complaintLines.length * 3.8) + (hasRedFlags ? 12 : 8));
+  doc.setFontSize(7.6);
+  const complaintLines = doc.splitTextToSize(queixaTxt, 172);
+  const linesHeight = complaintLines.length * 4.2;
+  const badgeHeight = hasRedFlags ? 10 : 7.5;
+
+  // Altura total do card 3 calculada dinamicamente:
+  // Título e cabeçalho do card = 20mm
+  // Texto da queixa = linesHeight
+  // Espaçamento até o badge = 3mm
+  // Altura do badge = badgeHeight
+  // Margem interna inferior = 4mm
+  const c3Height = 20 + linesHeight + 3 + badgeHeight + 4;
 
   doc.setFillColor(248, 250, 252);
-  doc.roundedRect(12, curY, 186, complaintBoxHeight, 2, 2, 'F');
+  doc.roundedRect(12, curY, 186, c3Height, 2, 2, 'F');
   doc.setDrawColor(203, 213, 225);
   doc.setLineWidth(0.25);
-  doc.roundedRect(12, curY, 186, complaintBoxHeight, 2, 2, 'S');
+  doc.roundedRect(12, curY, 186, c3Height, 2, 2, 'S');
   doc.setFillColor(hasRedFlags ? 239 : 13, hasRedFlags ? 68 : 148, hasRedFlags ? 68 : 136);
-  doc.rect(12, curY, 2.5, complaintBoxHeight, 'F');
+  doc.rect(12, curY, 2.5, c3Height, 'F');
 
-  doc.setFontSize(8.2);
+  doc.setFontSize(8);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(hasRedFlags ? 220 : 15, hasRedFlags ? 38 : 118, hasRedFlags ? 38 : 110);
   doc.text('2. AVALIAÇÃO CLÍNICA, QUEIXA PRINCIPAL & TRIAGEM FARMACÊUTICA', 17, curY + 5.5);
 
-  doc.setFontSize(7.5);
+  doc.setFontSize(7.3);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(30, 41, 59);
   doc.text('Modalidade / Procedimento:', 17, curY + 11);
@@ -3833,34 +3854,34 @@ window.reemitirDsfPDF = async function(attIdOrObj, patientIdOrObj, attDate) {
 
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(15, 118, 110);
-  doc.text('Queixa Relatada & Sintomas:', 17, curY + 16);
+  doc.text('Queixa Relatada & Sintomas:', 17, curY + 16.2);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(51, 65, 85);
-  doc.text(complaintLines, 17, curY + 20.5);
+  doc.text(complaintLines, 17, curY + 20.8);
 
-  let badgeY = curY + 20.5 + (complaintLines.length * 3.8) + 1;
+  const badgeY = curY + 20.8 + linesHeight + 2;
   if (hasRedFlags) {
     doc.setFillColor(254, 242, 242);
-    doc.rect(17, badgeY, 174, 9, 'F');
+    doc.roundedRect(17, badgeY, 174, badgeHeight, 1.5, 1.5, 'F');
     doc.setDrawColor(254, 202, 202);
-    doc.rect(17, badgeY, 174, 9, 'S');
-    doc.setFontSize(7.2);
+    doc.roundedRect(17, badgeY, 174, badgeHeight, 1.5, 1.5, 'S');
+    doc.setFontSize(6.8);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(185, 28, 28);
-    const rfText = cleanPdfText(`🚨 SINAIS DE ALERTA (RED FLAGS): ${att.red_flags.join(', ')} — ENCAMINHAMENTO MÉDICO IMEDIATO`);
+    const rfText = cleanPdfText(`[ALERTA RED FLAGS] ${att.red_flags.join(', ')} — ENCAMINHAMENTO MEDICO IMEDIATO`);
     doc.text(rfText, 20, badgeY + 6);
   } else {
     doc.setFillColor(240, 253, 250);
-    doc.rect(17, badgeY, 174, 7, 'F');
+    doc.roundedRect(17, badgeY, 174, badgeHeight, 1.5, 1.5, 'F');
     doc.setDrawColor(204, 251, 241);
-    doc.rect(17, badgeY, 174, 7, 'S');
-    doc.setFontSize(7);
+    doc.roundedRect(17, badgeY, 174, badgeHeight, 1.5, 1.5, 'S');
+    doc.setFontSize(6.6);
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(13, 148, 136);
-    doc.text('✓ CHECAGEM DE SEGURANÇA (CDSS 4D): NENHUM SINAL DE ALERTA IMPEDITIVO. CONDUTA DE BAIXO RISCO.', 20, badgeY + 4.8);
+    doc.text('[OK] CHECAGEM DE SEGURANCA (CDSS 4D): NENHUM SINAL DE ALERTA IMPEDITIVO · BAIXO RISCO', 20, badgeY + 5);
   }
 
-  curY += complaintBoxHeight + 4;
+  curY += c3Height + 4;
 
   // ==========================================
   // CARD 4: CONDUTA & PRESCRIÇÃO FARMACÊUTICA DE MIPS
@@ -3868,22 +3889,23 @@ window.reemitirDsfPDF = async function(attIdOrObj, patientIdOrObj, attDate) {
   const condutaFinal = cleanPdfText(att.conduta_final || 'Dispensação com Orientação Farmacêutica e Apoio ao Autocuidado');
   const prescricaoTxt = cleanPdfText(att.prescricao_mips || '');
   const medItems = prescricaoTxt ? prescricaoTxt.split(/;|\n/).map(m => m.trim()).filter(Boolean) : [];
-  const rxBoxHeight = Math.max(22, 18 + (medItems.length > 0 ? (medItems.length * 7.5) : 6));
+  const medTotalHeight = medItems.length > 0 ? (medItems.length * 8) : 8;
+  const c4Height = 22 + medTotalHeight + 4;
 
   doc.setFillColor(248, 250, 252);
-  doc.roundedRect(12, curY, 186, rxBoxHeight, 2, 2, 'F');
+  doc.roundedRect(12, curY, 186, c4Height, 2, 2, 'F');
   doc.setDrawColor(203, 213, 225);
   doc.setLineWidth(0.25);
-  doc.roundedRect(12, curY, 186, rxBoxHeight, 2, 2, 'S');
+  doc.roundedRect(12, curY, 186, c4Height, 2, 2, 'S');
   doc.setFillColor(13, 148, 136);
-  doc.rect(12, curY, 2.5, rxBoxHeight, 'F');
+  doc.rect(12, curY, 2.5, c4Height, 'F');
 
-  doc.setFontSize(8.2);
+  doc.setFontSize(8);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(15, 118, 110);
   doc.text('3. CONDUTA FARMACÊUTICA & PRESCRIÇÃO DE MIPs (CFF nº 586/2013)', 17, curY + 5.5);
 
-  doc.setFontSize(7.5);
+  doc.setFontSize(7.3);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(30, 41, 59);
   doc.text('Conduta Adotada:', 17, curY + 11);
@@ -3899,41 +3921,41 @@ window.reemitirDsfPDF = async function(attIdOrObj, patientIdOrObj, attDate) {
     medItems.forEach((item, idx) => {
       doc.setFont('helvetica', 'bold');
       doc.setTextColor(15, 23, 42);
-      doc.setFontSize(7.6);
-      doc.text(`💊 ${idx + 1}. ${item}`, 20, medLineY);
+      doc.setFontSize(7.4);
+      doc.text(`[RX] ${idx + 1}. ${item}`, 20, medLineY);
 
       doc.setFont('helvetica', 'normal');
-      doc.setFontSize(7);
+      doc.setFontSize(6.8);
       doc.setTextColor(100, 116, 139);
       doc.text('Uso conforme orientações de rotulagem e dispensação individualizada do consultório farmacêutico.', 25, medLineY + 3.8);
 
-      medLineY += 7.5;
+      medLineY += 8;
     });
   } else {
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7.3);
+    doc.setFontSize(7.2);
     doc.setTextColor(71, 85, 105);
     doc.text('• Orientação e educação em saúde para autocuidado sem indicação medicamentosa imediata.', 20, curY + 22);
   }
 
-  curY += rxBoxHeight + 4;
+  curY += c4Height + 4;
 
   // ==========================================
   // CARD 5: ORIENTAÇÕES NÃO FARMACOLÓGICAS & CRITÉRIOS DE ALERTA
   // ==========================================
-  const nonPharmaBoxHeight = 28;
+  const c5Height = 28;
   doc.setFillColor(240, 253, 250);
-  doc.roundedRect(12, curY, 186, nonPharmaBoxHeight, 2, 2, 'F');
+  doc.roundedRect(12, curY, 186, c5Height, 2, 2, 'F');
   doc.setDrawColor(153, 246, 228);
   doc.setLineWidth(0.25);
-  doc.roundedRect(12, curY, 186, nonPharmaBoxHeight, 2, 2, 'S');
+  doc.roundedRect(12, curY, 186, c5Height, 2, 2, 'S');
 
-  doc.setFontSize(8.2);
+  doc.setFontSize(8);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(15, 118, 110);
   doc.text('4. ORIENTAÇÕES NÃO FARMACOLÓGICAS & CRITÉRIOS DE PROCURA MÉDICA', 17, curY + 5.5);
 
-  doc.setFontSize(7.2);
+  doc.setFontSize(7.1);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(51, 65, 85);
   doc.text('• Hidratação adequada (ingerir em média 2 a 3 litros de água ao dia, salvo restrição hídrica médica).', 17, curY + 10.5);
@@ -3943,9 +3965,9 @@ window.reemitirDsfPDF = async function(attIdOrObj, patientIdOrObj, attDate) {
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(185, 28, 28);
   doc.text('• CRITÉRIOS DE ALERTA: Persistindo os sintomas por mais de 48h-72h, febre alta, dor intensa no peito, dispneia ou piora clínica,', 17, curY + 24);
-  doc.text('  o paciente deve procurar atendimento médico de emergência imediatamente.', 17, curY + 27.5);
+  doc.text('  o paciente deve procurar atendimento médico de emergência imediatamente.', 17, curY + 27.2);
 
-  curY += nonPharmaBoxHeight + 5;
+  curY += c5Height + 5;
 
   // ==========================================
   // CARD 6: ASSINATURAS & TERMO DE CONFORMIDADE
@@ -3960,44 +3982,45 @@ window.reemitirDsfPDF = async function(attIdOrObj, patientIdOrObj, attDate) {
   doc.setLineWidth(0.3);
 
   // Assinatura do Paciente (lado esquerdo)
-  doc.line(22, sigBoxY + 15, 92, sigBoxY + 15);
+  doc.line(22, sigBoxY + 14, 92, sigBoxY + 14);
   doc.setFontSize(7.5);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(15, 23, 42);
-  doc.text(patientFullName, 57, sigBoxY + 19.5, { align: 'center' });
-  doc.setFontSize(6.8);
+  doc.text(patientFullName, 57, sigBoxY + 18.5, { align: 'center' });
+  doc.setFontSize(6.7);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(100, 116, 139);
-  doc.text(`Paciente / Responsável Legal (CPF: ${patientCpf})`, 57, sigBoxY + 23.5, { align: 'center' });
+  doc.text(`Paciente / Responsável Legal (CPF: ${patientCpf})`, 57, sigBoxY + 22.5, { align: 'center' });
 
   // Assinatura do Farmacêutico RT (lado direito)
-  doc.line(118, sigBoxY + 15, 188, sigBoxY + 15);
+  doc.line(118, sigBoxY + 14, 188, sigBoxY + 14);
   doc.setFontSize(7.5);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(15, 23, 42);
-  doc.text(cleanPdfText(rtPharmacist), 153, sigBoxY + 19.5, { align: 'center' });
-  doc.setFontSize(6.8);
+  doc.text(cleanPdfText(rtPharmacist), 153, sigBoxY + 18.5, { align: 'center' });
+  doc.setFontSize(6.7);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(13, 148, 136);
-  doc.text(`Farmacêutico Responsável Técnico · ${pharmacyCRF}`, 153, sigBoxY + 23.5, { align: 'center' });
-  doc.setFontSize(6.2);
+  doc.text(`Farmacêutico Responsável Técnico · ${pharmacyCRF}`, 153, sigBoxY + 22.5, { align: 'center' });
+  doc.setFontSize(6.1);
   doc.setTextColor(100, 116, 139);
-  doc.text(`Certificação Digital ICP-Brasil A3 · Hash: ${hashAuth}`, 153, sigBoxY + 27, { align: 'center' });
+  doc.text(`Certificação Digital ICP-Brasil A3 · Hash: ${hashAuth}`, 153, sigBoxY + 26, { align: 'center' });
 
-  curY = sigBoxY + 31;
+  curY = sigBoxY + 30;
 
   // Caixa de Autenticidade & Conformidade Legal
+  const legalHeight = 14;
   doc.setFillColor(248, 250, 252);
-  doc.roundedRect(12, curY, 186, 14, 1.5, 1.5, 'F');
+  doc.roundedRect(12, curY, 186, legalHeight, 1.5, 1.5, 'F');
   doc.setDrawColor(226, 232, 240);
-  doc.roundedRect(12, curY, 186, 14, 1.5, 1.5, 'S');
+  doc.roundedRect(12, curY, 186, legalHeight, 1.5, 1.5, 'S');
 
-  doc.setFontSize(6.8);
+  doc.setFontSize(6.7);
   doc.setFont('helvetica', 'bold');
   doc.setTextColor(30, 41, 59);
   doc.text('VALIDADE JURÍDICA & CONFORMIDADE REGULATÓRIA (LEI 13.021/2014 & RESOLUÇÕES CFF 585/2013 E 586/2013)', 16, curY + 4.5);
 
-  doc.setFontSize(6.2);
+  doc.setFontSize(6.1);
   doc.setFont('helvetica', 'normal');
   doc.setTextColor(100, 116, 139);
   doc.text('Documento emitido eletronicamente pelo CRM Clínico Farmacêutico. Declaração válida em todo o território nacional como prova de serviço', 16, curY + 8.5);
