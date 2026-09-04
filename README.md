@@ -33,6 +33,7 @@ flowchart TD
   - *Fármaco x Comorbidades & Beers*: Travas de segurança para idosos, hipertensos, diabéticos e renais crônicos.
   - *Fármaco x Alimentos & Hábitos*: Orientações alimentares personalizadas.
 - **Red Flags**: Bloqueio imediato de MIPs com emissão de Guia de Encaminhamento Médico de urgência.
+- **📜 Janela Modal de Consulta da DSF & PDF Vetorial Direto**: A Declaração de Serviço Farmacêutico (DSF) é aberta em modal interativo para pré-visualização completa antes da emissão. O farmacêutico pode baixar o arquivo vetorial A4 de alta definição diretamente (sem acionar a caixa de diálogo de impressão do navegador), enviar para o WhatsApp ou faturar no PDV.
 - **Vacinação & Injetáveis (CFF 654/2018)**: Registro de via, músculo, lote e emissão de comprovante.
 - **Despacho Posológico via WhatsApp**: Envio instantâneo e formatado das instruções ao celular do paciente.
 
@@ -53,26 +54,28 @@ flowchart TD
 
 ---
 
-### 4. 👤 Prontuário Longitudinal, Compras & Portal do Paciente PWA ("Minha Saúde")
-- **Prontuário Completo**: Timeline cronológica de aferições vitais (PA, Glicemia, IMC), exames TLR e histórico de prescrições.
+### 4. 👤 Prontuário Longitudinal, Ergonomia & Portal do Paciente PWA ("Minha Saúde")
+- **Prontuário Completo com Reemissão de DSF**: Timeline cronológica de consultas SOAP, aferições vitais (PA, Glicemia, IMC), exames TLR e histórico de prescrições. Cada atendimento conta com o botão dedicado **"Visualizar / Exportar DSF"**.
+- **Ergonomia e Interface Focada**: Remoção de botões redundantes na listagem de pacientes; menu suspenso de PBMs dinamicamente posicionado sem sobrepor campos de digitação.
 - **Histórico de Compras & Adesão (`🛒`)**: Acompanhamento de compras realizadas, medicamentos dispensados, previsão de término de uso contínuo (*Refill*) e lembrete direto via WhatsApp.
 - **PWA do Paciente (`📱`)**: Simulador do smartphone do paciente com carteirinha digital de vacinação, histórico de Declarações de Serviços Farmacêuticos (DSF) e despertador inteligente de remédios.
 
 ---
 
-### 5. 📚 Manuais & Documentações Oficiais em PDF
-- 📘 **[Manual do Usuário — Guia Passo a Passo (PDF)](file:///c:/CRM%20Cl%C3%ADnico%20Farmac%C3%AAutico/Manual_do_Usuario_CRM_Clinico_Farmaceutico.pdf)**: Cobertura completa de 12 situações operacionais do balcão, caixa, estoque e configurações (`npm run build:manual`).
+### 5. 📚 Manuais & Documentações Oficiais do Sistema
+- 📘 **[Manual do Usuário — Guia Passo a Passo Completo (PDF)](file:///c:/CRM%20Cl%C3%ADnico%20Farmac%C3%AAutico/Manual_do_Usuario_CRM_Clinico_Farmaceutico.pdf)**: Guia operacional completo de alta fidelidade diagramado em A4 com cenários reais de balcão, simulação multiprofissional MEWS, controle de estoque e configurações (`npm run build:manual`).
+- 📖 **Manual Interativo Integrado no Sistema**: Acessível em qualquer tela pelo botão do manual ou atalhos, com busca semântica em linguagem natural e navegação direta para os módulos.
 - 📄 **[Relatório Executivo & Ficha Técnica (PDF)](file:///c:/CRM%20Cl%C3%ADnico%20Farmac%C3%AAutico/Relatorio_Executivo_CRM_Clinico_Farmaceutico.pdf)**: Resumo estratégico para diretoria e auditoria sanitária com os 7 pilares (`npm run build:pdf`).
 
 ---
 
 ### 6. ⚙️ Central de Configurações em 7 Agrupamentos Estruturados
-1. **👥 Gestão de Operadores & RBAC**: Controle de acesso por perfis (Master, Farmacêutico RT, Farmacêutico Clínico, Administrador, Atendente) e reset de senhas.
+1. **👥 Gestão de Operadores, RBAC & Instruções de Acesso**: Controle seguro de acessos (Master, Farmacêutico RT, Farmacêutico Clínico, Administrador, Atendente) sob política de proteção de credenciais.
 2. **☁️ Banco Turso Cloud (LibSQL Distribuído)**: Monitoramento do cluster na nuvem com detecção inteligente de atualizações (Modais Roxo/Laranja no Vercel).
 3. **🏢 Dados da Farmácia & RT**: Razão social, CNPJ e registro CRF-SP para chancela de documentos.
 4. **💾 Backup & Restauração JSON**: Exportação e importação criptografada de segurança.
 5. **📖 Protocolos Clínicos & Manual Interativo**: 6 protocolos integrados com dosagens e fluxogramas.
-6. **🧪 Simulador Sandbox & Gestão de Bases**: Geradores de dados de teste (Clientes, Atendimentos, Estoque, Financeiro) com limpeza seletiva e Hard Reset protegidos por senha.
+6. **🧪 Sandbox & HARD RESET Atômico**: Purga integral e sincronizada de atendimentos, compras, vendas PDV e dados transacionais de teste no LocalDB e na nuvem Turso, garantindo 0 resíduos no sistema com autenticação Master.
 7. **🏷️ Gestão de Parâmetros Financeiros**: Painel CRUD completo para gerenciar categorias de receitas, despesas e meios de pagamento vinculados aos botões `+`.
 
 ---

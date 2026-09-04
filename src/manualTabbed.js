@@ -19,10 +19,12 @@ export const SEMANTIC_SYNONYMS = {
   graficos_3d: ['graficos 3d', 'estilo de grafico', 'alternar grafico', 'rosca 3d', 'barras 3d', 'pizza 3d', 'polar 3d', 'bi'],
   // Motor CDSS 4D & Interações
   cdss: ['cdss', 'cdss 4d', 'motor cdss', 'interacao', 'interacoes', 'incompatibilidade', 'farmaco-farmaco', 'farmaco-alimento', 'farmaco-habito', 'duplicidade terapeutica', 'beers', 'criterios de beers', 'idosos', 'alergias cruzadas', 'bloqueio automatico', 'alerta vermelho', 'alerta amarelo', 'seguranca do paciente'],
-  // Declaração de Serviço Farmacêutico (DSF)
-  dsf: ['dsf', 'declaracao de servico farmaceutico', 'declaracao farmaceutica', 'cff 585', 'cff 586', 'crf', 'receita farmaceutica', 'impressao dsf', 'pdf dsf', 'hash cff', 'icp-brasil', 'autenticidade', 'termo de orientacao'],
+  // Declaração de Serviço Farmacêutico (DSF) & PDF Direto
+  dsf: ['dsf', 'declaracao de servico farmaceutico', 'declaracao farmaceutica', 'cff 585', 'cff 586', 'crf', 'receita farmaceutica', 'impressao dsf', 'pdf dsf', 'pdf direto', 'pdf vetorial', 'visualizar dsf', 'janela dsf', 'consulta dsf', 'preview dsf', 'reemitir dsf', 'hash cff', 'icp-brasil', 'autenticidade', 'termo de orientacao'],
   // Prontuário & Pacientes
-  paciente: ['paciente', 'pacientes', 'cliente', 'cadastro', 'prontuario', 'alergias', 'comorbidades', 'historico medicamentoso', 'timeline', 'longitudinal', 'hipertensao', 'diabetes', 'alergia penicilina', 'alergia aine'],
+  paciente: ['paciente', 'pacientes', 'cliente', 'cadastro', 'prontuario', 'alergias', 'comorbidades', 'historico medicamentoso', 'timeline', 'longitudinal', 'hipertensao', 'diabetes', 'alergia penicilina', 'alergia aine', 'pbm'],
+  // Hard Reset & Seguranca
+  reset: ['hard reset', 'limpeza total', 'limpeza turso', 'expurgo de dados', 'sandbox', 'instrucoes de acesso', 'seguranca', 'senha master'],
   // Agenda & Serviços Clínicos
   agenda: ['agenda', 'agendamento', 'marcar horario', 'servicos clinicos', 'afericao pa', 'pressao arterial', 'glicemia capilar', 'injetaveis', 'aplicacao', 'consulta farmaceutica', 'revisao da farmacoterapia', 'testes rapidos'],
   // Métricas & Dashboard
@@ -137,6 +139,16 @@ export const manualData = [
         keywords: ['red flags', 'sinais de alerta', 'dor no peito', 'febre persistente', 'encaminhamento medico', 'urgencia']
       },
       {
+        icon: 'fa-file-signature',
+        name: '📜 Consulta em Tela & Exportação Vetorial da DSF',
+        type: 'Documentação Regulatória',
+        color: '#f59e0b',
+        description: 'Abre a Declaração de Serviço Farmacêutico (DSF) em janela modal interativa para revisão completa em tela. Permite gerar e baixar o PDF vetorial nítido diretamente (sem diálogo de impressão do navegador) e enviar via WhatsApp.',
+        shortcut: 'Etapa 5 do Balcão ou Linha do Tempo no Prontuário',
+        rules: 'Conforme Resoluções CFF 585/586/2013, com Hash de autenticidade e carimbo de tempo.',
+        keywords: ['dsf', 'preview dsf', 'visualizar dsf', 'janela dsf', 'pdf direto', 'pdf vetorial', 'declaracao farmaceutica']
+      },
+      {
         icon: 'fa-brands fa-whatsapp',
         name: '📲 Despacho Posológico via WhatsApp',
         type: 'Comunicação & Adesão',
@@ -161,9 +173,11 @@ export const manualData = [
       { step: 1, title: 'Identificação & Queixa', desc: 'Selecione o paciente e registre o motivo da busca pelo serviço farmacêutico.' },
       { step: 2, title: 'Checagem de Red Flags', desc: 'Verifique se há sintomas graves que exigem encaminhamento médico imediato.' },
       { step: 3, title: 'Análise CDSS 4D', desc: 'Selecione o MIP ou serviço e verifique se há alertas de alergias ou interações.' },
-      { step: 4, title: 'Emissão DSF & WhatsApp', desc: 'Conclua emitindo a Declaração de Serviço Farmacêutico (DSF) e enviando ao WhatsApp.' }
+      { step: 4, title: 'Pré-Visualização DSF & PDF Direto', desc: 'Abra a DSF em janela modal para conferência em tela, baixe o PDF vetorial ou envie via WhatsApp.' },
+      { step: 5, title: 'Faturamento no Caixa (PDV)', desc: 'Clique em "Finalizar Venda no Caixa" para lançar no PDV e debitar itens no estoque.' }
     ],
     faq: [
+      { q: 'Como consultar a DSF antes de exportar o PDF?', a: 'Ao concluir a triagem na Etapa 5, o sistema abre a Janela Modal de Pré-visualização da DSF. Nela você confere todos os dados clínicos e condutas, podendo clicar em "Exportar PDF Direto" para baixar o documento vetorial de imediato.' },
       { q: 'O que fazer quando o CDSS 4D emite um alerta vermelho?', a: 'O alerta vermelho indica contraindicação clínica absoluta. O sistema bloqueia a prescrição e recomenda substituir o medicamento ou encaminhar ao médico prescritor.' },
       { q: 'Como prescrever um MIP com segurança?', a: 'Certifique-se de que o paciente não apresenta Red Flags, confirme ausência de gravidez/lactação e revise as alergias cadastradas no prontuário.' }
     ]
@@ -173,18 +187,28 @@ export const manualData = [
     title: 'Prontuário & Pacientes',
     icon: 'fa-user-nurse',
     color: '#38bdf8',
-    summary: 'Cadastro longitudinal de saúde: dados clínicos, alergias estruturadas, condições crônicas, PBMs e acesso ao Portal do Paciente PWA.',
+    summary: 'Cadastro longitudinal de saúde: dados clínicos, alergias estruturadas, condições crônicas, PBMs e acesso ao Portal do Paciente PWA com interface limpa e ergonômica.',
     roles: ['Master', 'Farmacêutico RT', 'Farmacêutico', 'Atendente', 'Administrador'],
     buttons: [
       {
         icon: 'fa-user-plus',
-        name: '➕ Cadastrar Novo Paciente (Com Botão + PBM)',
+        name: '➕ Cadastrar Novo Paciente (Formulário Ergonômico)',
         type: 'Cadastro Clínico',
         color: '#10b981',
-        description: 'Registra o paciente com validação estrita de CPF, data de nascimento, celular/WhatsApp, endereço via CEP e inclusão rápida de novos PBMs pelo botão +.',
+        description: 'Registra o paciente com validação estrita de CPF, data de nascimento, celular/WhatsApp, endereço via CEP e inclusão rápida de novos PBMs pelo botão + com menu suspenso posicionado sem sobrepor os campos adjacentes.',
         shortcut: 'Botão no topo de Pacientes',
         rules: 'Valida CPF em tempo real e impede duplicidade de registros.',
         keywords: ['novo paciente', 'cadastrar', 'adicionar paciente', 'cpf', 'dados cadastrais', 'pbm']
+      },
+      {
+        icon: 'fa-timeline',
+        name: '📅 Timeline do Prontuário & Reemissão de DSF',
+        type: 'Histórico Longitudinal',
+        color: '#818cf8',
+        description: 'Visualização cronológica de todas as consultas, queixas SOAP, aferições de PA/Glicemia e medicamentos. Cada atendimento possui o botão dedicado "Visualizar / Exportar DSF" para consulta prévia e emissão de PDF vetorial.',
+        shortcut: 'Ícone de Relógio / Prontuário na Tabela',
+        rules: 'Centraliza a emissão de documentos clínicos de forma organizada, eliminando botões redundantes na tabela principal.',
+        keywords: ['prontuario', 'timeline', 'historico', 'reemitir dsf', 'exportar dsf', 'afericoes']
       },
       {
         icon: 'fa-mobile-screen-button',
@@ -197,6 +221,16 @@ export const manualData = [
         keywords: ['portal paciente', 'pwa', 'minha saude', 'carteirinha', 'alarmes', 'despertador remedio']
       },
       {
+        icon: 'fa-cart-shopping',
+        name: '🛒 Histórico de Compras & Refill de Uso Contínuo',
+        type: 'Fidelização & Adesão',
+        color: '#10b981',
+        description: 'Acompanhamento detalhado de todas as compras realizadas no PDV, cálculo automático do dia previsto de término de medicamentos de uso contínuo e disparo de lembretes por WhatsApp.',
+        shortcut: 'Ícone de Carrinho (🛒) na tabela de clientes',
+        rules: 'Calcula o tempo de tratamento e avisa com 5 dias de antecedência do término.',
+        keywords: ['compras', 'adesao', 'refill', 'recompra', 'medicamento continuo']
+      },
+      {
         icon: 'fa-allergies',
         name: '⚠️ Alergias & Comorbidades Estruturadas',
         type: 'Histórico de Risco',
@@ -205,24 +239,16 @@ export const manualData = [
         shortcut: 'Card do Paciente / Prontuário',
         rules: 'Esses dados alimentam as travas automáticas do motor CDSS em qualquer atendimento futuro.',
         keywords: ['alergias', 'comorbidades', 'hipertensao', 'diabetes', 'penicilina', 'asma', 'alergia aine']
-      },
-      {
-        icon: 'fa-timeline',
-        name: '📅 Timeline do Cuidado Farmacoterapêutico',
-        type: 'Histórico Longitudinal',
-        color: '#818cf8',
-        description: 'Visualização cronológica de todas as aferições de PA, glicemia, medicamentos em uso e DSF emitidas para o paciente.',
-        shortcut: 'Aba Histórico no Prontuário',
-        rules: 'Permite acompanhar a evolução dos parâmetros clínicos e adesão ao longo dos meses.',
-        keywords: ['timeline', 'historico', 'evolucao', 'afericoes anteriores', 'longitudinal']
       }
     ],
     workflow: [
-      { step: 1, title: 'Busca por CPF/Nome', desc: 'Digite o CPF ou nome do paciente na barra de busca.' },
-      { step: 2, title: 'Atualização do Perfil Clínico', desc: 'Registre novas comorbidades, alergias relatadas e medicamentos em uso contínuo.' },
-      { step: 3, title: 'Acesso Rápido ao Atendimento', desc: 'Clique em "Iniciar Atendimento" para abrir a tela de balcão já com o paciente selecionado.' }
+      { step: 1, title: 'Busca por CPF/Nome', desc: 'Digite o CPF ou nome do paciente na barra de busca unificada.' },
+      { step: 2, title: 'Perfil Clínico & Alergias', desc: 'Registre novas comorbidades, alergias relatadas e medicamentos em uso contínuo.' },
+      { step: 3, title: 'Prontuário & Histórico', desc: 'Abra o prontuário para revisar atendimentos passados e consultar ou reemitir DSF em PDF com 1 clique.' },
+      { step: 4, title: 'Acesso Rápido ao Balcão', desc: 'Clique em "Atender" para iniciar a triagem já com o paciente selecionado.' }
     ],
     faq: [
+      { q: 'Onde encontro o botão para gerar PDF do atendimento do paciente?', a: 'Para manter a tabela de pacientes limpa e ergonômica, o acesso à DSF foi centralizado no Prontuário Clínico. Basta clicar no ícone de Prontuário do paciente e, na timeline do atendimento desejado, clicar em "Visualizar / Exportar DSF".' },
       { q: 'Como cadastrar uma nova alergia?', a: 'Abra a ficha do paciente, clique no campo Alergias Conhecidas, selecione as classes (ex: Dipirona, AINEs) e salve as alterações.' },
       { q: 'O que o paciente consegue ver no Portal PWA?', a: 'Sua carteirinha digital, dados cadastrais, histórico de atendimentos, orientações do farmacêutico e alarmes configurados para tomar seus medicamentos nos horários certos.' }
     ]
@@ -328,18 +354,28 @@ export const manualData = [
     title: 'Declarações (DSF) & Relatórios',
     icon: 'fa-file-signature',
     color: '#f59e0b',
-    summary: 'Emissão e autenticação de Declarações de Serviços Farmacêuticos (DSF) em conformidade com as Resoluções CFF 585 e 586/2013, com carimbo e hash de integridade.',
+    summary: 'Emissão, consulta em tela e autenticação de Declarações de Serviços Farmacêuticos (DSF) em conformidade com as Resoluções CFF 585 e 586/2013, com carimbo, hash de integridade e exportação direta em PDF vetorial.',
     roles: ['Master', 'Farmacêutico RT', 'Farmacêutico', 'Administrador'],
     buttons: [
       {
         icon: 'fa-file-pdf',
-        name: '📜 Emitir Declaração de Serviço Farmacêutico (DSF)',
+        name: '📜 Consulta em Tela & Emissão de DSF (PDF Vetorial)',
         type: 'Documentação Regulatória',
         color: '#f59e0b',
-        description: 'Gera a DSF oficial com cabeçalho da farmácia, dados do paciente, parâmetros aferidos (PA/Glicemia), MIPs indicados, orientações e assinatura com CRF.',
-        shortcut: 'Aba Relatórios / Botão "Emitir DSF" no Balcão',
-        rules: 'Inclui Hash de Autenticidade e Carimbo de Tempo rastreável conforme normas do CFF.',
-        keywords: ['dsf', 'declaracao farmaceutica', 'cff 585', 'cff 586', 'receita farmaceutica', 'imprimir dsf', 'pdf']
+        description: 'Abre a DSF oficial em janela modal para conferência integral de dados clínicos, aferições, MIPs e orientações antes de gerar. O botão "Exportar PDF Direto" gera o arquivo vetorial A4 de alta definição sem depender de caixa de diálogo de impressão do navegador.',
+        shortcut: 'Aba Relatórios / Botão "Emitir DSF" no Balcão ou Prontuário',
+        rules: 'Inclui Hash de Autenticidade, carimbo de tempo CFF e diagramação sem sobreposição de textos.',
+        keywords: ['dsf', 'declaracao farmaceutica', 'cff 585', 'cff 586', 'receita farmaceutica', 'imprimir dsf', 'pdf', 'pdf direto', 'preview dsf']
+      },
+      {
+        icon: 'fa-clock-rotate-left',
+        name: '🔄 Reemissão de DSF Histórica via Prontuário',
+        type: 'Histórico & Auditoria',
+        color: '#8b5cf6',
+        description: 'Permite reabrir a janela modal de visualização e exportar o PDF oficial de qualquer atendimento passado registrado na timeline do paciente.',
+        shortcut: 'Botão "Visualizar / Exportar DSF" na timeline do Prontuário',
+        rules: 'Mantém a fidelidade exata do registro sanitário original com assinatura e lote.',
+        keywords: ['reemitir dsf', 'segunda via dsf', 'auditoria sanitária', 'historico dsf']
       },
       {
         icon: 'fa-file-excel',
@@ -353,12 +389,13 @@ export const manualData = [
       }
     ],
     workflow: [
-      { step: 1, title: 'Seleção do Atendimento', desc: 'Localize o atendimento concluído na listagem de declarações.' },
-      { step: 2, title: 'Conferência dos Dados Clínicos', desc: 'Revise os valores aferidos, orientações posológicas e orientações não-farmacológicas.' },
-      { step: 3, title: 'Impressão ou Envio Digital', desc: 'Imprima em papel timbrado ou gere o PDF assinado para envio ao paciente.' }
+      { step: 1, title: 'Seleção do Atendimento', desc: 'Localize o atendimento concluído na listagem de declarações ou no prontuário.' },
+      { step: 2, title: 'Conferência em Janela Modal', desc: 'Revise na tela os valores aferidos, condutas posológicas e orientações não-farmacológicas.' },
+      { step: 3, title: 'Exportação Direta em PDF', desc: 'Clique em "Exportar PDF Direto" para salvar o documento em alta resolução sem abrir tela de impressão.' }
     ],
     faq: [
-      { q: 'O que é a DSF e por que ela é obrigatória?', a: 'A DSF (Declaração de Serviço Farmacêutico) é o documento legal exigido pelo Conselho Federal de Farmácia (Resoluções 585/586) para comprovar a realização de serviços clínicos e prescrições de MIPs.' }
+      { q: 'O que é a DSF e por que ela é obrigatória?', a: 'A DSF (Declaração de Serviço Farmacêutico) é o documento legal exigido pelo Conselho Federal de Farmácia (Resoluções 585/586) para comprovar a realização de serviços clínicos e prescrições de MIPs.' },
+      { q: 'Como exportar a DSF sem passar pela tela de impressão?', a: 'O sistema utiliza motor vetorial dedicado (jsPDF). Basta clicar no botão "Exportar PDF Direto" dentro da janela modal de pré-visualização para salvar o arquivo PDF A4 diretamente na sua máquina.' }
     ]
   },
   {
@@ -366,18 +403,18 @@ export const manualData = [
     title: 'Configurações & Gestão',
     icon: 'fa-sliders',
     color: '#a855f7',
-    summary: 'Central de governança com 7 Agrupamentos Estruturados: Operadores RBAC, Turso Cloud, Dados da Farmácia & RT, Backup/Restauração, Protocolos Clínicos, Sandbox Simulador & Gestão de Parâmetros Financeiros.',
+    summary: 'Central de governança com 7 Agrupamentos Estruturados: Operadores RBAC com Instruções de Acesso Seguras, Turso Cloud, Dados da Farmácia & RT, Backup/Restauração, Protocolos Clínicos, Sandbox com Hard Reset Atômico & Gestão de Parâmetros Financeiros.',
     roles: ['Master', 'Farmacêutico RT', 'Administrador'],
     buttons: [
       {
         icon: 'fa-users-gear',
-        name: '👥 1. Gestão de Operadores & Perfis (RBAC)',
-        type: 'Controle de Acesso',
+        name: '👥 1. Gestão de Operadores & Instruções de Acesso (RBAC)',
+        type: 'Controle de Acesso & Segurança',
         color: '#8b5cf6',
-        description: 'Cadastra novos operadores, define papéis (Farmacêutico RT, Farmacêutico, Atendente), vincula número de CRF e reseta senhas.',
+        description: 'Cadastra novos operadores, define papéis (Farmacêutico RT, Farmacêutico, Atendente), vincula CRF e apresenta Instruções de Acesso protegidas (sem exposição de senhas em texto puro).',
         shortcut: 'Agrupamento 1 em Configurações',
-        rules: 'O usuário Master mazzarowysk possui autoridade total para administrar todos os operadores.',
-        keywords: ['usuarios', 'operadores', 'novo usuario', 'senha', 'crf', 'rbac', 'permissoes', 'master', 'mazzarowysk']
+        rules: 'O usuário Master mazzarowysk possui autoridade total para administrar operadores sob política segura de credenciais.',
+        keywords: ['usuarios', 'operadores', 'instrucoes de acesso', 'seguranca', 'crf', 'rbac', 'permissoes', 'master']
       },
       {
         icon: 'fa-cloud-arrow-up',
@@ -420,14 +457,14 @@ export const manualData = [
         keywords: ['protocolos clinicos', 'mips doses', 'orientacoes farmacologia', 'manual interativo']
       },
       {
-        icon: 'fa-wand-magic-sparkles',
-        name: '🧪 6. Simulação de Dados (Sandbox) & Limpeza com Senha',
-        type: 'Testes & Gestão de Bases',
-        color: '#f472b6',
-        description: 'Gere dados simulados para treinamento ou limpe seletivamente simulações ou cadastros reais com autenticação por senha.',
+        icon: 'fa-triangle-exclamation',
+        name: '🧪 6. Sandbox & HARD RESET Atômico Seguro',
+        type: 'Testes & Expurgos',
+        color: '#ef4444',
+        description: 'Gera massas de dados de teste ou executa a limpeza profunda (HARD RESET) de todas as transações, atendimentos e vendas, eliminando integralmente resquícios locais no IndexedDB e remotos na nuvem Turso.',
         shortcut: 'Agrupamento 6 em Configurações',
-        rules: 'Protegido por senha Master para evitar perdas acidentais.',
-        keywords: ['simulador', 'sandbox', 'gerar dados', 'limpar simulacao', 'limpar producao', 'hard reset']
+        rules: 'Exige autenticação por Senha Master e digitação de confirmação para prevenir limpezas acidentais.',
+        keywords: ['simulador', 'sandbox', 'hard reset', 'limpeza total', 'expurgo turso', 'zerar sistema']
       },
       {
         icon: 'fa-tags',
@@ -442,14 +479,14 @@ export const manualData = [
     ],
     workflow: [
       { step: 1, title: 'Configuração da Farmácia', desc: 'Preencha os dados institucionais e o CRF do Responsável Técnico.' },
-      { step: 2, title: 'Cadastro da Equipe', desc: 'Crie os usuários para os farmacêuticos e atendentes com seus respectivos papéis.' },
+      { step: 2, title: 'Cadastro da Equipe & Acesso', desc: 'Crie operadores com suas permissões RBAC de acordo com as Instruções de Acesso Seguras.' },
       { step: 3, title: 'Parâmetros Financeiros', desc: 'Defina suas categorias personalizadas de receitas, despesas e formas de pagamento.' },
-      { step: 4, title: 'Sincronização & Backup', desc: 'Verifique o status verde da nuvem Turso e exporte cópias de segurança periódicas.' }
+      { step: 4, title: 'Sincronização & Governança', desc: 'Verifique o status verde da nuvem Turso e exporte cópias de segurança periódicas.' }
     ],
     faq: [
-      { q: 'Quem pode criar ou resetar senhas de usuários?', a: 'Apenas usuários com perfil Master (ex: mazzarowysk) ou Administrador têm permissão para criar operadores e redefinir credenciais.' },
+      { q: 'Quem pode criar ou resetar senhas de usuários?', a: 'Apenas usuários com perfil Master (ex: mazzarowysk) ou Administrador têm permissão para criar operadores e redefinir credenciais sob autenticação segura.' },
       { q: 'O sistema continua funcionando se a internet cair?', a: 'Sim! Graças à arquitetura Offline-First, o CRM Clínico Farmacêutico armazena tudo no banco local e faz a sincronização em segundo plano assim que a conexão retornar.' },
-      { q: 'Como limpar dados de simulação sem apagar meus clientes reais?', a: 'No Agrupamento 6, clique em "Limpar Dados de Simulação" e digite sua senha. Somente registros com a tag [SIMULADO] serão removidos.' }
+      { q: 'O HARD RESET apaga os cadastros de operadores e dados da farmácia?', a: 'Não! O HARD RESET limpa rigorosamente os dados transacionais e de teste (atendimentos, prontuários, prescrições, vendas PDV e compras), preservando a conta Master, operadores cadastrados e os dados fiscais/sanitários do estabelecimento.' }
     ]
   },
   {
@@ -465,10 +502,10 @@ export const manualData = [
         name: '🩺 Simulação 1: Balcão SOAP (< 60s) - Dona Carmem',
         type: 'Caso Prático Balcão',
         color: '#10b981',
-        description: 'Passo a passo completo: Seleção da cliente Dona Carmem (hipertensa), queixa de cefaleia/astenia há 2 dias, semáforo Red Flags desmarcado (verde), prescrição de Paracetamol 750mg + Soro de Reidratação e finalização com DSF no WhatsApp e PDV a R$ 17,90.',
+        description: 'Passo a passo completo: Seleção da cliente Dona Carmem (hipertensa), queixa de cefaleia/astenia há 2 dias, semáforo Red Flags desmarcado (verde), prescrição de Paracetamol 750mg + Soro de Reidratação e finalização com DSF em Janela Modal, download direto de PDF Vetorial e PDV a R$ 17,90.',
         shortcut: 'Aba Balcão -> Etapa 1 a 5',
         rules: 'Exibe como o CDSS 4D cruza a hipertensão da paciente e autoriza a prescrição de MIPs sem incompatibilidades.',
-        keywords: ['simulacao balcao', 'caso clinico', 'dona carmem', 'cefaleia', 'astenia', 'paracetamol', 'soro', 'pdv']
+        keywords: ['simulacao balcao', 'caso clinico', 'dona carmem', 'cefaleia', 'astenia', 'paracetamol', 'soro', 'pdv', 'pdf direto']
       },
       {
         icon: 'fa-user-doctor',
@@ -483,8 +520,9 @@ export const manualData = [
     ],
     workflow: [
       { step: 1, title: 'Simulação no Balcão', desc: 'Abra a aba Balcão, selecione o cliente, preencha o SOAP, valide os Red Flags e prescreva.' },
-      { step: 2, title: 'Finalização & Caixa', desc: 'Emita a DSF com QR Code, envie para o WhatsApp e abra o PDV para cobrança rápida.' },
-      { step: 3, title: 'Simulação Multiprofissional', desc: 'Na aba Profissionais, acione o simulador, teste o escore MEWS e emita a guia médica.' }
+      { step: 2, title: 'Conferência & PDF Direto', desc: 'Abra a DSF em janela modal, revise os dados, clique em Exportar PDF Direto e envie para o WhatsApp.' },
+      { step: 3, title: 'Faturamento no Caixa', desc: 'Conclua a cobrança no PDV com baixa automática do lote no estoque.' },
+      { step: 4, title: 'Simulação Multiprofissional', desc: 'Na aba Profissionais, acione o simulador, teste o escore MEWS e emita a guia médica.' }
     ],
     faq: [
       { q: 'Por que o Semáforo Red Flags deve ficar desmarcado na simulação de balcão?', a: 'Porque manter o semáforo desmarcado atesta a ausência de sinais de gravidade (sinal verde), autorizando a prescrição farmacêutica de MIPs. Se for marcado como grave, o sistema bloqueia os medicamentos e gera Guia Médica imediata.' },

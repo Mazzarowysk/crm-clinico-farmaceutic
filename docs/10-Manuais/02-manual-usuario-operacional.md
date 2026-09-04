@@ -59,7 +59,10 @@ Para garantir que o farmacêutico não precise tirar as mãos do teclado durante
    - Alergias declaradas do paciente.
    - Critérios de Beers para idosos.
    - Dosagem e posologia segura.
-5. **Finalização & Envio:** Clique em **`Finalizar Atendimento`**. O sistema emite a **Declaração de Serviço Farmacêutico (DSF)** com QR Code e possibilita envio instantâneo da receita para o **WhatsApp** do paciente.
+5. **Conclusão, Consulta em Tela & Exportação Direta de PDF:** Clique em **`Finalizar Atendimento`**. O sistema abre a **Janela Modal de Consulta Prévia da DSF**, permitindo conferir todos os parâmetros clínicos, posologia e orientações na tela antes de emitir. A partir desta janela, você pode:
+   - Clicar em **`Exportar PDF Direto`** para gerar e baixar instantaneamente o PDF vetorial A4 nítido (sem depender de caixa de diálogo de impressão do navegador).
+   - Enviar a receita digital formatada com link seguro via **WhatsApp**.
+   - Clicar em **`Finalizar Venda no Caixa`** para faturar no PDV com baixa imediata no estoque.
 
 ### 3.2. Rastreio Precoce de Sepse (Consenso Internacional SSC / qSOFA)
 - O sistema analisa continuamente os critérios de corte do *Quick SOFA* (PAS $\le$ 100 mmHg, FR $\ge$ 22 irpm, alteração mental/Glasgow e temperatura fora da faixa).
@@ -79,7 +82,12 @@ No prontuário do paciente, acesse a aba **`Sinais Vitais`** para registrar:
 - **Peso e Altura:** Cálculo instantâneo do Índice de Massa Corporal (IMC) e faixa de risco.
 
 ### 4.2. Histórico de Compras Integrado (`🛒`)
-Clique no ícone de carrinho para visualizar todas as compras e medicamentos já adquiridos pelo paciente no PDV da farmácia, facilitando a conciliação terapêutica.
+Clique no ícone de carrinho para visualizar todas as compras e medicamentos já adquiridos pelo paciente no PDV da farmácia, facilitando a conciliação terapêutica e o cálculo de recompra contínua (refill).
+
+### 4.3. Interface Focada & Centralização de Documentos no Prontuário
+- **Eliminação de Redundâncias:** Para manter a tabela de pacientes ágil e ergonômica, os botões redundantes de PDF foram removidos das linhas e do cabeçalho da janela de prontuário.
+- **Consulta & Reemissão de DSF na Linha do Tempo:** Cada atendimento gravado na timeline possui o botão exclusivo **`Visualizar / Exportar DSF`**, que abre o modal de consulta prévia em tela e download direto do PDF vetorial.
+- **Formulário Ergonômico de Cadastro:** O menu flutuante de seleção de PBMs (+) foi ajustado com posicionamento dinâmico inteligente, evitando que cubra os campos subsequentes (como CEP ou Endereço) durante a digitação.
 
 ---
 
@@ -141,18 +149,29 @@ Clique no ícone de carrinho para visualizar todas as compras e medicamentos já
 - Clique no botão para alternar dinamicamente entre **Rosca 3D Glossy**, **Barras 3D Volumétricas**, **Pizza 3D Cristalina**, **Esfera Polar 3D** e **Linha Suave Neon**, permitindo apresentações executivas personalizadas.
 
 ### 7.3. Exportação Direta em PDF sem Caixa de Diálogo
-- Clique em **`📥 Baixar PDF Direto`** na barra superior da janela do relatório.
-- O sistema processa a folha A4 em formato retrato (`210mm × 297mm`) com diagramação estruturada em alta definição e salva o arquivo `.pdf` diretamente na pasta de Downloads do dispositivo.
+- Clique em **`📥 Baixar PDF Direto`** na barra superior da janela do relatório ou na **Janela Modal de Consulta Prévia da DSF**.
+- O sistema processa a folha A4 em formato retrato (`210mm × 297mm`) com diagramação estruturada em alta definição vetorial (jsPDF) e salva o arquivo `.pdf` diretamente no dispositivo sem acionar a janela de impressão do sistema operacional.
+- O motor de diagramação calcula margens e quebras de página automáticas, garantindo zero sobreposição de textos em prescrições extensas.
+
+### 7.4. Consulta Prévia em Janela Modal da DSF
+- Em qualquer ponto do sistema (após a conclusão do atendimento ou na timeline do prontuário), a DSF é exibida em uma janela modal limpa e interativa.
+- O farmacêutico pode inspecionar todos os campos clínicos, conferir a lista de MIPs, dosagens e instruções antes de autorizar a impressão ou exportação.
 
 ---
 
 ## 8. Configurações, Backup & Sincronização Cloud
 
-### 8.1. Gestão de Operadores & Níveis de Acesso (RBAC)
-- **Gestor Master:** Acesso irrestrito a todos os módulos, DRE, configurações e exclusão de dados.
-- **Farmacêutico RT:** Emissão com assinatura técnica, validação de protocolos e controle SNGPC.
+### 8.1. Gestão de Operadores & Instruções de Acesso Seguras (RBAC)
+- **Instruções de Acesso Protegidas:** As credenciais e papéis são gerenciados sob política de privilégio mínimo. O sistema fornece orientações claras de permissão para cada perfil sem expor senhas em texto puro na interface pública.
+- **Gestor Master:** Acesso irrestrito a todos os módulos, DRE, configurações, parâmetros fiscais e rotinas de expurgo.
+- **Farmacêutico RT:** Emissão com assinatura técnica, validação de protocolos e controle sanitário.
 - **Farmacêutico Clínico:** Atendimento ao paciente, triagem SOAP, aferições e prescrições.
 - **Atendente:** Operação restrita ao PDV, caixa e cadastro demográfico básico.
 
-### 8.2. Backup de Segurança
+### 8.2. Backup de Segurança & Sincronização Turso Cloud
 - Na aba **`Configurações` ➔ `Backup`**, gere backups periódicos criptografados em formato JSON para garantir salvaguarda de dados em conformidade com as normas sanitárias do CFF e ANVISA.
+- A sincronização contínua com a réplica **Turso LibSQL Cloud** assegura integridade de dados mesmo em trocas de dispositivos.
+
+### 8.3. Sandbox de Demonstração & HARD RESET Atômico Seguro
+- O sistema disponibiliza no Agrupamento 6 o gerador de dados de teste (com a tag `[SIMULADO]`).
+- **Limpeza Profunda (HARD RESET):** Remove com 1 clique todas as consultas, prescrições, compras, vendas PDV e movimentações financeiras de teste. O expurgo é sincronizado atômica e simultaneamente no banco local (IndexedDB) e na nuvem (Turso Cloud), garantindo a eliminação total de registros órfãos ou resíduos, mantendo intactos os dados cadastrais da farmácia e os operadores do sistema.

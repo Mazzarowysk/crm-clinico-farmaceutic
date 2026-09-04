@@ -115,23 +115,25 @@ O sistema possui 5 perfis pré-configurados:
 - **Limpeza Seletiva**:
   - `Limpar Simulação`: Remove exclusivamente registros marcados com `[SIMULADO]` (autenticado por senha).
   - `Limpar Cadastros Reais`: Remove dados manuais de produção sem afetar usuários e configurações (autenticado por senha Master + confirmação `"LIMPAR"`).
-  - `Hard Reset de Fábrica`: Redefine o banco local a zero absoluto (autenticado por senha Master + confirmação `"HARD RESET"`).
-anilha]
-    G --> H[Enfermagem: Matriz de Checagem & Aplicação]
-    H --> I{Decisão Clínica}
-    I -->|Alta Médica| J[Emissão de Receituário A4 PDF]
-    I -->|Manter em Observação| K[Atendimento: Em Observação PS]
-    K --> L[Timer de Permanência PS - Max 12h]
-    L --> M{Alerta do Timer}
-    M -->|< 10 horas| N[Badge Azul: Normal]
-    M -->|10h a 12h| O[Badge Amarelo: Alerta Legal]
-    M -->|> 12 horas| P[Badge Vermelho Pulsante: EXCEDIDO]
-    P --> Q[Botão: Subir para Internação]
-    Q --> R[Gaveta de Leitos Vagos: UTI / Enfermaria]
-    R --> S[Transferência Concluída: Status Internado]
-```
+  - `Hard Reset de Fábrica`: Purga atômica e integral de todos os atendimentos, prontuários, prescrições, vendas PDV e compras de teste, sincronizando o expurgo no IndexedDB e na nuvem Turso Cloud (autenticado por senha Master + confirmação textual `"HARD RESET"`).
 
 ---
+
+## 📄 2.3 Pipeline de Emissão & Consulta da DSF (Modal & PDF Vetorial)
+
+O sistema conta com um motor desacoplado para consulta em tela e geração de documentos sanitários regulatórios (CFF 585/586):
+
+```mermaid
+flowchart TD
+    A["Conclusão da Triagem ou Timeline no Prontuário"] --> B["window.openDsfPreviewModal(dadosAtendimento)"]
+    B --> C["Renderiza Modal Interativo com Preview Visual A4"]
+    C --> D{"Ação do Usuário"}
+    D -->|Exportar PDF Direto| E["window.reemitirDsfPDF(dadosAtendimento)"]
+    E --> F["Motor jsPDF: Desenha Vetores, Linhas, Badges e Texto com Paginação Dinâmica"]
+    F --> G["Download Direto do Arquivo .pdf (Sem Diálogo de Impressão)"]
+    D -->|WhatsApp| H["Formata Mensagem com Posologia e Link Seguro"]
+    D -->|PDV| I["Abre Caixa Rápido com Itens Prescritos"]
+```
 
 ### 2.3 Fluxograma da Sincronização Local-First ↔ Cloud Turso (Dual Pipeline)
 

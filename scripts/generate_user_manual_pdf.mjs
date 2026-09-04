@@ -544,7 +544,7 @@ async function generateCompleteUserManualPDF() {
           </div>
           <div class="step-item">
             <div class="step-num">5</div>
-            <div class="step-text"><strong>Etapa 5 (Conclusão, DSF &amp; Venda Direta):</strong> Emita a Declaração de Serviço Farmacêutico (DSF) com QR Code, envie pelo WhatsApp e clique em <strong>Finalizar Venda no Caixa</strong> para faturar no PDV.</div>
+            <div class="step-text"><strong>Etapa 5 (Conclusão, Pré-Visualização &amp; PDF Vetorial Direto):</strong> A Declaração de Serviço Farmacêutico (DSF) é aberta na <strong>Janela Modal Interativa de Consulta Prévia</strong> com QR Code, parâmetros aferidos e posologia. Permite revisar todos os dados em tela e clicar em <strong>Exportar PDF Direto</strong> para baixar o documento vetorial nítido (sem caixa de diálogo de impressão do navegador), disparar via WhatsApp e clicar em <strong>Finalizar Venda no Caixa</strong> para faturar no PDV.</div>
           </div>
         </div>
       </div>
@@ -626,8 +626,8 @@ async function generateCompleteUserManualPDF() {
           <div class="step-item">
             <div class="step-num" style="background: #0d9488;">5</div>
             <div class="step-text">
-              <strong>Passo 5 — Emissão da DSF, Disparo de WhatsApp &amp; Faturamento no Caixa:</strong><br>
-              Clique no botão azul <span class="btn-pill">Concluir &amp; Gerar Declaração Farmacêutica &rarr;</span>. A <strong>Declaração de Serviço Farmacêutico (DSF)</strong> é gerada na tela com QR Code, assinatura digital e orientações de hidratação (2 a 3L de água/dia). Clique no botão <span class="btn-pill-green"><i class="fa-brands fa-whatsapp"></i> WhatsApp</span> para enviar a receita digital no celular da cliente. Em seguida, clique no botão verde <span class="btn-pill-green"><i class="fa-solid fa-cart-shopping"></i> Finalizar Venda no Caixa</span>: a Frente de Caixa (PDV Rápido) abre com o Paracetamol e os Sais no carrinho (Total: R$ 17,90), dá baixa no lote do estoque e lança no DRE financeiro!
+              <strong>Passo 5 — Consulta em Tela, Exportação do PDF Vetorial &amp; Faturamento no Caixa:</strong><br>
+              Clique no botão azul <span class="btn-pill">Concluir &amp; Gerar Declaração Farmacêutica &rarr;</span>. A <strong>Janela Modal de Consulta Prévia da DSF</strong> abre na tela com o documento diagramado, QR Code e orientações. Clique no botão azul <span class="btn-pill"><i class="fa-solid fa-file-pdf"></i> Exportar PDF Direto</span> para baixar o arquivo vetorial A4 de alta definição sem passar pela tela de impressão. Clique no botão verde <span class="btn-pill-green"><i class="fa-brands fa-whatsapp"></i> WhatsApp</span> para enviar a receita digital no celular da cliente. Em seguida, clique no botão verde <span class="btn-pill-green"><i class="fa-solid fa-cart-shopping"></i> Finalizar Venda no Caixa</span> para faturar no PDV e dar baixa no lote do estoque.
             </div>
           </div>
         </div>
@@ -691,11 +691,16 @@ async function generateCompleteUserManualPDF() {
             </tr>
             <tr>
               <td><i class="fa-solid fa-timeline" style="color: #a78bfa;"></i></td>
-              <td><strong>Prontuário</strong></td>
-              <td>Visualiza o prontuário completo, histórico de aferições de PA/Glicemia e laudos.</td>
+              <td><strong>Prontuário &amp; DSF</strong></td>
+              <td>Visualiza o prontuário completo, histórico de aferições e botão "Visualizar / Exportar DSF" com PDF direto.</td>
             </tr>
           </tbody>
         </table>
+      </div>
+
+      <div class="obs-card" style="margin-top: 2px; margin-bottom: 3px;">
+        <strong>💡 Interface Focada &amp; Centralização de Documentos:</strong>
+        Para manter a listagem de clientes limpa, o acesso às Declarações (DSF) e receitas está centralizado dentro do <strong>Prontuário</strong>, onde cada atendimento passado possui o botão dedicado para consulta em tela e download do PDF vetorial sem redundâncias.
       </div>
 
       <div class="example-box">
@@ -955,7 +960,7 @@ async function generateCompleteUserManualPDF() {
           <tbody>
             <tr>
               <td><strong>1. Operadores &amp; RBAC</strong></td>
-              <td>Controle de logins de farmacêuticos, atendentes e administradores.</td>
+              <td>Controle de perfis e Instruções de Acesso Seguras (sem senhas em texto puro).</td>
               <td>Apenas Master / Administrador</td>
             </tr>
             <tr>
@@ -980,7 +985,7 @@ async function generateCompleteUserManualPDF() {
             </tr>
             <tr>
               <td><strong>6. Sandbox &amp; Hard Reset</strong></td>
-              <td>Geração de massa de teste e limpeza total protegida por senha.</td>
+              <td>Geração de massa de teste e expurgo atômico (Local + Turso) protegido por senha.</td>
               <td>Senha Master Obrigatória</td>
             </tr>
             <tr>
@@ -993,7 +998,7 @@ async function generateCompleteUserManualPDF() {
       </div>
 
       <div class="example-box">
-        <div class="example-badge"><i class="fa-solid fa-triangle-exclamation"></i> Exemplo Prático 5: Execução de Hard Reset Seguro</div>
+        <div class="example-badge"><i class="fa-solid fa-triangle-exclamation"></i> Exemplo Prático 5: Execução de Hard Reset Atômico Seguro</div>
         <div class="example-title">Cenário: Limpar atendimentos e vendas de teste antes da inauguração da clínica</div>
         <div class="steps-list">
           <div class="step-item">
@@ -1006,11 +1011,11 @@ async function generateCompleteUserManualPDF() {
           </div>
           <div class="step-item">
             <div class="step-num">3</div>
-            <div class="step-text">O sistema abre o modal de segurança solicitando a <strong>Senha Master do Estabelecimento</strong>.</div>
+            <div class="step-text">O sistema abre o modal de segurança solicitando a <strong>Senha Master do Estabelecimento</strong> e confirmação textual.</div>
           </div>
           <div class="step-item">
             <div class="step-num">4</div>
-            <div class="step-text">Ao digitar a senha correta, todas as vendas e atendimentos de teste são zerados no banco local e na nuvem Turso, preservando os cadastros de operadores e dados do RT.</div>
+            <div class="step-text">Ao confirmar, o sistema purga atômica e integralmente todas as tabelas transacionais (atendimentos, receitas, vendas PDV e compras) no IndexedDB e na nuvem Turso, garantindo 0 resíduos de teste e preservando intactos os operadores e os dados cadastrais da farmácia.</div>
           </div>
         </div>
       </div>
