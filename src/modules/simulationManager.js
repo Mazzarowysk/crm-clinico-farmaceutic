@@ -378,6 +378,8 @@ export function hardResetAllCollections(password, confirmationText) {
     pharmacy_decision_audit: [],
     financial_transactions: [],
     financial_installments: [],
+    financial_categories: [],
+    financial_payment_methods: [],
     appointments: [],
     admissions: [],
     medications: [],
@@ -405,6 +407,13 @@ export function hardResetAllCollections(password, confirmationText) {
     'crm_products',
     'crm_inventory_movements',
     'crm_patient_purchases',
+    'crm_custom_fin_categories',
+    'crm_custom_fin_payments',
+    'crm_custom_pbms',
+    'crm_custom_prod_categories',
+    'crmFarmaceuticoDados',
+    'crmFarmaceuticoUpdatedAt',
+    'crmFarmaceuticoConfig',
     'crmFarmaceuticoDados_cache'
   ];
   keysToRemove.forEach(k => localStorage.removeItem(k));

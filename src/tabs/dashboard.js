@@ -47,27 +47,8 @@ export async function fetchDashboardData() {
   const attList = localDB.list('pharmacy_attendances') || localDB.list('pharmacy_consultations') || [];
   const clinicalEncounters = attList.length;
 
-  // 3. Intervenções CDSS (Garante população rica caso a tabela esteja zerada)
-  let cdssList = localDB.list('pharmacy_decision_audit') || [];
-  if (cdssList.length === 0) {
-    const defaultAudits = [
-      { id: 'AUD-001', interaction_title: 'Interação Fármaco-Fármaco: Atenolol + Enalapril (Risco de Hipotensão Severa)', severity: 'Crítica', justificativa: 'Monitoramento de PA e escalonamento de dose.', timestamp: new Date(Date.now() - 1 * 86400000).toISOString() },
-      { id: 'AUD-002', interaction_title: 'Interação Fármaco-Fármaco: AAS + Varfarina (Risco Hemorrágico Elevado)', severity: 'Crítica', justificativa: 'Intervenção farmacêutica para ajuste de anticoagulante.', timestamp: new Date(Date.now() - 2 * 86400000).toISOString() },
-      { id: 'AUD-003', interaction_title: 'Interação Fármaco-Fármaco: Metformina + Contraste Iodado', severity: 'Grave', justificativa: 'Suspensão temporária 48h antes de exame.', timestamp: new Date(Date.now() - 3 * 86400000).toISOString() },
-      { id: 'AUD-004', interaction_title: 'Fármaco-Alimento: Sinvastatina + Toranja (Grapefruit)', severity: 'Moderada', justificativa: 'Orientado a evitar consumo de toranja durante a terapia.', timestamp: new Date(Date.now() - 3 * 86400000).toISOString() },
-      { id: 'AUD-005', interaction_title: 'Fármaco-Alimento: Ciprofloxacino + Leite/Cálcio (Quelação e Inativação)', severity: 'Moderada', justificativa: 'Orientado espaçamento de 2 horas entre antibiótico e laticínios.', timestamp: new Date(Date.now() - 4 * 86400000).toISOString() },
-      { id: 'AUD-006', interaction_title: 'Fármaco-Hábito: Losartana + Álcool (Potencialização de Hipotensão)', severity: 'Moderada', justificativa: 'Alertado sobre risco de hipotensão postural com ingestão alcoólica.', timestamp: new Date(Date.now() - 5 * 86400000).toISOString() },
-      { id: 'AUD-007', interaction_title: 'Fármaco-Hábito: Teofilina + Tabagismo (Aumento da Depuração)', severity: 'Alta', justificativa: 'Necessidade de monitoramento de níveis séricos.', timestamp: new Date(Date.now() - 2 * 86400000).toISOString() },
-      { id: 'AUD-008', interaction_title: 'Duplicidade Terapêutica: Dois AINEs prescritos simultaneamente (Ibuprofeno + Diclofenaco)', severity: 'Crítica', justificativa: 'Bloqueada prescrição duplicada; mantido apenas um AINE.', timestamp: new Date(Date.now() - 6 * 86400000).toISOString() },
-      { id: 'AUD-009', interaction_title: 'Duplicidade Terapêutica: Dois Inibidores da Bomba de Prótons (Omeprazol + Pantoprazol)', severity: 'Alta', justificativa: 'Ajustada posologia única.', timestamp: new Date(Date.now() - 3 * 86400000).toISOString() },
-      { id: 'AUD-010', interaction_title: 'Critérios de Beers: Idoso 78 anos em uso de Benzodiazepínico (Diazepam)', severity: 'Crítica', justificativa: 'Alto risco de quedas e fraturas; sugerido desmame e alternativa não farmacológica.', timestamp: new Date(Date.now() - 1 * 86400000).toISOString() },
-      { id: 'AUD-011', interaction_title: 'Critérios de Beers: Anti-histamínico de 1ª Geração em Idoso (Difenidramina)', severity: 'Alta', justificativa: 'Substituído por anti-histamínico de 2ª geração sem efeito anticolinérgico.', timestamp: new Date(Date.now() - 4 * 86400000).toISOString() },
-      { id: 'AUD-012', interaction_title: 'Validação de Alergia Cruzada Bloqueada: Paciente alérgica a Dipirona', severity: 'Crítica', justificativa: 'Bloqueio automático CDSS 4D; prescrito Paracetamol 750mg.', timestamp: new Date(Date.now() - 1 * 86400000).toISOString() },
-      { id: 'AUD-013', interaction_title: 'Validação de Alergia Cruzada Bloqueada: Alergia a Sulfas (Sulfametoxazol)', severity: 'Crítica', justificativa: 'Prescrição redirecionada com segurança.', timestamp: new Date(Date.now() - 5 * 86400000).toISOString() }
-    ];
-    defaultAudits.forEach(item => localDB.insert('pharmacy_decision_audit', item));
-    cdssList = defaultAudits;
-  }
+  // 3. Intervenções CDSS
+  const cdssList = localDB.list('pharmacy_decision_audit') || [];
   const cdssInterventions = cdssList.length;
 
   // 4. Declarações DSF (CFF) emitidas / Compras
@@ -1720,7 +1701,7 @@ export async function renderDashboardTab(container) {
           <div style="display: flex; justify-content: space-between; align-items: flex-start;">
             <div>
               <div class="dashboard-kpi-label kpi-label-pink">Adesão Terapêutica</div>
-              <div class="dashboard-kpi-val">${d.adherenceRate || 85}%</div>
+              <div class="dashboard-kpi-val">${d.adherenceRate ?? 0}%</div>
             </div>
             <div class="dashboard-kpi-icon-box kpi-icon-pink"><i class="fa-solid fa-heart-pulse"></i></div>
           </div>
