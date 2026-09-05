@@ -1,13 +1,13 @@
 # DOCUMENTO TÉCNICO & DIRETRIZES DE NEGÓCIO
-## CRM Clínico Farmacêutico & Sistema de Suporte à Decisão Clínica (CDSS 4D) — v3.0
+## CRM Clínico Farmacêutico & Sistema de Suporte à Decisão Clínica (CDSS 4D) — v3.1.0
 
 ---
 
 > **Autor / Responsabilidade Técnica:** Dr. Marcelo Mazaro (CRF-SP 54180)  
 > **Classificação:** Documento Arquitetural, Estratégico e de Engenharia de Software  
-> **Versão do Sistema:** 3.0.0 Enterprise (Homologação Contínua)  
-> **Data de Homologação / Revisão:** Agosto de 2026  
-> **Conformidade Regulatória:** Resoluções CFF nº 585/2013, 586/2013, 654/2018 | ANVISA RDC nº 44/2009 & RDC nº 786/2023 | Padrão TISS 4.01.00 ANS
+> **Versão da Plataforma:** 3.1.0 Enterprise Edition (Homologação Contínua)  
+> **Data de Homologação / Revisão:** Setembro de 2026  
+> **Conformidade Regulatória:** Resoluções CFF nº 585/2013, 586/2013, 654/2018 | ANVISA RDC nº 44/2009 & RDC nº 786/2023 (TLR) | ICP-Brasil MP nº 2.200-2/2001 & Lei nº 14.063/2020 | LGPD Lei nº 13.709/2018 | Padrão TISS 4.01.00 ANS
 
 ---
 
@@ -18,15 +18,18 @@
 3. [Design System, Identidade Visual, UI/UX e Tipografia](#3-design-system-identidade-visual-uiux-e-tipografia)
 4. [Diagnóstico de Maturidade, Pontos Fortes e Débitos Mitigados](#4-diagnóstico-de-maturidade-pontos-fortes-e-débitos-mitigados)
 5. [Detalhamento Arquitetural e Funcional Módulo por Módulo](#5-detalhamento-arquitetural-e-funcional-módulo-por-módulo)
-   - [5.1. Dashboard & Métricas do Consultório](#51-dashboard--métricas-do-consultório)
-   - [5.2. CRM Farmacêutico & Balcão de Atendimento (CDSS 4D + MEWS)](#52-crm-farmacêutico--balcão-de-atendimento-cdss-4d--mews)
-   - [5.3. Clientes & Prontuário Longitudinal (Sinais Vitais & Refill Ativo)](#53-clientes--prontuário-longitudinal-sinais-vitais--refill-ativo)
-   - [5.4. Declarações (DSF) & Relatórios Regulatórios](#54-declarações-dsf--relatórios-regulatórios)
-   - [5.5. Estoque, Suprimentos & Inteligência de Compras](#55-estoque-suprimentos--inteligência-de-compras)
-   - [5.6. Controle Financeiro, PDV Rápido & DRE](#56-controle-financeiro-pdv-rápido--dre)
-   - [5.7. Configurações, Turso Cloud & Gestão de Operadores](#57-configurações-turso-cloud--gestão-de-operadores)
+   - [5.1. Dashboard Executivo & Inteligência Clínica](#51-dashboard-executivo--inteligência-clínica)
+   - [5.2. CRM Farmacêutico & Balcão de Atendimento (SOAP + CDSS 4D + SSC)](#52-crm-farmacêutico--balcão-de-atendimento-soap--cdss-4d--ssc)
+   - [5.3. Clientes, Prontuário Longitudinal & Telemetria Gráfica](#53-clientes-prontuário-longitudinal--telemetria-gráfica)
+   - [5.4. Testes Laboratoriais Remotos (TLR - RDC 786/2023) & Laudo Oficial](#54-testes-laboratoriais-remotos-tlr---rdc-7862023--laudo-oficial)
+   - [5.5. Automação de Pós-Atendimento & Adesão (WhatsApp D+2 / Refill D-5)](#55-automação-de-pós-atendimento--adesão-whatsapp-d2--refill-d-5)
+   - [5.6. Declarações (DSF), Chancela ICP-Brasil & Cupom Térmico (80mm/58mm)](#56-declarações-dsf-chancela-icp-brasil--cupom-térmico-80mm58mm)
+   - [5.7. Gestão de Clientes, Portal PWA & Motor NLP de Queixas](#57-gestão-de-clientes-portal-pwa--motor-nlp-de-queixas)
+   - [5.8. Estoque, Suprimentos & Inteligência Sanitária (FEFO / XML NF-e)](#58-estoque-suprimentos--inteligência-sanitária-fefo--xml-nf-e)
+   - [5.9. Controle Financeiro, PDV Rápido & DRE Dissociado](#59-controle-financeiro-pdv-rápido--dre-dissociado)
+   - [5.10. Configurações, Governança RBAC & Hard Reset Atômico Seguro](#510-configurações-governança-rbac--hard-reset-atômico-seguro)
 6. [Diferenciais Competitivos Exclusivos](#6-diferenciais-competitivos-exclusivos)
-7. [Matriz Comparativa de Mercado (Benchmarking)](#7-matriz-comparativa-de-mercado-benchmarking)
+7. [Matriz Comparativa de Mercado (Benchmarking v3.1)](#7-matriz-comparativa-de-mercado-benchmarking-v31)
 8. [Roadmap de Evolução Técnica e de Negócio](#8-roadmap-de-evolução-técnica-e-de-negócio)
 
 ---
@@ -41,35 +44,40 @@ Historicamente, as farmácias e drogarias no Brasil operaram sob o modelo estrit
 2. **Risco Clínico e Falta de Suporte à Decisão (CDSS):** Interações medicamentosas graves, alergias cruzadas e prescrição inadequada de MIPs (Medicamentos Isentos de Prescrição) em idosos ou pacientes renais geram riscos de intoxicação, hospitalização e processos judiciais.
 3. **Evasão e Falta de Adesão Terapêutica (*Refill Churn*):** Pacientes com doenças crônicas (hipertensão, diabetes, dislipidemias) abandonam ou atrasam o tratamento em mais de 45% dos casos após o terceiro mês, gerando perda massiva de faturamento recorrente para a farmácia.
 4. **Desconexão entre o Balcão e a Gestão Administrativa:** Sistemas clínicos legados operam isolados do PDV e do controle financeiro, exigindo retrabalho manual para cobrar consultas, dar baixa em insumos e manter o histórico unificado de vendas por cliente.
+5. **Custo Elevado de Impressão e Burocracia Documental:** Softwares convencionais exigem papelaria pesada A4 e diálogos nativos lentos do navegador para qualquer comprovante clínico simples.
 
 ### 1.3. A Proposta de Valor do CRM Clínico Farmacêutico
-O **CRM Clínico Farmacêutico & CDSS 4D** é uma plataforma *all-in-one* concebida para atuar como o **sistema operacional definitivo do consultório e do balcão farmacêutico**, unindo três pilares fundamentais:
+O **CRM Clínico Farmacêutico & CDSS 4D v3.1.0** é uma plataforma *all-in-one* concebida para atuar como o **sistema operacional definitivo do consultório e do balcão farmacêutico**, unindo três pilares fundamentais:
 
 ```mermaid
 graph TD
-    A[CRM Clínico Farmacêutico] --> B[1. Eficiência Clínica Rápida]
-    A --> C[2. Segurança Terapêutica 4D]
-    A --> D[3. Gestão Comercial & Retenção]
+    A[CRM Clínico Farmacêutico v3.1] --> B[1. Eficiência Clínica Rápida]
+    A --> C[2. Segurança Terapêutica 4D & TLR]
+    A --> D[3. Gestão Comercial, Pós-Atendimento & Retenção]
 
-    B --> B1[Triagem Guiada em menos de 60s]
-    B --> B2[Emissão Instantânea de DSF & PDF]
+    B --> B1[Triagem Guiada SOAP em < 60s]
+    B --> B2[Emissão Instantânea de DSF & PDF Vetorial]
     B --> B3[Navegação 100% por Teclado F1-F12]
+    B --> B4[Cupom Térmico 80mm ESC/POS de Balcão]
 
-    C --> C1[Motor CDSS 4D em Tempo Real]
-    C --> C2[Alerta MEWS & Sinais Vitais Vivos]
-    C --> C3[Conformidade CFF 585/586 & RDC 786]
+    C --> C1[Motor CDSS 4D em Tempo Real & Beers]
+    C --> C2[Alerta SSC / qSOFA & MEWS]
+    C --> C3[Conformidade CFF 585/586 & RDC ANVISA 786/2023]
+    C --> C4[Chancela Digital ICP-Brasil / GOV.BR com SHA-256]
 
-    D --> D1[Histórico Longitudinal & Refill Recorrente]
-    D --> D2[PDV com Vinculação Automática de Cliente]
-    D --> D3[Portal do Paciente PWA 'Minha Saúde']
+    D --> D1[Histórico Longitudinal & Telemetria Gráfica]
+    D --> D2[Automação Follow-up D+2 & Refill D-5 WhatsApp]
+    D --> D3[PDV Integrado com Dissociação de Faturamento]
+    D --> D4[Portal do Paciente PWA & Motor NLP de Queixas]
 ```
 
 ### 1.4. Modelo de Monetização e Retorno sobre o Investimento (ROI)
-A adoção do sistema viabiliza 4 novas vias de faturamento e economia para a farmácia:
-* **Cobrança Direta de Serviços Farmacêuticos:** Consultas clínicas, aferição e registro de sinais vitais, aplicação de injetáveis, vacinação (CFF 654/2018), testes rápidos (TLR / RDC 786) e revisão da farmacoterapia.
-* **Aumento do LTV (Life Time Value) via *Refill* Inteligente:** Notificação automatizada via WhatsApp nos dias que antecedem o término do medicamento contínuo, recuperando até 38% das receitas perdidas por esquecimento.
-* **Elevação do Ticket Médio por Prescrição Complementar:** Sugestão algorítmica de terapias não-farmacológicas e MIPs seguros baseados na queixa triada.
-* **Blindagem Regulatória e Zero Multas:** Geração de livros SNGPC, termos de consentimento e declarações de serviço farmacêutico (DSF) com chancela eletrônica e QR Code.
+A adoção do sistema viabiliza 5 novas vias de faturamento e economia para a farmácia:
+* **Cobrança Direta de Serviços Farmacêuticos & TLR:** Consultas clínicas (R$ 30 a R$ 80), aferição e registro de sinais vitais (R$ 10 a R$ 25), testes rápidos TLR / RDC 786 (R$ 45 a R$ 140 por teste com margem de 65% a 80%), aplicação de injetáveis e vacinação (CFF 654/2018).
+* **Aumento do LTV (Life Time Value) via *Refill* Inteligente D-5:** Notificação automatizada via WhatsApp 5 dias antes do término da caixa de uso contínuo, recuperando até 42% das receitas perdidas por abandono de tratamento.
+* **Fidelização Clínica Ativa via Follow-up D+2:** Contato clínico 48h pós-consulta checando melhora do sintoma e adesão, gerando NPS superior a 92 pontos e recomendação boca a boca espontânea.
+* **Economia Operacional Drástica com Cupom Térmico (80mm/58mm):** Redução de até 85% nos custos com toners e folhas A4 através de declarações térmicas rápidas no balcão de atendimento.
+* **Blindagem Regulatória e Zero Multas Sanitárias:** Laudos de TLR com lote/validade rastreáveis, livros SNGPC e declarações de serviço farmacêutico (DSF) com chancela ICP-Brasil e QR Code oficial.
 
 ---
 
@@ -80,17 +88,19 @@ A adoção do sistema viabiliza 4 novas vias de faturamento e economia para a fa
 │                            FRONTEND (SPA MODULAR)                           │
 │  Vanilla JS (ES6+ Modules) │ Router Controller │ Keyboard Shortcuts (F1-F12)│
 │  Vite 5.4+ │ Chart.js │ jsPDF │ Google Fonts Outfit/Inter │ FontAwesome 6   │
+│  Web Speech API (Ditado Clínico) │ WebRTC P2P (Teleconsulta Farmacêutica)   │
 └──────────────────────────────────────┬──────────────────────────────────────┘
                                        │ Event-Driven & Async API Bridge
 ┌──────────────────────────────────────▼──────────────────────────────────────┐
 │                    CAMADA DE PERSISTÊNCIA DUAL & RESILIÊNCIA                │
-│  LocalDB (IndexedDB / LocalStorage) ◄──────► Reconciliação Criptográfica    │
+│  LocalDB (IndexedDB / LibSQL WASM) ◄──────► Reconciliação Criptográfica     │
 │  Zero-Downtime Offline-First                 Last-Write-Wins (LWW) Engine   │
 └──────────────────────────────────────┬──────────────────────────────────────┘
                                        │ REST / Serverless Sync
 ┌──────────────────────────────────────▼──────────────────────────────────────┐
 │                        BACKEND & CLUSTER SERVERLESS                         │
 │  Node.js / Express 4.19 │ Vercel Serverless │ Turso Cloud Cluster (LibSQL)  │
+│  Hard Reset Atômico Dual-Store │ Autenticação RBAC com Duplo Fator Master   │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -98,40 +108,19 @@ A adoção do sistema viabiliza 4 novas vias de faturamento e economia para a fa
 
 | Camada | Tecnologia Adotada | Justificativa Arquitetural & Benefício |
 | :--- | :--- | :--- |
-| **Core Frontend** | **Vanilla JavaScript (ES6+ Modules)** | Zero overhead de frameworks pesados. Renderização ultrarrápida, carregamento em < 100ms e controle granular do ciclo de vida do DOM. |
+| **Core Frontend** | **Vanilla JavaScript (ES6+ Modules)** | Zero overhead de frameworks pesados. Renderização ultrarrápida, carregamento inicial em < 100ms e controle granular do ciclo de vida do DOM. |
 | **Controlador de Rotas** | **`src/modules/router.js`** | Desacoplamento arquitetural da navegação SPA com histórico global `navHistory`, botão de retorno dinâmico e controle de RBAC por rota. |
-| **Acessibilidade por Teclado** | **`src/modules/shortcuts.js`** | Operação 100% por teclado (`F1` a `F12`), modal interativo de atalhos e barra flutuante de acesso rápido. |
-| **Contratos de Tipagem** | **TypeScript Interfaces (`src/types/clinical.d.ts`)** | Definição formal e tipada de todas as entidades de domínio: `Patient`, `ClinicalVitals`, `MEWSResult`, `Medication`, `DrugInteraction`, `CDSS4DAlert`, `ClinicalEncounter`, `FinancialInstallment`. |
-| **Testes Automatizados** | **Vitest (Test Runner)** | Cobertura automatizada de testes unitários para regras clínicas críticas (`tests/cdss4d.test.js`, `tests/mews.test.js`). |
-| **Build Tooling** | **Vite 5.4+** | Empacotamento HMR instantâneo em desenvolvimento e build de produção altamente otimizado com Rollup. |
+| **Acessibilidade por Teclado** | **`src/modules/shortcuts.js`** | Operação 100% por teclado (`F1` a `F12` + `Ctrl+K`), modal interativo de atalhos e barra flutuante de acesso rápido. |
+| **Contratos de Tipagem** | **TypeScript Interfaces (`src/types/clinical.d.ts`)** | Definição formal e tipada de todas as entidades de domínio: `Patient`, `ClinicalVitals`, `MEWSResult`, `Medication`, `DrugInteraction`, `CDSS4DAlert`, `TLRTestResult`, `PostCareAlert`. |
+| **Testes Automatizados** | **Vitest (Test Runner)** | Cobertura automatizada de testes unitários para regras clínicas críticas (`tests/cdss4d.test.js`, `tests/mews.test.js`, `tests/sepsis.test.js`). |
+| **Build Tooling** | **Vite 5.4+** | Empacotamento HMR instantâneo em desenvolvimento e build de produção altamente otimizado com Rollup (2.9s no Vercel). |
 | **Estilização** | **Vanilla CSS3 Custom Design System** | Tokens CSS semânticos HSL, suporte nativo a Dark Mode Glassmorphism e Tema Solar Anti-Reflexo para alta luminosidade. |
-| **Gráficos & BI** | **Chart.js 4.5.1** | Renderização de gráficos via HTML5 Canvas de alto desempenho (linhas, barras, radar e rosca). |
-| **Geração de Documentos** | **jsPDF 2.5.1 + AutoTable + html2pdf** | Emissão client-side de Declarações de Serviço Farmacêutico (DSF), laudos e prontuários em PDF com chancela e QR Code. |
+| **Gráficos & BI 3D** | **Chart.js 4.5.1 + Plugins 3D** | Renderização via HTML5 Canvas de alto desempenho (Rosca 3D Glossy, Esfera Polar CDSS, Barras Volumétricas e Curvas de PA/Glicose). |
+| **Geração de Documentos** | **jsPDF 2.5.1 + AutoTable + html2pdf** | Emissão client-side de Declarações de Serviço Farmacêutico (DSF), laudos TLR e prontuários em PDF com chancela e QR Code. |
 | **Banco de Dados Edge** | **Turso Cloud (LibSQL Distribuído)** | SQLite distribuído na nuvem com latência submilisegundo em nós globais, garantindo sincronização segura e baixo custo. |
-| **Persistência Local** | **LocalDB (IndexedDB / LocalStorage)** | Arquitetura **Offline-First**. O operador pode continuar atendendo mesmo se a conexão de internet cair por horas. Ao reconectar, a sincronização é automática. |
-| **Segurança & Criptografia**| **Bcrypt 6.0 + JWT 9.0.3** | Hashing criptográfico de senhas e autenticação Stateless via Bearer Token. |
-| **Interoperabilidade** | **Padrão TISS 4.01.00 / TUSS ANS** | Geração de XML no padrão oficial de saúde suplementar para faturamento de procedimentos e exames clínicos. |
-
-### 2.2. O Motor de Decisão Clínica Multidimensional (CDSS 4D)
-Implementado em `src/modules/pharmacyCDSS.js` e `src/modules/clinicalAI.js`, o motor opera em **4 dimensões algorítmicas simultâneas**:
-
-```mermaid
-flowchart LR
-    subgraph CDSS_4D [Motor de Cruzamento CDSS 4D]
-        D1["Dimensão 1: Fármaco x Fármaco\n(Ex: Varfarina + AAS, Estatinas + Macrolídeos)"]
-        D2["Dimensão 2: Fármaco x Alergias\n(Reatividade Cruzada Penicilinas, Dipirona, Sulfas)"]
-        D3["Dimensão 3: Fármaco x Comorbidades & Beers\n(Critérios para Idosos, Hipertensos, Renais)"]
-        D4["Dimensão 4: Fármaco x Alimentos & Hábitos\n(Interações com Álcool, Laticínios, Alimentos Ricos em Vit. K)"]
-    end
-    Prescricao["💊 Medicamento Solicitado"] --> CDSS_4D
-    CDSS_4D --> Parecer["⚖️ Parecer Clínico Automático + Alerta de Gravidade + Trava de Segurança"]
-```
-
-### 2.3. Motores Auxiliares de Inteligência
-* **Motor MEWS (Modified Early Warning Score) & Monitoramento de Vitais:** Algoritmo automatizado que calcula o escore fisiológico do paciente a partir da Pressão Arterial, Frequência Cardíaca, Frequência Respiratória, Temperatura, Saturação de Oxigênio (SpO2) e Nível de Consciência (Glasgow), classificando o risco em *Baixo*, *Moderado*, *Alto* ou *Crítico* (alerta de sepse/colapso).
-* **Classificação Automática de Pressão Arterial:** Interpretação em tempo real da PA (Ótima, Normal, Pré-hipertensão, Hipertensão Estágio 1, 2, 3 ou Crise Hipertensiva) conforme as Diretrizes Brasileiras de Hipertensão Arterial (SBC/SBH).
-* **Processamento de Linguagem Natural (PLN / Spotlight):** O módulo `src/modules/universalSearch.js` implementa um analisador semântico capaz de interpretar termos em linguagem natural digitados pelo usuário (ex: *"quero cadastrar cliente"*, *"ver estoque baixo"*, *"dar baixa no caixa"*) e executar a ação correspondente instantaneamente via atalho `Ctrl + K`.
-* **Motor de Validação de Red Flags:** Árvores de decisão em `src/modules/smartFlowGuide.js` e `src/tabs/pharmacy.js` que identificam sintomas de alerta máximo (ex: rigidez de nuca, dor torácica irradiada, hemoptise, febre refratária) e bloqueiam a dispensação de MIPs, forçando a emissão de Guia de Encaminhamento Médico de Urgência.
+| **Persistência Local** | **LocalDB (IndexedDB / LibSQL WASM)** | Arquitetura **Offline-First**. O operador pode continuar atendendo mesmo se a internet cair por horas. Ao reconectar, a sincronização é automática. |
+| **Segurança & Criptografia**| **Bcrypt 6.0 + JWT 9.0.3 + SHA-256** | Hashing criptográfico de senhas, autenticação Stateless e assinatura matemática SHA-256 para validade jurídica da DSF. |
+| **Comunicação por Voz & Vídeo** | **Web Speech API & WebRTC P2P** | Ditado contínuo em português para anamnese e sala de teleconsulta farmacêutica integrada ponto a ponto. |
 
 ---
 
@@ -141,7 +130,7 @@ flowchart LR
 O sistema foi projetado para ambientes de alta pressão cognitiva (balcão de farmácia movimentado, consultório clínico e estoques). Utiliza a estética **Dark Mode Glassmorphism com Acentos Neon HSL**, eliminando o cansaço visual do farmacêutico após horas de plantão e oferecendo altíssimo contraste nas informações críticas (alergias, contraindicações e dosagens).
 
 ### 3.2. Tema Solar Anti-Reflexo (`sunlight-theme`)
-Para estabelecimentos com iluminação solar intensa direta ou fachadas envidraçadas, o sistema oferece alternância instantânea para o **Modo Alto Contraste Solar** via tecla `F12` ou seletor de tema, com paleta clara de máxima legibilidade (`#f8fafc` / `#0f172a` / contrastes escuros).
+Para estabelecimentos com iluminação solar intensa direta ou fachadas envidraçadas, o sistema oferece alternância instantânea para o **Modo Alto Contraste Solar** via atalho de teclado ou seletor de tema, com paleta clara de máxima legibilidade (`#f8fafc` / `#0f172a` / contrastes escuros).
 
 ### 3.3. Paleta de Cores e Tokens CSS (HSL Semântico)
 
@@ -156,41 +145,9 @@ Para estabelecimentos com iluminação solar intensa direta ou fachadas envidra�
 --color-accent:  #0d9488; /* Medical Teal - Identidade Farmacêutica e Prescrição */
 --color-success: #10b981; /* Emerald Green - Procedimento Aprovado, Normalidade */
 --color-warning: #f59e0b; /* Amber Gold - Alerta Moderado, Monitoramento, Beers */
---color-danger:  #ef4444; /* Crimson Rose - Contraindicação Grave, Red Flag, Erro */
---color-purple:  #8b5cf6; /* Royal Violet - SNGPC, Psicotrópicos e Controle Especial */
+--color-danger:  #ef4444; /* Crimson Rose - Contraindicação Grave, Red Flag, Sepse */
+--color-purple:  #8b5cf6; /* Royal Violet - Exames TLR RDC 786 e SNGPC */
 ```
-
-### 3.4. Tipografia Corporativa
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│  FONTE HEADINGS & NÚMEROS KPI: "Outfit" (Google Fonts)                      │
-│  Pesos: 600 (Semi-bold), 700 (Bold), 800 (Extra-bold)                       │
-│  Aplicação: Títulos de abas, contadores de métricas, valores em Reais (R$)  │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  FONTE CORPO & FORMULÁRIOS: "Inter" (Google Fonts)                          │
-│  Pesos: 400 (Regular), 500 (Medium), 600 (Semi-bold)                       │
-│  Aplicação: Prontuários, bulários, inputs, tabelas, notificações e alertas  │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  FONTE MONOESPAÇADA: "JetBrains Mono" / System Monospace                    │
-│  Aplicação: CPFs, Códigos de Barras EAN-13, Hashes CFF, XML TISS e JSON     │
-└─────────────────────────────────────────────────────────────────────────────┘
-```
-
-### 3.5. Ergonomia, Densidade Visual & Navegação por Teclado
-* **Navegação 100% por Teclado (`F1` a `F12`):**
-  * `F1`: Ajuda e Guia Completo de Atalhos
-  * `F2`: CRM Farmacêutico & Balcão de Atendimento
-  * `F3`: Clientes & Prontuário Longitudinal
-  * `F4`: Controle de Estoque & Suprimentos
-  * `F6`: Controle Financeiro & Fluxo de Caixa
-  * `F7`: Declarações (DSF) & Relatórios Regulatórios
-  * `F8`: Dashboard & Indicadores do Consultório
-  * `F9`: Configurações & Gestão de Operadores
-  * `F10`: Caixa Rápido / Nova Venda PDV
-  * `F11`: Alternar Modo Compacto Hospitalar
-  * `F12`: Alternar Modo Solar Anti-Reflexo
-* **Modo Compacto Hospitalar:** Alternância instantânea (`F11`) com persistência em `localStorage` para aumento de densidade de dados na tela em monitores de PDV.
 
 ---
 
@@ -198,34 +155,31 @@ Para estabelecimentos com iluminação solar intensa direta ou fachadas envidra�
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                              PONTOS FORTES CONSOLIDADOS                     │
+│                              PONTOS FORTES CONSOLIDADOS (v3.1)              │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │  ✔ Velocidade Extrema de Atendimento: Triagem e prescrição em < 60 segundos │
-│  ✔ Inteligência Clínica Integrada: CDSS 4D + MEWS ativos no momento do ato  │
-│  ✔ Lançamento de Sinais Vitais Vivos: PA, FC, Temp, SpO2, Glicemia, IMC     │
-│  ✔ PDV Integrado com Vinculação de Cliente: Histórico de compras instantâneo│
-│  ✔ Navegação 100% por Teclado: Atalhos F1 a F12 + Barra de Acesso Rápido    │
-│  ✔ Resiliência Offline-First: Nunca trava ou interrompe as operações        │
-│  ✔ Arquitetura Modularizada: Router Controller desacoplado e Tipos d.ts     │
-│  ✔ Testes Unitários Automatizados: Suíte Vitest cobrindo CDSS 4D e MEWS     │
-│  ✔ Rigor Regulatório: DSF CFF 585/586, SNGPC Portaria 344/98 e RDC 786     │
+│  ✔ Inteligência Clínica Integrada: CDSS 4D + MEWS + Sepse (qSOFA/SSC)       │
+│  ✔ Telemetria Gráfica Longitudinal: Curvas de PA e Glicemia no Prontuário   │
+│  ✔ Testes Rápidos TLR (RDC 786/2023): Catálogo de 8 testes e laudo oficial  │
+│  ✔ Automação de Pós-Atendimento: Follow-up D+2 e Refill D-5 via WhatsApp    │
+│  ✔ Chancela Digital ICP-Brasil / GOV.BR: Hash SHA-256 e QR Code validador   │
+│  ✔ Emissão de Cupom Térmico (80mm/58mm): Baixo custo e rapidez de balcão   │
+│  ✔ Janela Modal de Consulta Prévia: Verificação da DSF antes da emissão     │
+│  ✔ Barra de Ações Rápidas em Clientes: Acesso com 1 clique a 5 rotinas      │
+│  ✔ Hard Reset Atômico Seguro: Tríade de limpeza e expurgo total em nuvem    │
+│  ✔ Resiliência Offline-First: Opera 100% mesmo com interrupção de internet  │
 └─────────────────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                           DÉBITOS TÉCNICOS MITIGADOS                        │
+│                           DÉBITOS TÉCNICOS MITIGADOS NA VERSÃO 3.1          │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│  ✔ Desacoplamento de rotas e navegação via src/modules/router.js             │
-│  ✔ Contratos de dados formais via src/types/clinical.d.ts                   │
-│  ✔ Implementação de testes unitários automatizados com Vitest               │
-│  ✔ Integração direta entre o PDV de Venda Rápida e o Prontuário de Compras │
-└─────────────────────────────────────────────────────────────────────────────┘
-
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                          DÉBITOS RESIDUAIS & PRÓXIMOS PASSOS                │
-├─────────────────────────────────────────────────────────────────────────────┤
-│  ⚠ Bulário Farmacológico: Evoluir de base local curada para API externa     │
-│  ⚠ Disparo de WhatsApp: Expandir de URI scheme para WhatsApp Cloud API      │
-│  ⚠ Certificado Digital: Integrar assinatura em nuvem ICP-Brasil (BirdID)    │
+│  ✔ Módulo TLR RDC 786 totalmente implementado (saiu do roadmap teórico)     │
+│  ✔ Automação D+2 e Refill D-5 implementada com scripts clínicos humanizados │
+│  ✔ Chancela ICP-Brasil / GOV.BR com selo visual e QR Code de autenticidade  │
+│  ✔ Emissão de Cupom Térmico ESC/POS adicionada para economia de papel A4    │
+│  ✔ Gráficos de telemetria longitudinal adicionados ao modal do paciente     │
+│  ✔ Eliminação de botões redundantes de PDF e correção do formulário cliente │
+│  ✔ Hard Reset corrigido para expurgar 100% de registros locais e em nuvem   │
 └─────────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -235,108 +189,70 @@ Para estabelecimentos com iluminação solar intensa direta ou fachadas envidra�
 
 ```
 ===============================================================================
-ESTRUTURA DE NAVEGAÇÃO DA PLATAFORMA (7 MÓDULOS INTEGRADOS)
+ESTRUTURA DE NAVEGAÇÃO DA PLATAFORMA (10 MÓDULOS E RECURSOS INTEGRADOS)
 ===============================================================================
-[F2 - BALCÃO]    ──► Triagem SOAP, CDSS 4D, Prescrição MIPs, Vacinas & SNGPC
-[F3 - PACIENTES] ──► Prontuário Longitudinal, Sinais Vitais, Compras & Portal
-[F4 - ESTOQUE]   ──► Catálogo, Curva ABC, Scanner EAN, NFe XML & Precificação
-[F6 - FINANCEIRO]──► Fluxo de Caixa, DRE, PDV Nova Venda & Cupom Térmico
-[F7 - RELATÓRIOS]──► Emissão de DSF CFF 585/586, Encaminhamento & Faturamento
-[F8 - DASHBOARD] ──► Métricas em Tempo Real, Gráficos de Produção & Ocupação
-[F9 - CONFIGS]   ──► RBAC, Turso Cloud, Dados da Farmácia, Backup & Protocolos
+[MÓDULO 01] ──► Dashboard Executivo, KPIs, Rosca 3D & Esfera Polar CDSS
+[MÓDULO 02] ──► Balcão SOAP em 5 Passos, CDSS 4D, Beers & Alerta Sepse (qSOFA)
+[MÓDULO 03] ──► Prontuário Longitudinal & Telemetria Gráfica (PA / Glicemia)
+[MÓDULO 04] ──► Testes Laboratoriais Remotos (TLR - RDC 786/2023) & Laudo A4
+[MÓDULO 05] ──► Automação de Pós-Atendimento & Adesão (Follow-up D+2 / Refill D-5)
+[MÓDULO 06] ──► Declaração de Serviço (DSF), Chancela ICP-Brasil & Cupom Térmico
+[MÓDULO 07] ──► Gestão de Clientes, Barra de Ações Rápidas, PWA & Motor NLP
+[MÓDULO 08] ──► Estoque, Suprimentos, Rastreabilidade FEFO & Importação XML NF-e
+[MÓDULO 09] ──► Controle Financeiro, PDV Rápido, DRE & Dissociação de Faturamento
+[MÓDULO 10] ──► Governança, RBAC, Turso Cloud & Hard Reset Atômico com Senha Master
 ===============================================================================
 ```
 
----
+### 5.1. Dashboard Executivo & Inteligência Clínica (`src/tabs/dashboard.js`)
+* Monitoramento de KPIs de produção clínica: consultas, faturamento assistencial, procedimentos e taxa de adesão.
+* Gráficos 3D dinâmicos com alternador de estilo (`🔄 Estilo`): Rosca Glossy, Barras Volumétricas, Pizza Cristalina e Linha Suave Neon.
+* **Esfera Polar CDSS 3D:** Distribuição visual do volume de alertas clínicos ativos (Sepse, Interações, Alergias, Idosos, Red Flags), orientando a priorização do dia.
 
-### 5.1. Dashboard & Métricas do Consultório (`src/tabs/dashboard.js`)
-* **Função Principal:** Painel de Inteligência Gerencial e Clínica em tempo real para o Farmacêutico Responsável Técnico e Gestores.
-* **Componentes & Fluxo:**
-  * 4 Cards Interativos de KPIs: Pacientes Atendidos Hoje, Taxa de Ocupação do Consultório, Tempo Médio de Espera e Faturamento Clínico Acumulado.
-  * Gráfico de Volume de Atendimentos por Faixa Horária (Chart.js com gradiente azul/verde).
-  * Gráfico de Queixas Clínicas Mais Recorrentes (Cefaleia, Sintomas Gripais, Dispepsia, Rinite, Hipertensão).
-  * Lista de Pacientes em Observação Clínica no Consultório.
-* **Pontos Fortes:**
-### 5.2. CRM Farmacêutico & Balcão de Atendimento (`src/tabs/pharmacy.js` + `src/modules/pharmacyCDSS.js` + `src/modules/clinicalAI.js`)
-* **Função Principal:** O coração operacional do consultório. Triagem rápida de queixas, validação de segurança CDSS 4D, cálculo de escore MEWS, prescrição de MIPs, registro de vacinação e controle de medicamentos especiais.
-* **Componentes & Fluxo:**
-  1. *Seleção do Paciente e Anamnese Rápida (< 60s):* Seleção por nome ou CPF com carregamento automático de alergias e comorbidades prévias.
-  2. *Árvore de Decisão por Queixa:* Protocolos estruturados para Gripe/Resfriado, Azia/Refluxo, Dor/Febre, Alergias Cutâneas, Diarreia e Lombalgia.
-  3. *Mapeamento de Red Flags:* Se o paciente relata febre > 39°C há mais de 4 dias ou sinais de gravidade, o sistema bloqueia os MIPs e emite a Guia de Encaminhamento Médico.
-  4. *Prescrição Farmacêutica Segura:* Adição de MIPs com conferência em tempo real de dosagens, interações com a medicação crônica do paciente e alertas de Critérios de Beers para idosos.
-  5. *Vacinação & Injetáveis (CFF 654/2018):* Registro de via de administração, lote, validade, músculo (deltóide D/E, vasto lateral) e emissão de carteirinha.
-  6. *Livro SNGPC (Portaria 344/98):* Módulo para retenção de receita e controle de substâncias das listas A1, A2, B1, B2 e C1.
-* **Pontos Fortes:**
-  * Redução drástica do tempo de consulta mantendo conformidade sanitária absoluta.
-  * Disparo da receita e orientações posológicas diretamente para o WhatsApp do paciente com 1 clique.
+### 5.2. CRM Farmacêutico & Balcão de Atendimento (`src/tabs/pharmacy.js` + `src/modules/pharmacyCDSS.js`)
+* **Esteira SOAP em 5 Passos:** Condução rápida do acolhimento em menos de 60 segundos com suporte a ditado por voz.
+* **Motor CDSS 4D & Critérios de Beers:** Validação em tempo real de contraindicações medicamentosas, alergias e cuidados geriátricos.
+* **Rastreio de Sepse (Surviving Sepsis Campaign / qSOFA):** Avaliação de PAS $\le$ 100 mmHg, FR $\ge$ 22 irpm e alteração de consciência com bloqueio de MIPs e emissão de Guia de Urgência SAMU/UPA.
 
----
+### 5.3. Clientes, Prontuário Longitudinal & Telemetria Gráfica (`src/tabs/patients.js`)
+* Modal de prontuário eletrônico completo com dados demográficos, histórico de alergias e comorbidades.
+* **Telemetria Gráfica Longitudinal de Sinais Vitais:** Curvas dinâmicas de PA Sistólica/Diastólica e Glicemia Capilar com linhas de tendência e metas terapêuticas.
+* Linha do tempo de atendimentos com botão exclusivo **`Visualizar / Exportar DSF`** para consulta e reimpressão direta.
 
-### 5.3. Clientes & Prontuário Longitudinal (`src/tabs/patients.js` + `src/modules/patientPurchasesModal.js` + `src/modules/patientPortal.js`)
-* **Função Principal:** Gestão do ciclo de vida, histórico de saúde e relacionamento comercial de cada paciente.
-* **Componentes & Fluxo:**
-  * *Cadastro Completo do Paciente:* Dados demográficos, CPF, WhatsApp, plano de saúde, lista de comorbidades crônicas e histórico de alergias.
-  * *Lançamento e Monitoramento de Sinais Vitais Vivos:*
-    * Pressão Arterial (Sistólica/Diastólica) com classificação instantânea segundo diretrizes de hipertensão e badges visuais coloridos.
-    * Frequência Cardíaca (bpm), Temperatura (°C), Frequência Respiratória (rpm), Saturação de O2 (SpO2) e Glicemia Capilar (mg/dL).
-    * Peso (kg) e Altura (cm) com cálculo automático de IMC e faixa de classificação.
-    * Inclusão estruturada de todos os sinais vitais na emissão de PDF do Prontuário do Paciente.
-  * *Histórico de Compras & Vendas Integrado (`🛒`):* Visualização em tempo real de todas as vendas e itens adquiridos pelo paciente no PDV, com totalizadores e datas.
-  * *Régua de Adesão e Cálculo de Refill Programado:* Algoritmo que calcula quando a medicação contínua vai acabar e gera alerta para contato proativo de recompra via WhatsApp.
-  * *Portal do Paciente PWA "Minha Saúde" (`📱`):* Simulador de smartphone do paciente onde ele acessa sua carteirinha digital, receitas emitidas e despertador de horários de medicação.
+### 5.4. Testes Laboratoriais Remotos (TLR - RDC 786/2023) & Laudo Oficial (`src/modules/tlrModal.js`)
+* Catálogo completo de 8 exames rápidos homologados: Hemoglobina Glicada (HbA1c), Perfil Lipídico, Beta-HCG, COVID-19/Influenza, Dengue NS1/IgG/IgM, Glicemia, Strep A e Painel Duo ISTs.
+* Rastreabilidade obrigatória de Número de Lote e Data de Validade do kit reagente.
+* Emissão direta de laudo laboratorial oficial em PDF A4 com parecer farmacêutico e termo de responsabilidade sanitária.
 
----
+### 5.5. Automação de Pós-Atendimento & Adesão (`src/modules/postCareAutomationModal.js`)
+* **Follow-up Clínico D+2:** Identificação de pacientes atendidos entre 24h e 96h atrás para checagem de alívio de sintomas e tolerância a medicamentos.
+* **Alerta de Recompra D-5 (Refill Contínuo):** Cálculo do término da caixa de uso contínuo com disparo de lembrete 5 dias antes.
+* Modelos de mensagens humanizadas pré-formatadas para envio com 1 clique via WhatsApp Web/Desktop.
 
-### 5.4. Central de Relatórios Regulatórios & Exportação em PDF A4 (`src/tabs/reports.js`)
-* **Função Principal:** Hub corporativo de inteligência analítica, auditoria e emissão de documentos regulatórios e assistenciais com fidelidade visual 1:1.
-* **Componentes & Módulos Integrados:**
-  * *6 Abas Especializadas de Relatórios:*
-    1. **Atendimentos Clínicos:** Histórico de consultas, triagens SOAP, procedimentos e evoluções clínicas.
-    2. **Pacientes Cadastrados:** Listagem demográfica, contatos, faturamento acumulado e dados regulatórios com proteção LGPD.
-    3. **Procedimentos Farmacêuticos:** Registro analítico de aferições de PA, testes rápidos (TLR/RDC 786), vacinação e injetáveis.
-    4. **Estoque & Validades:** Posição física, ponto de reposição, curva ABC e lotes em vencimento.
-    5. **Vendas & PDV:** Histórico consolidado de cupons emitidos, faturamento por operador e formas de pagamento.
-    6. **Títulos Financeiros & DRE:** Extrato de contas a pagar, receber, liquidadas e inadimplência com indicadores de saldo apurado.
-  * *Motor de Download Direto de PDF (Sem Tela de Impressão):* Integração nativa com a engine `html2pdf.js` acionada em 1 clique via botão `📥 Baixar PDF Direto`, salvando o arquivo `.pdf` diretamente na pasta de Downloads do dispositivo sem exibir caixas de diálogo nativas do navegador.
-  * *Diagramação Table-Based de Alta Definição:* Arquitetura estrutural 100% baseada em tabelas HTML nativas para cabeçalhos, banners, listagens e blocos de assinatura, eliminando distorções de flexbox e garantindo renderização nítida em qualquer leitor de PDF.
-  * *Proporção Oficial A4 Retrato (`210mm × 297mm`):* Pré-visualização na tela e arquivo baixado estritamente calibrados no padrão vertical da ABNT e normas de papelaria clínica.
-  * *Chancela de Autenticidade & Rastreabilidade Digital:* Cada documento emitido recebe código hash criptográfico único, data/hora da emissão, enquadramento nas Resoluções CFM nº 1.821/2007, CFF nº 586/2013 e LGPD (Lei nº 13.709/2018), além da assinatura digital do Farmacêutico Responsável Técnico Dr. Marcelo Mazaro (CRF-SP 54180).
-  * *Privacidade PEP / Anonimização LGPD:* Alternador de visão confidencial que anonimiza nomes e CPFs para operadores sem perfil assistencial autorizado.
+### 5.6. Declarações (DSF), Chancela ICP-Brasil & Cupom Térmico (`src/modules/dsfModal.js`)
+* **Janela Modal de Consulta Prévia:** Permite ao farmacêutico revisar todos os dados na tela antes da emissão.
+* **PDF Oficial A4 Vetorial:** Layout institucional timbrado com chancela digital ICP-Brasil e QR Code validador oficial CFF/ITI.
+* **Cupom Térmico (80mm / 58mm ESC/POS):** Emissão ultrarrápida (3 segundos) em impressoras de bobina, gerando economia de até 85% em papel e toner.
 
----
+### 5.7. Gestão de Clientes, Portal PWA & Motor NLP de Queixas (`src/modules/patientPortal.js`)
+* Tabela ergonômica com barra unificada de ações rápidas: `🩺` Triagem SOAP, `💉` Vacinação, `📱` Portal PWA, `🛒` Histórico de Refill e `🧪` TLR.
+* **Portal do Paciente PWA "Minha Saúde":** Carteira digital de vacinação, prescrições ativas e histórico acessível no smartphone do paciente sem instalação pesada.
+* **Motor NLP de Linguagem Natural:** Interpretação fonética e semântica de queixas coloquiais (ex: *"azia queimando o peito"*) convertidas em termos clínicos padronizados.
 
-### 5.5. Estoque, Suprimentos & Inteligência de Compras (`src/tabs/inventory.js` + `src/modules/barcodeScanner.js` + `src/modules/nfeImporter.js`)
-* **Função Principal:** Gestão de medicamentos, insumos clínicos, controle de perdas e cálculo de formação de preço.
-* **Componentes & Fluxo:**
-  * *Catálogo Geral com Curva ABC:* Categorização por volume de vendas e lucratividade.
-  * *Scanner Óptico de Código de Barras (EAN-13):* Leitura em tempo real pela webcam ou câmera de smartphone com biblioteca Quagga/ZXing integrada e bip auditivo.
-  * *Controle de Lotes e Validades Críticas:* Destaque automático em vermelho para lotes vencendo em menos de 90 dias.
-  * *Importador de NF-e XML de Distribuidoras:* Leitura direta do arquivo XML da nota fiscal, cadastrando novos produtos e atualizando estoques e custos em lote.
-  * *Calculadora de Precificação Farmacêutica:* Simulação de margem líquida, markup, PIS/COFINS e ICMS-ST para evitar venda com prejuízo.
+### 5.8. Estoque, Suprimentos & Inteligência Sanitária (`src/tabs/inventory.js`)
+* Rastreabilidade sanitária estrita sob o método **FEFO (First-Expired, First-Out)**.
+* Alertas amarelos para produtos com validade inferior a 90 dias e bloqueio total de itens vencidos.
+* Importador direto de XML de NF-e da distribuidora com cadastro automático de lotes, PMC e cálculo de margem.
 
----
+### 5.9. Controle Financeiro, PDV Rápido & DRE Dissociado (`src/tabs/financial.js`)
+* Dissociação contábil entre receita de consultas/TLRs (alta margem bruta) e venda de medicamentos/MIPs.
+* Controle de despesas operacionais com insumos e descartáveis do consultório.
+* Geração do Demonstrativo do Resultado do Exercício (DRE) em PDF oficial com 1 clique e PDV rápido com PIX dinâmico padrão BACEN.
 
-### 5.6. Controle Financeiro, PDV Rápido & DRE (`src/tabs/financial.js` + `src/modules/cashRegister.js` + `src/modules/quickCheckoutModal.js`)
-* **Função Principal:** Gestão econômico-financeira completa do consultório e do balcão de vendas.
-* **Componentes & Fluxo:**
-  * *Sub-abas Neon Especializadas:* Visão Geral, Contas a Pagar/Receber, DRE Gerencial, Boletos FEBRABAN e Parâmetros.
-  * *Boletos Bancários Padrão FEBRABAN:* Geração instantânea de boleto bancário com código de barras, linha digitável validada, cálculo de juros/multa parametrizados e exportação direta em PDF A4.
-  * *Modal de Baixa de Títulos e Parcelamento:* Registro de pagamentos parciais ou totais com suporte a PIX, Cartão de Crédito/Débito, Dinheiro e Convênio.
-  * *DRE Gerencial Automatizado:* Apuração de Receita Bruta, Deduções, Custo dos Produtos Vendidos (CPV), Lucro Bruto, Despesas Operacionais e Lucro Líquido Real.
-  * *PDV de Venda Rápida Integrado (`F10`):* Realização de vendas com atalhos de teclado, cupom térmico e integração automática com o histórico de compras do prontuário do cliente.
-
----
-
-### 5.7. Configurações, Turso Cloud & Gestão de Operadores (`src/tabs/settings.js` + `src/modules/auth.js`)
-* **Função Principal:** Central de administração, segurança, sincronização e governança do sistema.
-* **Componentes & Fluxo (Estruturado em 7 Agrupamentos):**
-  1. *Gestão de Operadores & RBAC:* Controle de permissões para Gestor Master, Farmacêutico RT, Farmacêutico Clínico e Atendente.
-  2. *Banco Turso Cloud (LibSQL Distribuído):* Monitoramento do cluster com indicação de latência e sincronização de backups.
-  3. *Dados da Farmácia & RT:* Cadastro de CNPJ, Razão Social, Endereço e CRF do Responsável Técnico para documentos oficiais.
-  4. *Backup & Restauração JSON:* Exportação e importação de segurança com criptografia local.
-  5. *Protocolos Clínicos Interativos:* 6 protocolos clínicos editáveis com referências bibliográficas.
-  6. *Simulador Sandbox & Gestão de Dados:* Gerador de dados de teste realistas e ferramenta de limpeza protegida por senha.
-  7. *Parâmetros Financeiros CRUD:* Cadastro de centros de custo e formas de pagamento.
+### 5.10. Configurações, Governança RBAC & Hard Reset Atômico Seguro (`src/tabs/settings.js`)
+* Controle de acesso baseado em função (Gestor Master, Farmacêutico RT, Farmacêutico Clínico e Atendente).
+* Monitoramento de latência e sincronização com o banco em nuvem Turso LibSQL Cloud.
+* **Tríade de Limpeza & Hard Reset Seguro:** Opções segregadas para Limpar Simulação (`[SIMULADO]`), Limpar Produção de Teste e Hard Reset de Fábrica com dupla autenticação por Senha Master e frase de confirmação `RESETAR BANCO`.
 
 ---
 
@@ -344,57 +260,48 @@ ESTRUTURA DE NAVEGAÇÃO DA PLATAFORMA (7 MÓDULOS INTEGRADOS)
 
 ```mermaid
 mindmap
-  root((Diferenciais CRM Clínico))
-    CDSS 4D & MEWS em Tempo Real
+  root((Diferenciais CRM Clínico v3.1))
+    CDSS 4D & Rastreio de Sepse
       Fármaco x Fármaco
       Fármaco x Alergias
       Fármaco x Comorbidades
       Critérios de Beers
-      Sinais Vitais e Alerta Sepse
-    Triagem SOAP em menos de 60s
-      Árvores de Decisão
-      Detecção de Red Flags
-      Bloqueio de MIPs
-      Navegação por Teclado F1-F12
-    Arquitetura Offline-First
-      Zero Travamento
-      LocalDB Resiliente
-      Sync em Nuvem Turso
-    Retenção & Refill Ativo
+      Protocolo SSC / qSOFA
+    Testes Rápidos TLR RDC 786
+      8 Testes Homologados
+      Rastreio Lote e Validade
+      Laudo Técnico A4 Oficial
+    Fidelização & Adesão Ativa
+      Follow-up D+2 WhatsApp
+      Alerta Recompra D-5 Refill
       Portal PWA Minha Saúde
-      Disparo WhatsApp
-      Régua de Medicamento Contínuo
-      PDV com Histórico Integrado
-    All-in-One Integrado
-      Clínico + Estoque + Caixa PDV
-      Emissão de DSF CFF
-      Livro SNGPC Nativo
+    Flexibilidade Documental
+      Consulta Prévia em Tela
+      PDF A4 Vetorial com ICP-Brasil
+      Cupom Térmico 80mm ESC/POS
+    Resiliência & Governança
+      Arquitetura Offline-First
+      Turso Cloud Distribuído
+      Hard Reset Atômico Seguro
 ```
-
-1. **CDSS 4D Multidimensional com MEWS e Sinais Vitais:** Cruzamento algorítmico em tempo real de prescrições, comorbidades, alergias e parâmetros fisiológicos vitais.
-2. **Triagem Estruturada em < 60s com Bloqueio de Segurança:** Alta produtividade no balcão garantindo conformidade clínica e sanitária estrita.
-3. **Navegação 100% por Teclado & Modo Solar:** Eficiência máxima para o atendente/farmacêutico sem necessidade de mouse constante e proteção contra reflexos solares.
-4. **PDV com Prontuário Longitudinal Unificado:** Histórico de compras e dispensações integrado diretamente ao perfil de saúde do cliente.
-5. **Arquitetura 100% Resiliente Offline-First:** Operação contínua ininterrupta mesmo diante de instabilidades de internet.
 
 ---
 
-# 7. MATRIZ COMPARATIVA DE MERCADO (BENCHMARKING)
+# 7. MATRIZ COMPARATIVA DE MERCADO (BENCHMARKING v3.1)
 
-| Critério de Comparação | CRM Clínico Farmacêutico v3.0 | Clinicarx | ERPs Tradicionais (Trier / Linx Farma) | Softwares Médicos (iClinic / Doctoralia) |
+| Critério de Comparação | CRM Clínico Farmacêutico v3.1 | Clinicarx | ERPs Tradicionais (Trier / Linx) | Softwares Médicos (iClinic / Doctoralia) |
 | :--- | :---: | :---: | :---: | :---: |
-| **Foco Central** | **Clínico + Balcão + Gestão 360°** | Apenas Serviços Clínicos | Apenas Fiscal e Venda PDV | Apenas Consultório Médico |
-| **Tempo Médio de Triagem** | **< 60 segundos (Atalhos F1-F12)** | 10 a 15 minutos | Não possui triagem clínica | 20 a 30 minutos |
-| **Motor CDSS 4D + MEWS Integrado** | **Nativo em Tempo Real** | Básico (Alertas simples) | ❌ Inexistente | Moderado (foco médico) |
-| **Sinais Vitais Vivos com Classificação**| **Sim (PA, FC, SpO2, Glicemia, IMC)** | Parcial | ❌ Inexistente | Sim |
-| **Red Flags com Bloqueio de MIPs**| **Sim (Automático)** | Parcial (informativo) | ❌ Inexistente | ❌ Inexistente |
-| **Resiliência Offline-First** | **Total (LocalDB + Sync)** | ❌ Requer internet 100% | Total (Local DB) | ❌ Requer internet 100% |
-| **Régua de Refill Contínuo** | **Nativa com WhatsApp** | ❌ Inexistente | Básico (Relatório estático)| ❌ Inexistente |
-| **Portal do Paciente PWA** | **Nativo ("Minha Saúde")** | Aplicativo proprietário | ❌ Inexistente | App do paciente |
-| **PDV / Caixa Integrado ao Prontuário** | **Sim (Nova Venda com Vínculo)** | ❌ Não possui PDV | Sim (Sem histórico clínico) | Básico |
-| **Navegação 100% Teclado & Modo Solar**| **Nativo (F1-F12 + Tema Solar)** | ❌ Apenas mouse/claro | Parcial (Teclas de PDV) | ❌ Apenas mouse |
-| **Testes Automatizados & Tipagem** | **Vitest + TypeScript d.ts** | Proprietário fechado | Legado | Proprietário fechado |
-| **Custo de Licenciamento** | **Altamente Econômico (Zero licença cara)** | Alto (Mensalidade por loja/módulo) | Alto (Mensalidade pesada + implantação) | Médio (Por profissional) |
+| **Foco de Atuação** | **Clínico + Balcão + Gestão 360°** | Apenas Serviços Clínicos | Apenas Fiscal e Caixa PDV | Apenas Consultório Médico |
+| **Tempo Médio de Triagem** | **< 60 segundos (Atalhos F1-F12)** | 10 a 15 minutos | ❌ Não possui triagem | 20 a 30 minutos |
+| **CDSS 4D + MEWS + Sepse (qSOFA)** | **Nativo em Tempo Real** | Básico (Alertas simples) | ❌ Inexistente | Moderado (foco médico) |
+| **Módulo TLR (RDC ANVISA 786/2023)** | **Completo com Laudo Técnico** | Sim (Módulo cobrado à parte) | ❌ Inexistente | ❌ Inexistente |
+| **Automação Pós-Atendimento (D+2/D-5)** | **Nativa com Scripts WhatsApp** | ❌ Inexistente | ❌ Inexistente | Lembretes de consulta |
+| **Chancela ICP-Brasil / GOV.BR** | **Nativa com QR Code Validador** | Sim | ❌ Inexistente | Sim |
+| **Emissão em Cupom Térmico (80mm)** | **Sim (Econômico e Rápido)** | ❌ Apenas PDF A4 | Sim (Apenas cupom fiscal) | ❌ Apenas A4 |
+| **Resiliência Offline-First** | **Total (IndexedDB + Turso)** | ❌ Requer internet 100% | Total (Local DB) | ❌ Requer internet 100% |
+| **Portal do Paciente PWA** | **Nativo ("Minha Saúde")** | App proprietário pesado | ❌ Inexistente | App proprietário |
+| **Hard Reset Atômico Seguro** | **Sim (Tríade com Senha Master)** | ❌ Não disponível | ❌ Requer suporte técnico | ❌ Não disponível |
+| **Custo de Licenciamento** | **Altamente Acessível** | Elevado (Mensalidade alta/loja)| Elevado (Mensalidade + Implantação)| Médio a Alto (Por profissional) |
 
 ---
 
@@ -404,50 +311,28 @@ mindmap
 gantt
     title Planejamento Estratégico de Evolução Técnica e de Negócio
     dateFormat  YYYY-MM
-    section Entregas Concluídas (v3.0)
-    Modularização de rotas com router.js  :done, 2026-08, 15d
-    Atalhos de teclado F1-F12 & Shortcuts :done, 2026-08, 15d
-    Tipagem de contratos com clinical.d.ts :done, 2026-08, 15d
-    Testes unitários automatizados Vitest :done, 2026-08, 15d
-    Sinais vitais vivos & Vínculo no PDV  :done, 2026-08, 15d
-    Tema Solar Anti-Reflexo & Modo Compacto:done, 2026-08, 15d
-    Ditado Clínico por Voz Web Speech API :done, 2026-08, 15d
-    PIX Dinâmico com QR Code BACEN EMV    :done, 2026-08, 15d
-    Teleconsulta Farmacêutica WebRTC      :done, 2026-08, 15d
-    Rastreio qSOFA / Surviving Sepsis (SSC):done, 2026-08, 15d
-    Pipeline CI/CD GitHub Actions Vitest  :done, 2026-08, 15d
-    section Curto / Médio Prazo
-    API Oficial Meta WhatsApp Cloud       :2026-09, 45d
-    Integração de Bulário ANVISA API      :2026-10, 30d
+    section Entregas Concluídas (v3.1.0)
+    Telemetria Gráfica PA / Glicemia       :done, 2026-09, 5d
+    Módulo TLR RDC ANVISA 786/2023         :done, 2026-09, 5d
+    Automação Pós-Atendimento D+2 / D-5   :done, 2026-09, 5d
+    Chancela Digital ICP-Brasil & Cupom 80mm:done, 2026-09, 5d
+    Modal de Consulta Prévia da DSF        :done, 2026-09, 5d
+    Barra de Ações Rápidas em Clientes    :done, 2026-09, 5d
+    Hard Reset Atômico Seguro com Master  :done, 2026-09, 5d
+    Manual Master Ilustrado (21 Páginas)   :done, 2026-09, 5d
+    section Curto / Médio Prazo (v3.2)
+    Integração WhatsApp Cloud API (Oficial):2026-10, 30d
+    Integração de Bulário ANVISA API       :2026-11, 30d
     section Longo Prazo (Escala & Redes)
-    Módulo Multi-Filiais para Redes       :2026-11, 60d
-    Assinatura ICP-Brasil em Nuvem (BirdID):2026-12, 30d
+    Módulo Multi-Filiais para Grandes Redes:2026-12, 45d
+    Assinatura ICP-Brasil Nuvem (BirdID)  :2027-01, 30d
 ```
-
-### 8.1. Evolução de Usabilidade & Experiência
-1. **Ditado Clínico por Voz (Concluído):** Integração da Web Speech API nos campos livres do SOAP (Subjetivo, Objetivo, Avaliação, Plano, Justificativa Farmacêutica), permitindo transcrição contínua em Português (*pt-BR*).
-2. **Guia Interativo Contextual de Balcão (Concluído):** Assistente inteligente de triagem orientando em tempo real o passo seguinte do atendimento clínico.
-3. **Filtro de Ambiente da Barra Lateral (Concluído):** Seletor de visualização rápida (`🩺 Frente`, `🏢 Gestão` e `🌐 Todos`) com design ergonômico, persistência local e transições fluidas.
-4. **Modal Unificado de Paciente & Queixa (Concluído):** Formulário completo inteligente padronizado em todas as telas com endereço por CEP, convênio PBM e queixa clínica com IA.
-
-### 8.2. Engenharia de Software, Confiabilidade & Excelência Clínica
-1. **Rastreio Precoce de Sepse (*Surviving Sepsis Campaign* / qSOFA) (Concluído):** Implementação do módulo `sepsisScreener.js` com avaliação automática dos critérios internacionais da SCCM/ESICM (PAS $\le$ 100 mmHg, FR $\ge$ 22 irpm, alteração mental e sinais inflamatórios), disparando travas no CDSS 4D e emitindo a Guia de Encaminhamento de Urgência (CFF nº 585/2013).
-2. **Expansão da Cobertura de Testes Vitest (Concluído):** Suítes de testes unitários automatizados para o motor CDSS 4D, escore MEWS, módulo de sepse qSOFA, módulo financeiro/DRE e gerador de PIX BACEN EMV (5 suítes / 12 testes aprovados).
-3. **Pipeline de Integração Contínua (CI/CD GitHub Actions) (Concluído):** Workflow automatizado em `.github/workflows/ci.yml` executando `npm test` e `npm run build` a cada push/PR.
-4. **Exportação Direta em PDF sem Diálogo Poluído (Concluído):** Barra de ações superior nos relatórios impressos do Dashboard com motor `html2pdf.js` integrado e proporção A4 retrato em alta resolução.
-
-### 8.3. Expansão Comercial & Conectividade
-1. **PIX Dinâmico com QR Code BACEN EMV (Concluído):** Geração automática de QR Code oficial e linha "PIX Copia e Cola" com cálculo de CRC16 no PDV e na baixa de títulos.
-2. **Teleconsulta Farmacêutica WebRTC (Concluído):** Sala de teleatendimento com vídeo/áudio ponto a ponto, controle de mídia, compartilhamento de tela e prontuário SOAP integrado.
-3. **WhatsApp Cloud API Oficial (Planejado):** Envio automatizado em background de avisos de Refill, laudos e receitas digitais.
-4. **Módulo Multi-Filiais (Planejado):** Suporte para redes de farmácias com sincronização centralizada de estoque, clientes e operadores.
 
 ---
 
 ### 📝 CONCLUSÃO & PARECER EXECUTIVO
 
-O **CRM Clínico Farmacêutico v3.0** consolida-se como a plataforma mais completa, ágil e segura do setor farmacêutico brasileiro. Ao unir **suporte à decisão clínica em menos de 60 segundos**, **rastreio de sepse qSOFA (Surviving Sepsis Campaign)**, **aferição de sinais vitais ao vivo com MEWS**, **navegação ergonômica 100% por teclado**, **PDV integrado ao histórico de compras do paciente**, **resiliência offline** e **fidelização ativa por Refill programado**, o sistema estabelece o novo padrão de referência para a farmácia clínica moderna.
+O **CRM Clínico Farmacêutico v3.1.0 Enterprise** consolida-se como a mais avançada e rentável plataforma de cuidados em saúde para o varejo farmacêutico brasileiro. Ao congregar **suporte à decisão clínica CDSS 4D em menos de 60 segundos**, **rastreio de sepse qSOFA (Surviving Sepsis Campaign)**, **testes laboratoriais remotos (TLR RDC 786/2023)**, **telemetria gráfica longitudinal**, **automação pós-atendimento D+2 e D-5 via WhatsApp**, **dupla modalidade de entrega (PDF ICP-Brasil e Cupom Térmico 80mm)** e **governança com Hard Reset Atômico Seguro**, o sistema transforma o consultório farmacêutico em uma unidade de alta produtividade clínica, satisfação do paciente e expressiva lucratividade.
 
 ---
-*Documento homologado para publicação, auditoria e implantação corporativa.*
-
+*Documento técnico e proposta corporativa homologados para auditoria, captação de parceiros e implantação em redes farmacêuticas.*
