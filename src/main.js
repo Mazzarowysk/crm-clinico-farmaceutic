@@ -314,9 +314,52 @@ const initializeApp = async () => {
 
     if (authValid) {
       const fullDB = localDB.getFullDB();
-      if (Object.keys(fullDB).length === 0 || (fullDB.medications && fullDB.medications.length > 0 && fullDB.medications[0].stockQuantity === undefined)) {
-        console.log('[Init] Banco de dados vazio detectado. Gerando dados simulados iniciais...');
-        await generateMockData();
+      if (Object.keys(fullDB).length === 0) {
+        console.log('[Init] Banco de dados novo ou zerado detectado. Inicializando estrutura limpa do CRM...');
+        localStorage.setItem('crm_initialized', 'true');
+        localDB.saveFullDB({
+          __initialized: true,
+          users: localDB.list('users') || [],
+          settings: localDB.get('settings', 'main') || {},
+          patients: [],
+          pharmacy_patients: [],
+          pharmacy_attendances: [],
+          pharmacy_consultations: [],
+          pharmacy_active_meds: [],
+          products: [],
+          inventory_movements: [],
+          patient_purchases: [],
+          pharmacy_decision_audit: [],
+          financial_transactions: [],
+          financial_installments: [],
+          financial_categories: [],
+          financial_payment_methods: [],
+          appointments: [],
+          admissions: [],
+          medications: [],
+          prescriptions: [],
+          telemed_sessions: [],
+          sngpc_movements: [],
+          vaccinations: [],
+          cash_registers: [],
+          sales_history: [],
+          stagnation_alerts: [],
+          consulting_rooms: [],
+          consultorios: [],
+          doctors: [],
+          nurses: [],
+          encounters: [],
+          triages: [],
+          beds: [],
+          hospitalizations: [],
+          tv_calls: [],
+          duty_schedules: [],
+          clinical_notes: [],
+          tlr_exams: [],
+          postcare_followups: [],
+          postcare_refills: [],
+          user_sessions: []
+        });
       }
       renderAppStructure();
       const logoutBtn = document.getElementById('btn-logout');

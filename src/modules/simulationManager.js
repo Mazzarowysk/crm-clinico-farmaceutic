@@ -5,6 +5,7 @@
 
 import * as localDB from '../localDB.js';
 import { state } from '../state.js';
+import { syncManager } from './sync.js';
 
 // ─── GERADOR DE PACIENTES / CLIENTES CLÍNICOS SIMULADOS ───
 
@@ -267,7 +268,7 @@ export function verifyOperatorPassword(inputPassword) {
 }
 
 // 1. Limpa apenas os registros de Simulação (isSimulation === true ou [SIMULADO])
-export function cleanSimulationData(password) {
+export async function cleanSimulationData(password) {
   if (!verifyOperatorPassword(password)) {
     return { success: false, message: 'Senha incorreta. Verifique sua senha de acesso.' };
   }
@@ -295,11 +296,27 @@ export function cleanSimulationData(password) {
   });
 
   localDB.saveFullDB(db);
+  if (typeof window !== 'undefined' && typeof window.clearDataCache === 'function') {
+    window.clearDataCache();
+  }
+
+  // Sincronizar com Turso Cloud se configurado
+  if (syncManager && typeof syncManager.pushDirectToTurso === 'function') {
+    try {
+      await syncManager.pushDirectToTurso(
+        JSON.stringify(db),
+        localStorage.getItem('crmFarmaceuticoConfig') || '{}'
+      );
+    } catch(e) {
+      console.warn('[SimulationManager] Aviso ao sincronizar com Turso:', e.message);
+    }
+  }
+
   return { success: true, removedCount: totalRemoved };
 }
 
 // 2. Limpa apenas os registros Reais de Produção (mantém simulação)
-export function cleanRealProductionData(password, confirmationText) {
+export async function cleanRealProductionData(password, confirmationText) {
   if (!verifyOperatorPassword(password)) {
     return { success: false, message: 'Senha de operador incorreta.' };
   }
@@ -331,11 +348,27 @@ export function cleanRealProductionData(password, confirmationText) {
   });
 
   localDB.saveFullDB(db);
+  if (typeof window !== 'undefined' && typeof window.clearDataCache === 'function') {
+    window.clearDataCache();
+  }
+
+  // Sincronizar com Turso Cloud se configurado
+  if (syncManager && typeof syncManager.pushDirectToTurso === 'function') {
+    try {
+      await syncManager.pushDirectToTurso(
+        JSON.stringify(db),
+        localStorage.getItem('crmFarmaceuticoConfig') || '{}'
+      );
+    } catch(e) {
+      console.warn('[SimulationManager] Aviso ao sincronizar com Turso:', e.message);
+    }
+  }
+
   return { success: true, removedCount: totalRemoved };
 }
 
 // 3. Reset Completo de Fábrica (Hard Reset)
-export function hardResetAllCollections(password, confirmationText) {
+export async function hardResetAllCollections(password, confirmationText) {
   if (!verifyOperatorPassword(password)) {
     return { success: false, message: 'Senha de operador incorreta.' };
   }
@@ -343,6 +376,8 @@ export function hardResetAllCollections(password, confirmationText) {
   if (confirmationText?.trim()?.toUpperCase() !== 'CONFIRMAR') {
     return { success: false, message: 'Texto de confirmação incorreto. Digite "CONFIRMAR".' };
   }
+
+  const currentDB = localDB.getFullDB() || {};
 
   const masterUser = {
     id: 'USR-MAZZAROWYSK',
@@ -355,18 +390,33 @@ export function hardResetAllCollections(password, confirmationText) {
     created_at: new Date().toISOString()
   };
 
+  // Preserva usuários operadores cadastrados ou garante o Master
+  let preservedUsers = Array.isArray(currentDB.users) && currentDB.users.length > 0
+    ? currentDB.users
+    : [masterUser];
+  
+  if (!preservedUsers.some(u => (u.username || '').toLowerCase() === 'mazzarowysk')) {
+    preservedUsers.unshift(masterUser);
+  }
+
+  // Preserva dados fiscais e sanitários da farmácia ou usa o padrão
+  const preservedSettings = (currentDB.settings && typeof currentDB.settings === 'object' && Object.keys(currentDB.settings).length > 0)
+    ? currentDB.settings
+    : {
+        pharmacyName: 'Farmácia & Drogaria Modelo',
+        pharmacyCnpj: '12.345.678/0001-90',
+        pharmacyAddress: 'Av. Paulista, 1000 - São Paulo, SP',
+        pharmacyPhone: '(11) 3333-4444',
+        pharmacyResponsible: 'Marcelo Mazaro',
+        pharmacyCrf: 'CRF-SP 54180',
+        pharmacyAnvisaAfe: 'AFE-1.23456.7'
+      };
+
+  // Banco de dados limpo com todas as coleções do CRM e módulos zerados
   const cleanDB = {
     __initialized: true,
-    users: [masterUser],
-    settings: {
-      pharmacyName: 'Farmácia & Drogaria Modelo',
-      pharmacyCnpj: '12.345.678/0001-90',
-      pharmacyAddress: 'Av. Paulista, 1000 - São Paulo, SP',
-      pharmacyPhone: '(11) 3333-4444',
-      pharmacyResponsible: 'Marcelo Mazaro',
-      pharmacyCrf: 'CRF-SP 54180',
-      pharmacyAnvisaAfe: 'AFE-1.23456.7'
-    },
+    users: preservedUsers,
+    settings: preservedSettings,
     patients: [],
     pharmacy_patients: [],
     pharmacy_attendances: [],
@@ -391,13 +441,34 @@ export function hardResetAllCollections(password, confirmationText) {
     sales_history: [],
     stagnation_alerts: [],
     consulting_rooms: [],
-    doctors: []
+    consultorios: [],
+    doctors: [],
+    nurses: [],
+    encounters: [],
+    triages: [],
+    beds: [],
+    hospitalizations: [],
+    tv_calls: [],
+    duty_schedules: [],
+    clinical_notes: [],
+    tlr_exams: [],
+    postcare_followups: [],
+    postcare_refills: [],
+    user_sessions: []
   };
 
+  // Garante que qualquer outra chave de tabela dinâmica existente seja zerada
+  Object.keys(currentDB).forEach(key => {
+    if (key !== 'users' && key !== 'settings' && key !== '__initialized') {
+      cleanDB[key] = [];
+    }
+  });
+
+  // Salvar base limpa no localStorage com timestamp atualizado e flag de inicializado
   localStorage.setItem('crm_initialized', 'true');
   localDB.saveFullDB(cleanDB);
 
-  // Limpa chaves legadas ou caches que possam existir
+  // Limpar chaves legadas e caches (NUNCA remover crmFarmaceuticoDados!)
   const keysToRemove = [
     'crm_financial_transactions',
     'crm_patients',
@@ -411,12 +482,28 @@ export function hardResetAllCollections(password, confirmationText) {
     'crm_custom_fin_payments',
     'crm_custom_pbms',
     'crm_custom_prod_categories',
-    'crmFarmaceuticoDados',
-    'crmFarmaceuticoUpdatedAt',
-    'crmFarmaceuticoConfig',
-    'crmFarmaceuticoDados_cache'
+    'crmFarmaceuticoDados_cache',
+    'healthNexusDados_cache',
+    'hn_notified_pending'
   ];
   keysToRemove.forEach(k => localStorage.removeItem(k));
+
+  if (typeof window !== 'undefined' && typeof window.clearDataCache === 'function') {
+    window.clearDataCache();
+  }
+
+  // Sincronizar Hard Reset com Turso Cloud (garante que nuvem fique idêntica e vazia)
+  if (syncManager && typeof syncManager.pushDirectToTurso === 'function') {
+    try {
+      await syncManager.pushDirectToTurso(
+        JSON.stringify(cleanDB),
+        localStorage.getItem('crmFarmaceuticoConfig') || '{}'
+      );
+      console.log('[HardReset] Turso Cloud sincronizado com a base limpa.');
+    } catch(e) {
+      console.warn('[HardReset] Aviso ao sincronizar reset com Turso:', e.message);
+    }
+  }
 
   return { success: true };
 }

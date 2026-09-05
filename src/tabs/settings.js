@@ -1232,10 +1232,11 @@ export function renderSettingsTab(contentArea) {
       message: 'Confirme sua senha para remover <strong>exclusivamente</strong> os dados de teste gerados pelo simulador (clientes, atendimentos, estoque e financeiro com flag <code>[SIMULADO]</code>). Seus cadastros reais permanecerão 100% seguros.',
       requireConfirmationText: false,
       isDanger: false,
-      onConfirm: (password) => {
-        const res = cleanSimulationData(password);
+      onConfirm: async (password) => {
+        const res = await cleanSimulationData(password);
         if (res.success) {
-          showToast(`🧹 Base de simulação limpa com sucesso! ${res.removedCount} registros removidos.`);
+          showToast(`🧹 Base de simulação limpa com sucesso! ${res.removedCount} registros removidos. Atualizando...`);
+          setTimeout(() => location.reload(), 1000);
         } else {
           showCustomAlert({ title: 'Atenção', message: res.message, type: 'warning' });
         }
@@ -1251,10 +1252,11 @@ export function renderSettingsTab(contentArea) {
       message: '<strong>ATENÇÃO:</strong> Esta ação removerá permanentemente todos os cadastros reais inseridos manualmente (clientes, atendimentos, produtos e financeiro). Usuários e configurações do sistema serão preservados.',
       requireConfirmationText: true,
       isDanger: true,
-      onConfirm: (password, confirmText) => {
-        const res = cleanRealProductionData(password, confirmText);
+      onConfirm: async (password, confirmText) => {
+        const res = await cleanRealProductionData(password, confirmText);
         if (res.success) {
-          showToast(`⚠️ Base de produção limpa com sucesso! ${res.removedCount} registros reais removidos.`);
+          showToast(`⚠️ Base de produção limpa com sucesso! ${res.removedCount} registros reais removidos. Atualizando...`);
+          setTimeout(() => location.reload(), 1000);
         } else {
           showCustomAlert({ title: 'Erro de Autenticação', message: res.message, type: 'danger' });
         }
@@ -1267,14 +1269,14 @@ export function renderSettingsTab(contentArea) {
     openPasswordPromptModal({
       title: '💥 Hard Reset Geral de Fábrica',
       badge: 'Reset Crítico',
-      message: '<strong>PERIGO MÁXIMO:</strong> Esta ação redefinirá todas as bases locais para o estado zero (tanto dados simulados quanto reais).',
+      message: '<strong>PERIGO MÁXIMO:</strong> Esta ação redefinirá todas as bases locais e em nuvem para o estado zero (tanto dados simulados quanto reais). Os operadores e dados da farmácia serão mantidos.',
       requireConfirmationText: true,
       isDanger: true,
-      onConfirm: (password, confirmText) => {
-        const res = hardResetAllCollections(password, confirmText);
+      onConfirm: async (password, confirmText) => {
+        const res = await hardResetAllCollections(password, confirmText);
         if (res.success) {
-          showToast('💥 Reset de fábrica concluído com sucesso!');
-          setTimeout(() => location.reload(), 1200);
+          showToast('💥 Reset de fábrica concluído com sucesso! Recarregando sistema limpo...');
+          setTimeout(() => location.reload(), 1000);
         } else {
           showCustomAlert({ title: 'Erro de Autenticação', message: res.message, type: 'danger' });
         }

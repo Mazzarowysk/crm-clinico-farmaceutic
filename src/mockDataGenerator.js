@@ -812,6 +812,15 @@ export async function generateMockData(baseAmount = 300) {
   console.log('[MockGen] Gerando consultórios...');
   const consultorios = generateConsultorios(doctors);
 
+  // Marcar explicitamente todos os itens como simulação
+  [patients, doctors, nurses, appointments, encounters, triages, beds, hospitalizations, financial_installments, tv_calls, medications, duty_schedules, consultorios].forEach(arr => {
+    if (Array.isArray(arr)) {
+      arr.forEach(item => {
+        if (item && typeof item === 'object') item.isSimulation = true;
+      });
+    }
+  });
+
   // ── 3. Montar e salvar banco completo ──
   const db = {
     settings: currentDB.settings || [],
